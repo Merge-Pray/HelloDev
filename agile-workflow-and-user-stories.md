@@ -16,7 +16,7 @@ The word agile can mean a process in developing a product, a structure within a 
 
 There are a lot of different methods, we can use in agile management. The picture lists the most important methods in agile and shows their complexity and implementation.
 
-![agile](agile&ScrumSlides/assets/agile-methods.png)
+![agile](assets/agile-methods.png)
 Agile methods: complexity over implementation
 
 - **Single Task**: One Person does a job without many dependencies to others. It's simple, straight forward and easy in implementation.
@@ -32,7 +32,7 @@ Agile methods: complexity over implementation
 
 ## SCRUM overview
 
-![agile](agile&ScrumSlides/assets/SCRUM.png)
+![agile](assets/SCRUM.png)
 SCRUM
 
 The heart of the method is the **Sprint**. It's a fixed time where the developer team consistently works on defined tasks. Everyday there is a **daily standup** where everybody shares her/his progress. There are more events during the week for the team, like **Sprint planning** (we plan what to put in the next sprint) and **Sprint review** (after every Sprint inform stakeholders about the Sprint results).
@@ -47,12 +47,12 @@ The **Retrospective** reveals what went well, what went bad and what do we need 
 
 Because the Agile methodology is built on validating and iterating products based on user input, the MVP plays a central role in agile development.
 
-![MVP](agile&ScrumSlides/assets/MVP1.png)
+![MVP](assets/MVP1.png)
 
 The MVP is an instrument for risk minimization in the course of product development.
 It's a serviceable product with minimal features, created with little effort and used to obtain customer or user feedback
 
-![MVP](agile&ScrumSlides/assets/MVP2.png)
+![MVP](assets/MVP2.png)
 
 ## Backlog
 
@@ -62,7 +62,7 @@ There are two backlogs to consider: Product backlog and Sprint backlog. Check th
 
 **Sprint Backlog**: The Sprint backlog defines all user stories for the next sprint. The user stories are detailed and finished, prioritized and fixed. Once the Sprint has started, the Sprint backlog is protected and the development team focuses on those tasks.
 
-![MVP](agile&ScrumSlides/assets/backlog.png)
+![MVP](assets/backlog.png)
 
 ## User Stories
 
