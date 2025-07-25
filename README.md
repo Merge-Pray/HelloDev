@@ -40,3 +40,5 @@ Bewertungen, Coins und Badges machen dein Engagement sichtbar. Jede erfolgreiche
 
 **HelloDev.app – Dein Netzwerk für Inspiration, Wissen und Gemeinschaft.**  
 Warte nicht länger und **werde Teil der Community!**
+
+Happy Holidays!
