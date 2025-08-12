@@ -1,5 +1,100 @@
-* {
-  box-sizing: border-box;
+/* Basis-Variablen – Light Mode Standard */
+:root {
+  /* Grundfarben */
+  --color-bg: #e6e6e6; /* Hintergrund */
+  --color-bg-secondary: #ffffff; /* Karten/Panel Hintergrund */
+  --color-text: #000000; /* Haupttext */
+  --color-text-secondary: #999999; /* Zweittext */
+  --color-border: #666666; /* Rahmen */
+
+  /* Markenfarben */
+  --color-primary: #5d3f94; /* Lila Hauptfarbe */
+  --color-primary-hover: #7c3aed;
+  --color-accent: #9333ea;
+
+  /* Interaktionsfarben */
+  --color-like: #e0245e;
+  --color-comment: #1da1f2;
+  --color-share: #00ba7c;
+
+  /* Sidebar */
+  --color-sidebar-bg: #eaeaea;
+  --color-sidebar-text: #000000;
+
+  /* Karten / Posts */
+  --color-card-bg: #ffffff;
+  --color-card-shadow: rgba(0, 0, 0, 0.05);
+}
+
+/* Dark Mode Variablen */
+[data-theme="dark"] {
+  --color-bg: #1d0c2b; /* Haupt-Hintergrund */
+  --color-bg-secondary: #2a1f3c; /* Panels */
+  --color-text: #ffffff; /* Haupttext */
+  --color-text-secondary: #999999; /* Zweittext */
+  --color-border: #666666;
+
+  --color-primary: #a78bfa;
+  --color-primary-hover: #c4b5fd;
+  --color-accent: #c084fc;
+
+  --color-like: #ff5c8a;
+  --color-comment: #4bb3fd;
+  --color-share: #00e0a1;
+
+  --color-sidebar-bg: #150f20;
+  --color-sidebar-text: #f5f5f5;
+
+  --color-card-bg: #241632;
+  --color-card-shadow: rgba(0, 0, 0, 0.25);
+}
+
+/* Grund-Styles */
+body {
+  background-color: var(--color-bg);
+  color: var(--color-text);
+  font-family: "Inter", sans-serif;
   margin: 0;
   padding: 0;
+  box-sizing: border-box;
+}
+
+/* Beispiel für Sidebar */
+.sidebar {
+  background-color: var(--color-sidebar-bg);
+  color: var(--color-sidebar-text);
+}
+
+/* Beispiel für Buttons */
+.button-primary {
+  background-color: var(--color-primary);
+  color: white;
+  border: none;
+  padding: 0.6rem 1.2rem;
+  border-radius: 0.5rem;
+  cursor: pointer;
+  transition: background-color 0.2s ease;
+}
+
+.button-primary:hover {
+  background-color: var(--color-primary-hover);
+}
+
+/* Karten */
+.card {
+  background-color: var(--color-card-bg);
+  box-shadow: 0 2px 6px var(--color-card-shadow);
+  border-radius: 1rem;
+  padding: 1rem;
+}
+
+/* Icons */
+.icon-like {
+  color: var(--color-like);
+}
+.icon-comment {
+  color: var(--color-comment);
+}
+.icon-share {
+  color: var(--color-share);
 }
