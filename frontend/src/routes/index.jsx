@@ -4,7 +4,7 @@ import App from "../App";
 import Landingpage from "../pages/Landingpage";
 import NotFound from "../pages/NotFound";
 import Loginpage from "../pages/LoginPage";
-import Registerpage from "../pages/Registerpage";
+import Registerpage from "../pages/RegisterPage";
 import Profilepage from "../pages/ProfilePage";
 import Chatpage from "../pages/ChatPage";
 import Searchpage from "../pages/SearchPage";
@@ -16,6 +16,7 @@ import Newsfeed from "../pages/Newsfeed";
 import BuildProfile from "../pages/BuildProfile";
 import MatchOverView from "../pages/MatchOverView";
 import MatchPage from "../pages/MatchPage";
+import EditProfilePage from "../pages/EditProfilePage";
 
 export const router = createBrowserRouter([
   {
@@ -27,6 +28,7 @@ export const router = createBrowserRouter([
       { path: "login", element: <Loginpage /> },
       { path: "register", element: <Registerpage /> },
       { path: "buildprofile", element: <BuildProfile /> },
+      { path: "editprofile", element: <EditProfilePage /> },
       { path: "profile", element: <Profilepage /> },
       { path: "news", element: <Newsfeed /> },
       { path: "matchoverview", element: <MatchOverView /> },
