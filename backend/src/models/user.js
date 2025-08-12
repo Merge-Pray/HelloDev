@@ -1,21 +1,171 @@
 import { model, Schema } from "mongoose";
 
-const UserSchema = new Schema({
-  username: {
-    type: String,
-    unique: true,
-    required: false,
-  },
-  email: {
-    type: String,
-    unique: true,
-    required: true,
-  },
-  hashedPassword: {
-    type: String,
-    required: false,
-  },
-});
+const UserSchema = new Schema(
+  {
+    username: {
+      type: String,
+      unique: true,
+      required: false,
+    },
+    email: {
+      type: String,
+      unique: true,
+      required: true,
+    },
+    hashedPassword: {
+      type: String,
+      required: false,
+    },
 
-const UserModel = model("users", UserSchema);
+    contacts: [
+      {
+        type: Schema.Types.ObjectId,
+        ref: "User",
+      },
+    ],
+
+    isOnline: {
+      type: Boolean,
+      default: false,
+    },
+    lastSeen: {
+      type: Date,
+      default: Date.now,
+    },
+    socketId: {
+      type: String,
+      default: null,
+    },
+
+    rating: {
+      type: Number,
+      min: 1,
+      max: 5,
+      default: null,
+    },
+    points: {
+      type: Number,
+      default: 0,
+    },
+
+    avatar: {
+      type: String,
+      default: null,
+    },
+    aboutMe: {
+      type: String,
+      maxlength: 500,
+      default: "",
+    },
+
+    country: {
+      type: String,
+      default: "",
+    },
+    city: {
+      type: String,
+      default: "",
+    },
+    age: {
+      type: Number,
+      min: 13,
+      max: 120,
+      default: null,
+    },
+
+    status: {
+      type: String,
+      enum: ["searchhelp", "offerhelp", "networking", "learnpartner"],
+      default: "networking",
+    },
+
+    devExperience: {
+      type: String,
+      enum: ["beginner", "intermediate", "expert"],
+      default: "beginner",
+    },
+
+    techArea: [
+      {
+        type: String,
+      },
+    ],
+
+    favoriteTimeToCode: {
+      type: String,
+      enum: ["earlybird", "daytime", "nightowl"],
+      default: "daytime",
+    },
+
+    favoriteLineOfCode: {
+      type: String,
+      maxlength: 200,
+      default: "",
+    },
+
+    programmingLanguages: [
+      {
+        language: {
+          type: String,
+          required: true,
+        },
+        skillLevel: {
+          type: Number,
+          min: 1,
+          max: 10,
+          required: true,
+          default: 5,
+        },
+      },
+    ],
+
+    techStack: [
+      {
+        type: String,
+      },
+    ],
+
+    preferredOS: {
+      type: String,
+      enum: ["Windows", "macOS", "Linux", "Other"],
+      default: null,
+    },
+
+    languages: [
+      {
+        type: String,
+      },
+    ],
+
+    gaming: {
+      type: String,
+      enum: ["none", "pc", "console", "mobile", "board"],
+      default: "none",
+    },
+
+    otherInterests: [
+      {
+        type: String,
+      },
+    ],
+
+    favoriteDrinkWhileCoding: {
+      type: String,
+      default: "",
+    },
+    musicGenreWhileCoding: {
+      type: String,
+      default: "",
+    },
+    favoriteShowMovie: {
+      type: String,
+      default: "",
+    },
+  },
+  {
+    timestamps: true,
+  }
+);
+
+const UserModel = model("User", UserSchema);
 export default UserModel;
