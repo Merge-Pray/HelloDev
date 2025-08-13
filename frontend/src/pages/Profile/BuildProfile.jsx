@@ -30,7 +30,7 @@ const ONBOARDING_STEPS = [
         label: "Status",
         type: "select",
         required: true,
-        options: ["Networking", "Search Help", "Offer Help", "Learnpartner"],
+        options: ["searchhelp", "offerhelp", "networking", "learnpartner"],
       },
     ],
   },
@@ -40,11 +40,7 @@ const ONBOARDING_STEPS = [
     subtitle: "How would you describe your programming experience?",
     type: "radio",
     fieldName: "devExperience",
-    options: [
-      "Beginner (0-1 years)",
-      "Intermediate (1-3 years)",
-      "Expert (5+ years)",
-    ],
+    options: ["beginner", "intermediate", "expert"],
   },
   {
     id: 3,
@@ -127,14 +123,7 @@ const ONBOARDING_STEPS = [
     subtitle: "What OS do you prefer for development?",
     type: "radio",
     fieldName: "preferredOS",
-    options: [
-      "Windows",
-      "macOS",
-      "Linux (Ubuntu)",
-      "Linux (Arch)",
-      "Linux (Other)",
-      "I use multiple",
-    ],
+    options: ["Windows", "macOS", "Linux", "Other"],
   },
 ];
 
@@ -203,7 +192,7 @@ export default function BuildProfile() {
         try {
           console.log("Sending profile data:", newProfileData);
 
-          const response = await fetch(`${API_URL}/api/user/profile`, {
+          const response = await fetch(`${API_URL}/api/user/update`, {
             method: "PATCH",
             headers: {
               "Content-Type": "application/json",
@@ -213,15 +202,22 @@ export default function BuildProfile() {
           });
 
           if (!response.ok) {
-            const errorData = await response.json();
-            throw new Error(errorData.message || "Failed to save profile");
+            let errorMessage = "Failed to save profile";
+            try {
+              const errorData = await response.json();
+              errorMessage = errorData.message || errorMessage;
+            } catch (jsonError) {
+              // If response is not JSON, use status text or generic message
+              errorMessage = response.statusText || errorMessage;
+            }
+            throw new Error(errorMessage);
           }
 
           const responseData = await response.json();
           setCurrentUser({ ...currentUser, ...responseData.user });
 
           console.log("Profile saved successfully:", responseData);
-          navigate("/profile");
+          navigate("/login");
         } catch (error) {
           console.error("Profile creation error:", error);
           setError(
@@ -239,7 +235,6 @@ export default function BuildProfile() {
       profileData,
       fieldName,
       isLastStep,
-      API_URL,
       currentUser,
       setCurrentUser,
       navigate,
