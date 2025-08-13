@@ -1,3 +1,4 @@
+import checkIsMatchable from "../../utils/profileValidator.js";
 import { generateToken } from "../libs/jwt.js";
 import { hashPassword, comparePassword } from "../libs/pw.js";
 import UserModel from "../models/user.js";
@@ -12,6 +13,7 @@ export const createUser = async (req, res, next) => {
       email,
       hashedPassword,
       username,
+      isMatchable: false,
     });
 
     await newAccount.save();
@@ -31,6 +33,7 @@ export const createUser = async (req, res, next) => {
         id: newAccount._id,
         username: newAccount.username,
         email: newAccount.email,
+        isMatchable: false,
       },
     });
   } catch (error) {
@@ -94,6 +97,7 @@ export const updateUserProfile = async (req, res, next) => {
       new: true,
       runValidators: true,
     }).select("-hashedPassword");
+    still;
 
     if (!updatedUser) {
       const error = new Error("User not found");
@@ -101,9 +105,17 @@ export const updateUserProfile = async (req, res, next) => {
       return next(error);
     }
 
+    const isNowMatchable = checkIsMatchable(updatedUser);
+
+    if (isNowMatchable !== updatedUser.isMatchable) {
+      updatedUser.isMatchable = isNowMatchable;
+      await updatedUser.save();
+    }
+
     return res.status(200).json({
       message: "Profile updated successfully",
       user: updatedUser,
+      isMatchable: updatedUser.isMatchable,
     });
   } catch (error) {
     return next(error);
@@ -142,6 +154,12 @@ export const verifyLogin = async (req, res, next) => {
       return next(error);
     }
 
+    const isNowMatchable = checkIsMatchable(user);
+    if (isNowMatchable !== user.isMatchable) {
+      user.isMatchable = isNowMatchable;
+      await user.save();
+    }
+
     const token = generateToken(existingUser.username, existingUser._id);
 
     res.cookie("jwt", token, {
@@ -157,6 +175,7 @@ export const verifyLogin = async (req, res, next) => {
         id: existingUser._id,
         username: existingUser.username,
         email: existingUser.email,
+        isMatchable: user.isMatchable,
       },
     });
   } catch (error) {

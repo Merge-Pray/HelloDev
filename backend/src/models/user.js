@@ -37,6 +37,11 @@ const UserSchema = new Schema(
       default: null,
     },
 
+    isMatchable: {
+      type: Boolean,
+      default: false,
+    },
+
     rating: {
       type: Number,
       min: 1,
