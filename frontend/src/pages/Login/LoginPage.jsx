@@ -4,6 +4,7 @@ import { useForm } from "react-hook-form";
 import { Eye, EyeOff } from "lucide-react";
 import useUserStore from "../../hooks/userstore";
 import styles from "./loginpage.module.css";
+import { API_URL } from "../../lib/config";
 
 export default function LoginPage() {
   const setCurrentUser = useUserStore((s) => s.setCurrentUser);
@@ -29,12 +30,15 @@ export default function LoginPage() {
     setError(null);
 
     try {
-      await new Promise((resolve) => setTimeout(resolve, 1000));
+      const res = await fetch(`${API_URL}/api/user/login`, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        credentials: "include",
+        body: JSON.stringify(values),
+      });
 
-      const mockUser = {
-        userID: "123",
-        username: values.identifier,
-      };
+      const data = await res.json();
+      if (!res.ok) throw new Error(data.message || "Login failed");
 
       setCurrentUser(mockUser);
       navigate("/news");
