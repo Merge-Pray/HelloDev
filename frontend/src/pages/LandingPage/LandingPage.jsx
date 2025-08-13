@@ -35,7 +35,7 @@ export default function LandingPage() {
         </h1>
 
         <h2 className={styles.subheadline}>
-          Sign up today.
+          Welcome. Sign up today.
         </h2>
 
         <button

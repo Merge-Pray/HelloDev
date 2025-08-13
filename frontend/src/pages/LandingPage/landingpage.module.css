@@ -1,4 +1,3 @@
-/* === Basis Layout === */
 .container {
   display: flex;
   height: 100vh;
@@ -20,14 +19,15 @@
 .right {
   flex: 1;
   display: flex;
-  align-items: center;
+  align-items: left;
   justify-content: center;
 }
 
 /* Logo */
 .logo {
-  max-width: 60%;
+  max-width: 500px;
   height: auto;
+  padding-left: 3rem;
 }
 
 /* Standard: Light sichtbar, Dark unsichtbar */
@@ -50,8 +50,8 @@
 .right {
   flex-direction: column;
   gap: 1.5rem;
-  max-width: 480px;
-  padding: 2rem;
+  max-width: 800px;
+  padding: 4rem;
 }
 
 .headline {
@@ -68,6 +68,7 @@
 /* === Buttons === */
 .createAccountBtn {
   background-color: var(--color-primary);
+  max-width: 20rem;
   color: #fff;
   border: none;
   padding: 0.75rem 1.5rem;
@@ -90,6 +91,7 @@
 
 .loginBtn {
   background-color: transparent;
+  max-width: 20rem;
   color: var(--color-primary);
   border: 1px solid var(--color-primary);
   padding: 0.75rem 1.5rem;
@@ -115,7 +117,7 @@
   }
 
   .left {
-    padding: 2rem 0;
+    padding: 0rem 0;
   }
 
   .right {
@@ -133,7 +135,7 @@
   }
 
   .logo {
-    max-width: 200px;
+    max-width: 300px;
   }
 }
 
@@ -147,8 +149,5 @@
     font-size: 1.1rem;
   }
 
-  .createAccountBtn,
-  .loginBtn {
-    width: 100%;
-  }
+
 }
