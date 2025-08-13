@@ -3,9 +3,7 @@ import App from "../App";
 
 import Landingpage from "../pages/Landingpage";
 import NotFound from "../pages/NotFound";
-import Loginpage from "../pages/LoginPage";
-import Registerpage from "../pages/RegisterPage";
-import Profilepage from "../pages/ProfilePage";
+import Profilepage from "../pages/Profile/ProfilePage";
 import Chatpage from "../pages/ChatPage";
 import Searchpage from "../pages/SearchPage";
 import LegalNotice from "../pages/Legal/Legalnotice";
@@ -13,10 +11,12 @@ import GeneralTermsandConditions from "../pages/Legal/GeneralTermsandConditions"
 import DataPrivacy from "../pages/Legal/DataPrivacy";
 import About from "../pages/About";
 import Newsfeed from "../pages/Newsfeed";
-import BuildProfile from "../pages/BuildProfile";
+import BuildProfile from "../pages/Profile/BuildProfile";
 import MatchOverView from "../pages/MatchOverView";
 import MatchPage from "../pages/MatchPage";
 import EditProfilePage from "../pages/EditProfilePage";
+import LoginPage from "../pages/Login/LoginPage";
+import RegisterPage from "../pages/Register/RegisterPage";
 
 export const router = createBrowserRouter([
   {
@@ -25,8 +25,8 @@ export const router = createBrowserRouter([
     errorElement: <NotFound />,
     children: [
       { index: true, element: <Landingpage /> },
-      { path: "login", element: <Loginpage /> },
-      { path: "register", element: <Registerpage /> },
+      { path: "login", element: <LoginPage /> },
+      { path: "register", element: <RegisterPage /> },
       { path: "buildprofile", element: <BuildProfile /> },
       { path: "editprofile", element: <EditProfilePage /> },
       { path: "profile", element: <Profilepage /> },
