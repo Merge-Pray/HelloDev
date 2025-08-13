@@ -1,7 +1,7 @@
 import { createBrowserRouter } from "react-router";
 import App from "../App";
 
-import Landingpage from "../pages/Landingpage";
+import Landingpage from "../pages/LandingPage/Landingpage";
 import NotFound from "../pages/NotFound";
 import Profilepage from "../pages/Profile/ProfilePage";
 import Chatpage from "../pages/ChatPage";

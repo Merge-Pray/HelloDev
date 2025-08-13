@@ -1,7 +1,6 @@
-/* LandingPage.css */
+/* landingpage.module.css */
 
-/* Seite zentrieren */
-.landing-page {
+.landingPage {
   min-height: 100vh;
   display: flex;
   flex-direction: column;
@@ -13,15 +12,19 @@
   padding: 2rem;
 }
 
-/* Titel */
-.landing-page h1 {
+.title {
   font-size: 3rem;
   margin-bottom: 2rem;
   color: var(--color-primary);
 }
 
-/* Buttons */
-.landing-page button {
+.buttonGroup {
+  display: flex;
+  flex-direction: row;
+  gap: 0.5rem;
+}
+
+.button {
   background-color: var(--color-primary);
   color: white;
   border: none;
@@ -29,10 +32,9 @@
   border-radius: 0.5rem;
   cursor: pointer;
   font-size: 1rem;
-  margin: 0.5rem;
   transition: background-color 0.2s ease;
 }
 
-.landing-page button:hover {
+.button:hover {
   background-color: var(--color-primary-hover);
 }
