@@ -366,7 +366,7 @@ const EditProfilePage = () => {
           min-height: 100vh;
           background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
           padding: 20px;
-          font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+          font-family: "Helvetica Neue", Helvetica, Arial, sans-serif;
         }
         
         .edit-container {
@@ -498,7 +498,7 @@ const EditProfilePage = () => {
           border-radius: 8px;
           font-size: 16px;
           transition: border-color 0.3s ease;
-          font-family: inherit;
+          font-family: "Helvetica Neue", Helvetica, Arial, sans-serif;
         }
         
         .form-field input:focus,
