@@ -24,6 +24,27 @@
   /* Karten / Posts */
   --color-card-bg: #ffffff;
   --color-card-shadow: rgba(0, 0, 0, 0.05);
+
+  /* ERGÄNZUNGEN: Form Elements */
+  --color-input-bg: #ffffff;
+  --color-input-border: #e0e0e0;
+  --color-input-border-focus: var(--color-primary);
+  --color-input-shadow-focus: rgba(93, 63, 148, 0.1);
+
+  /* ERGÄNZUNGEN: Status Farben */
+  --color-success: #10b981;
+  --color-warning: #f59e0b;
+  --color-error: #ef4444;
+
+  /* ERGÄNZUNGEN: Card Border */
+  --color-card-border: #e9ecef;
+
+  /* ERGÄNZUNGEN: Backgrounds */
+  --color-bg-gradient: linear-gradient(
+    135deg,
+    var(--color-primary) 0%,
+    var(--color-accent) 100%
+  );
 }
 
 /* Dark Mode Variablen */
@@ -47,6 +68,20 @@
 
   --color-card-bg: #241632;
   --color-card-shadow: rgba(0, 0, 0, 0.25);
+
+  /* ERGÄNZUNGEN: Dark Mode Form Elements */
+  --color-input-bg: #2a1f3c;
+  --color-input-border: #4a4a4a;
+  --color-input-border-focus: var(--color-primary);
+  --color-input-shadow-focus: rgba(167, 139, 250, 0.2);
+
+  /* ERGÄNZUNGEN: Dark Mode Status Farben */
+  --color-success: #34d399;
+  --color-warning: #fbbf24;
+  --color-error: #f87171;
+
+  /* ERGÄNZUNGEN: Dark Mode Card Border */
+  --color-card-border: #3a2f4a;
 }
 
 /* Grund-Styles */
@@ -56,6 +91,11 @@ body {
   font-family: "Inter", sans-serif;
   margin: 0;
   padding: 0;
+  box-sizing: border-box;
+}
+
+/* ERGÄNZUNG: Global Box Sizing */
+* {
   box-sizing: border-box;
 }
 
@@ -97,4 +137,167 @@ body {
 }
 .icon-share {
   color: var(--color-share);
+}
+
+/* NEUE GLOBALE KOMPONENTEN */
+
+/* Page Container */
+.page {
+  min-height: 100vh;
+  background: var(--color-bg-gradient);
+  padding: 20px;
+  font-family: "Inter", sans-serif;
+}
+
+.page.centered {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+}
+
+/* Enhanced Cards */
+.card.enhanced {
+  background: var(--color-card-bg);
+  border-radius: 16px;
+  padding: 30px;
+  box-shadow: 0 10px 30px var(--color-card-shadow);
+  backdrop-filter: blur(10px);
+  border: 1px solid var(--color-card-border);
+  transition: all 0.3s ease;
+}
+
+@media (max-width: 768px) {
+  .card.enhanced {
+    padding: 20px;
+    margin: 10px;
+  }
+}
+
+/* Button System */
+.btn {
+  padding: 12px 24px;
+  border: none;
+  border-radius: 8px;
+  font-size: 16px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  text-decoration: none;
+  font-family: inherit;
+}
+
+.btn:disabled {
+  opacity: 0.6;
+  cursor: not-allowed;
+  transform: none !important;
+}
+
+.btn.full-width {
+  width: 100%;
+}
+
+.btn-primary {
+  background: var(--color-bg-gradient);
+  color: white;
+}
+
+.btn-primary:hover:not(:disabled) {
+  transform: translateY(-2px);
+  background: linear-gradient(
+    135deg,
+    var(--color-primary-hover) 0%,
+    var(--color-accent) 100%
+  );
+}
+
+.btn-secondary {
+  background: var(--color-input-bg);
+  color: var(--color-text);
+  border: 2px solid var(--color-card-border);
+}
+
+.btn-secondary:hover:not(:disabled) {
+  background: var(--color-bg-secondary);
+  border-color: var(--color-primary);
+}
+
+/* Form Elements */
+.form-field {
+  margin-bottom: 20px;
+}
+
+.form-field label {
+  display: block;
+  margin-bottom: 8px;
+  font-weight: 600;
+  color: var(--color-text);
+}
+
+.form-input {
+  width: 100%;
+  padding: 12px 16px;
+  border: 2px solid var(--color-input-border);
+  border-radius: 8px;
+  font-size: 16px;
+  transition: all 0.3s ease;
+  background: var(--color-input-bg);
+  color: var(--color-text);
+  font-family: inherit;
+}
+
+.form-input:focus {
+  outline: none;
+  border-color: var(--color-input-border-focus);
+  box-shadow: 0 0 0 3px var(--color-input-shadow-focus);
+}
+
+.form-input::placeholder {
+  color: var(--color-text-secondary);
+}
+
+.form-hint {
+  color: var(--color-error);
+  font-size: 14px;
+  margin-top: 5px;
+}
+
+/* Alert Messages */
+.alert {
+  padding: 12px 16px;
+  border-radius: 8px;
+  margin-bottom: 20px;
+  border-left: 4px solid;
+}
+
+.alert-error {
+  background: rgba(239, 68, 68, 0.1);
+  color: var(--color-error);
+  border-left-color: var(--color-error);
+}
+
+[data-theme="dark"] .alert-error {
+  background: rgba(239, 68, 68, 0.15);
+}
+
+/* Typography */
+.title {
+  font-size: 28px;
+  font-weight: 700;
+  color: var(--color-text);
+  margin-bottom: 8px;
+}
+
+.subtitle {
+  font-size: 16px;
+  color: var(--color-text-secondary);
+  margin-bottom: 30px;
+  line-height: 1.5;
+}
+
+.text-center {
+  text-align: center;
 }

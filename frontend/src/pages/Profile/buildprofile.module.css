@@ -1,0 +1,237 @@
+.buildCard {
+  width: 100%;
+  max-width: 600px;
+  position: relative;
+}
+
+@media (max-width: 768px) {
+  .buildCard {
+    max-width: 500px;
+  }
+}
+
+.progressBar {
+  width: 100%;
+  height: 6px;
+  background: var(--color-input-border);
+  border-radius: 3px;
+  margin-bottom: 30px;
+  overflow: hidden;
+}
+
+.progressFill {
+  height: 100%;
+  background: var(--color-bg-gradient);
+  border-radius: 3px;
+  transition: width 0.3s ease;
+}
+
+.stepCounter {
+  position: absolute;
+  top: 20px;
+  right: 20px;
+  background: var(--color-bg-secondary);
+  border: 2px solid var(--color-card-border);
+  padding: 8px 12px;
+  border-radius: 20px;
+  font-size: 14px;
+  font-weight: 600;
+  color: var(--color-text-secondary);
+}
+
+.welcomeText {
+  color: var(--color-primary);
+  font-size: 14px;
+  margin-bottom: 10px;
+  font-weight: 500;
+}
+
+.mixedFields {
+  margin-bottom: 30px;
+}
+
+.checkboxField {
+  margin-bottom: 15px;
+}
+
+.checkboxLabel {
+  display: flex;
+  align-items: center;
+  cursor: pointer;
+  font-weight: 500;
+  color: var(--color-text);
+  padding: 12px 16px;
+  background: var(--color-bg-secondary);
+  border: 2px solid var(--color-card-border);
+  border-radius: 8px;
+  transition: all 0.2s ease;
+  user-select: none;
+}
+
+.checkboxLabel:hover {
+  background: var(--color-input-bg);
+  border-color: var(--color-primary);
+}
+
+.checkboxLabel.selected {
+  background: rgba(93, 63, 148, 0.1);
+  border-color: var(--color-primary);
+  color: var(--color-primary);
+}
+
+[data-theme="dark"] .checkboxLabel.selected {
+  background: rgba(167, 139, 250, 0.15);
+}
+
+.checkboxLabel input {
+  display: none;
+}
+
+.checkboxLabel.selected::before {
+  content: "✓";
+  margin-right: 8px;
+  color: var(--color-primary);
+  font-weight: bold;
+  font-size: 16px;
+}
+
+.optionsGrid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+  gap: 12px;
+  margin-bottom: 20px;
+}
+
+.optionItem {
+  display: flex;
+  align-items: center;
+  padding: 12px 16px;
+  background: var(--color-bg-secondary);
+  border: 2px solid var(--color-card-border);
+  border-radius: 8px;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  user-select: none;
+  position: relative;
+}
+
+.optionItem:hover:not(.disabled) {
+  background: var(--color-input-bg);
+  border-color: var(--color-primary);
+}
+
+.optionItem.disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+}
+
+.optionItem.selected {
+  background: rgba(93, 63, 148, 0.1);
+  border-color: var(--color-primary);
+  color: var(--color-primary);
+}
+
+[data-theme="dark"] .optionItem.selected {
+  background: rgba(167, 139, 250, 0.15);
+}
+
+.optionItem input {
+  display: none;
+}
+
+.optionItem.disabled input {
+  cursor: not-allowed;
+}
+
+.optionItem label {
+  cursor: pointer;
+  font-weight: 500;
+  flex: 1;
+  color: inherit;
+}
+
+.optionItem.selected::before {
+  content: "✓";
+  position: absolute;
+  right: 12px;
+  color: var(--color-primary);
+  font-weight: bold;
+  font-size: 16px;
+}
+
+.selectionCounter {
+  text-align: center;
+  font-size: 14px;
+  color: var(--color-text-secondary);
+  margin-bottom: 20px;
+  padding: 8px;
+  background: var(--color-bg-secondary);
+  border: 2px solid var(--color-card-border);
+  border-radius: 6px;
+}
+
+.otherField {
+  margin-top: 20px;
+}
+
+.otherField label {
+  display: block;
+  margin-bottom: 8px;
+  font-weight: 600;
+  color: var(--color-text);
+}
+
+.otherField input {
+  width: 100%;
+  padding: 12px 16px;
+  border: 2px solid var(--color-input-border);
+  border-radius: 8px;
+  font-size: 16px;
+  transition: border-color 0.3s ease;
+  box-sizing: border-box;
+  background: var(--color-input-bg);
+  color: var(--color-text);
+}
+
+.otherField input:focus {
+  outline: none;
+  border-color: var(--color-input-border-focus);
+  box-shadow: 0 0 0 3px var(--color-input-shadow-focus);
+}
+
+.otherField input::placeholder {
+  color: var(--color-text-secondary);
+}
+
+.buttonGroup {
+  display: flex;
+  gap: 12px;
+  margin-top: 30px;
+}
+
+.btnBack {
+  background: none;
+  color: var(--color-primary);
+  padding: 8px;
+  border: 2px solid var(--color-primary);
+  width: 40px;
+  height: 40px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border-radius: 8px;
+  cursor: pointer;
+  transition: all 0.2s ease;
+}
+
+.btnBack:hover {
+  background: var(--color-primary);
+  color: white;
+}
+
+.footer {
+  text-align: center;
+  margin-top: 20px;
+  font-size: 14px;
+  color: var(--color-text-secondary);
+}

@@ -2,7 +2,8 @@ import { useState, useEffect } from "react";
 import { useNavigate } from "react-router";
 import { useForm } from "react-hook-form";
 import { ArrowLeft, ArrowRight, Check, X } from "lucide-react";
-import useUserStore from "../hooks/userstore";
+import useUserStore from "../../hooks/userstore";
+import styles from "./BuildProfile.module.css";
 
 const ONBOARDING_STEPS = [
   {
@@ -158,6 +159,111 @@ const ONBOARDING_STEPS = [
     ],
     hasOther: true,
   },
+  {
+    id: 7,
+    title: "Preferred Operating System",
+    subtitle: "What OS do you prefer for development?",
+    type: "radio",
+    options: [
+      "Windows",
+      "macOS",
+      "Linux (Ubuntu)",
+      "Linux (Arch)",
+      "Linux (Other)",
+      "I use multiple",
+    ],
+  },
+  {
+    id: 8,
+    title: "Gaming Preferences",
+    subtitle: "What types of gaming do you enjoy?",
+    type: "checkbox",
+    options: [
+      "PC Gaming",
+      "Console Gaming (PlayStation)",
+      "Console Gaming (Xbox)",
+      "Console Gaming (Nintendo)",
+      "Mobile Gaming",
+      "Board Games",
+      "Card Games",
+      "Retro Gaming",
+      "VR Gaming",
+    ],
+  },
+  {
+    id: 9,
+    title: "Other Interests",
+    subtitle: "What do you enjoy outside of programming?",
+    type: "checkbox",
+    options: [
+      "Reading",
+      "Music",
+      "Sports",
+      "Photography",
+      "Travel",
+      "Cooking",
+      "Art & Design",
+      "Writing",
+      "Podcasts",
+      "YouTube",
+      "Streaming",
+      "Fitness",
+      "Hiking",
+      "Cycling",
+    ],
+  },
+  {
+    id: 10,
+    title: "About You",
+    subtitle: "Tell us more about yourself and your coding preferences",
+    type: "mixed",
+    fields: [
+      {
+        name: "aboutMe",
+        label: "About Me",
+        type: "textarea",
+        required: false,
+        placeholder: "Tell us about yourself...",
+      },
+      {
+        name: "favoriteDrink",
+        label: "Favorite Drink While Coding",
+        type: "text",
+        required: false,
+        placeholder: "Coffee, Tea, Energy Drink...",
+      },
+      {
+        name: "musicGenre",
+        label: "Music Genre While Coding",
+        type: "text",
+        required: false,
+        placeholder: "Lo-fi, Rock, Electronic...",
+      },
+      {
+        name: "favoriteShow",
+        label: "Favorite Show/Movie",
+        type: "text",
+        required: false,
+        placeholder: "What do you watch for inspiration?",
+      },
+    ],
+  },
+  {
+    id: 11,
+    title: "Coding Schedule",
+    subtitle: "When do you prefer to code?",
+    type: "radio",
+    options: [
+      "Early Morning (5-9 AM)",
+      "Morning (9 AM-12 PM)",
+      "Afternoon (12-5 PM)",
+      "Evening (5-9 PM)",
+      "Night (9 PM-12 AM)",
+      "Late Night (12-5 AM)",
+      "I code anytime",
+      "It depends on the project",
+    ],
+  },
 ];
 
 export default function BuildProfile() {
@@ -253,7 +359,7 @@ export default function BuildProfile() {
 
   const renderMixedFields = () => {
     return (
-      <div className="mixed-fields">
+      <div className={styles.mixedFields}>
         {currentStepData.fields.map((field) => {
           if (field.type === "checkbox") {
             const fieldPath = `step${currentStep}.${field.name}`;
@@ -261,9 +367,11 @@ export default function BuildProfile() {
               watchedValues[`step${currentStep}`]?.[field.name];
 
             return (
-              <div key={field.name} className="checkbox-field">
+              <div key={field.name} className={styles.checkboxField}>
                 <label
-                  className={`checkbox-label ${isSelected ? "selected" : ""}`}
+                  className={`${styles.checkboxLabel} ${
+                    isSelected ? styles.selected : ""
+                  }`}
                 >
                   <input type="checkbox" {...register(fieldPath)} />
                   {field.label}
@@ -273,21 +381,41 @@ export default function BuildProfile() {
           }
 
           return (
-            <div key={field.name} className="field">
+            <div key={field.name} className="form-field">
               <label>{field.label}</label>
-              <input
-                type={field.type}
-                min={field.min}
-                max={field.max}
-                {...register(`step${currentStep}.${field.name}`, {
-                  required: field.required
-                    ? `${field.label} is required`
-                    : false,
-                })}
-                placeholder={`Enter your ${field.label.toLowerCase()}`}
-              />
+              {field.type === "textarea" ? (
+                <textarea
+                  className="form-input form-textarea"
+                  rows={4}
+                  {...register(`step${currentStep}.${field.name}`, {
+                    required: field.required
+                      ? `${field.label} is required`
+                      : false,
+                  })}
+                  placeholder={
+                    field.placeholder ||
+                    `Enter your ${field.label.toLowerCase()}`
+                  }
+                />
+              ) : (
+                <input
+                  className="form-input"
+                  type={field.type}
+                  min={field.min}
+                  max={field.max}
+                  {...register(`step${currentStep}.${field.name}`, {
+                    required: field.required
+                      ? `${field.label} is required`
+                      : false,
+                  })}
+                  placeholder={
+                    field.placeholder ||
+                    `Enter your ${field.label.toLowerCase()}`
+                  }
+                />
+              )}
               {errors[`step${currentStep}`]?.[field.name] && (
-                <div className="hint">
+                <div className="form-hint">
                   {errors[`step${currentStep}`][field.name].message}
                 </div>
               )}
@@ -306,7 +434,7 @@ export default function BuildProfile() {
 
     return (
       <>
-        <div className="options-grid">
+        <div className={styles.optionsGrid}>
           {currentStepData.options.map((option, index) => {
             const inputId = `${fieldName}-${index}`;
             const isCheckbox = inputType === "checkbox";
@@ -322,9 +450,9 @@ export default function BuildProfile() {
             return (
               <div
                 key={option}
-                className={`option-item ${isDisabled ? "disabled" : ""} ${
-                  isSelected ? "selected" : ""
-                }`}
+                className={`${styles.optionItem} ${
+                  isDisabled ? styles.disabled : ""
+                } ${isSelected ? styles.selected : ""}`}
               >
                 <input
                   type={inputType}
@@ -340,13 +468,13 @@ export default function BuildProfile() {
         </div>
 
         {maxSelections && (
-          <div className="selection-counter">
+          <div className={styles.selectionCounter}>
             {selectedCount}/{maxSelections} selected
           </div>
         )}
 
         {currentStepData.hasOther && (
-          <div className="other-field">
+          <div className={styles.otherField}>
             <label>Other (please specify):</label>
             <input
               type="text"
@@ -366,294 +494,22 @@ export default function BuildProfile() {
   };
 
   return (
-    <div className="page">
-      <style>{`
-        .page { 
-          display: flex; 
-          justify-content: center; 
-          align-items: center; 
-          min-height: 100vh; 
-          background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-          padding: 20px; 
-          font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
-        }
-        
-        @media (max-width: 768px) {
-          .card { 
-            max-width: 500px;
-          }
-        }
-        .card { 
-          background: white; 
-          border-radius: 16px; 
-          padding: 30px; 
-          box-shadow: 0 10px 30px rgba(0,0,0,0.2);
-          backdrop-filter: blur(10px);
-          border: 1px solid rgba(255,255,255,0.2);
-          width: 100%;
-          max-width: 600px;
-          position: relative;
-        }
-        .progress-bar {
-          width: 100%;
-          height: 6px;
-          background: #e0e0e0;
-          border-radius: 3px;
-          margin-bottom: 30px;
-          overflow: hidden;
-        }
-        .progress-fill {
-          height: 100%;
-          background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-          border-radius: 3px;
-          transition: width 0.3s ease;
-        }
-        .step-counter {
-          position: absolute;
-          top: 20px;
-          right: 20px;
-          background: #f5f5f5;
-          padding: 8px 12px;
-          border-radius: 20px;
-          font-size: 14px;
-          font-weight: 600;
-          color: #666;
-        }
-        .welcome-text {
-          color: #667eea;
-          font-size: 14px;
-          margin-bottom: 10px;
-          font-weight: 500;
-        }
-        .title {
-          font-size: 28px;
-          font-weight: 700;
-          color: #333;
-          margin-bottom: 8px;
-        }
-        .subtitle {
-          font-size: 16px;
-          color: #666;
-          margin-bottom: 30px;
-          line-height: 1.5;
-        }
-        .mixed-fields {
-          margin-bottom: 30px;
-        }
-        .field {
-          margin-bottom: 20px;
-        }
-        .field label {
-          display: block;
-          margin-bottom: 8px;
-          font-weight: 600;
-          color: #333;
-        }
-        .field input {
-          width: 100%;
-          padding: 12px 16px;
-          border: 2px solid #e0e0e0;
-          border-radius: 8px;
-          font-size: 16px;
-          transition: border-color 0.3s ease;
-          box-sizing: border-box;
-        }
-        .field input:focus {
-          outline: none;
-          border-color: #667eea;
-          box-shadow: 0 0 0 3px rgba(102, 126, 234, 0.1);
-        }
-        .checkbox-field {
-          margin-bottom: 15px;
-        }
-        .checkbox-label {
-          display: flex;
-          align-items: center;
-          cursor: pointer;
-          font-weight: 500;
-          color: #333;
-          padding: 12px 16px;
-          background: #f8f9fa;
-          border: 2px solid #e9ecef;
-          border-radius: 8px;
-          transition: all 0.2s ease;
-          user-select: none;
-        }
-        .checkbox-label:hover {
-          background: #e9ecef;
-          border-color: #667eea;
-        }
-        .checkbox-label.selected {
-          background: #e8f0fe;
-          border-color: #667eea;
-          color: #667eea;
-        }
-        .checkbox-label input {
-          display: none; /* Hide checkbox */
-        }
-        .options-grid {
-          display: grid;
-          grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
-          gap: 12px;
-          margin-bottom: 20px;
-        }
-        .option-item {
-          display: flex;
-          align-items: center;
-          padding: 12px 16px;
-          background: #f8f9fa;
-          border: 2px solid #e9ecef;
-          border-radius: 8px;
-          cursor: pointer;
-          transition: all 0.2s ease;
-          user-select: none;
-          position: relative;
-        }
-        .option-item:hover:not(.disabled) {
-          background: #e9ecef;
-          border-color: #667eea;
-        }
-        .option-item.disabled {
-          opacity: 0.5;
-          cursor: not-allowed;
-        }
-        .option-item.selected {
-          background: #e8f0fe;
-          border-color: #667eea;
-          color: #667eea;
-        }
-        .option-item input {
-          display: none; /* Hide radio buttons and checkboxes */
-        }
-        .option-item.disabled input {
-          cursor: not-allowed;
-        }
-        .option-item label {
-          cursor: pointer;
-          font-weight: 500;
-          flex: 1;
-        }
-        .option-item.selected::before {
-          content: '✓';
-          position: absolute;
-          right: 12px;
-          color: #667eea;
-          font-weight: bold;
-          font-size: 16px;
-        }
-        .checkbox-label.selected::before {
-          content: '✓';
-          margin-right: 8px;
-          color: #667eea;
-          font-weight: bold;
-          font-size: 16px;
-        }
-        .selection-counter {
-          text-align: center;
-          font-size: 14px;
-          color: #666;
-          margin-bottom: 20px;
-          padding: 8px;
-          background: #f8f9fa;
-          border-radius: 6px;
-        }
-        .other-field {
-          margin-top: 20px;
-        }
-        .other-field label {
-          display: block;
-          margin-bottom: 8px;
-          font-weight: 600;
-          color: #333;
-        }
-        .other-field input {
-          width: 100%;
-          padding: 12px 16px;
-          border: 2px solid #e0e0e0;
-          border-radius: 8px;
-          font-size: 16px;
-          transition: border-color 0.3s ease;
-          box-sizing: border-box;
-        }
-        .other-field input:focus {
-          outline: none;
-          border-color: #667eea;
-          box-shadow: 0 0 0 3px rgba(102, 126, 234, 0.1);
-        }
-        .hint {
-          color: #d32f2f;
-          font-size: 14px;
-          margin-top: 5px;
-        }
-        .button-group {
-          display: flex;
-          gap: 12px;
-          margin-top: 30px;
-        }
-        .btn {
-          padding: 12px 24px;
-          border: none;
-          border-radius: 8px;
-          font-size: 16px;
-          font-weight: 600;
-          cursor: pointer;
-          transition: all 0.2s ease;
-          display: flex;
-          align-items: center;
-          gap: 8px;
-        }
-        .btn-primary {
-          background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-          color: white;
-          flex: 1;
-        }
-        .btn-primary:hover:not(:disabled) {
-          transform: translateY(-2px);
-        }
-        .btn-primary:disabled {
-          opacity: 0.6;
-          cursor: not-allowed;
-        }
-        .btn-secondary {
-          background: #f8f9fa;
-          color: #666;
-          border: 2px solid #e9ecef;
-        }
-        .btn-secondary:hover {
-          background: #e9ecef;
-        }
-        .btn-back {
-          background: none;
-          color: #667eea;
-          padding: 8px;
-          border: 2px solid #667eea;
-          width: 40px;
-          height: 40px;
-          display: flex;
-          align-items: center;
-          justify-content: center;
-        }
-        .btn-back:hover {
-          background: #667eea;
-          color: white;
-        }
-      `}</style>
-
-      <div className="card">
-        <div className="step-counter">
+    <div className="page centered">
+      <div className={`card enhanced ${styles.buildCard}`}>
+        <div className={styles.stepCounter}>
           {currentStep} of {ONBOARDING_STEPS.length}
         </div>
 
-        <div className="progress-bar">
+        <div className={styles.progressBar}>
           <div
-            className="progress-fill"
+            className={styles.progressFill}
             style={{
               width: `${(currentStep / ONBOARDING_STEPS.length) * 100}%`,
             }}
           />
         </div>
 
-        <div className="welcome-text">
+        <div className={styles.welcomeText}>
           Welcome, {currentUser?.username || "Developer"}! 👋
         </div>
 
@@ -665,11 +521,11 @@ export default function BuildProfile() {
             ? renderMixedFields()
             : renderOptions()}
 
-          <div className="button-group">
+          <div className={styles.buttonGroup}>
             {currentStep > 1 && (
               <button
                 type="button"
-                className="btn btn-back"
+                className={styles.btnBack}
                 onClick={handleBack}
               >
                 <ArrowLeft size={20} />
@@ -689,6 +545,7 @@ export default function BuildProfile() {
               type="submit"
               className="btn btn-primary"
               disabled={isLoading}
+              style={{ flex: 1 }}
             >
               {isLoading ? (
                 "Creating Profile..."
@@ -707,14 +564,7 @@ export default function BuildProfile() {
           </div>
         </form>
 
-        <div
-          style={{
-            textAlign: "center",
-            marginTop: "20px",
-            fontSize: "14px",
-            color: "#666",
-          }}
-        >
+        <div className={styles.footer}>
           You can always add more details to your profile later!
         </div>
       </div>

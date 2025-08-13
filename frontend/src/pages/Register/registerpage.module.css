@@ -1,0 +1,71 @@
+.registerCard {
+  width: 100%;
+  max-width: 500px;
+}
+
+@media (max-width: 768px) {
+  .registerCard {
+    max-width: 450px;
+  }
+}
+
+.passwordField {
+  position: relative;
+}
+
+.passwordToggle {
+  position: absolute;
+  right: 12px;
+  top: 50%;
+  transform: translateY(-50%);
+  background: none;
+  border: none;
+  cursor: pointer;
+  color: var(--color-text-secondary);
+  padding: 4px;
+  transition: color 0.2s ease;
+}
+
+.passwordToggle:hover {
+  color: var(--color-text);
+}
+
+.requirements {
+  font-size: 14px;
+  color: var(--color-text-secondary);
+  background: var(--color-bg-secondary);
+  padding: 15px;
+  border-radius: 8px;
+  margin: 15px 0;
+  border: 2px solid var(--color-card-border);
+}
+
+.requirements ul {
+  margin: 10px 0 0 0;
+  padding-left: 20px;
+}
+
+.requirements strong {
+  color: var(--color-text);
+}
+
+.linkBtn {
+  font-size: 14px;
+  text-decoration: underline;
+  background: none;
+  border: none;
+  cursor: pointer;
+  color: var(--color-primary);
+  font-weight: 500;
+  transition: color 0.2s ease;
+}
+
+.linkBtn:hover {
+  color: var(--color-primary-hover);
+}
+
+.googleLoginContainer {
+  margin: 20px 0;
+  padding: 20px 0;
+  border-top: 1px solid var(--color-card-border);
+}
