@@ -4,6 +4,7 @@ import "dotenv/config";
 import { errorHandler } from "./middleware/error-handler.js";
 import db from "./db/db.js";
 import cookieParser from "cookie-parser";
+import { userRouter } from "./routes/user.js";
 
 const PORT = process.env.PORT || 3001;
 
