@@ -97,7 +97,6 @@ export const updateUserProfile = async (req, res, next) => {
       new: true,
       runValidators: true,
     }).select("-hashedPassword");
-    still;
 
     if (!updatedUser) {
       const error = new Error("User not found");
@@ -154,10 +153,11 @@ export const verifyLogin = async (req, res, next) => {
       return next(error);
     }
 
-    const isNowMatchable = checkIsMatchable(user);
-    if (isNowMatchable !== user.isMatchable) {
-      user.isMatchable = isNowMatchable;
-      await user.save();
+    // Fixed: Use existingUser instead of undefined 'user' variable
+    const isNowMatchable = checkIsMatchable(existingUser);
+    if (isNowMatchable !== existingUser.isMatchable) {
+      existingUser.isMatchable = isNowMatchable;
+      await existingUser.save();
     }
 
     const token = generateToken(existingUser.username, existingUser._id);
@@ -175,7 +175,7 @@ export const verifyLogin = async (req, res, next) => {
         id: existingUser._id,
         username: existingUser.username,
         email: existingUser.email,
-        isMatchable: user.isMatchable,
+        isMatchable: existingUser.isMatchable, // Fixed: Use existingUser instead of 'user'
       },
     });
   } catch (error) {
@@ -190,6 +190,59 @@ export const logout = async (req, res, next) => {
       message: "Logout successful",
     });
   } catch (error) {
+    return next(error);
+  }
+};
+
+export const getUserData = async (req, res, next) => {
+  try {
+    const { id } = req.params;
+
+    const user = await UserModel.findById(id).select("-hashedPassword");
+
+    if (!user) {
+      const error = new Error("User not found");
+      error.statusCode = 404;
+      return next(error);
+    }
+
+    // Return complete user profile
+    res.status(200).json({
+      message: "User data retrieved successfully",
+      user: {
+        id: user._id,
+        username: user.username,
+        email: user.email,
+        avatar: user.avatar,
+        aboutMe: user.aboutMe,
+        country: user.country,
+        city: user.city,
+        age: user.age,
+        status: user.status,
+        devExperience: user.devExperience,
+        techArea: user.techArea,
+        favoriteTimeToCode: user.favoriteTimeToCode,
+        favoriteLineOfCode: user.favoriteLineOfCode,
+        programmingLanguages: user.programmingLanguages,
+        techStack: user.techStack,
+        preferredOS: user.preferredOS,
+        languages: user.languages,
+        gaming: user.gaming,
+        otherInterests: user.otherInterests,
+        favoriteDrinkWhileCoding: user.favoriteDrinkWhileCoding,
+        musicGenreWhileCoding: user.musicGenreWhileCoding,
+        favoriteShowMovie: user.favoriteShowMovie,
+        isMatchable: user.isMatchable,
+        rating: user.rating,
+        points: user.points,
+        isOnline: user.isOnline,
+        lastSeen: user.lastSeen,
+        createdAt: user.createdAt,
+        updatedAt: user.updatedAt,
+      },
+    });
+  } catch (error) {
+    console.error("Error fetching user:", error);
     return next(error);
   }
 };
