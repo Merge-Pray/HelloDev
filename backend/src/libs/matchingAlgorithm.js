@@ -543,7 +543,7 @@ export async function runMatchingForAllUsers() {
     console.log("🔄 Starting matching algorithm...");
 
     const users = await UserModel.find({}).lean();
-    console.log(`📊 Found ${users.length} users to match`);
+    console.log(`Found ${users.length} users to match`);
 
     let matchesCreated = 0;
     let matchesUpdated = 0;
