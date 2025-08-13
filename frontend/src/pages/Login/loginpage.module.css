@@ -1,0 +1,85 @@
+.loginCard {
+  width: 100%;
+  max-width: 450px;
+}
+
+@media (max-width: 768px) {
+  .loginCard {
+    max-width: 400px;
+  }
+}
+
+.passwordField {
+  position: relative;
+}
+
+.passwordToggle {
+  position: absolute;
+  right: 12px;
+  top: 50%;
+  transform: translateY(-50%);
+  background: none;
+  border: none;
+  cursor: pointer;
+  color: var(--color-text-secondary);
+  padding: 4px;
+  transition: color 0.2s ease;
+}
+
+.passwordToggle:hover {
+  color: var(--color-text);
+}
+
+.divider {
+  display: flex;
+  align-items: center;
+  text-align: center;
+  margin: 20px 0;
+}
+
+.divider::before,
+.divider::after {
+  content: "";
+  flex: 1;
+  height: 1px;
+  background: var(--color-input-border);
+}
+
+.divider::before {
+  margin-right: 16px;
+}
+
+.divider::after {
+  margin-left: 16px;
+}
+
+.divider span {
+  color: var(--color-text-secondary);
+  font-size: 14px;
+}
+
+.googleBtn {
+  background: #4285f4;
+  color: white;
+  margin-bottom: 20px;
+}
+
+.googleBtn:hover {
+  background: #3367d6;
+  transform: translateY(-1px);
+}
+
+.linkBtn {
+  font-size: 14px;
+  text-decoration: underline;
+  background: none;
+  border: none;
+  cursor: pointer;
+  color: var(--color-primary);
+  font-weight: 500;
+  transition: color 0.2s ease;
+}
+
+.linkBtn:hover {
+  color: var(--color-primary-hover);
+}
