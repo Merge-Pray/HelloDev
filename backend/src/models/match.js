@@ -21,67 +21,19 @@ const MatchSchema = new Schema(
     },
 
     scores: {
-      programmingLanguages: {
+      technical: {
         type: Number,
         min: 0,
         max: 100,
         default: 0,
       },
-      techStack: {
+      goalAlignment: {
         type: Number,
         min: 0,
         max: 100,
         default: 0,
       },
-      techArea: {
-        type: Number,
-        min: 0,
-        max: 100,
-        default: 0,
-      },
-      experienceLevel: {
-        type: Number,
-        min: 0,
-        max: 100,
-        default: 0,
-      },
-
-      statusAlignment: {
-        type: Number,
-        min: 0,
-        max: 100,
-        default: 0,
-      },
-
-      locationProximity: {
-        type: Number,
-        min: 0,
-        max: 100,
-        default: 0,
-      },
-
-      codingTimeCompatibility: {
-        type: Number,
-        min: 0,
-        max: 100,
-        default: 0,
-      },
-
-      personalInterests: {
-        type: Number,
-        min: 0,
-        max: 100,
-        default: 0,
-      },
-
-      gamingCompatibility: {
-        type: Number,
-        min: 0,
-        max: 100,
-        default: 0,
-      },
-
-      personalityMatch: {
+      personal: {
         type: Number,
         min: 0,
         max: 100,
@@ -94,7 +46,7 @@ const MatchSchema = new Schema(
         type: String,
         enum: [
           "noob-connection",
-          "syntax-masters", 
+          "syntax-masters",
           "night-owls",
           "early-birds",
           "local-legends",
@@ -104,18 +56,14 @@ const MatchSchema = new Schema(
           "linux-ultras",
           "pc-master-race",
           "mobile-gamers",
-          "golden-connection"
+          "golden-connection",
         ],
       },
     ],
 
     matchType: {
       type: String,
-      enum: [
-        "mentor-mentee",
-        "learnpartner", 
-        "networking",
-      ],
+      enum: ["mentor-mentee", "learnpartner", "networking"],
       required: true,
     },
 
@@ -135,11 +83,6 @@ const MatchSchema = new Schema(
       type: Date,
       default: Date.now,
     },
-
-    expiresAt: {
-      type: Date,
-      default: () => new Date(Date.now() + 30 * 24 * 60 * 60 * 1000),
-    },
   },
   {
     timestamps: true,
@@ -147,12 +90,9 @@ const MatchSchema = new Schema(
 );
 
 MatchSchema.index({ user1: 1, user2: 1 }, { unique: true });
-
 MatchSchema.index({ user1: 1, compatibilityScore: -1 });
 MatchSchema.index({ user2: 1, compatibilityScore: -1 });
-
 MatchSchema.index({ quality: 1, status: 1 });
-
 MatchSchema.index({ expiresAt: 1 }, { expireAfterSeconds: 0 });
 
 const MatchModel = model("Match", MatchSchema);

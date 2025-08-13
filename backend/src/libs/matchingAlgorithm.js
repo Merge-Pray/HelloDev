@@ -1,6 +1,219 @@
 import UserModel from "../models/user.js";
 import MatchModel from "../models/match.js";
 
+export function calculateTechnicalScore(user1, user2) {
+  let totalScore = 0;
+  let factors = 0;
+
+  if (
+    user1.programmingLanguages?.length &&
+    user2.programmingLanguages?.length
+  ) {
+    factors++;
+    const langScore = calculateProgrammingLanguageScore(user1, user2);
+    totalScore += langScore * 0.5;
+  }
+
+  if (user1.techArea?.length && user2.techArea?.length) {
+    factors++;
+    const areaScore = calculateTechAreaScore(user1, user2);
+    totalScore += areaScore * 0.3;
+  }
+
+  if (user1.techStack?.length && user2.techStack?.length) {
+    factors++;
+    const stackScore = calculateTechStackScore(user1, user2);
+    totalScore += stackScore * 0.2;
+  }
+
+  return factors > 0 ? totalScore : 0;
+}
+
+export function calculateGoalAlignmentScore(user1, user2) {
+  const statusScore = calculateStatusAlignment(user1, user2);
+  const experienceScore = calculateExperienceLevelScore(user1, user2);
+
+  return statusScore * 0.7 + experienceScore * 0.3;
+}
+
+export function calculatePersonalScore(user1, user2) {
+  const scores = [];
+
+  const interestsScore = calculatePersonalInterestsScore(user1, user2);
+  if (interestsScore !== null) {
+    scores.push({ score: interestsScore, weight: 0.5 });
+  }
+
+  const timeScore = calculateCodingTimeCompatibility(user1, user2);
+  if (timeScore !== null) {
+    scores.push({ score: timeScore, weight: 0.35 });
+  }
+
+  const locationScore = calculateLocationCompatibility(user1, user2);
+  if (locationScore !== null) {
+    scores.push({ score: locationScore, weight: 0.15 });
+  }
+
+  if (scores.length === 0) {
+    return null;
+  }
+
+  const totalWeight = scores.reduce((sum, item) => sum + item.weight, 0);
+  const weightedSum = scores.reduce(
+    (sum, item) => sum + item.score * item.weight,
+    0
+  );
+
+  return weightedSum / totalWeight;
+}
+
+export function calculateLocationCompatibility(user1, user2) {
+  if (!user1.country || !user2.country) {
+    return null;
+  }
+
+  if (user1.country.toLowerCase() === user2.country.toLowerCase()) {
+    return 100;
+  }
+
+  return 40;
+}
+
+export function calculatePersonalInterestsScore(user1, user2) {
+  const user1Interests = extractAllInterests(user1);
+  const user2Interests = extractAllInterests(user2);
+
+  if (user1Interests.size === 0 && user2Interests.size === 0) {
+    return null;
+  }
+
+  if (user1Interests.size === 0 || user2Interests.size === 0) {
+    return 20;
+  }
+
+  const compatibilityScores = [];
+
+  const directOverlap = calculateDirectOverlap(user1Interests, user2Interests);
+  compatibilityScores.push({ score: directOverlap, weight: 0.6 });
+
+  const lifestyleScore = calculateLifestyleCompatibility(user1, user2);
+  if (lifestyleScore !== null) {
+    compatibilityScores.push({ score: lifestyleScore, weight: 0.4 });
+  }
+
+  const totalWeight = compatibilityScores.reduce(
+    (sum, item) => sum + item.weight,
+    0
+  );
+  const weightedSum = compatibilityScores.reduce(
+    (sum, item) => sum + item.score * item.weight,
+    0
+  );
+
+  return weightedSum / totalWeight;
+}
+
+function extractAllInterests(user) {
+  const interests = new Set();
+
+  if (user.otherInterests?.length) {
+    user.otherInterests.forEach((interest) => {
+      if (interest && interest.trim()) {
+        interests.add(normalizeInterest(interest));
+      }
+    });
+  }
+
+  if (user.favoriteShowMovie && user.favoriteShowMovie.trim()) {
+    interests.add(normalizeInterest(user.favoriteShowMovie));
+  }
+
+  if (user.gaming && user.gaming !== "none" && user.gaming.trim()) {
+    interests.add(`gaming:${normalizeInterest(user.gaming)}`);
+  }
+
+  return interests;
+}
+
+function calculateDirectOverlap(interests1, interests2) {
+  if (interests1.size === 0 || interests2.size === 0) {
+    return 0;
+  }
+
+  const intersection = new Set(
+    [...interests1].filter((x) => interests2.has(x))
+  );
+  const union = new Set([...interests1, ...interests2]);
+
+  const jaccardSimilarity = intersection.size / union.size;
+
+  const overlapBonus = intersection.size > 0 ? 0.2 : 0;
+
+  return Math.min(100, jaccardSimilarity * 100 + overlapBonus * 100);
+}
+
+function calculateLifestyleCompatibility(user1, user2) {
+  const compatibilityFactors = [];
+
+  const musicScore = comparePreference(
+    user1.musicGenreWhileCoding,
+    user2.musicGenreWhileCoding,
+    {
+      exact: 100,
+      both_exist: 60,
+      one_missing: 40,
+      both_missing: null,
+    }
+  );
+  if (musicScore !== null) {
+    compatibilityFactors.push(musicScore);
+  }
+
+  const drinkScore = comparePreference(
+    user1.favoriteDrinkWhileCoding,
+    user2.favoriteDrinkWhileCoding,
+    {
+      exact: 100,
+      both_exist: 70,
+      one_missing: 50,
+      both_missing: null,
+    }
+  );
+  if (drinkScore !== null) {
+    compatibilityFactors.push(drinkScore);
+  }
+
+  if (compatibilityFactors.length === 0) {
+    return null;
+  }
+
+  return (
+    compatibilityFactors.reduce((sum, score) => sum + score, 0) /
+    compatibilityFactors.length
+  );
+}
+
+function comparePreference(pref1, pref2, scoreMap) {
+  const hasP1 = pref1 && pref1.trim() && pref1 !== "none";
+  const hasP2 = pref2 && pref2.trim() && pref2 !== "none";
+
+  if (!hasP1 && !hasP2) return scoreMap.both_missing;
+  if (!hasP1 || !hasP2) return scoreMap.one_missing;
+
+  const normalizedP1 = normalizeInterest(pref1);
+  const normalizedP2 = normalizeInterest(pref2);
+
+  if (normalizedP1 === normalizedP2) return scoreMap.exact;
+  return scoreMap.both_exist;
+}
+
+function normalizeInterest(interest) {
+  return interest
+    .toLowerCase()
+    .trim()
+    .replace(/[^\w\s]/g, "");
+}
+
 export function calculateProgrammingLanguageScore(user1, user2) {
   if (
     !user1.programmingLanguages?.length ||
@@ -9,44 +222,27 @@ export function calculateProgrammingLanguageScore(user1, user2) {
     return 0;
   }
 
-  const user1Languages = new Map(
-    user1.programmingLanguages.map((lang) => [
-      lang.language.toLowerCase(),
-      lang.skillLevel,
-    ])
-  );
-  const user2Languages = new Map(
-    user2.programmingLanguages.map((lang) => [
-      lang.language.toLowerCase(),
-      lang.skillLevel,
-    ])
-  );
+  const user1Map = new Map(user1.programmingLanguages);
+  const user2Map = new Map(user2.programmingLanguages);
 
-  let commonLanguages = 0;
   let totalScore = 0;
-  let maxPossibleScore = 0;
+  let comparisons = 0;
 
-  for (const [lang, skill1] of user1Languages) {
-    if (user2Languages.has(lang)) {
-      commonLanguages++;
-      const skill2 = user2Languages.get(lang);
+  const allLanguages = new Set([...user1Map.keys(), ...user2Map.keys()]);
 
-      const skillDifference = Math.abs(skill1 - skill2);
-      const languageScore = Math.max(0, 10 - skillDifference);
+  for (const language of allLanguages) {
+    const skill1 = user1Map.get(language) || 0;
+    const skill2 = user2Map.get(language) || 0;
+
+    if (skill1 > 0 && skill2 > 0) {
+      const skillDiff = Math.abs(skill1 - skill2);
+      const languageScore = Math.max(0, 100 - skillDiff * 10);
       totalScore += languageScore;
+      comparisons++;
     }
-    maxPossibleScore += 10;
   }
 
-  if (maxPossibleScore === 0) return 0;
-
-  const commonLanguageBonus =
-    (commonLanguages / Math.max(user1Languages.size, user2Languages.size)) * 20;
-
-  return Math.min(
-    100,
-    (totalScore / maxPossibleScore) * 80 + commonLanguageBonus
-  );
+  return comparisons > 0 ? totalScore / comparisons : 0;
 }
 
 export function calculateTechStackScore(user1, user2) {
@@ -81,38 +277,6 @@ export function calculateTechAreaScore(user1, user2) {
   return (intersection.size / union.size) * 100;
 }
 
-export function calculateExperienceLevelScore(user1, user2) {
-  const experienceLevels = { beginner: 1, intermediate: 2, expert: 3 };
-
-  const level1 = experienceLevels[user1.devExperience] || 1;
-  const level2 = experienceLevels[user2.devExperience] || 1;
-
-  const isHelpRelationship =
-    (user1.status === "searchhelp" && user2.status === "offerhelp") ||
-    (user1.status === "offerhelp" && user2.status === "searchhelp");
-
-  if (isHelpRelationship) {
-    const helper = user1.status === "offerhelp" ? user1 : user2;
-    const helpSeeker = user1.status === "searchhelp" ? user1 : user2;
-
-    const helperLevel = experienceLevels[helper.devExperience] || 1;
-    const seekerLevel = experienceLevels[helpSeeker.devExperience] || 1;
-    const levelGap = helperLevel - seekerLevel;
-
-    if (levelGap >= 2) return 100;
-    if (levelGap === 1) return 85;
-    if (levelGap === 0) return 30;
-    if (levelGap === -1) return 15;
-    return 5;
-  } else {
-    const difference = Math.abs(level1 - level2);
-
-    if (difference === 0) return 100;
-    if (difference === 1) return 70;
-    return 30;
-  }
-}
-
 export function calculateStatusAlignment(user1, user2) {
   const status1 = user1.status;
   const status2 = user2.status;
@@ -125,6 +289,19 @@ export function calculateStatusAlignment(user1, user2) {
   if (status1 === status2) return 80;
 
   return 40;
+}
+
+export function calculateExperienceLevelScore(user1, user2) {
+  const experienceLevels = { beginner: 1, intermediate: 2, expert: 3 };
+
+  const level1 = experienceLevels[user1.devExperience] || 1;
+  const level2 = experienceLevels[user2.devExperience] || 1;
+
+  const difference = Math.abs(level1 - level2);
+
+  if (difference === 0) return 100;
+  if (difference === 1) return 70;
+  return 30;
 }
 
 export function calculateLocationProximity(user1, user2) {
@@ -147,159 +324,48 @@ export function calculateLocationProximity(user1, user2) {
 }
 
 export function calculateCodingTimeCompatibility(user1, user2) {
-  if (!user1.favoriteTimeToCode || !user2.favoriteTimeToCode) return 0;
-
-  const timePreference1 = user1.favoriteTimeToCode;
-  const timePreference2 = user2.favoriteTimeToCode;
-
-  if (timePreference1 === timePreference2) {
-    return 100;
+  if (!user1.favoriteTimeToCode || !user2.favoriteTimeToCode) {
+    return null;
   }
 
-  const compatibleCombos = [
-    ["earlybird", "daytime"],
-    ["daytime", "nightowl"],
-  ];
-
-  const isCompatible = compatibleCombos.some(
-    (combo) =>
-      combo.includes(timePreference1) && combo.includes(timePreference2)
-  );
-
-  return isCompatible ? 60 : 20;
-}
-
-export function calculatePersonalInterestsScore(user1, user2) {
-  if (!user1.otherInterests?.length || !user2.otherInterests?.length) {
-    return 0;
-  }
-
-  const interests1 = new Set(
-    user1.otherInterests.map((interest) => interest.toLowerCase())
-  );
-  const interests2 = new Set(
-    user2.otherInterests.map((interest) => interest.toLowerCase())
-  );
-
-  const intersection = new Set(
-    [...interests1].filter((interest) => interests2.has(interest))
-  );
-  const union = new Set([...interests1, ...interests2]);
-
-  return (intersection.size / union.size) * 100;
-}
-
-export function calculateGamingCompatibility(user1, user2) {
-  if (
-    !user1.gaming ||
-    !user2.gaming ||
-    user1.gaming === "none" ||
-    user2.gaming === "none"
-  ) {
-    return 0;
-  }
-
-  // Exact match gives highest score
-  if (user1.gaming === user2.gaming) {
-    return 100;
-  }
-
-  // Similar gaming types get partial scores
-  const gamingCompatibility = {
-    pc: ["console"], // PC and console gamers might get along
-    console: ["pc"],
-    mobile: ["board"], // Mobile and board games are more casual
-    board: ["mobile"],
+  const timeMap = {
+    "early morning": 1,
+    morning: 2,
+    afternoon: 3,
+    evening: 4,
+    "late night": 5,
+    night: 5,
+    earlybird: 1,
+    daytime: 3,
+    nightowl: 5,
   };
 
-  if (gamingCompatibility[user1.gaming]?.includes(user2.gaming)) {
-    return 60;
-  }
+  const time1 = timeMap[user1.favoriteTimeToCode.toLowerCase()] || 3;
+  const time2 = timeMap[user2.favoriteTimeToCode.toLowerCase()] || 3;
 
-  return 30; // Different gaming preferences but both game
-}
+  const timeDiff = Math.abs(time1 - time2);
 
-export function calculatePersonalityMatch(user1, user2) {
-  let score = 0;
-  let factors = 0;
+  if (timeDiff === 0) return 100;
 
-  if (user1.musicGenreWhileCoding && user2.musicGenreWhileCoding) {
-    factors++;
-    if (
-      user1.musicGenreWhileCoding.toLowerCase() ===
-      user2.musicGenreWhileCoding.toLowerCase()
-    ) {
-      score += 100;
-    } else {
-      score += 30;
-    }
-  }
+  if (timeDiff === 1) return 80;
 
-  if (user1.favoriteDrinkWhileCoding && user2.favoriteDrinkWhileCoding) {
-    factors++;
-    if (
-      user1.favoriteDrinkWhileCoding.toLowerCase() ===
-      user2.favoriteDrinkWhileCoding.toLowerCase()
-    ) {
-      score += 100;
-    } else {
-      score += 30;
-    }
-  }
+  if (timeDiff === 2) return 60;
 
-  if (user1.preferredOS && user2.preferredOS) {
-    factors++;
-    if (user1.preferredOS === user2.preferredOS) {
-      score += 100;
-    } else {
-      score += 20;
-    }
-  }
-
-  return factors > 0 ? score / factors : 0;
-}
-
-export function determineMatchType(user1, user2, scores) {
-  const experienceLevels = { beginner: 1, intermediate: 2, expert: 3 };
-  const level1 = experienceLevels[user1.devExperience] || 1;
-  const level2 = experienceLevels[user2.devExperience] || 1;
-
-  if (Math.abs(level1 - level2) >= 2) {
-    return "mentor-mentee";
-  }
-
-  if (user1.status === "learnpartner" && user2.status === "learnpartner") {
-    return "project-partner";
-  }
-
-  if (scores.locationProximity >= 70) {
-    return "local-buddy";
-  }
-
-  if (level1 === level2 && scores.programmingLanguages >= 60) {
-    return "peer-learning";
-  }
-
-  if (scores.statusAlignment >= 90) {
-    return "complementary-skills";
-  }
-
-  return "networking";
+  return 30;
 }
 
 export function generateMatchBadges(user1, user2, scores) {
   const badges = [];
 
-  // noob-connection: Both beginners in all languages
   if (
     user1.programmingLanguages?.length >= 1 &&
     user2.programmingLanguages?.length >= 1
   ) {
     const user1AllBeginner = user1.programmingLanguages.every(
-      (lang) => lang.skillLevel <= 3
+      (lang) => lang[1] <= 3
     );
     const user2AllBeginner = user2.programmingLanguages.every(
-      (lang) => lang.skillLevel <= 3
+      (lang) => lang[1] <= 3
     );
 
     if (user1AllBeginner && user2AllBeginner) {
@@ -307,16 +373,15 @@ export function generateMatchBadges(user1, user2, scores) {
     }
   }
 
-  // syntax-masters: Both experts (9-10) in all languages
   if (
     user1.programmingLanguages?.length >= 1 &&
     user2.programmingLanguages?.length >= 1
   ) {
     const user1AllExpert = user1.programmingLanguages.every(
-      (lang) => lang.skillLevel >= 9
+      (lang) => lang[1] >= 9
     );
     const user2AllExpert = user2.programmingLanguages.every(
-      (lang) => lang.skillLevel >= 9
+      (lang) => lang[1] >= 9
     );
 
     if (user1AllExpert && user2AllExpert) {
@@ -324,7 +389,6 @@ export function generateMatchBadges(user1, user2, scores) {
     }
   }
 
-  // night-owls: Both nightowl coders
   if (
     user1.favoriteTimeToCode === "nightowl" &&
     user2.favoriteTimeToCode === "nightowl"
@@ -332,7 +396,6 @@ export function generateMatchBadges(user1, user2, scores) {
     badges.push("night-owls");
   }
 
-  // early-birds: Both earlybird coders
   if (
     user1.favoriteTimeToCode === "earlybird" &&
     user2.favoriteTimeToCode === "earlybird"
@@ -340,7 +403,6 @@ export function generateMatchBadges(user1, user2, scores) {
     badges.push("early-birds");
   }
 
-  // local-legends: Same city
   if (
     user1.city &&
     user2.city &&
@@ -352,7 +414,6 @@ export function generateMatchBadges(user1, user2, scores) {
     badges.push("local-legends");
   }
 
-  // caffeine-addicts: Both love coffee
   if (user1.favoriteDrinkWhileCoding && user2.favoriteDrinkWhileCoding) {
     const drink1 = user1.favoriteDrinkWhileCoding.toLowerCase();
     const drink2 = user2.favoriteDrinkWhileCoding.toLowerCase();
@@ -371,7 +432,6 @@ export function generateMatchBadges(user1, user2, scores) {
     }
   }
 
-  // metal-coders: Both like metal music
   if (user1.musicGenreWhileCoding && user2.musicGenreWhileCoding) {
     const music1 = user1.musicGenreWhileCoding.toLowerCase();
     const music2 = user2.musicGenreWhileCoding.toLowerCase();
@@ -388,7 +448,6 @@ export function generateMatchBadges(user1, user2, scores) {
     }
   }
 
-  // hydro-homies: Both drink water while coding
   if (user1.favoriteDrinkWhileCoding && user2.favoriteDrinkWhileCoding) {
     const drink1 = user1.favoriteDrinkWhileCoding.toLowerCase();
     const drink2 = user2.favoriteDrinkWhileCoding.toLowerCase();
@@ -401,56 +460,35 @@ export function generateMatchBadges(user1, user2, scores) {
     }
   }
 
-  // linux-ultras: Both use Linux
   if (user1.preferredOS === "Linux" && user2.preferredOS === "Linux") {
     badges.push("linux-ultras");
   }
 
-  // pc-master-race: Both PC gamers
   if (user1.gaming === "pc" && user2.gaming === "pc") {
     badges.push("pc-master-race");
   }
 
-  // mobile-gamers: Both mobile gamers
   if (user1.gaming === "mobile" && user2.gaming === "mobile") {
     badges.push("mobile-gamers");
   }
-
-  // golden-connection: compatibility above 98 (will be set in main function)
 
   return badges;
 }
 
 export function calculateCompatibility(user1, user2) {
-  const scores = {
-    programmingLanguages: calculateProgrammingLanguageScore(user1, user2),
-    techStack: calculateTechStackScore(user1, user2),
-    techArea: calculateTechAreaScore(user1, user2),
-    experienceLevel: calculateExperienceLevelScore(user1, user2),
-    statusAlignment: calculateStatusAlignment(user1, user2),
-    locationProximity: calculateLocationProximity(user1, user2),
-    codingTimeCompatibility: calculateCodingTimeCompatibility(user1, user2),
-    personalInterests: calculatePersonalInterestsScore(user1, user2),
-    gamingCompatibility: calculateGamingCompatibility(user1, user2),
-    personalityMatch: calculatePersonalityMatch(user1, user2),
-  };
+  const technicalScore = calculateTechnicalScore(user1, user2);
+  const goalAlignmentScore = calculateGoalAlignmentScore(user1, user2);
+  const personalScore = calculatePersonalScore(user1, user2);
 
-  const weights = {
-    programmingLanguages: 0.22, // 22%
-    techArea: 0.18, // 18% - New tech area field
-    techStack: 0.16, // 16%
-    statusAlignment: 0.16, // 16%
-    experienceLevel: 0.12, // 12%
-    codingTimeCompatibility: 0.08, // 8% - Simplified without timezone
-    locationProximity: 0.04, // 4%
-    personalInterests: 0.02, // 2%
-    gamingCompatibility: 0.01, // 1%
-    personalityMatch: 0.01, // 1%
-  };
-
-  let compatibilityScore = 0;
-  for (const [category, score] of Object.entries(scores)) {
-    compatibilityScore += score * weights[category];
+  let compatibilityScore;
+  if (personalScore === null) {
+    compatibilityScore = Math.round(
+      technicalScore * 0.75 + goalAlignmentScore * 0.25
+    );
+  } else {
+    compatibilityScore = Math.round(
+      technicalScore * 0.6 + goalAlignmentScore * 0.3 + personalScore * 0.1
+    );
   }
 
   let quality;
@@ -459,10 +497,8 @@ export function calculateCompatibility(user1, user2) {
   else if (compatibilityScore >= 45) quality = "fair";
   else quality = "poor";
 
-  // Simplified matchType logic: mentor-mentee, learnpartner, or networking
-  let matchType = "networking"; // Default
+  let matchType = "networking";
 
-  // Check for mentor-mentee relationship
   const experienceLevels = { beginner: 1, intermediate: 2, expert: 3 };
   const level1 = experienceLevels[user1.devExperience] || 1;
   const level2 = experienceLevels[user2.devExperience] || 1;
@@ -472,24 +508,30 @@ export function calculateCompatibility(user1, user2) {
 
   if (isHelpRelationship && Math.abs(level1 - level2) >= 1) {
     matchType = "mentor-mentee";
-  }
-  // Check for learn partner relationship
-  else if (user1.status === "learnpartner" && user2.status === "learnpartner") {
+  } else if (
+    user1.status === "learnpartner" &&
+    user2.status === "learnpartner"
+  ) {
     matchType = "learnpartner";
   }
 
-  // Generate badges
-  let badges = generateMatchBadges(user1, user2, scores);
+  let badges = generateMatchBadges(user1, user2, {
+    technical: technicalScore,
+    goalAlignment: goalAlignmentScore,
+    personal: personalScore,
+  });
 
-  // Add golden-connection badge if compatibility is above 98
-  const finalCompatibilityScore = Math.round(compatibilityScore);
-  if (finalCompatibilityScore >= 98) {
+  if (compatibilityScore >= 95) {
     badges.push("golden-connection");
   }
 
   return {
-    compatibilityScore: finalCompatibilityScore,
-    scores,
+    compatibilityScore,
+    scores: {
+      technical: Math.round(technicalScore),
+      goalAlignment: Math.round(goalAlignmentScore),
+      personal: personalScore !== null ? Math.round(personalScore) : null,
+    },
     matchType,
     quality,
     badges,
@@ -520,33 +562,28 @@ export async function runMatchingForAllUsers() {
 
         const matchData = calculateCompatibility(user1, user2);
 
-        if (matchData.quality !== "poor") {
-          const matchDoc = {
-            user1: user1._id,
-            user2: user2._id,
-            compatibilityScore: matchData.compatibilityScore,
-            scores: matchData.scores,
-            matchType: matchData.matchType,
-            quality: matchData.quality,
-            badges: matchData.badges,
-            lastCalculated: new Date(),
-          };
+        if (matchData.compatibilityScore >= 45) {
+          const existingMatch = await MatchModel.findOne({
+            $or: [
+              { user1: user1._id, user2: user2._id },
+              { user1: user2._id, user2: user1._id },
+            ],
+          });
 
-          const result = await MatchModel.findOneAndUpdate(
-            {
-              $or: [
-                { user1: user1._id, user2: user2._id },
-                { user1: user2._id, user2: user1._id },
-              ],
-            },
-            matchDoc,
-            { upsert: true, new: true }
-          );
-
-          if (result.isNew) {
-            matchesCreated++;
-          } else {
+          if (existingMatch) {
+            await MatchModel.findByIdAndUpdate(existingMatch._id, {
+              ...matchData,
+              lastCalculated: new Date(),
+            });
             matchesUpdated++;
+          } else {
+            await MatchModel.create({
+              user1: user1._id,
+              user2: user2._id,
+              ...matchData,
+              lastCalculated: new Date(),
+            });
+            matchesCreated++;
           }
         }
       }
@@ -562,32 +599,41 @@ export async function runMatchingForAllUsers() {
   }
 }
 
-export async function getMatchesForUser(userId, limit = 20) {
+export async function getMatchesForUser(userId, limit = 10) {
   try {
     const matches = await MatchModel.find({
       $or: [{ user1: userId }, { user2: userId }],
-      quality: { $in: ["excellent", "good", "fair"] },
+      status: "pending",
     })
       .populate(
         "user1",
-        "username avatar aboutMe devExperience programmingLanguages techArea"
+        "username avatar aboutMe techArea programmingLanguages"
       )
       .populate(
         "user2",
-        "username avatar aboutMe devExperience programmingLanguages techArea"
+        "username avatar aboutMe techArea programmingLanguages"
       )
       .sort({ compatibilityScore: -1 })
       .limit(limit);
 
-    return matches.map((match) => ({
-      ...match.toObject(),
-      otherUser:
-        match.user1._id.toString() === userId.toString()
-          ? match.user2
-          : match.user1,
-    }));
+    const formattedMatches = matches.map((match) => {
+      const isUser1 = match.user1._id.toString() === userId.toString();
+      const otherUser = isUser1 ? match.user2 : match.user1;
+
+      return {
+        matchId: match._id,
+        user: otherUser,
+        compatibilityScore: match.compatibilityScore,
+        scores: match.scores,
+        badges: match.badges,
+        matchType: match.matchType,
+        quality: match.quality,
+      };
+    });
+
+    return formattedMatches;
   } catch (error) {
-    console.error("❌ Error getting matches for user:", error);
+    console.error("❌ Error getting user matches:", error);
     throw error;
   }
 }
