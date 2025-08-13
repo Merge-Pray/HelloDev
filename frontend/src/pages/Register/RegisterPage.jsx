@@ -4,6 +4,7 @@ import { useForm } from "react-hook-form";
 import { Eye, EyeOff } from "lucide-react";
 import useUserStore from "../../hooks/userstore";
 import styles from "./RegisterPage.module.css";
+import { API_URL } from "../../lib/config";
 
 export default function RegisterPage() {
   const setCurrentUser = useUserStore((state) => state.setCurrentUser);
@@ -37,19 +38,64 @@ export default function RegisterPage() {
     setValidationErrors({});
 
     try {
-      await new Promise((resolve) => setTimeout(resolve, 1000));
+      const { confirmPassword, ...submitData } = values;
 
-      const mockUser = {
-        userID: "123",
-        username: values.username,
-        email: values.email,
-      };
+      const response = await fetch(`${API_URL}/api/user/register`, {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        credentials: "include",
+        body: JSON.stringify(submitData),
+      });
 
-      setCurrentUser(mockUser);
-      navigate("/buildprofile");
+      if (!response.ok) {
+        const errorData = await response.json();
+
+        if (response.status === 400 && errorData.errors) {
+          const fieldErrors = {};
+
+          if (Array.isArray(errorData.errors)) {
+            errorData.errors.forEach((error) => {
+              const fieldName = Object.keys(error)[0];
+              const errorMessage = Object.values(error)[0];
+              fieldErrors[fieldName] = errorMessage;
+            });
+          } else if (typeof errorData.errors === "object") {
+            Object.entries(errorData.errors).forEach(([field, message]) => {
+              fieldErrors[field] = message;
+            });
+          }
+
+          setValidationErrors(fieldErrors);
+
+          Object.entries(fieldErrors).forEach(([field, message]) => {
+            if (field in values) {
+              setFormError(field, {
+                type: "server",
+                message: message,
+              });
+            }
+          });
+
+          setError("Please fix the validation errors below.");
+        } else {
+          throw new Error(errorData.message || "Registration failed");
+        }
+      } else {
+        const data = await response.json();
+
+        setCurrentUser(data.user);
+        navigate("/buildprofile");
+      }
     } catch (err) {
       console.error("Registration error:", err);
-      setError("Registration failed. Please try again.");
+
+      if (err instanceof Error) {
+        setError(err.message);
+      } else {
+        setError("Registration failed. Please try again.");
+      }
     } finally {
       setIsLoading(false);
     }
