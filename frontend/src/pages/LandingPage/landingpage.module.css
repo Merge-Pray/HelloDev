@@ -1,0 +1,153 @@
+.container {
+  display: flex;
+  height: 100vh;
+  background-color: var(--color-bg);
+  color: var(--color-text);
+  position: relative;
+}
+
+/* === DarkMode Button === */
+.darkModeWrapper {
+  position: fixed;
+  top: 16px;
+  right: 16px;
+  z-index: 1000;
+}
+
+/* === Spalten Layout === */
+.left,
+.right {
+  flex: 1;
+  display: flex;
+  align-items: left;
+  justify-content: center;
+}
+
+/* Logo */
+.logo {
+  max-width: 500px;
+  height: auto;
+  padding-left: 3rem;
+}
+
+/* Standard: Light sichtbar, Dark unsichtbar */
+.logoLight {
+  display: block;
+}
+.logoDark {
+  display: none;
+}
+
+/* Wenn Dark Mode aktiv → Logos tauschen */
+:root[data-theme="dark"] .logoLight {
+  display: none;
+}
+:root[data-theme="dark"] .logoDark {
+  display: block;
+}
+
+/* === Rechte Spalte Inhalt === */
+.right {
+  flex-direction: column;
+  gap: 1.5rem;
+  max-width: 800px;
+  padding: 4rem;
+}
+
+.headline {
+  font-size: 3rem;
+  font-weight: 800;
+  line-height: 1.2;
+}
+
+.subheadline {
+  font-size: 1.5rem;
+  font-weight: 700;
+}
+
+/* === Buttons === */
+.createAccountBtn {
+  background-color: var(--color-primary);
+  max-width: 20rem;
+  color: #fff;
+  border: none;
+  padding: 0.75rem 1.5rem;
+  border-radius: 9999px;
+  font-size: 1.2rem;
+  font-weight: 700;
+  cursor: pointer;
+  transition: background 0.2s ease;
+}
+
+.createAccountBtn:hover {
+  background-color: var(--color-primary-hover);
+}
+
+.loginBox {
+  display: flex;
+  flex-direction: column;
+  gap: 1rem;
+}
+
+.loginBtn {
+  background-color: transparent;
+  max-width: 20rem;
+  color: var(--color-primary);
+  border: 1px solid var(--color-primary);
+  padding: 0.75rem 1.5rem;
+  border-radius: 9999px;
+  font-size: 1rem;
+  font-weight: 700;
+  cursor: pointer;
+  transition: all 0.2s ease;
+}
+
+.loginBtn:hover {
+  background-color: var(--color-primary);
+  color: #fff;
+}
+
+/* === Responsive: Logo über den Text setzen === */
+@media (max-width: 1024px) {
+  .container {
+    flex-direction: column;
+    text-align: center;
+    height: auto;
+    padding-top: 80px; /* Platz für DarkMode Button */
+  }
+
+  .left {
+    padding: 0rem 0;
+  }
+
+  .right {
+    align-items: center;
+    padding: 1.5rem;
+    max-width: none;
+  }
+
+  .headline {
+    font-size: 2.5rem;
+  }
+
+  .subheadline {
+    font-size: 1.3rem;
+  }
+
+  .logo {
+    max-width: 300px;
+  }
+}
+
+/* === Mobile Optimierung === */
+@media (max-width: 640px) {
+  .headline {
+    font-size: 2rem;
+  }
+
+  .subheadline {
+    font-size: 1.1rem;
+  }
+
+
+}

@@ -26,8 +26,8 @@
   transition: color 0.2s ease;
 }
 
-.passwordToggle:hover {
-  color: var(--color-text);
+  .passwordToggle:hover {
+    color: var(--color-text);
 }
 
 .requirements {

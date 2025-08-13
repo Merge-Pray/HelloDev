@@ -9,7 +9,7 @@
 
   /* Markenfarben */
   --color-primary: #5d3f94; /* Lila Hauptfarbe */
-  --color-primary-hover: #7c3aed;
+  --color-primary-hover: #63439f;
   --color-accent: #9333ea;
 
   /* Interaktionsfarben */
@@ -144,7 +144,7 @@ body {
 /* Page Container */
 .page {
   min-height: 100vh;
-  background: var(--color-bg-gradient);
+  background: var(--color-bg);
   padding: 20px;
   font-family: "Inter", sans-serif;
 }
