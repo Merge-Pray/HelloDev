@@ -14,4 +14,4 @@ userRouter
   .post("/register", registerValidationRules(), validate, createUser)
   .post("/login", verifyLogin)
   .post("/logout", logout)
-  .patch("/profile", authorizeJwt, updateUserProfile);
+  .patch("/update", authorizeJwt, updateUserProfile);
