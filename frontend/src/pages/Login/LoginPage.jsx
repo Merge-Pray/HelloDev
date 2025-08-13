@@ -40,7 +40,7 @@ export default function LoginPage() {
       const data = await res.json();
       if (!res.ok) throw new Error(data.message || "Login failed");
 
-      setCurrentUser(mockUser);
+      setCurrentUser(data.user);
       navigate("/news");
     } catch (err) {
       console.error("Login error:", err);

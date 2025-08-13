@@ -1,9 +1,10 @@
-import { useState, useEffect } from "react";
+import { useState, useEffect, useCallback } from "react";
 import { useNavigate } from "react-router";
 import { useForm } from "react-hook-form";
 import { ArrowLeft, ArrowRight, Check, X } from "lucide-react";
 import useUserStore from "../../hooks/userstore";
 import styles from "./BuildProfile.module.css";
+import { API_URL } from "../../lib/config";
 
 const ONBOARDING_STEPS = [
   {
@@ -16,39 +17,63 @@ const ONBOARDING_STEPS = [
         name: "country",
         label: "Country",
         type: "text",
-        required: false,
+        required: true,
       },
       {
         name: "city",
         label: "City",
         type: "text",
-        required: false,
+        required: true,
       },
       {
-        name: "age",
-        label: "Age",
-        type: "number",
-        required: false,
-        min: 13,
-        max: 100,
-      },
-      {
-        name: "hideLocation",
-        label: "Hide location on profile",
-        type: "checkbox",
-      },
-      {
-        name: "hideAge",
-        label: "Hide age on profile",
-        type: "checkbox",
+        name: "status",
+        label: "Status",
+        type: "select",
+        required: true,
+        options: ["Networking", "Search Help", "Offer Help", "Learnpartner"],
       },
     ],
   },
   {
     id: 2,
+    title: "Development Experience",
+    subtitle: "How would you describe your programming experience?",
+    type: "radio",
+    fieldName: "devExperience",
+    options: [
+      "Beginner (0-1 years)",
+      "Intermediate (1-3 years)",
+      "Expert (5+ years)",
+    ],
+  },
+  {
+    id: 3,
+    title: "Tech Areas of Interest",
+    subtitle: "What areas of technology interest you most? (Select up to 3)",
+    type: "checkbox",
+    fieldName: "techArea",
+    maxSelections: 3,
+    options: [
+      "Web Development",
+      "Mobile Development",
+      "Game Development",
+      "AI/Machine Learning",
+      "Data Science",
+      "DevOps",
+      "Cybersecurity",
+      "Cloud Computing",
+      "Blockchain",
+      "IoT",
+      "AR/VR",
+      "Desktop Applications",
+    ],
+  },
+  {
+    id: 4,
     title: "Programming Languages",
     subtitle: "Which programming languages do you know? (Select up to 5)",
     type: "checkbox",
+    fieldName: "programmingLanguages",
     maxSelections: 5,
     options: [
       "JavaScript",
@@ -66,48 +91,15 @@ const ONBOARDING_STEPS = [
       "C",
       "Scala",
       "Dart",
-      "R",
-      "MATLAB",
-      "Perl",
-      "Haskell",
-      "Lua",
     ],
-  },
-  {
-    id: 3,
-    title: "Experience Level",
-    subtitle: "How would you describe your programming experience?",
-    type: "radio",
-    options: ["Beginner", "Intermediate", "Expert"],
-  },
-  {
-    id: 4,
-    title: "Tech Areas of Interest",
-    subtitle: "What areas of technology interest you most?",
-    type: "checkbox",
-    options: [
-      "Web Development",
-      "Mobile Development",
-      "Game Development",
-      "AI/Machine Learning",
-      "Data Science",
-      "DevOps",
-      "Cybersecurity",
-      "Cloud Computing",
-      "Blockchain",
-      "IoT",
-      "AR/VR",
-      "Robotics",
-      "Desktop Applications",
-      "Embedded Systems",
-    ],
-    hasOther: true,
   },
   {
     id: 5,
     title: "Tech Stack & Tools",
-    subtitle: "What technologies and tools do you work with?",
+    subtitle: "What technologies and tools do you work with? (Select up to 5)",
     type: "checkbox",
+    fieldName: "techStack",
+    maxSelections: 5,
     options: [
       "React",
       "Vue.js",
@@ -118,7 +110,6 @@ const ONBOARDING_STEPS = [
       "Flask",
       "Spring Boot",
       "Laravel",
-      "Rails",
       "Docker",
       "Kubernetes",
       "AWS",
@@ -127,43 +118,15 @@ const ONBOARDING_STEPS = [
       "MongoDB",
       "PostgreSQL",
       "MySQL",
-      "Redis",
       "Git",
-      "Jenkins",
-      "Terraform",
     ],
-    hasOther: true,
   },
   {
     id: 6,
-    title: "Languages",
-    subtitle: "What languages do you speak?",
-    type: "checkbox",
-    options: [
-      "English",
-      "Spanish",
-      "French",
-      "German",
-      "Italian",
-      "Portuguese",
-      "Russian",
-      "Chinese (Mandarin)",
-      "Japanese",
-      "Korean",
-      "Arabic",
-      "Hindi",
-      "Dutch",
-      "Swedish",
-      "Norwegian",
-      "Danish",
-    ],
-    hasOther: true,
-  },
-  {
-    id: 7,
     title: "Preferred Operating System",
     subtitle: "What OS do you prefer for development?",
     type: "radio",
+    fieldName: "preferredOS",
     options: [
       "Windows",
       "macOS",
@@ -173,112 +136,20 @@ const ONBOARDING_STEPS = [
       "I use multiple",
     ],
   },
-  {
-    id: 8,
-    title: "Gaming Preferences",
-    subtitle: "What types of gaming do you enjoy?",
-    type: "checkbox",
-    options: [
-      "PC Gaming",
-      "Console Gaming (PlayStation)",
-      "Console Gaming (Xbox)",
-      "Console Gaming (Nintendo)",
-      "Mobile Gaming",
-      "Board Games",
-      "Card Games",
-      "Retro Gaming",
-      "VR Gaming",
-    ],
-  },
-  {
-    id: 9,
-    title: "Other Interests",
-    subtitle: "What do you enjoy outside of programming?",
-    type: "checkbox",
-    options: [
-      "Reading",
-      "Music",
-      "Sports",
-      "Photography",
-      "Travel",
-      "Cooking",
-      "Art & Design",
-      "Writing",
-      "Podcasts",
-      "YouTube",
-      "Streaming",
-      "Fitness",
-      "Hiking",
-      "Cycling",
-    ],
-  },
-  {
-    id: 10,
-    title: "About You",
-    subtitle: "Tell us more about yourself and your coding preferences",
-    type: "mixed",
-    fields: [
-      {
-        name: "aboutMe",
-        label: "About Me",
-        type: "textarea",
-        required: false,
-        placeholder: "Tell us about yourself...",
-      },
-      {
-        name: "favoriteDrink",
-        label: "Favorite Drink While Coding",
-        type: "text",
-        required: false,
-        placeholder: "Coffee, Tea, Energy Drink...",
-      },
-      {
-        name: "musicGenre",
-        label: "Music Genre While Coding",
-        type: "text",
-        required: false,
-        placeholder: "Lo-fi, Rock, Electronic...",
-      },
-      {
-        name: "favoriteShow",
-        label: "Favorite Show/Movie",
-        type: "text",
-        required: false,
-        placeholder: "What do you watch for inspiration?",
-      },
-    ],
-  },
-  {
-    id: 11,
-    title: "Coding Schedule",
-    subtitle: "When do you prefer to code?",
-    type: "radio",
-    options: [
-      "Early Morning (5-9 AM)",
-      "Morning (9 AM-12 PM)",
-      "Afternoon (12-5 PM)",
-      "Evening (5-9 PM)",
-      "Night (9 PM-12 AM)",
-      "Late Night (12-5 AM)",
-      "I code anytime",
-      "It depends on the project",
-    ],
-  },
 ];
 
 export default function BuildProfile() {
-  const currentUser = useUserStore((s) => s.currentUser);
+  const { currentUser, setCurrentUser } = useUserStore();
   const [currentStep, setCurrentStep] = useState(1);
   const [profileData, setProfileData] = useState({});
   const [isLoading, setIsLoading] = useState(false);
-  const [otherInputs, setOtherInputs] = useState({});
   const [selectedCount, setSelectedCount] = useState(0);
+  const [error, setError] = useState(null);
   const navigate = useNavigate();
 
   const {
     register,
     handleSubmit,
-    getValues,
     reset,
     watch,
     formState: { errors },
@@ -289,93 +160,136 @@ export default function BuildProfile() {
   );
   const isLastStep = currentStep === ONBOARDING_STEPS.length;
 
-  // Watch for checkbox changes to count selections
-  const watchedValues = watch();
+  const fieldName = currentStepData?.fieldName;
+  const watchedField = watch(fieldName);
 
   useEffect(() => {
-    if (currentStepData?.maxSelections) {
-      const fieldName = `step${currentStep}`;
-      const values = watchedValues[fieldName] || [];
-      setSelectedCount(Array.isArray(values) ? values.length : 0);
+    if (currentStepData?.maxSelections && fieldName && watchedField) {
+      const count = Array.isArray(watchedField) ? watchedField.length : 0;
+      setSelectedCount(count);
+    } else {
+      setSelectedCount(0);
     }
-  }, [watchedValues, currentStep, currentStepData]);
+  }, [watchedField, fieldName, currentStepData?.maxSelections]);
 
-  const handleNext = async (data) => {
-    const stepKey = `step${currentStep}`;
-    let stepData = data[stepKey] || [];
+  useEffect(() => {
+    reset();
+    setSelectedCount(0);
+  }, [currentStep, reset]);
 
-    // Add "other" input if provided
-    if (currentStepData?.hasOther && otherInputs[stepKey]) {
-      stepData = [
-        ...(Array.isArray(stepData) ? stepData : [stepData]),
-        otherInputs[stepKey],
-      ];
-    }
+  const handleNext = useCallback(
+    async (data) => {
+      setError(null);
 
-    const newProfileData = {
-      ...profileData,
-      [stepKey]: stepData,
-    };
-    setProfileData(newProfileData);
+      let newProfileData;
 
-    if (isLastStep) {
-      setIsLoading(true);
-      try {
-        await new Promise((resolve) => setTimeout(resolve, 1000));
-        console.log("Profile data:", newProfileData);
-        navigate("/profile");
-      } catch (error) {
-        console.error("Profile creation error:", error);
-      } finally {
-        setIsLoading(false);
+      if (currentStepData.type === "mixed") {
+        newProfileData = {
+          ...profileData,
+          ...data,
+        };
+      } else {
+        const stepData = data[fieldName];
+        newProfileData = {
+          ...profileData,
+          [fieldName]: stepData,
+        };
       }
-    } else {
-      setCurrentStep(currentStep + 1);
-      reset();
-      setSelectedCount(0);
-    }
-  };
 
-  const handleSkip = () => {
-    if (isLastStep) {
-      navigate("/profile");
-    } else {
-      setCurrentStep(currentStep + 1);
-      reset();
-      setSelectedCount(0);
-    }
-  };
+      setProfileData(newProfileData);
 
-  const handleBack = () => {
+      if (isLastStep) {
+        setIsLoading(true);
+        try {
+          console.log("Sending profile data:", newProfileData);
+
+          const response = await fetch(`${API_URL}/api/user/profile`, {
+            method: "PATCH",
+            headers: {
+              "Content-Type": "application/json",
+            },
+            credentials: "include",
+            body: JSON.stringify(newProfileData),
+          });
+
+          if (!response.ok) {
+            const errorData = await response.json();
+            throw new Error(errorData.message || "Failed to save profile");
+          }
+
+          const responseData = await response.json();
+          setCurrentUser({ ...currentUser, ...responseData.user });
+
+          console.log("Profile saved successfully:", responseData);
+          navigate("/profile");
+        } catch (error) {
+          console.error("Profile creation error:", error);
+          setError(
+            error.message || "Failed to save profile. Please try again."
+          );
+        } finally {
+          setIsLoading(false);
+        }
+      } else {
+        setCurrentStep((prev) => prev + 1);
+      }
+    },
+    [
+      currentStepData,
+      profileData,
+      fieldName,
+      isLastStep,
+      API_URL,
+      currentUser,
+      setCurrentUser,
+      navigate,
+    ]
+  );
+
+  const handleCancel = useCallback(() => {
+    navigate("/profile");
+  }, [navigate]);
+
+  const handleBack = useCallback(() => {
     if (currentStep > 1) {
-      setCurrentStep(currentStep - 1);
-      setSelectedCount(0);
+      setCurrentStep((prev) => prev - 1);
     }
-  };
+  }, [currentStep]);
 
-  const onSubmit = (data) => {
-    handleNext(data);
-  };
+  const onSubmit = useCallback(
+    (data) => {
+      console.log("Form submitted with data:", data);
+      handleNext(data);
+    },
+    [handleNext]
+  );
 
   const renderMixedFields = () => {
     return (
       <div className={styles.mixedFields}>
         {currentStepData.fields.map((field) => {
-          if (field.type === "checkbox") {
-            const fieldPath = `step${currentStep}.${field.name}`;
-            const isSelected =
-              watchedValues[`step${currentStep}`]?.[field.name];
-
+          if (field.type === "select") {
             return (
-              <div key={field.name} className={styles.checkboxField}>
-                <label
-                  className={`${styles.checkboxLabel} ${
-                    isSelected ? styles.selected : ""
-                  }`}
+              <div key={field.name} className="form-field">
+                <label>{field.label}</label>
+                <select
+                  className="form-input"
+                  {...register(field.name, {
+                    required: field.required
+                      ? `${field.label} is required`
+                      : false,
+                  })}
                 >
-                  <input type="checkbox" {...register(fieldPath)} />
-                  {field.label}
-                </label>
+                  <option value="">Select {field.label}</option>
+                  {field.options.map((option) => (
+                    <option key={option} value={option}>
+                      {option}
+                    </option>
+                  ))}
+                </select>
+                {errors[field.name] && (
+                  <div className="form-hint">{errors[field.name].message}</div>
+                )}
               </div>
             );
           }
@@ -383,41 +297,18 @@ export default function BuildProfile() {
           return (
             <div key={field.name} className="form-field">
               <label>{field.label}</label>
-              {field.type === "textarea" ? (
-                <textarea
-                  className="form-input form-textarea"
-                  rows={4}
-                  {...register(`step${currentStep}.${field.name}`, {
-                    required: field.required
-                      ? `${field.label} is required`
-                      : false,
-                  })}
-                  placeholder={
-                    field.placeholder ||
-                    `Enter your ${field.label.toLowerCase()}`
-                  }
-                />
-              ) : (
-                <input
-                  className="form-input"
-                  type={field.type}
-                  min={field.min}
-                  max={field.max}
-                  {...register(`step${currentStep}.${field.name}`, {
-                    required: field.required
-                      ? `${field.label} is required`
-                      : false,
-                  })}
-                  placeholder={
-                    field.placeholder ||
-                    `Enter your ${field.label.toLowerCase()}`
-                  }
-                />
-              )}
-              {errors[`step${currentStep}`]?.[field.name] && (
-                <div className="form-hint">
-                  {errors[`step${currentStep}`][field.name].message}
-                </div>
+              <input
+                className="form-input"
+                type={field.type}
+                {...register(field.name, {
+                  required: field.required
+                    ? `${field.label} is required`
+                    : false,
+                })}
+                placeholder={`Enter your ${field.label.toLowerCase()}`}
+              />
+              {errors[field.name] && (
+                <div className="form-hint">{errors[field.name].message}</div>
               )}
             </div>
           );
@@ -427,10 +318,9 @@ export default function BuildProfile() {
   };
 
   const renderOptions = () => {
-    const fieldName = `step${currentStep}`;
     const inputType = currentStepData.type;
     const maxSelections = currentStepData.maxSelections;
-    const selectedValues = watchedValues[fieldName] || [];
+    const selectedValues = watchedField || [];
 
     return (
       <>
@@ -459,7 +349,9 @@ export default function BuildProfile() {
                   id={inputId}
                   value={option}
                   disabled={isDisabled}
-                  {...register(fieldName)}
+                  {...register(fieldName, {
+                    required: "Please select at least one option",
+                  })}
                 />
                 <label htmlFor={inputId}>{option}</label>
               </div>
@@ -470,23 +362,6 @@ export default function BuildProfile() {
         {maxSelections && (
           <div className={styles.selectionCounter}>
             {selectedCount}/{maxSelections} selected
-          </div>
-        )}
-
-        {currentStepData.hasOther && (
-          <div className={styles.otherField}>
-            <label>Other (please specify):</label>
-            <input
-              type="text"
-              placeholder="Type here..."
-              value={otherInputs[fieldName] || ""}
-              onChange={(e) =>
-                setOtherInputs({
-                  ...otherInputs,
-                  [fieldName]: e.target.value,
-                })
-              }
-            />
           </div>
         )}
       </>
@@ -516,6 +391,8 @@ export default function BuildProfile() {
         <h1 className="title">{currentStepData?.title}</h1>
         <p className="subtitle">{currentStepData?.subtitle}</p>
 
+        {error && <div className="alert alert-error">{error}</div>}
+
         <form onSubmit={handleSubmit(onSubmit)}>
           {currentStepData?.type === "mixed"
             ? renderMixedFields()
@@ -535,10 +412,10 @@ export default function BuildProfile() {
             <button
               type="button"
               className="btn btn-secondary"
-              onClick={handleSkip}
+              onClick={handleCancel}
             >
               <X size={16} />
-              Skip
+              Cancel
             </button>
 
             <button
@@ -548,7 +425,7 @@ export default function BuildProfile() {
               style={{ flex: 1 }}
             >
               {isLoading ? (
-                "Creating Profile..."
+                "Saving Profile..."
               ) : isLastStep ? (
                 <>
                   <Check size={16} />
@@ -565,7 +442,8 @@ export default function BuildProfile() {
         </form>
 
         <div className={styles.footer}>
-          You can always add more details to your profile later!
+          Complete your basic profile to get started. You can add more details
+          later!
         </div>
       </div>
     </div>
