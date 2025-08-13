@@ -1,5 +1,5 @@
 import { useState, useEffect } from "react";
-import { useNavigate } from "react-router";
+import { useNavigate } from "react-router"; // useParams entfernt
 import {
   Edit3,
   MapPin,
@@ -27,6 +27,7 @@ import styles from "./profilepage.module.css";
 import { API_URL } from "../../lib/config";
 
 export default function ProfilePage() {
+  // const { id } = useParams(); // Diese Zeile entfernen
   const { currentUser, setCurrentUser } = useUserStore();
   const [profileData, setProfileData] = useState({});
   const [isLoading, setIsLoading] = useState(true);
@@ -44,7 +45,8 @@ export default function ProfilePage() {
       setError(null);
 
       try {
-        const response = await fetch(`${API_URL}/api/user/profile`, {
+        // Nur eigene Daten abrufen - keine ID nötig
+        const response = await fetch(`${API_URL}/api/user/user`, {
           method: "GET",
           headers: {
             "Content-Type": "application/json",
@@ -88,7 +90,6 @@ export default function ProfilePage() {
 
         setProfileData(transformedData);
 
-        // Update user in store if needed
         setCurrentUser({ ...currentUser, ...data.user });
       } catch (error) {
         console.error("Failed to fetch profile:", error);
@@ -102,14 +103,13 @@ export default function ProfilePage() {
   }, [currentUser?.id, navigate, setCurrentUser]);
 
   const handleEditProfile = () => {
-    navigate("/buildprofile");
+    navigate("/editprofile");
   };
 
   const handleEditAdditional = () => {
     navigate("/editprofile");
   };
 
-  // Loading state
   if (isLoading) {
     return (
       <div className="page centered">
@@ -123,7 +123,6 @@ export default function ProfilePage() {
     );
   }
 
-  // Error state
   if (error) {
     return (
       <div className="page centered">
@@ -140,7 +139,6 @@ export default function ProfilePage() {
     );
   }
 
-  // Helper functions
   const hasData = (data) => {
     if (Array.isArray(data)) return data.length > 0;
     if (typeof data === "object" && data !== null) {
@@ -172,7 +170,6 @@ export default function ProfilePage() {
     );
   };
 
-  // Render functions
   const renderPersonalInfo = () => {
     return (
       <div className="card enhanced">

@@ -217,7 +217,7 @@ export default function BuildProfile() {
           setCurrentUser({ ...currentUser, ...responseData.user });
 
           console.log("Profile saved successfully:", responseData);
-          navigate("/login");
+          navigate("/profile");
         } catch (error) {
           console.error("Profile creation error:", error);
           setError(

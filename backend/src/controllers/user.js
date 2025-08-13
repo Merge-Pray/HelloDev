@@ -196,9 +196,9 @@ export const logout = async (req, res, next) => {
 
 export const getUserData = async (req, res, next) => {
   try {
-    const { id } = req.params;
+    const userId = req.user._id;
 
-    const user = await UserModel.findById(id).select("-hashedPassword");
+    const user = await UserModel.findById(userId).select("-hashedPassword");
 
     if (!user) {
       const error = new Error("User not found");
@@ -206,7 +206,6 @@ export const getUserData = async (req, res, next) => {
       return next(error);
     }
 
-    // Return complete user profile
     res.status(200).json({
       message: "User data retrieved successfully",
       user: {
