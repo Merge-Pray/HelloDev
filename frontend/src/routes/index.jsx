@@ -1,7 +1,6 @@
 import { createBrowserRouter } from "react-router";
 import App from "../App";
 
-import Landingpage from "../pages/LandingPage/Landingpage";
 import NotFound from "../pages/NotFound";
 import Profilepage from "../pages/Profile/ProfilePage";
 import Chatpage from "../pages/ChatPage";
@@ -17,6 +16,7 @@ import MatchPage from "../pages/MatchPage";
 import EditProfilePage from "../pages/EditProfilePage";
 import LoginPage from "../pages/Login/LoginPage";
 import RegisterPage from "../pages/Register/RegisterPage";
+import LandingPage from "../pages/LandingPage/LandingPage";
 
 export const router = createBrowserRouter([
   {
@@ -24,7 +24,7 @@ export const router = createBrowserRouter([
     element: <App />,
     errorElement: <NotFound />,
     children: [
-      { index: true, element: <Landingpage /> },
+      { index: true, element: <LandingPage /> },
       { path: "login", element: <LoginPage /> },
       { path: "register", element: <RegisterPage /> },
       { path: "buildprofile", element: <BuildProfile /> },

@@ -1,5 +1,5 @@
 import { useState, useEffect } from "react";
-import { useNavigate } from "react-router"; // useParams entfernt
+import { useNavigate } from "react-router";
 import {
   Edit3,
   MapPin,
