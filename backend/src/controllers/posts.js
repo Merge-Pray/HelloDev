@@ -1,86 +1,85 @@
 import PostModel from "../models/post.js";
 import UserModel from "../models/user.js";
 
-// Create a new post
 export const createPost = async (req, res, next) => {
   try {
     const userId = req.user._id;
-    const {
-      content,
-      hashtags = [],
-      visibility = "public"
-    } = req.body;
+    const { content, hashtags = [], visibility = "public" } = req.body;
 
-    // Extract mentions from content (@username)
     const mentionMatches = content.match(/@(\w+)/g) || [];
-    const mentionUsernames = mentionMatches.map(match => match.slice(1));
-    
-    // Find mentioned users
-    const mentionedUsers = await UserModel.find({
-      username: { $in: mentionUsernames }
-    }).select('_id');
-    
-    const mentions = mentionedUsers.map(user => user._id);
+    const mentionUsernames = mentionMatches.map((match) => match.slice(1));
 
-    // Create the post
+    const mentionedUsers = await UserModel.find({
+      username: { $in: mentionUsernames },
+    }).select("_id");
+
+    const mentions = mentionedUsers.map((user) => user._id);
+
     const newPost = new PostModel({
       author: userId,
       content: content.trim(),
       mentions,
-      hashtags: hashtags.map(tag => tag.toLowerCase().replace(/^#/, '')),
-      visibility
+      hashtags: hashtags.map((tag) => tag.toLowerCase().replace(/^#/, "")),
+      visibility,
     });
 
     await newPost.save();
 
-    // Populate author info for response
-    await newPost.populate('author', 'username avatar');
-    await newPost.populate('mentions', 'username');
+    await newPost.populate("author", "username avatar");
+    await newPost.populate("mentions", "username");
 
     res.status(201).json({
       success: true,
       message: "Post created successfully",
-      post: newPost
+      post: newPost,
     });
-
   } catch (error) {
     next(error);
   }
 };
 
-// Get personalized newsfeed
 export const getNewsfeed = async (req, res, next) => {
   try {
     const userId = req.user._id;
-    const { 
-      page = 1, 
-      limit = 20, 
-      algorithm = "mixed" // "chronological", "engagement", "mixed"
+    const {
+      page = 1,
+      limit = 20,
+      algorithm = "mixed",
+      feedType = "all",
     } = req.query;
 
     const skip = (page - 1) * limit;
 
-    // Get user's contacts for personalized feed
-    const currentUser = await UserModel.findById(userId).select('contacts');
+    const currentUser = await UserModel.findById(userId).select("contacts");
     const userContacts = currentUser.contacts || [];
 
-    let sortCriteria;
-    let matchCriteria = {
-      isHidden: false,
-      $or: [
-        { visibility: "public" },
-        { 
-          visibility: "contacts_only", 
-          $or: [
-            { author: { $in: userContacts } },
-            { author: userId }
-          ]
-        },
-        { visibility: "private", author: userId }
-      ]
-    };
+    let matchCriteria;
 
-    // Different feed algorithms
+    if (feedType === "friends") {
+      matchCriteria = {
+        isHidden: false,
+        $or: [
+          {
+            author: { $in: userContacts },
+            visibility: { $in: ["public", "contacts_only"] },
+          },
+
+          { author: userId },
+        ],
+      };
+    } else {
+      matchCriteria = {
+        isHidden: false,
+        $or: [
+          { visibility: "public" },
+          { visibility: "contacts_only", author: userId },
+          { visibility: "private", author: userId },
+        ],
+      };
+    }
+
+    let sortCriteria;
+
     switch (algorithm) {
       case "chronological":
         sortCriteria = { createdAt: -1 };
@@ -90,7 +89,6 @@ export const getNewsfeed = async (req, res, next) => {
         break;
       case "mixed":
       default:
-        // Mixed algorithm: boost posts from contacts and recent posts
         const pipeline = [
           { $match: matchCriteria },
           {
@@ -98,17 +96,17 @@ export const getNewsfeed = async (req, res, next) => {
               isFromContact: {
                 $cond: {
                   if: { $in: ["$author", userContacts] },
-                  then: 1.5, // Boost factor for contacts
-                  else: 1
-                }
+                  then: 1.5,
+                  else: 1,
+                },
               },
               recencyScore: {
                 $divide: [
                   { $subtract: [new Date(), "$createdAt"] },
-                  1000 * 60 * 60 * 24 // Convert to days
-                ]
-              }
-            }
+                  1000 * 60 * 60 * 24,
+                ],
+              },
+            },
           },
           {
             $addFields: {
@@ -116,46 +114,48 @@ export const getNewsfeed = async (req, res, next) => {
                 $multiply: [
                   "$engagementScore",
                   "$isFromContact",
-                  { $exp: { $multiply: ["$recencyScore", -0.1] } } // Decay over time
-                ]
-              }
-            }
+                  { $exp: { $multiply: ["$recencyScore", -0.1] } },
+                ],
+              },
+            },
           },
           { $sort: { finalScore: -1, createdAt: -1 } },
           { $skip: skip },
-          { $limit: parseInt(limit) }
+          { $limit: parseInt(limit) },
         ];
 
         const mixedPosts = await PostModel.aggregate(pipeline);
-        
-        // Populate the aggregated results
+
         const populatedMixedPosts = await PostModel.populate(mixedPosts, [
-          { path: 'author', select: 'username avatar isOnline lastSeen' },
-          { path: 'mentions', select: 'username' },
-          { path: 'likes.user', select: 'username' },
-          { path: 'comments.author', select: 'username avatar' }
+          { path: "author", select: "username avatar isOnline lastSeen" },
+          { path: "mentions", select: "username" },
+          { path: "likes.user", select: "username" },
+          { path: "comments.author", select: "username avatar" },
         ]);
 
         return res.json({
           success: true,
           posts: populatedMixedPosts,
+          feedType,
+          friendsCount: userContacts.length,
           pagination: {
             currentPage: parseInt(page),
-            totalPages: Math.ceil(await PostModel.countDocuments(matchCriteria) / limit),
-            hasNextPage: populatedMixedPosts.length === parseInt(limit)
-          }
+            totalPages: Math.ceil(
+              (await PostModel.countDocuments(matchCriteria)) / limit
+            ),
+            hasNextPage: populatedMixedPosts.length === parseInt(limit),
+          },
         });
     }
 
-    // For chronological and engagement algorithms
     const posts = await PostModel.find(matchCriteria)
       .sort(sortCriteria)
       .skip(skip)
       .limit(parseInt(limit))
-      .populate('author', 'username avatar isOnline lastSeen')
-      .populate('mentions', 'username')
-      .populate('likes.user', 'username')
-      .populate('comments.author', 'username avatar')
+      .populate("author", "username avatar isOnline lastSeen")
+      .populate("mentions", "username")
+      .populate("likes.user", "username")
+      .populate("comments.author", "username avatar")
       .lean();
 
     const totalPosts = await PostModel.countDocuments(matchCriteria);
@@ -163,19 +163,19 @@ export const getNewsfeed = async (req, res, next) => {
     res.json({
       success: true,
       posts,
+      feedType,
+      friendsCount: userContacts.length,
       pagination: {
         currentPage: parseInt(page),
         totalPages: Math.ceil(totalPosts / limit),
-        hasNextPage: posts.length === parseInt(limit)
-      }
+        hasNextPage: posts.length === parseInt(limit),
+      },
     });
-
   } catch (error) {
     next(error);
   }
 };
 
-// Get posts by a specific user
 export const getUserPosts = async (req, res, next) => {
   try {
     const { userId } = req.params;
@@ -184,52 +184,49 @@ export const getUserPosts = async (req, res, next) => {
 
     const skip = (page - 1) * limit;
 
-    // Check if current user can view this user's posts
-    const targetUser = await UserModel.findById(userId).select('contacts');
-    const currentUser = await UserModel.findById(currentUserId).select('contacts');
-    
+    const targetUser = await UserModel.findById(userId).select("contacts");
+    const currentUser = await UserModel.findById(currentUserId).select(
+      "contacts"
+    );
+
     if (!targetUser) {
       return res.status(404).json({
         success: false,
-        message: "User not found"
+        message: "User not found",
       });
     }
 
-    // Determine visibility based on relationship
     let visibilityFilter;
     if (userId === currentUserId.toString()) {
-      // Own posts - can see all
       visibilityFilter = {};
     } else if (currentUser.contacts.includes(userId)) {
-      // Contact - can see public and contacts_only
       visibilityFilter = {
-        visibility: { $in: ["public", "contacts_only"] }
+        visibility: { $in: ["public", "contacts_only"] },
       };
     } else {
-      // Stranger - only public posts
       visibilityFilter = {
-        visibility: "public"
+        visibility: "public",
       };
     }
 
     const posts = await PostModel.find({
       author: userId,
       isHidden: false,
-      ...visibilityFilter
+      ...visibilityFilter,
     })
       .sort({ createdAt: -1 })
       .skip(skip)
       .limit(parseInt(limit))
-      .populate('author', 'username avatar')
-      .populate('mentions', 'username')
-      .populate('likes.user', 'username')
-      .populate('comments.author', 'username avatar')
+      .populate("author", "username avatar")
+      .populate("mentions", "username")
+      .populate("likes.user", "username")
+      .populate("comments.author", "username avatar")
       .lean();
 
     const totalPosts = await PostModel.countDocuments({
       author: userId,
       isHidden: false,
-      ...visibilityFilter
+      ...visibilityFilter,
     });
 
     res.json({
@@ -238,54 +235,49 @@ export const getUserPosts = async (req, res, next) => {
       pagination: {
         currentPage: parseInt(page),
         totalPages: Math.ceil(totalPosts / limit),
-        hasNextPage: posts.length === parseInt(limit)
-      }
+        hasNextPage: posts.length === parseInt(limit),
+      },
     });
-
   } catch (error) {
     next(error);
   }
 };
 
-// Get a specific post by ID
 export const getPostById = async (req, res, next) => {
   try {
     const { postId } = req.params;
     const userId = req.user._id;
 
     const post = await PostModel.findById(postId)
-      .populate('author', 'username avatar isOnline lastSeen')
-      .populate('mentions', 'username')
-      .populate('likes.user', 'username')
-      .populate('comments.author', 'username avatar');
+      .populate("author", "username avatar isOnline lastSeen")
+      .populate("mentions", "username")
+      .populate("likes.user", "username")
+      .populate("comments.author", "username avatar");
 
     if (!post) {
       return res.status(404).json({
         success: false,
-        message: "Post not found"
+        message: "Post not found",
       });
     }
 
-    // Check if user can view this post
-    const currentUser = await UserModel.findById(userId).select('contacts');
+    const currentUser = await UserModel.findById(userId).select("contacts");
     if (!post.canUserView(userId, currentUser.contacts)) {
       return res.status(403).json({
         success: false,
-        message: "You don't have permission to view this post"
+        message: "You don't have permission to view this post",
       });
     }
 
     res.json({
       success: true,
-      post
+      post,
     });
-
   } catch (error) {
     next(error);
   }
 };
 
-// Update a post
 export const updatePost = async (req, res, next) => {
   try {
     const { postId } = req.params;
@@ -297,53 +289,50 @@ export const updatePost = async (req, res, next) => {
     if (!post) {
       return res.status(404).json({
         success: false,
-        message: "Post not found"
+        message: "Post not found",
       });
     }
 
-    // Only author can update their post
     if (post.author.toString() !== userId.toString()) {
       return res.status(403).json({
         success: false,
-        message: "You can only update your own posts"
+        message: "You can only update your own posts",
       });
     }
 
-    // Update mentions if content changed
     if (updates.content) {
       const mentionMatches = updates.content.match(/@(\w+)/g) || [];
-      const mentionUsernames = mentionMatches.map(match => match.slice(1));
-      
+      const mentionUsernames = mentionMatches.map((match) => match.slice(1));
+
       const mentionedUsers = await UserModel.find({
-        username: { $in: mentionUsernames }
-      }).select('_id');
-      
-      updates.mentions = mentionedUsers.map(user => user._id);
+        username: { $in: mentionUsernames },
+      }).select("_id");
+
+      updates.mentions = mentionedUsers.map((user) => user._id);
     }
 
-    // Clean hashtags
     if (updates.hashtags) {
-      updates.hashtags = updates.hashtags.map(tag => tag.toLowerCase().replace(/^#/, ''));
+      updates.hashtags = updates.hashtags.map((tag) =>
+        tag.toLowerCase().replace(/^#/, "")
+      );
     }
 
     Object.assign(post, updates);
     await post.save();
 
-    await post.populate('author', 'username avatar');
-    await post.populate('mentions', 'username');
+    await post.populate("author", "username avatar");
+    await post.populate("mentions", "username");
 
     res.json({
       success: true,
       message: "Post updated successfully",
-      post
+      post,
     });
-
   } catch (error) {
     next(error);
   }
 };
 
-// Delete a post
 export const deletePost = async (req, res, next) => {
   try {
     const { postId } = req.params;
@@ -354,15 +343,14 @@ export const deletePost = async (req, res, next) => {
     if (!post) {
       return res.status(404).json({
         success: false,
-        message: "Post not found"
+        message: "Post not found",
       });
     }
 
-    // Only author can delete their post
     if (post.author.toString() !== userId.toString()) {
       return res.status(403).json({
         success: false,
-        message: "You can only delete your own posts"
+        message: "You can only delete your own posts",
       });
     }
 
@@ -370,15 +358,13 @@ export const deletePost = async (req, res, next) => {
 
     res.json({
       success: true,
-      message: "Post deleted successfully"
+      message: "Post deleted successfully",
     });
-
   } catch (error) {
     next(error);
   }
 };
 
-// Like a post
 export const likePost = async (req, res, next) => {
   try {
     const { postId } = req.params;
@@ -389,16 +375,16 @@ export const likePost = async (req, res, next) => {
     if (!post) {
       return res.status(404).json({
         success: false,
-        message: "Post not found"
+        message: "Post not found",
       });
     }
 
     const liked = post.addLike(userId);
-    
+
     if (!liked) {
       return res.status(400).json({
         success: false,
-        message: "You have already liked this post"
+        message: "You have already liked this post",
       });
     }
 
@@ -407,15 +393,13 @@ export const likePost = async (req, res, next) => {
     res.json({
       success: true,
       message: "Post liked successfully",
-      likeCount: post.likes.length
+      likeCount: post.likes.length,
     });
-
   } catch (error) {
     next(error);
   }
 };
 
-// Unlike a post
 export const unlikePost = async (req, res, next) => {
   try {
     const { postId } = req.params;
@@ -426,16 +410,16 @@ export const unlikePost = async (req, res, next) => {
     if (!post) {
       return res.status(404).json({
         success: false,
-        message: "Post not found"
+        message: "Post not found",
       });
     }
 
     const unliked = post.removeLike(userId);
-    
+
     if (!unliked) {
       return res.status(400).json({
         success: false,
-        message: "You haven't liked this post"
+        message: "You haven't liked this post",
       });
     }
 
@@ -444,15 +428,13 @@ export const unlikePost = async (req, res, next) => {
     res.json({
       success: true,
       message: "Post unliked successfully",
-      likeCount: post.likes.length
+      likeCount: post.likes.length,
     });
-
   } catch (error) {
     next(error);
   }
 };
 
-// Add a comment to a post
 export const addComment = async (req, res, next) => {
   try {
     const { postId } = req.params;
@@ -464,40 +446,36 @@ export const addComment = async (req, res, next) => {
     if (!post) {
       return res.status(404).json({
         success: false,
-        message: "Post not found"
+        message: "Post not found",
       });
     }
 
-    // Extract mentions from comment
     const mentionMatches = content.match(/@(\w+)/g) || [];
-    const mentionUsernames = mentionMatches.map(match => match.slice(1));
-    
+    const mentionUsernames = mentionMatches.map((match) => match.slice(1));
+
     const mentionedUsers = await UserModel.find({
-      username: { $in: mentionUsernames }
-    }).select('_id');
-    
-    const mentions = mentionedUsers.map(user => user._id);
+      username: { $in: mentionUsernames },
+    }).select("_id");
+
+    const mentions = mentionedUsers.map((user) => user._id);
 
     post.addComment(userId, content, mentions);
     await post.save();
 
-    // Get the newly added comment with populated author
-    await post.populate('comments.author', 'username avatar');
+    await post.populate("comments.author", "username avatar");
     const newComment = post.comments[post.comments.length - 1];
 
     res.status(201).json({
       success: true,
       message: "Comment added successfully",
       comment: newComment,
-      commentCount: post.comments.length
+      commentCount: post.comments.length,
     });
-
   } catch (error) {
     next(error);
   }
 };
 
-// Delete a comment
 export const deleteComment = async (req, res, next) => {
   try {
     const { postId, commentId } = req.params;
@@ -508,7 +486,7 @@ export const deleteComment = async (req, res, next) => {
     if (!post) {
       return res.status(404).json({
         success: false,
-        message: "Post not found"
+        message: "Post not found",
       });
     }
 
@@ -517,16 +495,17 @@ export const deleteComment = async (req, res, next) => {
     if (!comment) {
       return res.status(404).json({
         success: false,
-        message: "Comment not found"
+        message: "Comment not found",
       });
     }
 
-    // Only comment author or post author can delete
-    if (comment.author.toString() !== userId.toString() && 
-        post.author.toString() !== userId.toString()) {
+    if (
+      comment.author.toString() !== userId.toString() &&
+      post.author.toString() !== userId.toString()
+    ) {
       return res.status(403).json({
         success: false,
-        message: "You can only delete your own comments"
+        message: "You can only delete your own comments",
       });
     }
 
@@ -537,15 +516,13 @@ export const deleteComment = async (req, res, next) => {
     res.json({
       success: true,
       message: "Comment deleted successfully",
-      commentCount: post.comments.length
+      commentCount: post.comments.length,
     });
-
   } catch (error) {
     next(error);
   }
 };
 
-// Search posts
 export const searchPosts = async (req, res, next) => {
   try {
     const { q, page = 1, limit = 20 } = req.query;
@@ -554,14 +531,13 @@ export const searchPosts = async (req, res, next) => {
     if (!q || q.trim().length < 2) {
       return res.status(400).json({
         success: false,
-        message: "Search query must be at least 2 characters"
+        message: "Search query must be at least 2 characters",
       });
     }
 
     const skip = (page - 1) * limit;
 
-    // Get user's contacts for visibility filtering
-    const currentUser = await UserModel.findById(userId).select('contacts');
+    const currentUser = await UserModel.findById(userId).select("contacts");
     const userContacts = currentUser.contacts || [];
 
     let matchCriteria = {
@@ -569,24 +545,20 @@ export const searchPosts = async (req, res, next) => {
       isHidden: false,
       $or: [
         { visibility: "public" },
-        { 
-          visibility: "contacts_only", 
-          $or: [
-            { author: { $in: userContacts } },
-            { author: userId }
-          ]
+        {
+          visibility: "contacts_only",
+          $or: [{ author: { $in: userContacts } }, { author: userId }],
         },
-        { visibility: "private", author: userId }
-      ]
+        { visibility: "private", author: userId },
+      ],
     };
-
 
     const posts = await PostModel.find(matchCriteria)
       .sort({ score: { $meta: "textScore" }, createdAt: -1 })
       .skip(skip)
       .limit(parseInt(limit))
-      .populate('author', 'username avatar')
-      .populate('mentions', 'username')
+      .populate("author", "username avatar")
+      .populate("mentions", "username")
       .lean();
 
     const totalPosts = await PostModel.countDocuments(matchCriteria);
@@ -597,16 +569,14 @@ export const searchPosts = async (req, res, next) => {
       pagination: {
         currentPage: parseInt(page),
         totalPages: Math.ceil(totalPosts / limit),
-        hasNextPage: posts.length === parseInt(limit)
-      }
+        hasNextPage: posts.length === parseInt(limit),
+      },
     });
-
   } catch (error) {
     next(error);
   }
 };
 
-// Get posts by hashtag
 export const getPostsByHashtag = async (req, res, next) => {
   try {
     const { hashtag } = req.params;
@@ -614,10 +584,9 @@ export const getPostsByHashtag = async (req, res, next) => {
     const userId = req.user._id;
 
     const skip = (page - 1) * limit;
-    const cleanHashtag = hashtag.toLowerCase().replace(/^#/, '');
+    const cleanHashtag = hashtag.toLowerCase().replace(/^#/, "");
 
-    // Get user's contacts for visibility filtering
-    const currentUser = await UserModel.findById(userId).select('contacts');
+    const currentUser = await UserModel.findById(userId).select("contacts");
     const userContacts = currentUser.contacts || [];
 
     const matchCriteria = {
@@ -625,23 +594,20 @@ export const getPostsByHashtag = async (req, res, next) => {
       isHidden: false,
       $or: [
         { visibility: "public" },
-        { 
-          visibility: "contacts_only", 
-          $or: [
-            { author: { $in: userContacts } },
-            { author: userId }
-          ]
+        {
+          visibility: "contacts_only",
+          $or: [{ author: { $in: userContacts } }, { author: userId }],
         },
-        { visibility: "private", author: userId }
-      ]
+        { visibility: "private", author: userId },
+      ],
     };
 
     const posts = await PostModel.find(matchCriteria)
       .sort({ createdAt: -1 })
       .skip(skip)
       .limit(parseInt(limit))
-      .populate('author', 'username avatar')
-      .populate('mentions', 'username')
+      .populate("author", "username avatar")
+      .populate("mentions", "username")
       .lean();
 
     const totalPosts = await PostModel.countDocuments(matchCriteria);
@@ -653,16 +619,14 @@ export const getPostsByHashtag = async (req, res, next) => {
       pagination: {
         currentPage: parseInt(page),
         totalPages: Math.ceil(totalPosts / limit),
-        hasNextPage: posts.length === parseInt(limit)
-      }
+        hasNextPage: posts.length === parseInt(limit),
+      },
     });
-
   } catch (error) {
     next(error);
   }
 };
 
-// Report a post
 export const reportPost = async (req, res, next) => {
   try {
     const { postId } = req.params;
@@ -673,14 +637,13 @@ export const reportPost = async (req, res, next) => {
     if (!post) {
       return res.status(404).json({
         success: false,
-        message: "Post not found"
+        message: "Post not found",
       });
     }
 
     post.reportCount += 1;
     post.isReported = true;
 
-    // Auto-hide posts with many reports
     if (post.reportCount >= 5) {
       post.isHidden = true;
     }
@@ -689,15 +652,13 @@ export const reportPost = async (req, res, next) => {
 
     res.json({
       success: true,
-      message: "Post reported successfully"
+      message: "Post reported successfully",
     });
-
   } catch (error) {
     next(error);
   }
 };
 
-// Increment view count
 export const incrementViewCount = async (req, res, next) => {
   try {
     const { postId } = req.params;
@@ -710,9 +671,148 @@ export const incrementViewCount = async (req, res, next) => {
 
     res.json({
       success: true,
-      message: "View count updated"
+      message: "View count updated",
+    });
+  } catch (error) {
+    next(error);
+  }
+};
+
+export const repostPost = async (req, res, next) => {
+  try {
+    const userId = req.user._id;
+    const { postId } = req.params;
+    const { comment = "" } = req.body;
+
+    const originalPost = await PostModel.findById(postId);
+    if (!originalPost) {
+      return res.status(404).json({
+        success: false,
+        message: "Post not found",
+      });
+    }
+
+    const existingRepost = await PostModel.findOne({
+      author: userId,
+      originalPost: postId,
+      isRepost: true,
     });
 
+    if (existingRepost) {
+      return res.status(400).json({
+        success: false,
+        message: "You have already reposted this post",
+      });
+    }
+
+    if (originalPost.author.toString() === userId.toString()) {
+      return res.status(400).json({
+        success: false,
+        message: "You cannot repost your own post",
+      });
+    }
+
+    const repost = new PostModel({
+      author: userId,
+      content: originalPost.content,
+      isRepost: true,
+      originalPost: postId,
+      repostComment: comment.trim(),
+      hashtags: originalPost.hashtags,
+      visibility: "public",
+    });
+
+    await repost.save();
+
+    await PostModel.findByIdAndUpdate(postId, {
+      $inc: { repostCount: 1 },
+      $push: {
+        reposts: {
+          user: userId,
+          comment: comment.trim(),
+          createdAt: new Date(),
+        },
+      },
+    });
+
+    await repost.populate("author", "username avatar");
+    await repost.populate("originalPost");
+    await repost.populate("originalPost.author", "username avatar");
+
+    res.status(201).json({
+      success: true,
+      message: "Post reposted successfully",
+      repost: repost,
+    });
+  } catch (error) {
+    next(error);
+  }
+};
+
+export const removeRepost = async (req, res, next) => {
+  try {
+    const userId = req.user._id;
+    const { postId } = req.params;
+
+    const repost = await PostModel.findOneAndDelete({
+      author: userId,
+      originalPost: postId,
+      isRepost: true,
+    });
+
+    if (!repost) {
+      return res.status(404).json({
+        success: false,
+        message: "Repost not found",
+      });
+    }
+
+    await PostModel.findByIdAndUpdate(postId, {
+      $inc: { repostCount: -1 },
+      $pull: { reposts: { user: userId } },
+    });
+
+    res.json({
+      success: true,
+      message: "Repost removed successfully",
+    });
+  } catch (error) {
+    next(error);
+  }
+};
+
+export const getPostReposts = async (req, res, next) => {
+  try {
+    const { postId } = req.params;
+    const { page = 1, limit = 20 } = req.query;
+
+    const skip = (page - 1) * limit;
+
+    const reposts = await PostModel.find({
+      originalPost: postId,
+      isRepost: true,
+    })
+      .sort({ createdAt: -1 })
+      .skip(skip)
+      .limit(parseInt(limit))
+      .populate("author", "username avatar")
+      .populate("originalPost")
+      .lean();
+
+    const totalReposts = await PostModel.countDocuments({
+      originalPost: postId,
+      isRepost: true,
+    });
+
+    res.json({
+      success: true,
+      reposts,
+      pagination: {
+        currentPage: parseInt(page),
+        totalPages: Math.ceil(totalReposts / limit),
+        hasNextPage: reposts.length === parseInt(limit),
+      },
+    });
   } catch (error) {
     next(error);
   }

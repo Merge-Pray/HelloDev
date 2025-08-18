@@ -43,7 +43,6 @@ const validate = (req, res, next) => {
   });
 };
 
-// Post validation rules
 const postValidationRules = () => {
   return [
     body("content")
@@ -57,31 +56,47 @@ const postValidationRules = () => {
       .isIn(["public", "contacts_only", "private"])
       .withMessage("Invalid visibility setting."),
 
-    // Hashtags validation
     body("hashtags")
       .optional()
       .isArray()
       .withMessage("Hashtags must be an array.")
       .custom((value) => {
-        return value.every(tag => 
-          typeof tag === 'string' && 
-          tag.length <= 50 && 
-          /^[a-zA-Z0-9_]+$/.test(tag.replace(/^#/, ''))
+        return value.every(
+          (tag) =>
+            typeof tag === "string" &&
+            tag.length <= 50 &&
+            /^[a-zA-Z0-9_]+$/.test(tag.replace(/^#/, ""))
         );
       })
-      .withMessage("Hashtags must be alphanumeric and under 50 characters each.")
+      .withMessage(
+        "Hashtags must be alphanumeric and under 50 characters each."
+      ),
   ];
 };
 
-// Comment validation rules
 const commentValidationRules = () => {
   return [
     body("content")
       .notEmpty()
       .withMessage("Comment content is required.")
       .isLength({ min: 1, max: 500 })
-      .withMessage("Comment must be between 1 and 500 characters.")
+      .withMessage("Comment must be between 1 and 500 characters."),
   ];
 };
 
-export { registerValidationRules, postValidationRules, commentValidationRules, validate };
+const repostValidationRules = () => {
+  return [
+    body("comment")
+      .optional()
+      .isLength({ max: 500 })
+      .withMessage("Repost comment must be less than 500 characters."),
+  ];
+};
+
+export {
+  registerValidationRules,
+  postValidationRules,
+  commentValidationRules,
+  repostValidationRules,
+  validate,
+};
