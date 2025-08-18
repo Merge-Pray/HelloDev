@@ -156,6 +156,8 @@ export const getNewsfeed = async (req, res, next) => {
       .populate("mentions", "username")
       .populate("likes.user", "username")
       .populate("comments.author", "username avatar")
+      .populate("originalPost") // For reposts
+      .populate("originalPost.author", "username avatar") // Critical: populate original post author
       .lean();
 
     const totalPosts = await PostModel.countDocuments(matchCriteria);
