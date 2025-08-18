@@ -27,8 +27,8 @@ postsRouter.use(authorizeJwt);
 postsRouter
   .post("/", postValidationRules(), validate, createPost)
   .get("/newsfeed", getNewsfeed)
-  .get("/user/:userId", getUserPosts)
   .get("/search", searchPosts)
+  .get("/user/:userId", getUserPosts)
   .get("/hashtag/:hashtag", getPostsByHashtag)
   .get("/:postId", getPostById)
   .put("/:postId", postValidationRules(), validate, updatePost)
@@ -43,4 +43,3 @@ postsRouter
   .post("/:postId/view", incrementViewCount)
   .post("/:postId/report", reportPost);
 
-export default postsRouter;
