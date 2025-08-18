@@ -1,21 +1,30 @@
-import React, { useState } from 'react';
-import { Heart, MessageCircle, Repeat, Share2 } from 'lucide-react';
-import RepostModal from './RepostModal';
-import { API_URL } from '../lib/config';
+import React, { useState } from "react";
+import { Heart, MessageCircle, Repeat, Share2 } from "lucide-react";
+import RepostModal from "./RepostModal";
+import { API_URL } from "../lib/config";
 
-export default function PostActions({ post, currentUser, onLike, onRepost, onToggleComments }) {
+export default function PostActions({
+  post,
+  currentUser,
+  onLike,
+  onRepost,
+  onToggleComments,
+}) {
   const [showRepostModal, setShowRepostModal] = useState(false);
   const [isLiked, setIsLiked] = useState(
-    post.likes?.some(like => like.user._id === currentUser?.userID) || false
+    post.likes?.some(
+      (like) =>
+        like.user._id === currentUser?._id || like.user === currentUser?._id
+    ) || false
   );
-  const [isReposted, setIsReposted] = useState(false); // TODO: Check if user already reposted
+  const [isReposted, setIsReposted] = useState(false); 
 
   const handleLike = async () => {
     try {
-      const endpoint = isLiked ? 'DELETE' : 'POST';
+      const endpoint = isLiked ? "DELETE" : "POST";
       const response = await fetch(`${API_URL}/api/posts/${post._id}/like`, {
         method: endpoint,
-        credentials: 'include'
+        credentials: "include",
       });
 
       const data = await response.json();
@@ -24,17 +33,17 @@ export default function PostActions({ post, currentUser, onLike, onRepost, onTog
         onLike(post._id, !isLiked, data.likeCount);
       }
     } catch (error) {
-      console.error('Error toggling like:', error);
+      console.error("Error toggling like:", error);
     }
   };
 
-  const handleRepost = async (comment = '') => {
+  const handleRepost = async (comment = "") => {
     try {
       const response = await fetch(`${API_URL}/api/posts/${post._id}/repost`, {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        credentials: 'include',
-        body: JSON.stringify({ comment })
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        credentials: "include",
+        body: JSON.stringify({ comment }),
       });
 
       const data = await response.json();
@@ -46,24 +55,37 @@ export default function PostActions({ post, currentUser, onLike, onRepost, onTog
         alert(data.message);
       }
     } catch (error) {
-      console.error('Error reposting:', error);
+      console.error("Error reposting:", error);
     }
   };
 
-  const handleShare = () => {
-    // Copy post URL to clipboard
-    const postUrl = `${window.location.origin}/post/${post._id}`;
-    navigator.clipboard.writeText(postUrl);
-    // TODO: Show toast notification
+  const handleShare = async () => {
+    try {
+      const postUrl = `${window.location.origin}/post/${post._id}`;
+      await navigator.clipboard.writeText(postUrl);
+
+      
+      alert("Post URL copied to clipboard!"); 
+    } catch (error) {
+      console.error("Failed to copy URL:", error);
+      
+      const textArea = document.createElement("textarea");
+      textArea.value = postUrl;
+      document.body.appendChild(textArea);
+      textArea.select();
+      document.execCommand("copy");
+      document.body.removeChild(textArea);
+      alert("Post URL copied to clipboard!");
+    }
   };
 
   return (
     <div className="post-actions">
-      <button 
-        className={`action-btn ${isLiked ? 'liked' : ''}`}
+      <button
+        className={`action-btn ${isLiked ? "liked" : ""}`}
         onClick={handleLike}
       >
-        <Heart size={20} fill={isLiked ? '#e11d48' : 'none'} />
+        <Heart size={20} fill={isLiked ? "#e11d48" : "none"} />
         <span>{post.likeCount || 0}</span>
       </button>
 
@@ -72,8 +94,8 @@ export default function PostActions({ post, currentUser, onLike, onRepost, onTog
         <span>{post.commentCount || 0}</span>
       </button>
 
-      <button 
-        className={`action-btn ${isReposted ? 'reposted' : ''}`}
+      <button
+        className={`action-btn ${isReposted ? "reposted" : ""}`}
         onClick={() => setShowRepostModal(true)}
         disabled={post.author._id === currentUser?.userID}
       >
