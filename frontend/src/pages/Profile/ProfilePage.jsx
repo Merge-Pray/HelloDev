@@ -20,14 +20,16 @@ import {
   Award,
   Zap,
   Target,
+  Wrench,
+  Briefcase,
 } from "lucide-react";
 import useUserStore from "../../hooks/userstore";
 import DarkMode from "../../components/DarkMode";
 import styles from "./profilepage.module.css";
 import { API_URL } from "../../lib/config";
+import { calculateProfileCompletion } from "../../utils/profileCompletion";
 
 export default function ProfilePage() {
-  // const { id } = useParams(); // Diese Zeile entfernen
   const { currentUser, setCurrentUser } = useUserStore();
   const [profileData, setProfileData] = useState({});
   const [isLoading, setIsLoading] = useState(true);
@@ -45,7 +47,6 @@ export default function ProfilePage() {
       setError(null);
 
       try {
-        // Nur eigene Daten abrufen - keine ID nötig
         const response = await fetch(`${API_URL}/api/user/user`, {
           method: "GET",
           headers: {
@@ -63,33 +64,7 @@ export default function ProfilePage() {
         }
 
         const data = await response.json();
-        console.log("Profile data received:", data);
-
-        const transformedData = {
-          country: data.user.country,
-          city: data.user.city,
-          status: data.user.status,
-          devExperience: data.user.devExperience,
-          techArea: data.user.techArea,
-          programmingLanguages: data.user.programmingLanguages,
-          techStack: data.user.techStack,
-          preferredOS: data.user.preferredOS,
-
-          age: data.user.age,
-          hideLocation: data.user.hideLocation || false,
-          hideAge: data.user.hideAge || false,
-          languages: data.user.languages,
-          gamingPreferences: data.user.gamingPreferences,
-          otherInterests: data.user.otherInterests,
-          aboutMe: data.user.aboutMe,
-          favoriteDrink: data.user.favoriteDrink,
-          musicGenre: data.user.musicGenreWhileCoding,
-          favoriteShow: data.user.favoriteShow,
-          codingTime: data.user.codingTime,
-        };
-
-        setProfileData(transformedData);
-
+        setProfileData(data.user);
         setCurrentUser({ ...currentUser, ...data.user });
       } catch (error) {
         console.error("Failed to fetch profile:", error);
@@ -162,10 +137,10 @@ export default function ProfilePage() {
 
   const hasCodingPreferences = () => {
     return (
-      profileData.favoriteDrink ||
-      profileData.musicGenre ||
-      profileData.favoriteShow ||
-      profileData.codingTime ||
+      profileData.favoriteDrinkWhileCoding ||
+      profileData.musicGenreWhileCoding ||
+      profileData.favoriteShowMovie ||
+      profileData.favoriteTimeToCode ||
       profileData.preferredOS
     );
   };
@@ -174,7 +149,10 @@ export default function ProfilePage() {
     return (
       <div className="card enhanced">
         <div className={styles.sectionHeader}>
-          <h3 className={styles.sectionTitle}>Personal Information</h3>
+          <div className={styles.sectionTitleContainer}>
+            <User size={20} className={styles.sectionIcon} />
+            <h3 className={styles.sectionTitle}>Personal Information</h3>
+          </div>
           <button
             className={`btn btn-secondary ${styles.editBtn}`}
             onClick={handleEditAdditional}
@@ -186,7 +164,7 @@ export default function ProfilePage() {
           {!profileData.hideLocation &&
             (profileData.country || profileData.city) && (
               <div className={styles.infoItem}>
-                <MapPin size={18} />
+                <MapPin size={18} className={styles.infoIcon} />
                 <span>
                   {[profileData.city, profileData.country]
                     .filter(Boolean)
@@ -196,13 +174,13 @@ export default function ProfilePage() {
             )}
           {!profileData.hideAge && profileData.age && (
             <div className={styles.infoItem}>
-              <Calendar size={18} />
+              <Calendar size={18} className={styles.infoIcon} />
               <span>{profileData.age} years old</span>
             </div>
           )}
           {hasData(profileData.languages) && (
             <div className={styles.infoItem}>
-              <Globe size={18} />
+              <Globe size={18} className={styles.infoIcon} />
               <span>Speaks {profileData.languages.slice(0, 3).join(", ")}</span>
             </div>
           )}
@@ -215,7 +193,10 @@ export default function ProfilePage() {
     return (
       <div className={`card enhanced ${styles.aboutSection}`}>
         <div className={styles.sectionHeader}>
-          <h3 className={styles.sectionTitle}>About Me</h3>
+          <div className={styles.sectionTitleContainer}>
+            <User size={20} className={styles.sectionIcon} />
+            <h3 className={styles.sectionTitle}>About Me</h3>
+          </div>
           <button
             className={`btn btn-secondary ${styles.editBtn}`}
             onClick={handleEditAdditional}
@@ -243,12 +224,27 @@ export default function ProfilePage() {
     emptyText,
     isBasic = false
   ) => {
-    const skills = Array.isArray(data) ? data : [];
+    if (!hasData(data)) {
+      return (
+        <div className={`card ${isBasic ? "basic" : "enhanced"}`}>
+          <div className={styles.sectionHeader}>
+            <div className={styles.sectionTitleContainer}>
+              {icon}
+              <h3 className={styles.sectionTitle}>{title}</h3>
+            </div>
+          </div>
+          <p className={styles.emptyState}>{emptyText}</p>
+        </div>
+      );
+    }
 
     return (
-      <div className="card enhanced">
+      <div className={`card ${isBasic ? "basic" : "enhanced"}`}>
         <div className={styles.sectionHeader}>
-          <h3 className={styles.sectionTitle}>{title}</h3>
+          <div className={styles.sectionTitleContainer}>
+            {icon}
+            <h3 className={styles.sectionTitle}>{title}</h3>
+          </div>
           <button
             className={`btn btn-secondary ${styles.editBtn}`}
             onClick={isBasic ? handleEditProfile : handleEditAdditional}
@@ -256,21 +252,18 @@ export default function ProfilePage() {
             <Edit3 size={16} />
           </button>
         </div>
-        <div className={styles.skillsContainer}>
-          {skills.length > 0 ? (
-            <div className={styles.skillsGrid}>
-              {skills.map((skill, index) => (
-                <div key={index} className={styles.skillTag}>
-                  {icon}
-                  <span>{skill}</span>
-                </div>
+        <div className={styles.skillsGrid}>
+          {Array.isArray(data)
+            ? data.map((item, index) => (
+                <span key={index} className={styles.skillTag}>
+                  {item}
+                </span>
+              ))
+            : data.split(",").map((item, index) => (
+                <span key={index} className={styles.skillTag}>
+                  {item.trim()}
+                </span>
               ))}
-            </div>
-          ) : (
-            <div className={styles.emptyState}>
-              <span>{emptyText}</span>
-            </div>
-          )}
         </div>
       </div>
     );
@@ -281,25 +274,26 @@ export default function ProfilePage() {
     if (!level) return null;
 
     const getLevelStyle = () => {
-      if (level.includes("Beginner")) return styles.levelBeginner;
-      if (level.includes("Intermediate")) return styles.levelIntermediate;
-      if (level.includes("Advanced") || level.includes("Expert"))
-        return styles.levelExpert;
+      if (level.includes("beginner")) return styles.levelBeginner;
+      if (level.includes("intermediate")) return styles.levelIntermediate;
+      if (level.includes("expert")) return styles.levelExpert;
       return styles.levelBeginner;
     };
 
     const getLevelIcon = () => {
-      if (level.includes("Beginner")) return <Zap size={18} />;
-      if (level.includes("Intermediate")) return <Target size={18} />;
-      if (level.includes("Advanced") || level.includes("Expert"))
-        return <Award size={18} />;
+      if (level.includes("beginner")) return <Zap size={18} />;
+      if (level.includes("intermediate")) return <Target size={18} />;
+      if (level.includes("expert")) return <Award size={18} />;
       return <Zap size={18} />;
     };
 
     return (
       <div className="card enhanced">
         <div className={styles.sectionHeader}>
-          <h3 className={styles.sectionTitle}>Experience Level</h3>
+          <div className={styles.sectionTitleContainer}>
+            <Briefcase size={20} className={styles.sectionIcon} />
+            <h3 className={styles.sectionTitle}>Experience Level</h3>
+          </div>
           <button
             className={`btn btn-secondary ${styles.editBtn}`}
             onClick={handleEditProfile}
@@ -310,7 +304,9 @@ export default function ProfilePage() {
         <div className={styles.experienceBadge}>
           <div className={`${styles.levelBadge} ${getLevelStyle()}`}>
             {getLevelIcon()}
-            <span>{level}</span>
+            <span className={styles.levelText}>
+              {level.charAt(0).toUpperCase() + level.slice(1)}
+            </span>
           </div>
         </div>
       </div>
@@ -323,7 +319,10 @@ export default function ProfilePage() {
     return (
       <div className="card enhanced">
         <div className={styles.sectionHeader}>
-          <h3 className={styles.sectionTitle}>Coding Preferences</h3>
+          <div className={styles.sectionTitleContainer}>
+            <Settings size={20} className={styles.sectionIcon} />
+            <h3 className={styles.sectionTitle}>Coding Preferences</h3>
+          </div>
           <button
             className={`btn btn-secondary ${styles.editBtn}`}
             onClick={handleEditAdditional}
@@ -332,49 +331,53 @@ export default function ProfilePage() {
           </button>
         </div>
         <div className={styles.preferencesGrid}>
-          {profileData.favoriteDrink && (
+          {profileData.favoriteDrinkWhileCoding && (
             <div className={styles.prefItem}>
-              <Coffee size={18} />
+              <Coffee size={18} className={styles.prefIcon} />
               <div>
                 <div className={styles.prefLabel}>Favorite Drink</div>
                 <div className={styles.prefValue}>
-                  {profileData.favoriteDrink}
+                  {profileData.favoriteDrinkWhileCoding}
                 </div>
               </div>
             </div>
           )}
-          {profileData.musicGenre && (
+          {profileData.musicGenreWhileCoding && (
             <div className={styles.prefItem}>
-              <Music size={18} />
+              <Music size={18} className={styles.prefIcon} />
               <div>
                 <div className={styles.prefLabel}>Music Genre</div>
-                <div className={styles.prefValue}>{profileData.musicGenre}</div>
+                <div className={styles.prefValue}>
+                  {profileData.musicGenreWhileCoding}
+                </div>
               </div>
             </div>
           )}
-          {profileData.favoriteShow && (
+          {profileData.favoriteShowMovie && (
             <div className={styles.prefItem}>
-              <Tv size={18} />
+              <Tv size={18} className={styles.prefIcon} />
               <div>
                 <div className={styles.prefLabel}>Favorite Show</div>
                 <div className={styles.prefValue}>
-                  {profileData.favoriteShow}
+                  {profileData.favoriteShowMovie}
                 </div>
               </div>
             </div>
           )}
-          {profileData.codingTime && (
+          {profileData.favoriteTimeToCode && (
             <div className={styles.prefItem}>
-              <Clock size={18} />
+              <Clock size={18} className={styles.prefIcon} />
               <div>
                 <div className={styles.prefLabel}>Coding Time</div>
-                <div className={styles.prefValue}>{profileData.codingTime}</div>
+                <div className={styles.prefValue}>
+                  {profileData.favoriteTimeToCode}
+                </div>
               </div>
             </div>
           )}
           {profileData.preferredOS && (
             <div className={styles.prefItem}>
-              <Monitor size={18} />
+              <Monitor size={18} className={styles.prefIcon} />
               <div>
                 <div className={styles.prefLabel}>Preferred OS</div>
                 <div className={styles.prefValue}>
@@ -389,63 +392,67 @@ export default function ProfilePage() {
   };
 
   const renderStats = () => {
-    const basicFields = [
-      profileData.country,
-      profileData.city,
-      profileData.status,
-      profileData.devExperience,
-      profileData.techArea,
-      profileData.programmingLanguages,
-      profileData.techStack,
-      profileData.preferredOS,
-    ].filter(Boolean);
-
-    const additionalFields = [
-      profileData.age,
-      profileData.languages,
-      profileData.gamingPreferences,
-      profileData.otherInterests,
-      profileData.aboutMe,
-      profileData.favoriteDrink,
-      profileData.musicGenre,
-      profileData.favoriteShow,
-      profileData.codingTime,
-    ].filter((field) => hasData(field));
-
-    const totalFields = 17; // Total possible fields
-    const completedFields = basicFields.length + additionalFields.length;
+    const profileStats = calculateProfileCompletion(profileData);
 
     const stats = [
       {
         label: "Languages",
         value: profileData.programmingLanguages?.length || 0,
+        icon: <Code size={16} />,
       },
       {
         label: "Tech Stack",
         value: profileData.techStack?.length || 0,
+        icon: <Wrench size={16} />,
       },
       {
         label: "Interests",
         value: profileData.techArea?.length || 0,
+        icon: <Heart size={16} />,
       },
       {
         label: "Profile Complete",
-        value: `${Math.round((completedFields / totalFields) * 100)}%`,
+        value: `${profileStats.totalCompletion}%`,
+        icon: <Target size={16} />,
       },
     ];
 
     return (
       <div className={`card enhanced ${styles.statsSection}`}>
-        <h3 className={styles.sectionTitle} style={{ color: "white" }}>
-          Profile Stats
-        </h3>
+        <div className={styles.sectionHeader}>
+          <div className={styles.sectionTitleContainer}>
+            <Award size={20} className={styles.sectionIcon} />
+            <h3 className={styles.sectionTitle}>Profile Stats</h3>
+          </div>
+        </div>
         <div className={styles.statsGrid}>
           {stats.map((stat, index) => (
             <div key={index} className={styles.statItem}>
+              <div className={styles.statIconContainer}>{stat.icon}</div>
               <div className={styles.statNumber}>{stat.value}</div>
               <div className={styles.statLabel}>{stat.label}</div>
             </div>
           ))}
+        </div>
+        <div className={styles.matchingStatus}>
+          {profileStats.isMatchable ? (
+            <span className={styles.matchingEnabled}>
+              ✅ You are able to match! (
+              {profileStats.completedRequiredFieldsCount}/
+              {profileStats.totalRequiredFieldsCount} required fields)
+            </span>
+          ) : (
+            <span className={styles.matchingDisabled}>
+              ❌ {profileStats.missingRequiredFields} required fields missing to
+              match
+            </span>
+          )}
+        </div>
+        <div className={styles.profileProgress}>
+          <small>
+            {profileStats.completedFieldsCount} of{" "}
+            {profileStats.totalFieldsCount} total profile fields completed
+          </small>
         </div>
       </div>
     );
@@ -456,13 +463,23 @@ export default function ProfilePage() {
     return (
       <div className="page centered">
         <div className="card enhanced">
-          <h1 className="title">Complete Your Profile</h1>
-          <p className="subtitle">
-            Let's set up your basic profile information
-          </p>
-          <button className="btn btn-primary" onClick={handleEditProfile}>
-            Start Profile Setup
-          </button>
+          <div style={{ textAlign: "center", padding: "40px" }}>
+            <User
+              size={48}
+              style={{
+                color: "var(--color-primary)",
+                marginBottom: "20px",
+              }}
+            />
+            <h1 className="title">Complete Your Profile</h1>
+            <p className="subtitle">
+              Let's set up your basic profile information
+            </p>
+            <button className="btn btn-primary" onClick={handleEditProfile}>
+              <Plus size={16} />
+              Start Profile Setup
+            </button>
+          </div>
         </div>
       </div>
     );
@@ -480,7 +497,7 @@ export default function ProfilePage() {
           </div>
 
           <div className={styles.avatar}>
-            {currentUser?.username?.charAt(0)?.toUpperCase() || "U"}
+            <User size={32} />
           </div>
 
           <h1 className={`title ${styles.profileName}`}>
@@ -501,19 +518,16 @@ export default function ProfilePage() {
         </div>
 
         <div className={styles.profileContent}>
-          {/* Always show About Me section */}
           {renderAboutMe()}
 
-          {/* Show personal info if exists */}
           {hasPersonalInfo() && renderPersonalInfo()}
 
-          {/* Basic profile sections */}
           {renderExperienceLevel()}
 
           {hasData(profileData.programmingLanguages) &&
             renderSkillSection(
               "Programming Languages",
-              <Code size={14} />,
+              <Code size={20} className={styles.sectionIcon} />,
               profileData.programmingLanguages,
               "No programming languages added yet",
               true
@@ -522,7 +536,7 @@ export default function ProfilePage() {
           {hasData(profileData.techStack) &&
             renderSkillSection(
               "Tech Stack & Tools",
-              <Zap size={14} />,
+              <Wrench size={20} className={styles.sectionIcon} />,
               profileData.techStack,
               "No tech stack added yet",
               true
@@ -531,38 +545,35 @@ export default function ProfilePage() {
           {hasData(profileData.techArea) &&
             renderSkillSection(
               "Tech Interests",
-              <Heart size={14} />,
+              <Heart size={20} className={styles.sectionIcon} />,
               profileData.techArea,
               "No tech interests added yet",
               true
             )}
 
-          {/* Additional profile sections */}
-          {hasData(profileData.gamingPreferences) &&
+          {hasData(profileData.gaming) &&
             renderSkillSection(
               "Gaming Preferences",
-              <Gamepad2 size={14} />,
-              profileData.gamingPreferences,
+              <Gamepad2 size={20} className={styles.sectionIcon} />,
+              profileData.gaming, // ✅ Korrekt: "gaming" statt "gamingPreferences"
               "No gaming preferences added yet"
             )}
 
           {hasData(profileData.otherInterests) &&
             renderSkillSection(
               "Other Interests",
-              <Users size={14} />,
+              <Users size={20} className={styles.sectionIcon} />,
               profileData.otherInterests,
               "No other interests added yet"
             )}
 
           {hasCodingPreferences() && renderCodingPreferences()}
 
-          {/* Stats Section */}
           {renderStats()}
 
-          {/* Add More Section */}
           <div className={styles.addMoreSection} onClick={handleEditAdditional}>
             <div className={styles.addMoreContent}>
-              <Plus size={32} />
+              <Plus size={32} className={styles.addMoreIcon} />
               <div className={styles.addMoreText}>
                 Add Additional Information
               </div>
