@@ -3,7 +3,7 @@ import { useNavigate } from "react-router";
 import { useForm } from "react-hook-form";
 import { Eye, EyeOff } from "lucide-react";
 import useUserStore from "../../hooks/userstore";
-import styles from "./RegisterPage.module.css";
+import styles from "./registerpage.module.css";
 import { API_URL } from "../../lib/config";
 
 export default function RegisterPage() {
