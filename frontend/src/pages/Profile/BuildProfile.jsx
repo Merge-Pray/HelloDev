@@ -3,7 +3,7 @@ import { useNavigate } from "react-router";
 import { useForm } from "react-hook-form";
 import { ArrowLeft, ArrowRight, Check, X } from "lucide-react";
 import useUserStore from "../../hooks/userstore";
-import styles from "./BuildProfile.module.css";
+import styles from "./buildprofile.module.css";
 import { API_URL } from "../../lib/config";
 
 const ONBOARDING_STEPS = [
