@@ -39,7 +39,7 @@ app.use(
     optionsSuccessStatus: 200,
   })
 );
-app.options("*", cors());
+app.options("/(.*)", cors());
 
 app.use("/api/user", userRouter);
 app.use("/api/posts", postsRouter);
