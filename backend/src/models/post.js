@@ -16,76 +16,6 @@ const PostSchema = new Schema(
       trim: true,
     },
 
-    postType: {
-      type: String,
-      enum: ["text", "project", "help_request", "achievement", "match_announcement"],
-      default: "text",
-      index: true,
-    },
-
-    // For project posts
-    projectDetails: {
-      title: {
-        type: String,
-        maxlength: 200,
-      },
-      description: {
-        type: String,
-        maxlength: 1000,
-      },
-      techStack: [{
-        type: String,
-      }],
-      lookingFor: [{
-        type: String,
-        enum: ["frontend", "backend", "fullstack", "designer", "mentor", "tester"],
-      }],
-      projectUrl: {
-        type: String,
-        validate: {
-          validator: function(v) {
-            return !v || /^https?:\/\/.+/.test(v);
-          },
-          message: "Project URL must be a valid HTTP/HTTPS URL"
-        }
-      },
-    },
-
-    // For help requests
-    helpRequest: {
-      title: {
-        type: String,
-        maxlength: 200,
-      },
-      techArea: [{
-        type: String,
-      }],
-      urgency: {
-        type: String,
-        enum: ["low", "medium", "high"],
-        default: "medium",
-      },
-      isResolved: {
-        type: Boolean,
-        default: false,
-      },
-    },
-
-    // For achievements
-    achievement: {
-      type: {
-        type: String,
-        enum: ["new_skill", "project_completed", "certification", "job_change", "milestone"],
-      },
-      title: {
-        type: String,
-        maxlength: 200,
-      },
-      description: {
-        type: String,
-        maxlength: 500,
-      },
-    },
 
     // @mentions in the post
     mentions: [{
@@ -192,12 +122,9 @@ const PostSchema = new Schema(
 // Indexes for performance
 PostSchema.index({ author: 1, createdAt: -1 });
 PostSchema.index({ createdAt: -1, visibility: 1 });
-PostSchema.index({ postType: 1, createdAt: -1 });
 PostSchema.index({ hashtags: 1, createdAt: -1 });
 PostSchema.index({ mentions: 1, createdAt: -1 });
 PostSchema.index({ engagementScore: -1, createdAt: -1 });
-PostSchema.index({ "projectDetails.techStack": 1, postType: 1 });
-PostSchema.index({ "helpRequest.techArea": 1, "helpRequest.isResolved": 1 });
 
 // Compound index for newsfeed queries
 PostSchema.index({ 
@@ -209,10 +136,6 @@ PostSchema.index({
 // Text search index for content and hashtags
 PostSchema.index({
   content: "text",
-  "projectDetails.title": "text",
-  "projectDetails.description": "text",
-  "helpRequest.title": "text",
-  "achievement.title": "text",
   hashtags: "text"
 });
 

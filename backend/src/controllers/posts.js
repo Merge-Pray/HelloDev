@@ -7,10 +7,6 @@ export const createPost = async (req, res, next) => {
     const userId = req.user._id;
     const {
       content,
-      postType = "text",
-      projectDetails,
-      helpRequest,
-      achievement,
       hashtags = [],
       visibility = "public"
     } = req.body;
@@ -30,10 +26,6 @@ export const createPost = async (req, res, next) => {
     const newPost = new PostModel({
       author: userId,
       content: content.trim(),
-      postType,
-      projectDetails: postType === "project" ? projectDetails : undefined,
-      helpRequest: postType === "help_request" ? helpRequest : undefined,
-      achievement: postType === "achievement" ? achievement : undefined,
       mentions,
       hashtags: hashtags.map(tag => tag.toLowerCase().replace(/^#/, '')),
       visibility
@@ -556,7 +548,7 @@ export const deleteComment = async (req, res, next) => {
 // Search posts
 export const searchPosts = async (req, res, next) => {
   try {
-    const { q, postType, page = 1, limit = 20 } = req.query;
+    const { q, page = 1, limit = 20 } = req.query;
     const userId = req.user._id;
 
     if (!q || q.trim().length < 2) {
@@ -588,9 +580,6 @@ export const searchPosts = async (req, res, next) => {
       ]
     };
 
-    if (postType) {
-      matchCriteria.postType = postType;
-    }
 
     const posts = await PostModel.find(matchCriteria)
       .sort({ score: { $meta: "textScore" }, createdAt: -1 })
