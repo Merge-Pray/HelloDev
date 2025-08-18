@@ -23,23 +23,23 @@ export const postsRouter = express.Router();
 // All routes require authentication
 postsRouter.use(authorizeJwt);
 
-// Post CRUD operations
-postsRouter
-  .post("/", postValidationRules(), validate, createPost)
-  .get("/newsfeed", getNewsfeed)
-  .get("/search", searchPosts)
-  .get("/user/:userId", getUserPosts)
-  .get("/hashtag/:hashtag", getPostsByHashtag)
-  .get("/:postId", getPostById)
-  .put("/:postId", postValidationRules(), validate, updatePost)
-  .delete("/:postId", deletePost);
+// Specific routes first (before generic :postId routes)
+postsRouter.post("/", postValidationRules(), validate, createPost);
+postsRouter.get("/newsfeed", getNewsfeed);
+postsRouter.get("/search", searchPosts);
+postsRouter.get("/user/:userId", getUserPosts);
+postsRouter.get("/hashtag/:hashtag", getPostsByHashtag);
 
-// Post interactions
-postsRouter
-  .post("/:postId/like", likePost)
-  .delete("/:postId/like", unlikePost)
-  .post("/:postId/comments", commentValidationRules(), validate, addComment)
-  .delete("/:postId/comments/:commentId", deleteComment)
-  .post("/:postId/view", incrementViewCount)
-  .post("/:postId/report", reportPost);
+// Post interactions (specific paths before generic :postId)
+postsRouter.post("/:postId/like", likePost);
+postsRouter.delete("/:postId/like", unlikePost);
+postsRouter.post("/:postId/comments", commentValidationRules(), validate, addComment);
+postsRouter.delete("/:postId/comments/:commentId", deleteComment);
+postsRouter.post("/:postId/view", incrementViewCount);
+postsRouter.post("/:postId/report", reportPost);
+
+// Generic :postId routes last
+postsRouter.get("/:postId", getPostById);
+postsRouter.put("/:postId", postValidationRules(), validate, updatePost);
+postsRouter.delete("/:postId", deletePost);
 
