@@ -1,0 +1,53 @@
+/* src/pages/Home.module.css */
+.page {
+  --bg: #140e1a;
+  --panel: #1b1324;
+  --border: rgba(255,255,255,0.06);
+
+  display: grid;
+  grid-template-columns: 260px 1fr 360px; /* menu | feed | sidebar */
+  gap: 24px;
+  min-height: 100vh;
+  background: var(--bg);
+  color: #eee;
+  padding: 24px;
+  box-sizing: border-box;
+}
+
+/* Bereiche */
+.left   { background: var(--panel); border: 1px solid var(--border); border-radius: 16px; }
+.center { background: var(--panel); border: 1px solid var(--border); border-radius: 16px; }
+.right  { background: var(--panel); border: 1px solid var(--border); border-radius: 16px; }
+
+/* Innenabstände */
+.left, .center, .right { padding: 16px; }
+
+/* ---------- Breakpoints ---------- */
+
+/* < 1200px: Sidebar ausblenden */
+@media (max-width: 1200px) {
+  .page {
+    grid-template-columns: 260px 1fr;
+  }
+  .right {
+    display: none;
+  }
+}
+
+/* < 900px: Menü schmal, nur Icons (Breite 76px) */
+@media (max-width: 900px) {
+  .page {
+    grid-template-columns: 76px 1fr;
+    gap: 16px;
+    padding: 16px;
+  }
+}
+
+/* < 520px: etwas kompakter */
+@media (max-width: 520px) {
+  .page {
+    gap: 12px;
+    padding: 12px;
+  }
+  .center { padding: 12px; }
+}
