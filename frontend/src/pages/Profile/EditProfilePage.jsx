@@ -1,7 +1,7 @@
 import { useState, useEffect } from "react";
 import { useNavigate } from "react-router";
 import { useForm } from "react-hook-form";
-import { Save, X, Edit3, Check, AlertCircle } from "lucide-react";
+import { Save, X, Edit3, Check, AlertCircle, Gamepad2 } from "lucide-react";
 import useUserStore from "../../hooks/userstore";
 import { API_URL } from "../../lib/config";
 import DarkMode from "../../components/DarkMode";
@@ -27,7 +27,6 @@ const EditProfilePage = () => {
     formState: { errors },
   } = useForm();
 
-  // Fetch user profile data
   useEffect(() => {
     const fetchProfileData = async () => {
       if (!currentUser) {
@@ -51,7 +50,6 @@ const EditProfilePage = () => {
         const data = await response.json();
         setProfileData(data.user);
 
-        // Set form values
         Object.keys(data.user).forEach((key) => {
           if (data.user[key] !== null && data.user[key] !== undefined) {
             setValue(key, data.user[key]);
@@ -68,31 +66,13 @@ const EditProfilePage = () => {
     fetchProfileData();
   }, [currentUser, navigate, setValue]);
 
-  // Separater useEffect für Form-Updates
   useEffect(() => {
     if (profileData && Object.keys(profileData).length > 0) {
-      Object.keys(profileData).forEach((key) => {
-        if (profileData[key] !== null && profileData[key] !== undefined) {
-          const currentValue = watch(key);
-          // Nur setzen wenn sich der Wert geändert hat
-          if (currentValue !== profileData[key]) {
-            setValue(key, profileData[key]);
-          }
-        }
-      });
-    }
-  }, [profileData, setValue, watch]);
-
-  // NEUER useEffect für Checkbox-Werte
-  useEffect(() => {
-    if (profileData && Object.keys(profileData).length > 0) {
-      // Setze Array-Felder separat
       const arrayFields = [
         "programmingLanguages",
         "techArea",
         "techStack",
         "languages",
-        "gaming",
         "otherInterests",
       ];
 
@@ -102,7 +82,6 @@ const EditProfilePage = () => {
         }
       });
 
-      // Setze andere Felder
       Object.keys(profileData).forEach((key) => {
         if (
           profileData[key] !== null &&
@@ -115,7 +94,6 @@ const EditProfilePage = () => {
     }
   }, [profileData, setValue]);
 
-  // VERBESSERTE Save-Funktion
   const saveSection = async (sectionData, sectionName) => {
     setIsSaving(true);
     setError(null);
@@ -257,31 +235,25 @@ const EditProfilePage = () => {
     </div>
   );
 
-  // SPEZIELLER Gaming Handler (da es String ist, nicht Array)
   const renderGamingSection = () => (
     <div className={styles.formSection}>
-      {renderSectionHeader("Gaming Preferences", "gaming")}
+      {renderSectionHeader("Gaming Preferences", "gaming")}{" "}
       <div className={styles.radioGroup}>
         {[
-          "PC Gaming",
-          "Console Gaming (PlayStation)",
-          "Console Gaming (Xbox)",
-          "Console Gaming (Nintendo)",
-          "Mobile Gaming",
-          "Board Games",
-          "Card Games",
-          "Retro Gaming",
-          "VR Gaming",
+          { value: "none", label: "No Gaming" },
+          { value: "pc", label: "PC Gaming" },
+          { value: "console", label: "Console Gaming" },
+          { value: "mobile", label: "Mobile Gaming" },
+          { value: "board", label: "Board Games" },
         ].map((option) => (
-          <label key={option} className={styles.radioLabel}>
-            <Gamepad2 size={16} className={styles.fieldIcon} />
+          <label key={option.value} className={styles.radioLabel}>
             <input
               type="radio"
-              value={option}
+              value={option.value}
               {...register("gaming")}
               disabled={!editingSections.gaming}
             />
-            {option}
+            {option.label}
           </label>
         ))}
       </div>
@@ -309,6 +281,7 @@ const EditProfilePage = () => {
         data.programmingLanguages = Array.isArray(formData.programmingLanguages)
           ? formData.programmingLanguages
           : [];
+        console.log("Saving programming languages:", data.programmingLanguages);
         break;
       case "interests":
         data.techArea = Array.isArray(formData.techArea)
@@ -329,9 +302,7 @@ const EditProfilePage = () => {
         data.preferredOS = formData.preferredOS;
         break;
       case "gaming":
-        // ✅ Gaming ist String, nicht Array
         data.gaming = formData.gaming || "";
-        console.log("Gaming data being saved:", data.gaming);
         break;
       case "other":
         data.otherInterests = Array.isArray(formData.otherInterests)
@@ -349,7 +320,6 @@ const EditProfilePage = () => {
         return formData;
     }
 
-    // Entferne undefined/null Werte
     Object.keys(data).forEach((key) => {
       if (data[key] === undefined || data[key] === null) {
         delete data[key];
@@ -496,16 +466,40 @@ const EditProfilePage = () => {
               {option}
             </label>
           ))}
+
+          {sectionKey === "techArea" && (
+            <label className={styles.checkboxLabel}>
+              <input
+                type="checkbox"
+                value="other"
+                checked={watchedValues.includes("other")}
+                {...register(
+                  fieldName,
+                  required
+                    ? {
+                        required: `At least one ${title.toLowerCase()} is required`,
+                      }
+                    : {}
+                )}
+                disabled={!editingSections[sectionKey]}
+                onChange={(e) => {
+                  const currentValues = watchedValues || [];
+                  if (e.target.checked) {
+                    setValue(fieldName, [...currentValues, "other"]);
+                  } else {
+                    setValue(
+                      fieldName,
+                      currentValues.filter((v) => v !== "other")
+                    );
+                  }
+                }}
+              />
+              Other
+            </label>
+          )}
         </div>
         {required && errors[fieldName] && (
           <span className={styles.error}>{errors[fieldName].message}</span>
-        )}
-
-        {/* DEBUG: Zeige aktuelle Werte an */}
-        {process.env.NODE_ENV === "development" && (
-          <div style={{ fontSize: "12px", color: "gray", marginTop: "10px" }}>
-            Debug - Current {fieldName}: {JSON.stringify(watchedValues)}
-          </div>
         )}
       </div>
     );
@@ -589,133 +583,160 @@ const EditProfilePage = () => {
     </div>
   );
 
-  const renderCurrentSection = () => {
-    switch (activeSection) {
-      case "personal":
-        return renderPersonalSection();
-      case "experience":
-        return renderExperienceSection();
-      case "languages":
-        return renderMultiSelectSection(
-          "Programming Languages",
-          "programmingLanguages",
-          [
-            "JavaScript",
-            "Python",
-            "Java",
-            "C++",
-            "C#",
-            "TypeScript",
-            "PHP",
-            "Ruby",
-            "Go",
-            "Rust",
-            "Swift",
-            "Kotlin",
-            "C",
-            "Scala",
-            "Dart",
-          ],
-          "languages",
-          true
-        );
-      case "interests":
-        return renderMultiSelectSection(
-          "Tech Areas of Interest",
-          "techArea",
-          [
-            "Web Development",
-            "Mobile Development",
-            "Game Development",
-            "AI/Machine Learning",
-            "Data Science",
-            "DevOps",
-            "Cybersecurity",
-            "Cloud Computing",
-            "Blockchain",
-            "IoT",
-            "AR/VR",
-            "Robotics",
-          ],
-          "interests",
-          true
-        );
-      case "stack":
-        return renderMultiSelectSection(
-          "Tech Stack & Tools",
-          "techStack",
-          [
-            "React",
-            "Vue.js",
-            "Angular",
-            "Node.js",
-            "Express",
-            "Django",
-            "Flask",
-            "Spring Boot",
-            "Docker",
-            "Kubernetes",
-            "AWS",
-            "Azure",
-            "GCP",
-            "MongoDB",
-            "PostgreSQL",
-            "MySQL",
-          ],
-          "stack",
-          true
-        );
-      case "spoken":
-        return renderMultiSelectSection(
-          "Spoken Languages",
-          "languages",
-          [
-            "English",
-            "Spanish",
-            "French",
-            "German",
-            "Italian",
-            "Portuguese",
-            "Russian",
-            "Chinese (Mandarin)",
-            "Japanese",
-            "Korean",
-            "Arabic",
-            "Hindi",
-          ],
-          "spoken"
-        );
-      case "environment":
-        return renderEnvironmentSection();
-      case "gaming":
-        return renderGamingSection(); // ✅ Spezielle Gaming-Funktion
-      case "other":
-        return renderMultiSelectSection(
-          "Other Interests",
-          "otherInterests",
-          [
-            "Reading",
-            "Music",
-            "Sports",
-            "Photography",
-            "Travel",
-            "Cooking",
-            "Art & Design",
-            "Writing",
-            "Podcasts",
-            "YouTube",
-            "Streaming",
-            "Fitness",
-            "Hiking",
-            "Cycling",
-          ],
-          "other"
-        );
-      case "preferences":
-        return renderPreferencesSection();
-      default:
-        return renderPersonalSection();
+  useEffect(() => {
+    const urlParams = new URLSearchParams(window.location.search);
+    const section = urlParams.get("section");
+
+    if (section) {
+      setActiveSection(section);
+
+      setTimeout(() => {
+        const sectionElement = document.getElementById(`section-${section}`);
+        if (sectionElement) {
+          sectionElement.scrollIntoView({
+            behavior: "smooth",
+            block: "start",
+          });
+        }
+      }, 100);
     }
+  }, []);
+
+  const renderCurrentSection = () => {
+    const sectionContent = (() => {
+      switch (activeSection) {
+        case "personal":
+          return renderPersonalSection();
+        case "experience":
+          return renderExperienceSection();
+        case "languages":
+          return renderMultiSelectSection(
+            "Programming Languages",
+            "programmingLanguages",
+            [
+              "JavaScript",
+              "Python",
+              "Java",
+              "C++",
+              "C#",
+              "TypeScript",
+              "PHP",
+              "Ruby",
+              "Go",
+              "Rust",
+              "Swift",
+              "Kotlin",
+              "C",
+              "Scala",
+              "Dart",
+            ],
+            "languages",
+            true
+          );
+        case "interests":
+          return renderMultiSelectSection(
+            "Tech Areas of Interest",
+            "techArea",
+            [
+              "Web Development",
+              "Mobile Development",
+              "Game Development",
+              "AI/Machine Learning",
+              "Data Science",
+              "DevOps",
+              "Cybersecurity",
+              "Cloud Computing",
+              "Blockchain",
+              "IoT",
+              "AR/VR",
+              "Robotics",
+            ],
+            "interests",
+            true
+          );
+        case "stack":
+          return renderMultiSelectSection(
+            "Tech Stack & Tools",
+            "techStack",
+            [
+              "React",
+              "Vue.js",
+              "Angular",
+              "Node.js",
+              "Express",
+              "Django",
+              "Flask",
+              "Spring Boot",
+              "Docker",
+              "Kubernetes",
+              "AWS",
+              "Azure",
+              "GCP",
+              "MongoDB",
+              "PostgreSQL",
+              "MySQL",
+            ],
+            "stack",
+            true
+          );
+        case "spoken":
+          return renderMultiSelectSection(
+            "Spoken Languages",
+            "languages",
+            [
+              "English",
+              "Spanish",
+              "French",
+              "German",
+              "Italian",
+              "Portuguese",
+              "Russian",
+              "Chinese (Mandarin)",
+              "Japanese",
+              "Korean",
+              "Arabic",
+              "Hindi",
+            ],
+            "spoken"
+          );
+        case "environment":
+          return renderEnvironmentSection();
+        case "gaming":
+          return renderGamingSection();
+        case "other":
+          return renderMultiSelectSection(
+            "Other Interests",
+            "otherInterests",
+            [
+              "Reading",
+              "Music",
+              "Sports",
+              "Photography",
+              "Travel",
+              "Cooking",
+              "Art & Design",
+              "Writing",
+              "Podcasts",
+              "YouTube",
+              "Streaming",
+              "Fitness",
+              "Hiking",
+              "Cycling",
+            ],
+            "other"
+          );
+        case "preferences":
+          return renderPreferencesSection();
+        default:
+          return renderPersonalSection();
+      }
+    })();
+
+    return (
+      <div id={`section-${activeSection}`} className={styles.sectionContainer}>
+        {sectionContent}
+      </div>
+    );
   };
 
   if (isLoading) {
@@ -761,7 +782,7 @@ const EditProfilePage = () => {
               <br />
               {isMatchable ? (
                 <span style={{ color: "var(--color-success)" }}>
-                  {/* FIX: Ändere Text */}✅ You are able to match!
+                  You are able to match!
                 </span>
               ) : (
                 <span style={{ color: "var(--color-warning)" }}>

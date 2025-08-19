@@ -434,6 +434,108 @@
   color: white;
 }
 
+/* ✅ NEU: Programming Languages Slider Styles */
+.programmingLanguagesGrid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+  gap: 16px;
+  margin-top: 16px;
+}
+
+.languageCard {
+  border: 1px solid var(--color-border);
+  border-radius: 8px;
+  padding: 16px;
+  background: var(--color-bg);
+  transition: all 0.2s ease;
+}
+
+.languageCard:hover {
+  border-color: var(--color-primary);
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+}
+
+.languageCheckbox {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  cursor: pointer;
+  font-weight: 500;
+}
+
+.languageName {
+  color: var(--color-text);
+}
+
+.skillSliderContainer {
+  margin-top: 12px;
+  padding-top: 12px;
+  border-top: 1px solid var(--color-border);
+}
+
+.skillLevelHeader {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 8px;
+}
+
+.skillLabel {
+  font-size: 12px;
+  color: var(--color-text-secondary);
+  font-weight: 500;
+}
+
+.skillValue {
+  font-size: 14px;
+  font-weight: 600;
+  color: var(--color-primary);
+  background: var(--color-primary-light);
+  padding: 2px 8px;
+  border-radius: 12px;
+}
+
+.sliderWrapper {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  margin-bottom: 8px;
+}
+
+.sliderMinMax {
+  font-size: 12px;
+  color: var(--color-text-secondary);
+  min-width: 12px;
+  text-align: center;
+}
+
+.skillSlider {
+  flex: 1;
+  height: 6px;
+  border-radius: 3px;
+  background: var(--color-border);
+  outline: none;
+  cursor: pointer;
+}
+
+.skillSlider::-webkit-slider-thumb {
+  appearance: none;
+  width: 18px;
+  height: 18px;
+  border-radius: 50%;
+  background: var(--color-primary);
+  cursor: pointer;
+  border: 2px solid white;
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.2);
+}
+
+.skillDescription {
+  font-size: 11px;
+  color: var(--color-text-secondary);
+  font-style: italic;
+  text-align: center;
+}
+
 /* Dark mode specific adjustments */
 [data-theme="dark"] .formField select option {
   background: var(--color-card-bg);
@@ -505,4 +607,30 @@
 * {
   transition: background-color 0.3s ease, border-color 0.3s ease,
     color 0.3s ease;
+}
+
+/* Section Container für Bookmark-Jumps */
+.sectionContainer {
+  scroll-margin-top: 20px; /* Platz über der Section beim Scrollen */
+  padding-top: 10px;
+}
+
+/* Smooth Scrolling für die gesamte Seite */
+html {
+  scroll-behavior: smooth;
+}
+
+/* Aktive Section Highlight */
+.sectionContainer:target {
+  animation: highlightSection 2s ease-in-out;
+}
+
+@keyframes highlightSection {
+  0% {
+    background-color: rgba(var(--color-primary-rgb), 0.1);
+    border-radius: 8px;
+  }
+  100% {
+    background-color: transparent;
+  }
 }

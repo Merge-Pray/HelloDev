@@ -64,6 +64,7 @@ export default function ProfilePage() {
         }
 
         const data = await response.json();
+
         setProfileData(data.user);
         setCurrentUser({ ...currentUser, ...data.user });
       } catch (error) {
@@ -81,8 +82,8 @@ export default function ProfilePage() {
     navigate("/editprofile");
   };
 
-  const handleEditAdditional = () => {
-    navigate("/editprofile");
+  const handleEditSection = (section) => {
+    navigate(`/editprofile?section=${section}`);
   };
 
   if (isLoading) {
@@ -155,7 +156,7 @@ export default function ProfilePage() {
           </div>
           <button
             className={`btn btn-secondary ${styles.editBtn}`}
-            onClick={handleEditAdditional}
+            onClick={() => handleEditSection("personal")}
           >
             <Edit3 size={16} />
           </button>
@@ -199,7 +200,7 @@ export default function ProfilePage() {
           </div>
           <button
             className={`btn btn-secondary ${styles.editBtn}`}
-            onClick={handleEditAdditional}
+            onClick={() => handleEditSection("personal")}
           >
             <Edit3 size={16} />
           </button>
@@ -222,6 +223,7 @@ export default function ProfilePage() {
     icon,
     data,
     emptyText,
+    sectionKey,
     isBasic = false
   ) => {
     if (!hasData(data)) {
@@ -247,20 +249,55 @@ export default function ProfilePage() {
           </div>
           <button
             className={`btn btn-secondary ${styles.editBtn}`}
-            onClick={isBasic ? handleEditProfile : handleEditAdditional}
+            onClick={() => handleEditSection(sectionKey)}
           >
             <Edit3 size={16} />
           </button>
         </div>
         <div className={styles.skillsGrid}>
           {Array.isArray(data)
-            ? data.map((item, index) => (
-                <span key={index} className={styles.skillTag}>
-                  {item}
-                </span>
-              ))
+            ? data.map((item, index) => {
+                if (
+                  sectionKey === "languages" &&
+                  Array.isArray(item) &&
+                  item.length === 2
+                ) {
+                  return (
+                    <span
+                      key={`${item[0]}-${index}`}
+                      className={`${styles.skillTag} ${styles.programmingLanguageTag}`}
+                    >
+                      <Code size={14} className={styles.skillIcon} />
+                      <span className={styles.skillName}>{item[0]}</span>
+                      <span className={styles.skillLevel}>({item[1]}/10)</span>
+                    </span>
+                  );
+                }
+
+                if (sectionKey === "languages" && typeof item === "string") {
+                  return (
+                    <span
+                      key={`${item}-${index}`}
+                      className={`${styles.skillTag} ${styles.programmingLanguageTag}`}
+                    >
+                      <Code size={14} className={styles.skillIcon} />
+                      <span className={styles.skillName}>{item}</span>
+                      <span className={styles.skillLevel}>(5/10)</span>
+                    </span>
+                  );
+                }
+
+                return (
+                  <span key={`${item}-${index}`} className={styles.skillTag}>
+                    {item}
+                  </span>
+                );
+              })
             : data.split(",").map((item, index) => (
-                <span key={index} className={styles.skillTag}>
+                <span
+                  key={`${item.trim()}-${index}`}
+                  className={styles.skillTag}
+                >
                   {item.trim()}
                 </span>
               ))}
@@ -296,7 +333,7 @@ export default function ProfilePage() {
           </div>
           <button
             className={`btn btn-secondary ${styles.editBtn}`}
-            onClick={handleEditProfile}
+            onClick={() => handleEditSection("experience")}
           >
             <Edit3 size={16} />
           </button>
@@ -325,7 +362,7 @@ export default function ProfilePage() {
           </div>
           <button
             className={`btn btn-secondary ${styles.editBtn}`}
-            onClick={handleEditAdditional}
+            onClick={() => handleEditSection("preferences")}
           >
             <Edit3 size={16} />
           </button>
@@ -386,6 +423,44 @@ export default function ProfilePage() {
               </div>
             </div>
           )}
+        </div>
+      </div>
+    );
+  };
+
+  const renderGamingPreferences = () => {
+    if (!profileData.gaming || profileData.gaming === "none") return null;
+
+    const getGamingLabel = (value) => {
+      const labelMap = {
+        pc: "PC Gaming",
+        console: "Console Gaming",
+        mobile: "Mobile Gaming",
+        board: "Board Games",
+        none: "No Gaming",
+      };
+      return labelMap[value] || value;
+    };
+
+    return (
+      <div className="card enhanced">
+        <div className={styles.sectionHeader}>
+          <div className={styles.sectionTitleContainer}>
+            <Gamepad2 size={20} className={styles.sectionIcon} />
+            <h3 className={styles.sectionTitle}>Gaming Preferences</h3>
+          </div>
+          <button
+            className={`btn btn-secondary ${styles.editBtn}`}
+            onClick={() => handleEditSection("gaming")}
+          >
+            <Edit3 size={16} />
+          </button>
+        </div>
+        <div className={styles.infoGrid}>
+          <div className={styles.infoItem}>
+            <Gamepad2 size={18} className={styles.infoIcon} />
+            <span>{getGamingLabel(profileData.gaming)}</span>
+          </div>
         </div>
       </div>
     );
@@ -458,7 +533,6 @@ export default function ProfilePage() {
     );
   };
 
-  // Show onboarding if no basic profile data
   if (!hasBasicInfo()) {
     return (
       <div className="page centered">
@@ -530,6 +604,7 @@ export default function ProfilePage() {
               <Code size={20} className={styles.sectionIcon} />,
               profileData.programmingLanguages,
               "No programming languages added yet",
+              "languages",
               true
             )}
 
@@ -539,6 +614,7 @@ export default function ProfilePage() {
               <Wrench size={20} className={styles.sectionIcon} />,
               profileData.techStack,
               "No tech stack added yet",
+              "stack",
               true
             )}
 
@@ -548,30 +624,31 @@ export default function ProfilePage() {
               <Heart size={20} className={styles.sectionIcon} />,
               profileData.techArea,
               "No tech interests added yet",
+              "interests",
               true
             )}
 
-          {hasData(profileData.gaming) &&
-            renderSkillSection(
-              "Gaming Preferences",
-              <Gamepad2 size={20} className={styles.sectionIcon} />,
-              profileData.gaming, // ✅ Korrekt: "gaming" statt "gamingPreferences"
-              "No gaming preferences added yet"
-            )}
+          {profileData.gaming &&
+            profileData.gaming !== "none" &&
+            renderGamingPreferences()}
 
           {hasData(profileData.otherInterests) &&
             renderSkillSection(
               "Other Interests",
               <Users size={20} className={styles.sectionIcon} />,
               profileData.otherInterests,
-              "No other interests added yet"
+              "No other interests added yet",
+              "other"
             )}
 
           {hasCodingPreferences() && renderCodingPreferences()}
 
           {renderStats()}
 
-          <div className={styles.addMoreSection} onClick={handleEditAdditional}>
+          <div
+            className={styles.addMoreSection}
+            onClick={() => handleEditSection("personal")}
+          >
             <div className={styles.addMoreContent}>
               <Plus size={32} className={styles.addMoreIcon} />
               <div className={styles.addMoreText}>
@@ -587,3 +664,200 @@ export default function ProfilePage() {
     </div>
   );
 }
+
+const renderMultiSelectSection = (
+  title,
+  fieldName,
+  options,
+  sectionKey,
+  required = false
+) => {
+  const watchedValues = watch(fieldName) || [];
+
+  const isProgrammingLanguages = fieldName === "programmingLanguages";
+
+  return (
+    <div className={styles.formSection}>
+      {renderSectionHeader(title, sectionKey)}
+      <div className={styles.checkboxGrid}>
+        {options.map((option) => {
+          const isSelected = isProgrammingLanguages
+            ? watchedValues.some((item) =>
+                Array.isArray(item) ? item[0] === option : item === option
+              )
+            : watchedValues.includes(option);
+
+          const currentSkillLevel =
+            isProgrammingLanguages && isSelected
+              ? (() => {
+                  const found = watchedValues.find((item) =>
+                    Array.isArray(item) ? item[0] === option : item === option
+                  );
+                  return Array.isArray(found) ? found[1] : 5;
+                })()
+              : 5;
+
+          return (
+            <div key={option} className={styles.checkboxItem}>
+              <label className={styles.checkboxLabel}>
+                <input
+                  type="checkbox"
+                  value={option}
+                  checked={isSelected}
+                  {...register(
+                    fieldName,
+                    required
+                      ? {
+                          required: `At least one ${title.toLowerCase()} is required`,
+                        }
+                      : {}
+                  )}
+                  disabled={!editingSections[sectionKey]}
+                  onChange={(e) => {
+                    const currentValues = watchedValues || [];
+
+                    if (isProgrammingLanguages) {
+                      if (e.target.checked) {
+                        setValue(fieldName, [...currentValues, [option, 5]]);
+                      } else {
+                        setValue(
+                          fieldName,
+                          currentValues.filter((item) =>
+                            Array.isArray(item)
+                              ? item[0] !== option
+                              : item !== option
+                          )
+                        );
+                      }
+                    } else {
+                      if (e.target.checked) {
+                        setValue(fieldName, [...currentValues, option]);
+                      } else {
+                        setValue(
+                          fieldName,
+                          currentValues.filter((v) => v !== option)
+                        );
+                      }
+                    }
+                  }}
+                />
+                <span className={styles.checkboxText}>{option}</span>
+              </label>
+
+              {isProgrammingLanguages && isSelected && (
+                <div className={styles.skillLevelContainer}>
+                  <label className={styles.skillLabel}>Skill Level:</label>
+                  <select
+                    className={styles.skillSelect}
+                    value={currentSkillLevel}
+                    disabled={!editingSections[sectionKey]}
+                    onChange={(e) => {
+                      const newLevel = parseInt(e.target.value);
+                      const currentValues = watchedValues || [];
+
+                      const updatedValues = currentValues.map((item) => {
+                        if (Array.isArray(item) && item[0] === option) {
+                          return [option, newLevel];
+                        }
+                        return item;
+                      });
+
+                      setValue(fieldName, updatedValues);
+                    }}
+                  >
+                    {[1, 2, 3, 4, 5, 6, 7, 8, 9, 10].map((level) => (
+                      <option key={level} value={level}>
+                        {level}/10
+                      </option>
+                    ))}
+                  </select>
+                </div>
+              )}
+            </div>
+          );
+        })}
+      </div>
+
+      {required && errors[fieldName] && (
+        <span className={styles.error}>{errors[fieldName].message}</span>
+      )}
+
+      {process.env.NODE_ENV === "development" && (
+        <div
+          style={{
+            fontSize: "12px",
+            color: "gray",
+            marginTop: "10px",
+          }}
+        >
+          Debug - Current {fieldName}: {JSON.stringify(watchedValues)}
+        </div>
+      )}
+    </div>
+  );
+};
+
+const getSectionData = (sectionKey, formData) => {
+  const data = {};
+
+  switch (sectionKey) {
+    case "personal":
+      data.country = formData.country;
+      data.city = formData.city;
+      data.age = formData.age;
+      data.aboutMe = formData.aboutMe;
+      break;
+    case "experience":
+      data.devExperience = formData.devExperience;
+      data.status = formData.status;
+      break;
+    case "languages":
+      data.programmingLanguages = Array.isArray(formData.programmingLanguages)
+        ? formData.programmingLanguages
+        : [];
+      console.log("Saving programming languages:", data.programmingLanguages);
+      break;
+    case "interests":
+      data.techArea = Array.isArray(formData.techArea) ? formData.techArea : [];
+      break;
+    case "stack":
+      data.techStack = Array.isArray(formData.techStack)
+        ? formData.techStack
+        : [];
+      break;
+    case "spoken":
+      data.languages = Array.isArray(formData.languages)
+        ? formData.languages
+        : [];
+      break;
+    case "environment":
+      data.preferredOS = formData.preferredOS;
+      break;
+    case "gaming":
+      data.gaming = formData.gaming || "";
+      break;
+    case "other":
+      data.otherInterests = Array.isArray(formData.otherInterests)
+        ? formData.otherInterests
+        : [];
+      break;
+    case "preferences":
+      data.favoriteTimeToCode = formData.favoriteTimeToCode;
+      data.favoriteLineOfCode = formData.favoriteLineOfCode;
+      data.favoriteDrinkWhileCoding = formData.favoriteDrinkWhileCoding;
+      data.musicGenreWhileCoding = formData.musicGenreWhileCoding;
+      data.favoriteShowMovie = formData.favoriteShowMovie;
+      break;
+    default:
+      return formData;
+  }
+
+  Object.keys(data).forEach((key) => {
+    if (data[key] === undefined || data[key] === null) {
+      delete data[key];
+    }
+  });
+
+  console.log(`Section ${sectionKey} data:`, data);
+  return data;
+};
