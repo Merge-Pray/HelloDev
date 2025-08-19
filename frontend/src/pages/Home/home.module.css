@@ -15,9 +15,9 @@
 }
 
 /* Bereiche */
-.left   { background: var(--panel); border: 1px solid var(--border); border-radius: 16px; }
-.center { background: var(--panel); border: 1px solid var(--border); border-radius: 16px; }
-.right  { background: var(--panel); border: 1px solid var(--border); border-radius: 16px; }
+.left   { border-right: 1px solid var(--border);  }
+/* .center { background: var(--panel); border: 1px solid var(--border); border-radius: 16px; } */
+.right { border-left: 1px solid var(--border); }
 
 /* Innenabstände */
 .left, .center, .right { padding: 16px; }

@@ -1,26 +1,30 @@
+// src/components/MainMenu/MainMenu.jsx
+import React from "react";
 import styles from "./MainMenu.module.css";
 import { NavLink } from "react-router";
 
-const items = [
-  { to: "/",           icon: "🏠", label: "Home" },
-  { to: "/matches",    icon: "✨", label: "Matches" },
-  { to: "/search",     icon: "🔎", label: "Search" },
-  { to: "/messages",   icon: "💬", label: "Messages" },
-  { to: "/notifications", icon: "💖", label: "Notifications" },
-  { to: "/profile",    icon: "👤", label: "Profile" },
-  { to: "/settings",   icon: "⚙️", label: "Settings" },
+const topItems = [
+  { to: "/",             icon: "/icons/home.svg",           label: "Home" },
+  { to: "/matches",      icon: "/icons/matches.svg",        label: "Matches" },
+  { to: "/search",       icon: "/icons/search.svg",         label: "Search" },
+  { to: "/messages",     icon: "/icons/messages.svg",       label: "Messages" },
+  { to: "/notifications",icon: "/icons/notifications.svg",  label: "Notifications" },
+];
+
+const bottomItems = [
+  { to: "/profile",      icon: "/icons/profile.svg",        label: "Profile" },
+  { to: "/settings",     icon: "/icons/settings.svg",       label: "Settings" },
 ];
 
 export default function MainMenu() {
   return (
     <nav className={styles.menu} aria-label="Main">
       <div className={styles.brand}>
-        <span className={styles.logo} aria-hidden>🖐️</span>
-        <span className={styles.brandText}>Hello<br/>Dev</span>
+        <img src="/logo/HelloDev_Logo_White.svg" alt="Hello Dev Logo" className={styles.logo} />
       </div>
 
-      <ul className={styles.list}>
-        {items.map(item => (
+      <ul className={styles.listTop}>
+        {topItems.map(item => (
           <li key={item.to}>
             <NavLink
               to={item.to}
@@ -28,7 +32,23 @@ export default function MainMenu() {
                 [styles.link, isActive ? styles.active : ""].join(" ")
               }
             >
-              <span className={styles.icon} aria-hidden>{item.icon}</span>
+              <img src={item.icon} alt="" className={styles.icon} />
+              <span className={styles.label}>{item.label}</span>
+            </NavLink>
+          </li>
+        ))}
+      </ul>
+
+      <ul className={styles.listBottom}>
+        {bottomItems.map(item => (
+          <li key={item.to}>
+            <NavLink
+              to={item.to}
+              className={({ isActive }) =>
+                [styles.link, isActive ? styles.active : ""].join(" ")
+              }
+            >
+              <img src={item.icon} alt="" className={styles.icon} />
               <span className={styles.label}>{item.label}</span>
             </NavLink>
           </li>

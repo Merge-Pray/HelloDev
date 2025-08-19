@@ -1,8 +1,7 @@
-/* src/components/MainMenu/MainMenue.module.css */
 .menu {
   height: 100%;
   display: grid;
-  grid-template-rows: auto 1fr;
+  grid-template-rows: auto 1fr auto;
   gap: 12px;
 }
 
@@ -12,19 +11,15 @@
   align-items: center;
   gap: 10px;
   padding: 8px 10px;
-  border-radius: 12px;
-  background: rgba(255,255,255,0.03);
-  border: 1px solid rgba(255,255,255,0.06);
 }
 
 .logo {
   display: inline-grid;
   place-items: center;
-  font-size: 26px;
-  width: 44px;
+  font-size: 33px;
+  max-width: 120px;
   height: 44px;
-  background: rgba(255,255,255,0.06);
-  border-radius: 12px;
+  transition: all 0.25s ease;
 }
 
 .brandText {
@@ -32,13 +27,21 @@
   font-weight: 800;
   letter-spacing: 0.4px;
 }
-
-.list {
+.listTop,
+.listBottom {
   list-style: none;
   margin: 0;
+  margin-top: 40px;
   padding: 6px;
   display: grid;
-  gap: 4px;
+  gap: 30px;
+
+  align-content: start;
+}
+
+.listBottom {
+  padding-top: 0;
+  padding-bottom: 6px;
 }
 
 .link {
@@ -46,48 +49,72 @@
   grid-template-columns: 28px 1fr;
   align-items: center;
   gap: 12px;
-  padding: 10px 12px;
+  padding: var(--item-py) 12px; 
   border-radius: 12px;
   text-decoration: none;
   color: #e8e3ee;
   border: 1px solid transparent;
+  transition: background 0.2s ease, border-color 0.2s ease;
 }
 
 .link:hover {
-  background: rgba(255,255,255,0.05);
-  border-color: rgba(255,255,255,0.08);
+  background: rgba(255, 255, 255, 0.05);
+  border-color: rgba(255, 255, 255, 0.08);
 }
 
 .active {
-  background: rgba(160,120,255,0.12);
-  border-color: rgba(160,120,255,0.35);
+  background: rgba(160, 120, 255, 0.12);
+  border-color: rgba(160, 120, 255, 0.35);
 }
 
 .icon {
-  font-size: 18px;
-  width: 28px;
+  width: 30px;
+  height: 30px;
+  object-fit: contain;
   text-align: center;
+  filter: invert(90%);
+  transition: filter 0.2s ease;
+}
+
+.link:hover .icon,
+.active .icon {
+  filter: invert(100%) sepia(90%) saturate(200%) hue-rotate(250deg);
 }
 
 .label {
   white-space: nowrap;
+  font-size: 1.3rem;
 }
 
-/* --- Kollabieren auf schmal: nur Icons --- */
 @media (max-width: 900px) {
   .brand {
     grid-template-columns: 44px;
     justify-items: center;
   }
+
   .brandText {
     display: none;
   }
+
+  .logo {
+    max-width: 40px;
+    height: 40px;
+    font-size: 20px;
+  }
+
   .link {
-    grid-template-columns: 1fr; /* nur Icon mittig */
+    grid-template-columns: 1fr; 
     justify-items: center;
     padding: 10px;
   }
+
   .label {
-    display: none; /* nur Icons zeigen */
+    display: none;
+  }
+
+  .listTop,
+  .listBottom {
+    padding: 4px;
+    gap: 4px;
   }
 }
