@@ -14,19 +14,19 @@ export default function PostActions({
   const [isReposted, setIsReposted] = useState(false);
   const [isProcessing, setIsProcessing] = useState(false);
 
-  // Simple check if current user liked this post
+  
   const checkIfLiked = () => {
     if (!post?.likes || !currentUser?._id) return false;
 
     return post.likes.some((like) => {
       const likeUserId = like.user?._id || like.user;
-      return likeUserId === currentUser._id || likeUserId === currentUser.userID;
+      return likeUserId === currentUser._id;
     });
   };
 
   const [isLiked, setIsLiked] = useState(checkIfLiked());
 
-  // Update when post or user changes
+  
   useEffect(() => {
     setIsLiked(checkIfLiked());
   }, [post?.likes, currentUser?._id]);
@@ -37,7 +37,7 @@ export default function PostActions({
     setIsProcessing(true);
     const wasLiked = isLiked;
     
-    // Optimistic update
+    
     setIsLiked(!wasLiked);
 
     try {
@@ -60,15 +60,15 @@ export default function PostActions({
       const data = await response.json();
 
       if (data.success) {
-        // Update parent component with the actual like count from server
+        
         onLike(post._id, !wasLiked, data.likeCount);
       } else {
-        // Revert optimistic update on failure
+        
         setIsLiked(wasLiked);
         console.error("Like operation failed:", data.message);
       }
     } catch (error) {
-      // Revert optimistic update on error
+      
       setIsLiked(wasLiked);
       console.error("Error toggling like:", error);
     } finally {

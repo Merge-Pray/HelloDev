@@ -3,16 +3,16 @@ import { useNavigate } from "react-router";
 import { useForm } from "react-hook-form";
 import { Save, X, Edit3, Check, AlertCircle, Gamepad2 } from "lucide-react";
 import useUserStore from "../../hooks/userstore";
+import { useProfile, useUpdateProfile } from "../../hooks/useProfile";
 import { API_URL } from "../../lib/config";
 import DarkMode from "../../components/DarkMode";
 import { calculateProfileCompletion } from "../../utils/profileCompletion";
 import styles from "./editprofile.module.css";
 
 const EditProfilePage = () => {
-  const { currentUser, setCurrentUser } = useUserStore();
-  const [profileData, setProfileData] = useState({});
-  const [isLoading, setIsLoading] = useState(true);
-  const [isSaving, setIsSaving] = useState(false);
+  const currentUser = useUserStore((state) => state.currentUser); // Auth only
+  const { data: profileData, isLoading, error: profileError, refetch } = useProfile();
+  const updateProfile = useUpdateProfile();
   const [activeSection, setActiveSection] = useState("personal");
   const [editingSections, setEditingSections] = useState({});
   const [error, setError] = useState(null);
@@ -28,43 +28,28 @@ const EditProfilePage = () => {
   } = useForm();
 
   useEffect(() => {
-    const fetchProfileData = async () => {
-      if (!currentUser) {
+    if (!currentUser) {
+      navigate("/login");
+      return;
+    }
+    
+    if (profileError) {
+      if (profileError.message.includes('401')) {
         navigate("/login");
         return;
       }
-
-      try {
-        const response = await fetch(`${API_URL}/api/user/user`, {
-          method: "GET",
-          headers: {
-            "Content-Type": "application/json",
-          },
-          credentials: "include",
-        });
-
-        if (!response.ok) {
-          throw new Error("Failed to fetch profile data");
+      setError("Failed to load profile data. Please try again.");
+    }
+    
+    // Initialize form with profile data when it loads
+    if (profileData) {
+      Object.keys(profileData).forEach((key) => {
+        if (profileData[key] !== null && profileData[key] !== undefined) {
+          setValue(key, profileData[key]);
         }
-
-        const data = await response.json();
-        setProfileData(data.user);
-
-        Object.keys(data.user).forEach((key) => {
-          if (data.user[key] !== null && data.user[key] !== undefined) {
-            setValue(key, data.user[key]);
-          }
-        });
-      } catch (error) {
-        console.error("Error fetching profile:", error);
-        setError("Failed to load profile data");
-      } finally {
-        setIsLoading(false);
-      }
-    };
-
-    fetchProfileData();
-  }, [currentUser, navigate, setValue]);
+      });
+    }
+  }, [currentUser, navigate, profileError, profileData, setValue]);
 
   useEffect(() => {
     if (profileData && Object.keys(profileData).length > 0) {
@@ -95,77 +80,32 @@ const EditProfilePage = () => {
   }, [profileData, setValue]);
 
   const saveSection = async (sectionData, sectionName) => {
-    setIsSaving(true);
     setError(null);
     setSuccess(null);
 
     try {
-      const response = await fetch(`${API_URL}/api/user/update`, {
-        method: "PATCH",
-        headers: {
-          "Content-Type": "application/json",
-        },
-        credentials: "include",
-        body: JSON.stringify(sectionData),
-      });
-
-      if (!response.ok) {
-        const errorData = await response.json();
-        console.error("Server response:", errorData);
-        throw new Error(errorData.message || "Failed to save changes");
-      }
-
-      const data = await response.json();
-      console.log("Server returned:", data);
-
-      setCurrentUser({ ...currentUser, ...data.user });
-      setProfileData({ ...profileData, ...data.user });
-
+      await updateProfile.mutateAsync(sectionData);
       setSuccess(`${sectionName} updated successfully!`);
       setEditingSections({ ...editingSections, [activeSection]: false });
-
       setTimeout(() => setSuccess(null), 3000);
     } catch (error) {
-      console.error("Error saving profile:", error);
-      setError(error.message);
-    } finally {
-      setIsSaving(false);
+      console.error("Error saving section:", error);
+      setError(error.message || "Failed to save changes. Please try again.");
     }
   };
 
   const saveAllChanges = async (formData) => {
-    setIsSaving(true);
     setError(null);
     setSuccess(null);
 
     try {
-      const response = await fetch(`${API_URL}/api/user/update`, {
-        method: "PATCH",
-        headers: {
-          "Content-Type": "application/json",
-        },
-        credentials: "include",
-        body: JSON.stringify(formData),
-      });
-
-      if (!response.ok) {
-        const errorData = await response.json();
-        throw new Error(errorData.message || "Failed to save changes");
-      }
-
-      const data = await response.json();
-      setCurrentUser({ ...currentUser, ...data.user });
-      setProfileData({ ...profileData, ...data.user });
-
+      await updateProfile.mutateAsync(formData);
       setSuccess("Profile updated successfully!");
       setEditingSections({});
-
       setTimeout(() => setSuccess(null), 3000);
     } catch (error) {
       console.error("Error saving profile:", error);
-      setError(error.message);
-    } finally {
-      setIsSaving(false);
+      setError(error.message || "Failed to save changes. Please try again.");
     }
   };
 
@@ -224,10 +164,10 @@ const EditProfilePage = () => {
                 const sectionData = getSectionData(sectionKey, formData);
                 saveSection(sectionData, title);
               }}
-              disabled={isSaving}
+              disabled={updateProfile.isLoading}
             >
               <Check size={16} />
-              {isSaving ? "Saving..." : "Save"}
+              {updateProfile.isLoading ? "Saving..." : "Save"}
             </button>
           </div>
         )}
@@ -843,10 +783,10 @@ const EditProfilePage = () => {
               <button
                 type="submit"
                 className={`${styles.btn} ${styles.btnPrimary}`}
-                disabled={isSaving}
+                disabled={updateProfile.isLoading}
               >
                 <Save size={16} />
-                {isSaving ? "Saving All Changes..." : "Save All Changes"}
+                {updateProfile.isLoading ? "Saving All Changes..." : "Save All Changes"}
               </button>
             </div>
           </form>

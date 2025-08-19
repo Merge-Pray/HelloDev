@@ -3,6 +3,7 @@ import { useNavigate } from "react-router";
 import { useForm } from "react-hook-form";
 import { ArrowLeft, ArrowRight, Check, X } from "lucide-react";
 import useUserStore from "../../hooks/userstore";
+import { useUpdateProfile } from "../../hooks/useProfile";
 import styles from "./buildprofile.module.css";
 import { API_URL } from "../../lib/config";
 
@@ -128,7 +129,8 @@ const ONBOARDING_STEPS = [
 ];
 
 export default function BuildProfile() {
-  const { currentUser, setCurrentUser } = useUserStore();
+  const currentUser = useUserStore((state) => state.currentUser); // Auth only
+  const updateProfile = useUpdateProfile();
   const [currentStep, setCurrentStep] = useState(1);
   const [profileData, setProfileData] = useState({});
   const [isLoading, setIsLoading] = useState(false);
@@ -192,31 +194,9 @@ export default function BuildProfile() {
         try {
           console.log("Sending profile data:", newProfileData);
 
-          const response = await fetch(`${API_URL}/api/user/update`, {
-            method: "PATCH",
-            headers: {
-              "Content-Type": "application/json",
-            },
-            credentials: "include",
-            body: JSON.stringify(newProfileData),
-          });
+          await updateProfile.mutateAsync(newProfileData);
 
-          if (!response.ok) {
-            let errorMessage = "Failed to save profile";
-            try {
-              const errorData = await response.json();
-              errorMessage = errorData.message || errorMessage;
-            } catch (jsonError) {
-              // If response is not JSON, use status text or generic message
-              errorMessage = response.statusText || errorMessage;
-            }
-            throw new Error(errorMessage);
-          }
-
-          const responseData = await response.json();
-          setCurrentUser({ ...currentUser, ...responseData.user });
-
-          console.log("Profile saved successfully:", responseData);
+          console.log("Profile saved successfully");
           navigate("/profile");
         } catch (error) {
           console.error("Profile creation error:", error);
@@ -236,7 +216,6 @@ export default function BuildProfile() {
       fieldName,
       isLastStep,
       currentUser,
-      setCurrentUser,
       navigate,
     ]
   );
@@ -422,7 +401,7 @@ export default function BuildProfile() {
             <button
               type="submit"
               className="btn btn-primary"
-              disabled={isLoading}
+              disabled={isLoading || updateProfile.isLoading}
               style={{ flex: 1 }}
             >
               {isLoading ? (
