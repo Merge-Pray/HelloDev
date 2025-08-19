@@ -68,8 +68,9 @@ const ONBOARDING_STEPS = [
   {
     id: 4,
     title: "Programming Languages",
-    subtitle: "Which programming languages do you know? (Select up to 5)",
-    type: "checkbox",
+    subtitle:
+      "Which programming languages do you know? Select and rate your skill level (1-10)",
+    type: "programming-languages",
     fieldName: "programmingLanguages",
     maxSelections: 5,
     options: [
@@ -144,6 +145,7 @@ export default function BuildProfile() {
     handleSubmit,
     reset,
     watch,
+    setValue,
     formState: { errors },
   } = useForm();
 
@@ -214,18 +216,15 @@ export default function BuildProfile() {
     [currentStepData, profileData, fieldName, isLastStep, currentUser, navigate]
   );
 
-  // ✅ ÄNDERE handleCancel zu:
   const handleCancel = useCallback(() => {
     setShowCancelDialog(true);
   }, []);
 
-  // ✅ NEU: Confirm Cancel
   const confirmCancel = useCallback(() => {
     setShowCancelDialog(false);
     navigate("/profile");
   }, [navigate]);
 
-  // ✅ NEU: Stay in onboarding
   const stayInOnboarding = useCallback(() => {
     setShowCancelDialog(false);
   }, []);
@@ -297,8 +296,121 @@ export default function BuildProfile() {
     );
   };
 
+  const renderProgrammingLanguages = () => {
+    const selectedValues = watchedField || [];
+
+    return (
+      <div className={styles.programmingLanguagesContainer}>
+        <div className={styles.programmingLanguagesGrid}>
+          {currentStepData.options.map((language, index) => {
+            const inputId = `${fieldName}-${index}`;
+            const selectedEntry = selectedValues.find((item) =>
+              Array.isArray(item) ? item[0] === language : item === language
+            );
+            const isSelected = !!selectedEntry;
+            const currentSkillLevel = Array.isArray(selectedEntry)
+              ? selectedEntry[1]
+              : 5;
+            const isDisabled =
+              currentStepData.maxSelections &&
+              selectedValues.length >= currentStepData.maxSelections &&
+              !isSelected;
+
+            return (
+              <div
+                key={language}
+                className={`${styles.programmingLanguageCard} ${
+                  isDisabled ? styles.disabled : ""
+                } ${isSelected ? styles.selected : ""}`}
+              >
+                <div className={styles.languageHeader}>
+                  <input
+                    type="checkbox"
+                    id={inputId}
+                    checked={isSelected}
+                    disabled={isDisabled}
+                    {...register(fieldName, {
+                      required:
+                        "Please select at least one programming language",
+                    })}
+                    onChange={(e) => {
+                      const currentValues = selectedValues || [];
+                      if (e.target.checked) {
+                        // Hinzufügen mit Default Skill Level 5
+                        const newValues = [...currentValues, [language, 5]];
+                        setValue(fieldName, newValues);
+                      } else {
+                        // Entfernen
+                        const newValues = currentValues.filter((item) =>
+                          Array.isArray(item)
+                            ? item[0] !== language
+                            : item !== language
+                        );
+                        setValue(fieldName, newValues);
+                      }
+                    }}
+                  />
+                  <label htmlFor={inputId} className={styles.languageLabel}>
+                    {language}
+                  </label>
+                </div>
+
+                {/* ✅ Skill Level Slider */}
+                {isSelected && (
+                  <div className={styles.skillSection}>
+                    <div className={styles.skillHeader}>
+                      <span>Skill Level</span>
+                      <span className={styles.skillValue}>
+                        {currentSkillLevel}/10
+                      </span>
+                    </div>
+                    <input
+                      type="range"
+                      min="1"
+                      max="10"
+                      value={currentSkillLevel}
+                      className={styles.skillSlider}
+                      onChange={(e) => {
+                        const newLevel = parseInt(e.target.value);
+                        const currentValues = selectedValues || [];
+                        const newValues = currentValues.map((item) => {
+                          if (Array.isArray(item) && item[0] === language) {
+                            return [language, newLevel];
+                          }
+                          return item;
+                        });
+                        setValue(fieldName, newValues);
+                      }}
+                    />
+                    <div className={styles.skillLabels}>
+                      <span>Beginner</span>
+                      <span>Expert</span>
+                    </div>
+                  </div>
+                )}
+              </div>
+            );
+          })}
+        </div>
+
+        {currentStepData.maxSelections && (
+          <div className={styles.selectionCounter}>
+            {selectedValues.length}/{currentStepData.maxSelections} selected
+          </div>
+        )}
+      </div>
+    );
+  };
+
+  // ✅ ÄNDERE renderOptions Funktion:
   const renderOptions = () => {
     const inputType = currentStepData.type;
+
+    // ✅ Spezielle Behandlung für Programming Languages
+    if (inputType === "programming-languages") {
+      return renderProgrammingLanguages();
+    }
+
     const maxSelections = currentStepData.maxSelections;
     const selectedValues = watchedField || [];
 
