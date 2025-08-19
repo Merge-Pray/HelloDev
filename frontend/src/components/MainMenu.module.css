@@ -1,8 +1,10 @@
 /* ───────── Grundlayout ───────── */
 .menu {
-  height: 100%;
+  position: sticky;
+  top: 16px;                      /* Abstand nach oben, an dein Layout anpassen */
+  height: calc(100dvh - 32px);    /* volle Viewport-Höhe minus top/bottom Padding */
   display: grid;
-  grid-template-rows: auto 1fr auto;
+  grid-template-rows: auto 1fr auto; /* Brand | Top-Liste (scrollt) | Bottom fix */
   gap: 12px;
 }
 
