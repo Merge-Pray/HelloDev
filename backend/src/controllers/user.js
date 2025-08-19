@@ -34,6 +34,7 @@ export const createUser = async (req, res, next) => {
         username: newAccount.username,
         email: newAccount.email,
         isMatchable: false,
+        avatar: newAccount.avatar,
       },
     });
   } catch (error) {
@@ -153,7 +154,6 @@ export const verifyLogin = async (req, res, next) => {
       return next(error);
     }
 
-    // Fixed: Use existingUser instead of undefined 'user' variable
     const isNowMatchable = checkIsMatchable(existingUser);
     if (isNowMatchable !== existingUser.isMatchable) {
       existingUser.isMatchable = isNowMatchable;
@@ -175,7 +175,28 @@ export const verifyLogin = async (req, res, next) => {
         id: existingUser._id,
         username: existingUser.username,
         email: existingUser.email,
-        isMatchable: existingUser.isMatchable, // Fixed: Use existingUser instead of 'user'
+        isMatchable: existingUser.isMatchable,
+        avatar: existingUser.avatar,
+        aboutMe: existingUser.aboutMe,
+        country: existingUser.country,
+        city: existingUser.city,
+        age: existingUser.age,
+        status: existingUser.status,
+        devExperience: existingUser.devExperience,
+        techArea: existingUser.techArea,
+        programmingLanguages: existingUser.programmingLanguages,
+        techStack: existingUser.techStack,
+        preferredOS: existingUser.preferredOS,
+        languages: existingUser.languages,
+        gaming: existingUser.gaming,
+        otherInterests: existingUser.otherInterests,
+        favoriteDrinkWhileCoding: existingUser.favoriteDrinkWhileCoding,
+        musicGenreWhileCoding: existingUser.musicGenreWhileCoding,
+        favoriteShowMovie: existingUser.favoriteShowMovie,
+        isOnline: existingUser.isOnline,
+        lastSeen: existingUser.lastSeen,
+        points: existingUser.points,
+        rating: existingUser.rating,
       },
     });
   } catch (error) {

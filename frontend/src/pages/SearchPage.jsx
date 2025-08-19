@@ -3,7 +3,7 @@ import NewsfeedContainer from "../components/NewsfeedContainer";
 const SearchPage = () => {
   return (
     <div>
-      │ <NewsfeedContainer />
+      <NewsfeedContainer />
     </div>
   );
 };

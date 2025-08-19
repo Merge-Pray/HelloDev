@@ -37,7 +37,7 @@ postsRouter.get("/user/:userId", getUserPosts);
 postsRouter.get("/hashtag/:hashtag", getPostsByHashtag);
 
 postsRouter.post("/:postId/like", likePost);
-postsRouter.delete("/:postId/like", unlikePost);
+postsRouter.post("/:postId/unlike", unlikePost);
 postsRouter.post(
   "/:postId/comments",
   commentValidationRules(),

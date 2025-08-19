@@ -1,0 +1,10 @@
+.postCard {
+  border: 1px solid #ddd;
+  border-radius: 8px;
+  padding: 16px;
+  margin-bottom: 16px;
+}
+
+.error {
+  border-color: #ff0000;
+}

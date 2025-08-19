@@ -4,29 +4,33 @@ import PostActions from "./PostActions";
 import CommentSection from "./CommentSection";
 import RepostCard from "./RepostCard";
 import useUserStore from "../hooks/userstore";
+import styles from "./PostCard.module.css";
 
-export default function PostCard({ post, onLike, onComment, onRepost }) {
+export default function PostCard({
+  post,
+  onLike,
+  onComment,
+  onRepost,
+  isEmbedded = false,
+}) {
   const [showComments, setShowComments] = useState(false);
   const currentUser = useUserStore((state) => state.currentUser);
 
-  // Add safety check
   if (!post || !post.author) {
     console.error("PostCard received invalid post data:", post);
     return (
-      <div className="post-card error">
+      <div className={`${styles.postCard} ${styles.error}`}>
         <p>Error: Post data is incomplete</p>
       </div>
     );
   }
 
   const renderContent = (content) => {
-    // Replace hashtags with clickable links
     let processedContent = content.replace(
       /#(\w+)/g,
       '<span class="hashtag" data-hashtag="$1">#$1</span>'
     );
 
-    // Replace mentions with clickable links
     processedContent = processedContent.replace(
       /@(\w+)/g,
       '<span class="mention" data-username="$1">@$1</span>'
@@ -36,16 +40,13 @@ export default function PostCard({ post, onLike, onComment, onRepost }) {
   };
 
   const handleHashtagClick = (hashtag) => {
-    // Navigate to hashtag page
     window.location.href = `/hashtag/${hashtag}`;
   };
 
   const handleMentionClick = (username) => {
-    // Navigate to user profile
     window.location.href = `/user/${username}`;
   };
 
-  // Handle clicks on hashtags and mentions
   const handleContentClick = (e) => {
     if (e.target.classList.contains("hashtag")) {
       const hashtag = e.target.dataset.hashtag;
@@ -56,7 +57,6 @@ export default function PostCard({ post, onLike, onComment, onRepost }) {
     }
   };
 
-  // If this is a repost, render the repost card
   if (post.isRepost) {
     return (
       <RepostCard
@@ -69,7 +69,7 @@ export default function PostCard({ post, onLike, onComment, onRepost }) {
   }
 
   return (
-    <div className="post-card">
+    <div className={styles.postCard}>
       <div className="post-header">
         <img
           src={post.author?.avatar || "/default-avatar.png"}
