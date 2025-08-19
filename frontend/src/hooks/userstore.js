@@ -28,13 +28,10 @@ const useUserStore = create(
         }),
 
       clearUser: () => set({ currentUser: null }),
-
-      // Helper to check if user is authenticated
-      isAuthenticated: () => !!get().currentUser,
     }),
 
     {
-      name: "user-storage", // Keep original name for compatibility
+      name: "user-storage",
       storage: zustandStorage,
     }
   )
