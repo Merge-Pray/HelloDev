@@ -7,6 +7,7 @@ import EmptyFriendsFeed from "./EmptyFriendsFeed";
 import SearchBar from "./SearchBar";
 import useUserStore from "../hooks/userstore";
 import { API_URL } from "../lib/config";
+import styles from "./NewsfeedContainer.module.css";
 
 export default function NewsfeedContainer() {
   const [posts, setPosts] = useState([]);
@@ -98,12 +99,10 @@ export default function NewsfeedContainer() {
               likeCount: newLikeCount,
               likes: isLiked
                 ? [...(post.likes || []), { user: currentUser._id }]
-                : (post.likes || []).filter(
-                    (like) => {
-                      const likeUserId = like.user?._id || like.user;
-                      return likeUserId !== currentUser._id;
-                    }
-                  ),
+                : (post.likes || []).filter((like) => {
+                    const likeUserId = like.user?._id || like.user;
+                    return likeUserId !== currentUser._id;
+                  }),
             }
           : post
       )
@@ -143,7 +142,7 @@ export default function NewsfeedContainer() {
   };
 
   return (
-    <div className="newsfeed-container">
+    <div className={styles.newsfeedContainer}>
       {/* Search Bar */}
       <SearchBar
         onSearch={handleSearch}
@@ -154,7 +153,7 @@ export default function NewsfeedContainer() {
 
       {/* Feed Controls - Hide during search */}
       {!isSearchActive && (
-        <div className="feed-controls">
+        <div className={styles.feedControls}>
           <FeedToggle
             feedType={feedType}
             onFeedTypeChange={handleFeedTypeChange}
@@ -173,9 +172,9 @@ export default function NewsfeedContainer() {
 
       {/* Search Results Header */}
       {isSearchActive && (
-        <div className="search-results-header">
+        <div className={styles.searchResultsHeader}>
           <h3>Search Results for "{searchQuery}"</h3>
-          <button onClick={handleClearSearch} className="clear-search-btn">
+          <button onClick={handleClearSearch} className={styles.clearSearchBtn}>
             Clear Search
           </button>
         </div>
@@ -183,7 +182,7 @@ export default function NewsfeedContainer() {
 
       {/* Error Message */}
       {error && (
-        <div className="error-message">
+        <div className={styles.errorMessage}>
           <p>{error}</p>
           <button onClick={() => fetchPosts(true)}>Try Again</button>
         </div>
@@ -193,10 +192,15 @@ export default function NewsfeedContainer() {
       {!isSearchActive &&
         feedType === "friends" &&
         posts.length === 0 &&
-        !loading && <EmptyFriendsFeed friendsCount={friendsCount} />}
+        !loading && (
+          <EmptyFriendsFeed
+            friendsCount={friendsCount}
+            className={styles.emptyFriendsFeed}
+          />
+        )}
 
       {isSearchActive && posts.length === 0 && !loading && (
-        <div className="empty-search-results">
+        <div className={styles.emptySearchResults}>
           <h3>No posts found</h3>
           <p>Try different keywords or check your spelling.</p>
         </div>
@@ -212,6 +216,7 @@ export default function NewsfeedContainer() {
           onLoadMore={handleLoadMore}
           loading={loading}
           hasNextPage={hasNextPage}
+          className={styles.newsfeedList}
         />
       )}
     </div>

@@ -1,41 +1,81 @@
-import { useState, useEffect } from "react";
+import { useState, useEffect, useRef } from "react";
 import { Moon, Sun } from "lucide-react";
+
+const THEME_KEY = "theme";
+const DARK = "dark";
+const LIGHT = "light";
+const QUERY = "(prefers-color-scheme: dark)";
+
+function setThemeAttr(theme) {
+  if (typeof document !== "undefined") {
+    document.documentElement.setAttribute("data-theme", theme);
+  }
+}
+
+function getSavedTheme() {
+  try {
+    return localStorage.getItem(THEME_KEY);
+  } catch {
+    return null;
+  }
+}
+
+function saveTheme(theme) {
+  try {
+    localStorage.setItem(THEME_KEY, theme);
+  } catch {
+    /* ignore */
+  }
+}
 
 const DarkMode = () => {
   const [isDarkMode, setIsDarkMode] = useState(false);
+  const userChoseManually = useRef(false); // merkt sich, ob User aktiv getoggelt hat
 
+  // Initialisierung + System-Änderungen beobachten
   useEffect(() => {
-    const savedTheme = localStorage.getItem("theme");
-    const prefersDark = window.matchMedia(
-      "(prefers-color-scheme: dark)"
-    ).matches;
+    if (typeof window === "undefined") return;
 
-    if (savedTheme === "dark" || (!savedTheme && prefersDark)) {
-      setIsDarkMode(true);
-      document.documentElement.setAttribute("data-theme", "dark");
+    const media = window.matchMedia(QUERY);
+    const saved = getSavedTheme();
+
+    const dark = saved ? saved === DARK : media.matches;
+    setIsDarkMode(dark);
+    setThemeAttr(dark ? DARK : LIGHT);
+
+
+    const onSystemChange = (e) => {
+      if (userChoseManually.current) return; // User hat explizit gewählt → nicht überschreiben
+      const nowDark = e.matches;
+      setIsDarkMode(nowDark);
+      setThemeAttr(nowDark ? DARK : LIGHT);
+    };
+
+    // addEventListener fallback für ältere Browser
+    if (typeof media.addEventListener === "function") {
+      media.addEventListener("change", onSystemChange);
+      return () => media.removeEventListener("change", onSystemChange);
     } else {
-      setIsDarkMode(false);
-      document.documentElement.setAttribute("data-theme", "light");
+      media.addListener(onSystemChange);
+      return () => media.removeListener(onSystemChange);
     }
   }, []);
 
   const toggleDarkMode = () => {
-    const newTheme = !isDarkMode;
-    setIsDarkMode(newTheme);
-
-    if (newTheme) {
-      document.documentElement.setAttribute("data-theme", "dark");
-      localStorage.setItem("theme", "dark");
-    } else {
-      document.documentElement.setAttribute("data-theme", "light");
-      localStorage.setItem("theme", "light");
-    }
+    const next = !isDarkMode;
+    userChoseManually.current = true;
+    setIsDarkMode(next);
+    setThemeAttr(next ? DARK : LIGHT);
+    saveTheme(next ? DARK : LIGHT);
   };
 
   return (
     <button
       onClick={toggleDarkMode}
       className="btn"
+      aria-pressed={isDarkMode}
+      aria-label={isDarkMode ? "Switch to light mode" : "Switch to dark mode"}
+      title={isDarkMode ? "Switch to Light Mode" : "Switch to Dark Mode"}
       style={{
         background: "var(--color-bg-secondary)",
         border: "2px solid var(--color-card-border)",
@@ -51,16 +91,15 @@ const DarkMode = () => {
         height: "40px",
       }}
       onMouseEnter={(e) => {
-        e.target.style.background = "var(--color-primary)";
-        e.target.style.color = "white";
-        e.target.style.borderColor = "var(--color-primary)";
+        e.currentTarget.style.background = "var(--color-primary)";
+        e.currentTarget.style.color = "white";
+        e.currentTarget.style.borderColor = "var(--color-primary)";
       }}
       onMouseLeave={(e) => {
-        e.target.style.background = "var(--color-bg-secondary)";
-        e.target.style.color = "var(--color-text)";
-        e.target.style.borderColor = "var(--color-card-border)";
+        e.currentTarget.style.background = "var(--color-bg-secondary)";
+        e.currentTarget.style.color = "var(--color-text)";
+        e.currentTarget.style.borderColor = "var(--color-card-border)";
       }}
-      title={isDarkMode ? "Switch to Light Mode" : "Switch to Dark Mode"}
     >
       {isDarkMode ? <Sun size={20} /> : <Moon size={20} />}
     </button>
