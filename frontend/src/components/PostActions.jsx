@@ -14,7 +14,6 @@ export default function PostActions({
   const [isReposted, setIsReposted] = useState(false);
   const [isProcessing, setIsProcessing] = useState(false);
 
-  
   const checkIfLiked = () => {
     if (!post?.likes || !currentUser?._id) return false;
 
@@ -26,7 +25,6 @@ export default function PostActions({
 
   const [isLiked, setIsLiked] = useState(checkIfLiked());
 
-  
   useEffect(() => {
     setIsLiked(checkIfLiked());
   }, [post?.likes, currentUser?._id]);
@@ -36,8 +34,7 @@ export default function PostActions({
 
     setIsProcessing(true);
     const wasLiked = isLiked;
-    
-    
+
     setIsLiked(!wasLiked);
 
     try {
@@ -47,9 +44,6 @@ export default function PostActions({
         {
           method: "POST",
           credentials: "include",
-          headers: {
-            "Content-Type": "application/json",
-          },
         }
       );
 
@@ -60,15 +54,12 @@ export default function PostActions({
       const data = await response.json();
 
       if (data.success) {
-        
         onLike(post._id, !wasLiked, data.likeCount);
       } else {
-        
         setIsLiked(wasLiked);
         console.error("Like operation failed:", data.message);
       }
     } catch (error) {
-      
       setIsLiked(wasLiked);
       console.error("Error toggling like:", error);
     } finally {
@@ -140,11 +131,13 @@ export default function PostActions({
             transition: "all 0.2s ease",
           }}
         />
-        <span style={{ 
-          color: isLiked ? "#dc2626" : "#64748b",
-          fontWeight: isLiked ? "600" : "normal",
-          transition: "all 0.2s ease",
-        }}>
+        <span
+          style={{
+            color: isLiked ? "#dc2626" : "#64748b",
+            fontWeight: isLiked ? "600" : "normal",
+            transition: "all 0.2s ease",
+          }}
+        >
           {likeCount}
         </span>
       </button>
