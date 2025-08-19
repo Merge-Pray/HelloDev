@@ -1,7 +1,7 @@
 import { useState, useEffect, useCallback } from "react";
 import { useNavigate } from "react-router";
 import { useForm } from "react-hook-form";
-import { ArrowLeft, ArrowRight, Check, X } from "lucide-react";
+import { ArrowLeft, ArrowRight, Check, X, AlertTriangle } from "lucide-react";
 import useUserStore from "../../hooks/userstore";
 import { useUpdateProfile } from "../../hooks/useProfile";
 import styles from "./buildprofile.module.css";
@@ -129,13 +129,14 @@ const ONBOARDING_STEPS = [
 ];
 
 export default function BuildProfile() {
-  const currentUser = useUserStore((state) => state.currentUser); // Auth only
+  const currentUser = useUserStore((state) => state.currentUser);
   const updateProfile = useUpdateProfile();
   const [currentStep, setCurrentStep] = useState(1);
   const [profileData, setProfileData] = useState({});
   const [isLoading, setIsLoading] = useState(false);
   const [selectedCount, setSelectedCount] = useState(0);
   const [error, setError] = useState(null);
+  const [showCancelDialog, setShowCancelDialog] = useState(false); // ✅ NEU
   const navigate = useNavigate();
 
   const {
@@ -210,25 +211,24 @@ export default function BuildProfile() {
         setCurrentStep((prev) => prev + 1);
       }
     },
-    [
-      currentStepData,
-      profileData,
-      fieldName,
-      isLastStep,
-      currentUser,
-      navigate,
-    ]
+    [currentStepData, profileData, fieldName, isLastStep, currentUser, navigate]
   );
 
+  // ✅ ÄNDERE handleCancel zu:
   const handleCancel = useCallback(() => {
-    // Show warning message and redirect to profile
-    setError(
-      "Profile setup incomplete. Complete at least 50% to enable matching."
-    );
-    setTimeout(() => {
-      navigate("/profile");
-    }, 2000);
+    setShowCancelDialog(true);
+  }, []);
+
+  // ✅ NEU: Confirm Cancel
+  const confirmCancel = useCallback(() => {
+    setShowCancelDialog(false);
+    navigate("/profile");
   }, [navigate]);
+
+  // ✅ NEU: Stay in onboarding
+  const stayInOnboarding = useCallback(() => {
+    setShowCancelDialog(false);
+  }, []);
 
   const handleBack = useCallback(() => {
     if (currentStep > 1) {
@@ -426,6 +426,53 @@ export default function BuildProfile() {
           later!
         </div>
       </div>
+
+      {/* ✅ NEU: Cancel Confirmation Dialog */}
+      {showCancelDialog && (
+        <div className={styles.dialogOverlay}>
+          <div className={styles.dialog}>
+            <div className={styles.dialogHeader}>
+              <AlertTriangle size={24} className={styles.warningIcon} />
+              <h3>Cancel Profile Setup?</h3>
+            </div>
+            <div className={styles.dialogContent}>
+              <div className={styles.warningBox}>
+                <h4>⚠️ Important Information</h4>
+                <ul className={styles.warningList}>
+                  <li>
+                    <strong>All unsaved changes will be lost</strong> - Your
+                    progress in this session won't be saved
+                  </li>
+                  <li>
+                    <strong>You need 50% profile completion to match</strong> -
+                    Without basic info, you can't connect with other developers
+                  </li>
+                  <li>
+                    <strong>You'll need to edit your profile manually</strong> -
+                    Complete setup through the Edit Profile page
+                  </li>
+                </ul>
+              </div>
+
+              <div className={styles.recommendationBox}>
+                <h4>💡 We recommend completing the setup now</h4>
+                <p>
+                  It only takes 2-3 minutes and you'll be ready to match
+                  immediately!
+                </p>
+              </div>
+            </div>
+            <div className={styles.dialogActions}>
+              <button className="btn btn-primary" onClick={stayInOnboarding}>
+                Continue Setup
+              </button>
+              <button className="btn btn-secondary" onClick={confirmCancel}>
+                Skip to Profile
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
     </div>
   );
 }
