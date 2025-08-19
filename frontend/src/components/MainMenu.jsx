@@ -18,13 +18,18 @@ const bottomItems = [
 export default function MainMenu() {
   return (
     <nav className={styles.menu} aria-label="Main">
-      <div className={styles.brand}>
-        <img
-          src="/logo/HelloDev_Logo_White.svg"
-          alt="Hello Dev Logo"
-          className={styles.logo}
-        />
-      </div>
+<div className={styles.brand}>
+  <img
+    src="/logo/HelloDev_Logo_White.svg"
+    alt="Hello Dev Logo"
+    className={`${styles.logo} ${styles.logoDark}`}
+  />
+  <img
+    src="/logo/HelloDev_Logo_Color.svg"
+    alt="Hello Dev Logo"
+    className={`${styles.logo} ${styles.logoLight}`}
+  />
+</div>
 
       <ul className={styles.listTop}>
         {topItems.map((item) => (
@@ -41,7 +46,10 @@ export default function MainMenu() {
           </li>
         ))}
       </ul>
-
+  {/* DarkMode-Button unter Settings */}
+       <li className={styles.darkmode}>
+  <DarkMode />
+</li>
       <ul className={styles.listBottom}>
         {bottomItems.map((item) => (
           <li key={item.to}>
@@ -57,10 +65,7 @@ export default function MainMenu() {
           </li>
         ))}
 
-        {/* DarkMode-Button unter Settings */}
-        <li className="darkmode">
-          <DarkMode />
-        </li>
+      
       </ul>
     </nav>
   );

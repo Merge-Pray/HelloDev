@@ -1,3 +1,4 @@
+/* ───────── Grundlayout ───────── */
 .menu {
   height: 100%;
   display: grid;
@@ -6,7 +7,7 @@
 }
 
 .brand {
-  display: flex;                /* flex statt grid */
+  display: flex; /* flex statt grid */
   align-items: center;
   justify-content: space-between;
   padding: 8px 10px;
@@ -17,13 +18,35 @@
   display: inline-grid;
   place-items: center;
   font-size: 33px;
-  
   height: 50px;
   transition: all 0.25s ease;
 }
 
+/* Zwei Logos – abhängig vom Theme */
+.logoDark,
+.logoLight {
+  display: none;
+  height: 50px;
+  max-width: 140px;
+}
+
+/* Darkmode → weißes Logo */
+:root[data-theme="dark"] .logoDark {
+  display: block;
+}
+
+/* Lightmode → schwarzes Logo */
+:root[data-theme="light"] .logoLight {
+  display: block;
+}
+
 .darkmode {
-  text-align: center;
+  /* border-top: 1px solid var(--border);
+  border-bottom: 1px solid var(--border); */
+  display: flex;
+  justify-content: left; /* horizontal mittig */
+  align-items: center;     /* vertikal mittig */
+  padding: 10px;           /* wie bei .link */
 }
 
 .brandText {
@@ -31,6 +54,8 @@
   font-weight: 800;
   letter-spacing: 0.4px;
 }
+
+/* ───────── Listen ───────── */
 .listTop,
 .listBottom {
   list-style: none;
@@ -39,7 +64,6 @@
   padding: 6px;
   display: grid;
   gap: 5px;
-
   align-content: start;
 }
 
@@ -48,12 +72,13 @@
   padding-bottom: 6px;
 }
 
+/* ───────── Links ───────── */
 .link {
   display: grid;
   grid-template-columns: 28px 1fr;
   align-items: center;
   gap: 12px;
-  padding:  10px; 
+  padding: 10px;
   border-radius: 8px;
   text-decoration: none;
   color: var(--color-text);
@@ -67,32 +92,40 @@
   border-color: var(--color-border);
 }
 
-/* .active {
-  background: rgba(160, 120, 255, 0.12);
-  border-color: rgba(160, 120, 255, 0.35);
-} */
-
+/* ───────── Icons ───────── */
 .icon {
   width: 25px;
   height: 25px;
-  filter: brightness(0) saturate(100%); /* schwarz */
   transition: filter 0.2s ease;
 }
 
+/* Light Mode → schwarz */
+:root[data-theme="light"] .icon {
+  filter: brightness(0) saturate(100%);
+}
+
+/* Dark Mode → weiß */
+:root[data-theme="dark"] .icon {
+  filter: invert(1) brightness(100%);
+}
+
+/* Hover → heller / invertiert */
 .link:hover .icon {
-  filter: brightness(0) invert(1); /* weiß */
+  filter: invert(1) brightness(120%);
 }
 
+/* Active → zurück in Basis-Farbe */
 .active .icon {
-  filter: brightness(0) saturate(100%); /* wieder schwarz */
+  filter: inherit;
 }
 
-
+/* ───────── Labels ───────── */
 .label {
   white-space: nowrap;
   font-size: 1.2rem;
 }
 
+/* ───────── Responsive (<900px) ───────── */
 @media (max-width: 900px) {
   .brand {
     grid-template-columns: 44px;
@@ -110,16 +143,14 @@
   }
 
   .icon {
-  width: 30px;
-  height: 30px;
-  object-fit: contain;
-  text-align: center;
-  filter: invert(90%);
-  transition: filter 0.2s ease;
-}
+    width: 30px;
+    height: 30px;
+    object-fit: contain;
+    text-align: center;
+  }
 
   .link {
-    grid-template-columns: 1fr; 
+    grid-template-columns: 1fr;
     justify-items: center;
     padding: 10px;
   }
@@ -133,4 +164,12 @@
     padding: 4px;
     gap: 4px;
   }
+
+  .darkmode {
+  /* border-top: 1px solid var(--border);
+  border-bottom: 1px solid var(--border); */
+  justify-content: center; /* horizontal mittig */
+  align-items: center;     /* vertikal mittig */
+  
+}
 }
