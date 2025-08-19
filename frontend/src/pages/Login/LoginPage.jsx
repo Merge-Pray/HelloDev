@@ -41,7 +41,7 @@ export default function LoginPage() {
       if (!res.ok) throw new Error(data.message || "Login failed");
 
       setCurrentUser(data.user);
-      navigate("/news");
+      navigate("/home");
     } catch (err) {
       console.error("Login error:", err);
       setError("Login failed. Please try again.");
