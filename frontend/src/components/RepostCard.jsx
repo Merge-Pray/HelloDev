@@ -2,13 +2,13 @@ import React from "react";
 import { Repeat } from "lucide-react";
 import { formatDistanceToNow } from "date-fns";
 import PostCard from "./PostCard";
+import styles from "./PostCard.module.css";
 
 export default function RepostCard({ repost, onLike, onComment, onRepost }) {
-  // Add safety checks
   if (!repost || !repost.author) {
     console.error("RepostCard received invalid repost data:", repost);
     return (
-      <div className="repost-card error">
+      <div className={`${styles.postCard} ${styles.error}`}>
         <p>Error: Repost data is incomplete</p>
       </div>
     );
@@ -17,14 +17,14 @@ export default function RepostCard({ repost, onLike, onComment, onRepost }) {
   if (!repost.originalPost) {
     console.error("RepostCard missing originalPost:", repost);
     return (
-      <div className="repost-card error">
+      <div className={`${styles.postCard} ${styles.error}`}>
         <p>Error: Original post data is missing</p>
       </div>
     );
   }
 
   return (
-    <div className="repost-card">
+    <div className={styles.postCard}>
       {/* Repost header */}
       <div className="repost-header">
         <Repeat size={16} />
@@ -48,7 +48,7 @@ export default function RepostCard({ repost, onLike, onComment, onRepost }) {
         </div>
       )}
 
-      {/* Original post content - add safety check */}
+      {/* Original post content */}
       <div className="original-post">
         {repost.originalPost && repost.originalPost.author ? (
           <PostCard
@@ -59,7 +59,7 @@ export default function RepostCard({ repost, onLike, onComment, onRepost }) {
             isEmbedded={true}
           />
         ) : (
-          <div className="error-message">
+          <div className={`${styles.postCard} ${styles.error}`}>
             <p>Original post unavailable</p>
           </div>
         )}

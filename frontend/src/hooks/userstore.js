@@ -18,42 +18,48 @@ const useUserStore = create(
   persist(
     (set, get) => ({
       currentUser: null,
+
       setCurrentUser: (user) =>
         set({
           currentUser: {
-            userID: user.userID,
+            _id: user.id || user._id,
+            userID: user.id || user._id,
             username: user.username,
+            email: user.email,
+            isMatchable: user.isMatchable,
+            avatar: user.avatar,
+
+            aboutMe: user.aboutMe,
+            country: user.country,
+            city: user.city,
+            age: user.age,
+            status: user.status,
+            devExperience: user.devExperience,
+            techArea: user.techArea,
+            programmingLanguages: user.programmingLanguages,
+            techStack: user.techStack,
+            preferredOS: user.preferredOS,
+            languages: user.languages,
+            gaming: user.gaming,
+            otherInterests: user.otherInterests,
+            favoriteDrinkWhileCoding: user.favoriteDrinkWhileCoding,
+            musicGenreWhileCoding: user.musicGenreWhileCoding,
+            favoriteShowMovie: user.favoriteShowMovie,
+            isOnline: user.isOnline,
+            lastSeen: user.lastSeen,
+            points: user.points,
+            rating: user.rating,
           },
         }),
+
       clearUser: () => set({ currentUser: null }),
-      //       checkToken: async () => {
-      //     try {
-      //       const currentUser = get().currentUser;
 
-      //       if (!currentUser) {
-      //         set({ currentUser: null });
-      //         return;
-      //       }
-
-      //       const response = await fetch(
-      //         `${API_URL}/api/user/${currentUser.id}`,
-      //         {
-      //           method: "GET",
-      //           credentials: "include",
-      //         }
-      //       );
-
-      //       if (response.ok) {
-      //         const user = await response.json();
-      //         set({ currentUser: user });
-      //       } else {
-      //         set({ currentUser: null });
-      //       }
-      //     } catch (error) {
-      //       console.error("Error checking token:", error);
-      //       set({ currentUser: null });
-      //     }
-      //   },
+      updateUser: (userData) =>
+        set((state) => ({
+          currentUser: state.currentUser
+            ? { ...state.currentUser, ...userData }
+            : null,
+        })),
     }),
 
     {
