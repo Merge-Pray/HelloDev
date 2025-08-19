@@ -242,7 +242,13 @@ export default function BuildProfile() {
   );
 
   const handleCancel = useCallback(() => {
-    navigate("/profile");
+    // Show warning message and redirect to profile
+    setError(
+      "Profile setup incomplete. Complete at least 50% to enable matching."
+    );
+    setTimeout(() => {
+      navigate("/profile");
+    }, 2000);
   }, [navigate]);
 
   const handleBack = useCallback(() => {
