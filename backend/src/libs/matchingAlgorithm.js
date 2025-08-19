@@ -41,17 +41,23 @@ export function calculatePersonalScore(user1, user2) {
 
   const interestsScore = calculatePersonalInterestsScore(user1, user2);
   if (interestsScore !== null) {
-    scores.push({ score: interestsScore, weight: 0.5 });
+    scores.push({ score: interestsScore, weight: 0.4 }); 
   }
 
   const timeScore = calculateCodingTimeCompatibility(user1, user2);
   if (timeScore !== null) {
-    scores.push({ score: timeScore, weight: 0.35 });
+    scores.push({ score: timeScore, weight: 0.3 }); 
   }
 
   const locationScore = calculateLocationCompatibility(user1, user2);
   if (locationScore !== null) {
     scores.push({ score: locationScore, weight: 0.15 });
+  }
+
+  
+  const languageScore = calculateSpokenLanguageScore(user1, user2);
+  if (languageScore > 0) {
+    scores.push({ score: languageScore, weight: 0.15 }); 
   }
 
   if (scores.length === 0) {
@@ -636,4 +642,34 @@ export async function getMatchesForUser(userId, limit = 10) {
     console.error("❌ Error getting user matches:", error);
     throw error;
   }
+}
+
+
+export function calculateSpokenLanguageScore(user1, user2) {
+  if (!user1.languages?.length || !user2.languages?.length) {
+    return 0;
+  }
+
+  const user1Languages = new Set(
+    user1.languages.map((lang) => lang.toLowerCase())
+  );
+  const user2Languages = new Set(
+    user2.languages.map((lang) => lang.toLowerCase())
+  );
+
+  const commonLanguages = new Set(
+    [...user1Languages].filter((lang) => user2Languages.has(lang))
+  );
+
+  if (commonLanguages.size === 0) {
+    return 0;
+  }
+
+  
+  const baseScore = 60;
+
+  
+  const multiLanguageBonus = Math.min(commonLanguages.size * 15, 40);
+
+  return Math.min(100, baseScore + multiLanguageBonus);
 }
