@@ -601,6 +601,17 @@
   .btn {
     justify-content: center;
   }
+
+  /* ✅ NEU: Programming Languages Editor Styles */
+
+  .programmingLanguagesGrid {
+    grid-template-columns: 1fr;
+    gap: 12px;
+  }
+
+  .languageCard {
+    padding: 12px;
+  }
 }
 
 /* Smooth transitions for theme switching */

@@ -11,7 +11,12 @@ import styles from "./editprofile.module.css";
 
 const EditProfilePage = () => {
   const currentUser = useUserStore((state) => state.currentUser); // Auth only
-  const { data: profileData, isLoading, error: profileError, refetch } = useProfile();
+  const {
+    data: profileData,
+    isLoading,
+    error: profileError,
+    refetch,
+  } = useProfile();
   const updateProfile = useUpdateProfile();
   const [activeSection, setActiveSection] = useState("personal");
   const [editingSections, setEditingSections] = useState({});
@@ -32,15 +37,15 @@ const EditProfilePage = () => {
       navigate("/login");
       return;
     }
-    
+
     if (profileError) {
-      if (profileError.message.includes('401')) {
+      if (profileError.message.includes("401")) {
         navigate("/login");
         return;
       }
       setError("Failed to load profile data. Please try again.");
     }
-    
+
     // Initialize form with profile data when it loads
     if (profileData) {
       Object.keys(profileData).forEach((key) => {
@@ -523,6 +528,114 @@ const EditProfilePage = () => {
     </div>
   );
 
+  const renderProgrammingLanguagesSection = () => {
+    const watchedValues = watch("programmingLanguages") || [];
+    const options = [
+      "JavaScript",
+      "Python",
+      "Java",
+      "C++",
+      "C#",
+      "TypeScript",
+      "PHP",
+      "Ruby",
+      "Go",
+      "Rust",
+      "Swift",
+      "Kotlin",
+      "C",
+      "Scala",
+      "Dart",
+    ];
+
+    return (
+      <div className={styles.formSection}>
+        {renderSectionHeader("Programming Languages", "languages")}
+        <div className={styles.programmingLanguagesGrid}>
+          {options.map((language) => {
+            const selectedEntry = watchedValues.find((item) =>
+              Array.isArray(item) ? item[0] === language : item === language
+            );
+            const isSelected = !!selectedEntry;
+            const currentSkillLevel = Array.isArray(selectedEntry)
+              ? selectedEntry[1]
+              : 5;
+
+            return (
+              <div key={language} className={styles.languageCard}>
+                <div className={styles.languageHeader}>
+                  <label className={styles.languageCheckbox}>
+                    <input
+                      type="checkbox"
+                      checked={isSelected}
+                      disabled={!editingSections.languages}
+                      onChange={(e) => {
+                        const currentValues = watchedValues || [];
+
+                        if (e.target.checked) {
+                          setValue("programmingLanguages", [
+                            ...currentValues,
+                            [language, 5],
+                          ]);
+                        } else {
+                          setValue(
+                            "programmingLanguages",
+                            currentValues.filter((item) =>
+                              Array.isArray(item)
+                                ? item[0] !== language
+                                : item !== language
+                            )
+                          );
+                        }
+                      }}
+                    />
+                    <span className={styles.languageName}>{language}</span>
+                  </label>
+                </div>
+
+                {isSelected && (
+                  <div className={styles.skillSliderContainer}>
+                    <div className={styles.skillLevelHeader}>
+                      <span className={styles.skillLabel}>Skill Level</span>
+                      <span className={styles.skillValue}>
+                        {currentSkillLevel}/10
+                      </span>
+                    </div>
+                    <div className={styles.sliderWrapper}>
+                      <span className={styles.sliderMinMax}>1</span>
+                      <input
+                        type="range"
+                        min="1"
+                        max="10"
+                        value={currentSkillLevel}
+                        className={styles.skillSlider}
+                        disabled={!editingSections.languages}
+                        onChange={(e) => {
+                          const newLevel = parseInt(e.target.value);
+                          const currentValues = watchedValues || [];
+
+                          const updatedValues = currentValues.map((item) => {
+                            if (Array.isArray(item) && item[0] === language) {
+                              return [language, newLevel];
+                            }
+                            return item;
+                          });
+
+                          setValue("programmingLanguages", updatedValues);
+                        }}
+                      />
+                      <span className={styles.sliderMinMax}>10</span>
+                    </div>
+                  </div>
+                )}
+              </div>
+            );
+          })}
+        </div>
+      </div>
+    );
+  };
+
   useEffect(() => {
     const urlParams = new URLSearchParams(window.location.search);
     const section = urlParams.get("section");
@@ -550,29 +663,7 @@ const EditProfilePage = () => {
         case "experience":
           return renderExperienceSection();
         case "languages":
-          return renderMultiSelectSection(
-            "Programming Languages",
-            "programmingLanguages",
-            [
-              "JavaScript",
-              "Python",
-              "Java",
-              "C++",
-              "C#",
-              "TypeScript",
-              "PHP",
-              "Ruby",
-              "Go",
-              "Rust",
-              "Swift",
-              "Kotlin",
-              "C",
-              "Scala",
-              "Dart",
-            ],
-            "languages",
-            true
-          );
+          return renderProgrammingLanguagesSection(); // ✅ Neue Funktion statt renderMultiSelectSection
         case "interests":
           return renderMultiSelectSection(
             "Tech Areas of Interest",
@@ -786,7 +877,9 @@ const EditProfilePage = () => {
                 disabled={updateProfile.isLoading}
               >
                 <Save size={16} />
-                {updateProfile.isLoading ? "Saving All Changes..." : "Save All Changes"}
+                {updateProfile.isLoading
+                  ? "Saving All Changes..."
+                  : "Save All Changes"}
               </button>
             </div>
           </form>

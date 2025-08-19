@@ -130,32 +130,25 @@
 .skillsGrid {
   display: flex;
   flex-wrap: wrap;
-  gap: 8px;
+  gap: 12px; /* ✅ Erhöhter Abstand */
   width: 100%;
 }
 
 .skillTag {
   background: var(--color-primary-light);
   color: var(--color-primary);
-  padding: 8px 12px;
+  padding: 10px 14px; /* ✅ Erhöhtes Padding */
   border-radius: 20px;
   font-size: 14px;
   font-weight: 500;
   border: 1px solid var(--color-primary);
   display: flex;
   align-items: center;
-  gap: 6px;
+  gap: 8px; /* ✅ Erhöhter Gap */
   transition: all 0.2s ease;
-  /* ✅ Wichtig: Verhindert dass Tags zusammenfließen */
   flex-shrink: 0;
   min-width: fit-content;
-}
-
-.skillTag:hover {
-  background: var(--color-primary);
-  color: white;
-  transform: translateY(-1px);
-  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.15);
+  margin-bottom: 4px; /* ✅ Extra Margin für vertikalen Abstand */
 }
 
 .skillIcon {
@@ -169,12 +162,13 @@
 
 .skillLevel {
   font-size: 12px;
-  opacity: 0.8;
-  font-weight: 400;
-  background: rgba(255, 255, 255, 0.2);
-  padding: 2px 6px;
-  border-radius: 8px;
+  opacity: 0.9; /* ✅ Erhöhte Sichtbarkeit */
+  font-weight: 500; /* ✅ Erhöhtes Font-Weight */
+  background: rgba(255, 255, 255, 0.3);
+  padding: 3px 7px; /* ✅ Erhöhtes Padding */
+  border-radius: 10px;
   white-space: nowrap; /* ✅ Verhindert Zeilenumbruch im Level */
+  margin-left: 4px; /* ✅ Extra Abstand */
 }
 
 /* ✅ Spezielle Styles für Programming Language Tags */
@@ -187,6 +181,7 @@
   border: 1px solid var(--color-primary);
   position: relative;
   overflow: hidden;
+  min-width: 120px; /* ✅ Mindestbreite für konsistente Darstellung */
 }
 
 .programmingLanguageTag::before {
@@ -430,15 +425,96 @@
   cursor: not-allowed;
 }
 
-/* Dark Mode Support */
-[data-theme="dark"] .checkboxItem {
-  background: var(--color-bg-secondary);
-  border-color: var(--color-border);
+.experienceBadge {
+  display: flex;
 }
 
-[data-theme="dark"] .skillSelect {
-  background: var(--color-bg-secondary);
-  border-color: var(--color-border);
+.levelBadge {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 12px 20px;
+  border-radius: 25px;
+  font-weight: 600;
+  font-size: 14px;
+  border: 2px solid;
+  transition: all 0.2s ease;
+  min-width: 140px;
+  justify-content: center;
+}
+
+.levelText {
+  font-weight: 600;
+}
+
+/* ✅ Beginner Level - Grün */
+.levelBeginner {
+  background: linear-gradient(135deg, #d1fae5, #a7f3d0);
+  color: #065f46;
+  border-color: #10b981;
+}
+
+.levelBeginner:hover {
+  background: linear-gradient(135deg, #a7f3d0, #6ee7b7);
+  transform: translateY(-1px);
+  box-shadow: 0 4px 12px rgba(16, 185, 129, 0.3);
+}
+
+/* ✅ Intermediate Level - Orange */
+.levelIntermediate {
+  background: linear-gradient(135deg, #fed7aa, #fdba74);
+  color: #9a3412;
+  border-color: #f97316;
+}
+
+.levelIntermediate:hover {
+  background: linear-gradient(135deg, #fdba74, #fb923c);
+  transform: translateY(-1px);
+  box-shadow: 0 4px 12px rgba(249, 115, 22, 0.3);
+}
+
+/* ✅ Expert Level - Lila */
+.levelExpert {
+  background: linear-gradient(135deg, #e9d5ff, #c4b5fd);
+  color: #581c87;
+  border-color: #8b5cf6;
+}
+
+.levelExpert:hover {
+  background: linear-gradient(135deg, #c4b5fd, #a78bfa);
+  transform: translateY(-1px);
+  box-shadow: 0 4px 12px rgba(139, 92, 246, 0.3);
+}
+
+/* Dark Mode Support */
+[data-theme="dark"] .levelBeginner {
+  background: linear-gradient(
+    135deg,
+    rgba(16, 185, 129, 0.2),
+    rgba(16, 185, 129, 0.3)
+  );
+  color: #6ee7b7;
+  border-color: #10b981;
+}
+
+[data-theme="dark"] .levelIntermediate {
+  background: linear-gradient(
+    135deg,
+    rgba(249, 115, 22, 0.2),
+    rgba(249, 115, 22, 0.3)
+  );
+  color: #fdba74;
+  border-color: #f97316;
+}
+
+[data-theme="dark"] .levelExpert {
+  background: linear-gradient(
+    135deg,
+    rgba(139, 92, 246, 0.2),
+    rgba(139, 92, 246, 0.3)
+  );
+  color: #c4b5fd;
+  border-color: #8b5cf6;
 }
 
 /* Mobile Responsive */
@@ -452,16 +528,26 @@
   }
 
   .skillsGrid {
-    gap: 6px;
+    gap: 8px;
   }
 
   .skillTag {
     font-size: 13px;
-    padding: 6px 10px;
+    padding: 8px 12px;
   }
 
   .skillLevel {
     font-size: 11px;
-    padding: 1px 4px;
+    padding: 2px 5px;
+  }
+
+  .levelBadge {
+    padding: 10px 16px;
+    font-size: 13px;
+    min-width: 120px;
+  }
+
+  .experienceBadge {
+    padding: 12px;
   }
 }
