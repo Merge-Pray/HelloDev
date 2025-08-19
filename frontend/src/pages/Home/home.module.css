@@ -5,7 +5,7 @@
   --border: rgba(255,255,255,0.06);
 
   display: grid;
-  grid-template-columns: 260px 1fr 360px; /* menu | feed | sidebar */
+  grid-template-columns: 260px 1fr 400px; /* menu | feed | sidebar */
   gap: 24px;
   min-height: 100vh;
   background: var(--bg);
@@ -20,7 +20,7 @@
 .right { border-left: 1px solid var(--border); }
 
 /* Innenabstände */
-.left, .center, .right { padding: 16px; }
+.left, .center, .right { padding: 0px; }
 
 /* ---------- Breakpoints ---------- */
 

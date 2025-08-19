@@ -5,8 +5,8 @@
 }
 
 .section {
-  border: 1px solid rgba(255,255,255,0.06);
-  background: rgba(255,255,255,0.03);
+  /* border: 1px solid rgba(255,255,255,0.06); */
+  /* background: rgba(255,255,255,0.03); */
   border-radius: 12px;
   padding: 12px;
 }
@@ -39,5 +39,3 @@
   place-items: center;
   opacity: 0.6;
 }
-
-/* Mobile wird die gesamte Sidebar bereits im Seitenlayout ausgeblendet (Home.module.css) */

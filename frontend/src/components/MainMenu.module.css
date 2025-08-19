@@ -17,8 +17,8 @@
   display: inline-grid;
   place-items: center;
   font-size: 33px;
-  max-width: 120px;
-  height: 44px;
+  
+  height: 50px;
   transition: all 0.25s ease;
 }
 
@@ -68,8 +68,8 @@
 }
 
 .icon {
-  width: 30px;
-  height: 30px;
+  width: 25px;
+  height: 25px;
   object-fit: contain;
   text-align: center;
   filter: invert(90%);
@@ -83,7 +83,7 @@
 
 .label {
   white-space: nowrap;
-  font-size: 1.3rem;
+  font-size: 1.2rem;
 }
 
 @media (max-width: 900px) {
@@ -97,10 +97,19 @@
   }
 
   .logo {
-    max-width: 40px;
+    max-width: 50px;
     height: 40px;
     font-size: 20px;
   }
+
+  .icon {
+  width: 30px;
+  height: 30px;
+  object-fit: contain;
+  text-align: center;
+  filter: invert(90%);
+  transition: filter 0.2s ease;
+}
 
   .link {
     grid-template-columns: 1fr; 
