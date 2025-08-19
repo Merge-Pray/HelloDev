@@ -1,15 +1,15 @@
 /* src/pages/Home.module.css */
 .page {
-  --bg: #140e1a;
-  --panel: #1b1324;
-  --border: rgba(255,255,255,0.06);
+  --bg: var(--color-bg);
+  --panel: var(--color-bg-secondary);
+  --border: var(--color-border);
 
   display: grid;
   grid-template-columns: 260px 1fr 400px; /* menu | feed | sidebar */
   gap: 24px;
   min-height: 100vh;
   background: var(--bg);
-  color: #eee;
+  color: var(--color-text);
   padding: 24px;
   box-sizing: border-box;
 }

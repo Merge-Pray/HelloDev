@@ -6,11 +6,11 @@
 }
 
 .brand {
-  display: grid;
-  grid-template-columns: 44px 1fr;
+  display: flex;                /* flex statt grid */
   align-items: center;
-  gap: 10px;
+  justify-content: space-between;
   padding: 8px 10px;
+  gap: 8px;
 }
 
 .logo {
@@ -20,6 +20,10 @@
   
   height: 50px;
   transition: all 0.25s ease;
+}
+
+.darkmode {
+  text-align: center;
 }
 
 .brandText {
@@ -34,7 +38,7 @@
   margin-top: 40px;
   padding: 6px;
   display: grid;
-  gap: 30px;
+  gap: 5px;
 
   align-content: start;
 }
@@ -49,37 +53,40 @@
   grid-template-columns: 28px 1fr;
   align-items: center;
   gap: 12px;
-  padding: var(--item-py) 12px; 
-  border-radius: 12px;
+  padding:  10px; 
+  border-radius: 8px;
   text-decoration: none;
-  color: #e8e3ee;
+  color: var(--color-text);
   border: 1px solid transparent;
   transition: background 0.2s ease, border-color 0.2s ease;
 }
 
 .link:hover {
-  background: rgba(255, 255, 255, 0.05);
-  border-color: rgba(255, 255, 255, 0.08);
+  background: var(--color-primary-hover);
+  color: var(--color-primary-hover-invert);
+  border-color: var(--color-border);
 }
 
-.active {
+/* .active {
   background: rgba(160, 120, 255, 0.12);
   border-color: rgba(160, 120, 255, 0.35);
-}
+} */
 
 .icon {
   width: 25px;
   height: 25px;
-  object-fit: contain;
-  text-align: center;
-  filter: invert(90%);
+  filter: brightness(0) saturate(100%); /* schwarz */
   transition: filter 0.2s ease;
 }
 
-.link:hover .icon,
-.active .icon {
-  filter: invert(100%) sepia(90%) saturate(200%) hue-rotate(250deg);
+.link:hover .icon {
+  filter: brightness(0) invert(1); /* weiß */
 }
+
+.active .icon {
+  filter: brightness(0) saturate(100%); /* wieder schwarz */
+}
+
 
 .label {
   white-space: nowrap;

@@ -10,6 +10,7 @@
   /* Markenfarben */
   --color-primary: #5d3f94; /* Lila Hauptfarbe */
   --color-primary-hover: #63439f;
+  --color-primary-hover-invert: #ffffff;
   --color-accent: #9333ea;
 
   /* Interaktionsfarben */
@@ -57,6 +58,7 @@
 
   --color-primary: #a78bfa;
   --color-primary-hover: #c4b5fd;
+   --color-primary-hover-invert: Black;
   --color-accent: #c084fc;
 
   --color-like: #ff5c8a;
