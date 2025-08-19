@@ -4,7 +4,7 @@ import styles from "./MainMenu.module.css";
 import { NavLink } from "react-router";
 
 const topItems = [
-  { to: "/",             icon: "/icons/home.svg",           label: "Home" },
+  { to: "/home",             icon: "/icons/home.svg",           label: "Home" },
   { to: "/matches",      icon: "/icons/matches.svg",        label: "Matches" },
   { to: "/search",       icon: "/icons/search.svg",         label: "Search" },
   { to: "/messages",     icon: "/icons/messages.svg",       label: "Messages" },
