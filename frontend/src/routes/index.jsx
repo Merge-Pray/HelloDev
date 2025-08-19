@@ -9,13 +9,13 @@ import LegalNotice from "../pages/Legal/Legalnotice";
 import GeneralTermsandConditions from "../pages/Legal/GeneralTermsandConditions";
 import DataPrivacy from "../pages/Legal/DataPrivacy";
 import About from "../pages/About";
-import Newsfeed from "../pages/Newsfeed";
 import BuildProfile from "../pages/Profile/BuildProfile";
 import MatchOverView from "../pages/MatchOverView";
 import MatchPage from "../pages/MatchPage";
 import LoginPage from "../pages/Login/LoginPage";
 import RegisterPage from "../pages/Register/RegisterPage";
 import LandingPage from "../pages/LandingPage/LandingPage";
+import Home from "../pages/Home/Home";
 import EditProfilePage from "../pages/Profile/EditProfilePage";
 
 export const router = createBrowserRouter([
@@ -30,7 +30,7 @@ export const router = createBrowserRouter([
       { path: "buildprofile", element: <BuildProfile /> },
       { path: "editprofile", element: <EditProfilePage /> },
       { path: "profile", element: <Profilepage /> },
-      { path: "news", element: <Newsfeed /> },
+      { path: "home", element: <Home /> },
       { path: "matchoverview", element: <MatchOverView /> },
       { path: "match", element: <MatchPage /> },
       { path: "chat", element: <Chatpage /> },
