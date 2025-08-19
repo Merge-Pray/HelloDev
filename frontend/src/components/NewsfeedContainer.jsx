@@ -101,7 +101,7 @@ export default function NewsfeedContainer() {
                 : (post.likes || []).filter(
                     (like) => {
                       const likeUserId = like.user?._id || like.user;
-                      return likeUserId !== currentUser._id && likeUserId !== currentUser.userID;
+                      return likeUserId !== currentUser._id;
                     }
                   ),
             }

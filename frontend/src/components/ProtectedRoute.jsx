@@ -3,7 +3,7 @@ import useUserStore from "../hooks/userstore";
 import { Navigate } from "react-router";
 
 const ProtectedRoute = ({ children }) => {
-  const { currentUser } = useUserStore();
+  const currentUser = useUserStore((state) => state.currentUser);
   const [redirect, setRedirect] = useState(false);
 
   useEffect(() => {

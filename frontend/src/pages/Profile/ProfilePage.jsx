@@ -24,59 +24,32 @@ import {
   Briefcase,
 } from "lucide-react";
 import useUserStore from "../../hooks/userstore";
+import { useProfile } from "../../hooks/useProfile";
 import DarkMode from "../../components/DarkMode";
 import styles from "./profilepage.module.css";
 import { API_URL } from "../../lib/config";
 import { calculateProfileCompletion } from "../../utils/profileCompletion";
 
 export default function ProfilePage() {
-  const { currentUser, setCurrentUser } = useUserStore();
-  const [profileData, setProfileData] = useState({});
-  const [isLoading, setIsLoading] = useState(true);
+  const currentUser = useUserStore((state) => state.currentUser); // Auth only
+  const { data: profileData, isLoading, error: profileError, refetch } = useProfile();
   const [error, setError] = useState(null);
   const navigate = useNavigate();
 
   useEffect(() => {
-    const fetchProfileData = async () => {
-      if (!currentUser) {
+    if (!currentUser) {
+      navigate("/login");
+      return;
+    }
+    
+    if (profileError) {
+      if (profileError.message.includes('401')) {
         navigate("/login");
         return;
       }
-
-      setIsLoading(true);
-      setError(null);
-
-      try {
-        const response = await fetch(`${API_URL}/api/user/user`, {
-          method: "GET",
-          headers: {
-            "Content-Type": "application/json",
-          },
-          credentials: "include",
-        });
-
-        if (!response.ok) {
-          if (response.status === 401) {
-            navigate("/login");
-            return;
-          }
-          throw new Error(`HTTP error! status: ${response.status}`);
-        }
-
-        const data = await response.json();
-
-        setProfileData(data.user);
-        setCurrentUser({ ...currentUser, ...data.user });
-      } catch (error) {
-        console.error("Failed to fetch profile:", error);
-        setError("Failed to load profile data. Please try again.");
-      } finally {
-        setIsLoading(false);
-      }
-    };
-
-    fetchProfileData();
-  }, [currentUser?.id, navigate, setCurrentUser]);
+      setError("Failed to load profile data. Please try again.");
+    }
+  }, [currentUser, navigate, profileError]);
 
   const handleEditProfile = () => {
     navigate("/editprofile");

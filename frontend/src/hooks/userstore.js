@@ -23,47 +23,18 @@ const useUserStore = create(
         set({
           currentUser: {
             _id: user.id || user._id,
-            userID: user.id || user._id,
             username: user.username,
-            email: user.email,
-            isMatchable: user.isMatchable,
-            avatar: user.avatar,
-
-            aboutMe: user.aboutMe,
-            country: user.country,
-            city: user.city,
-            age: user.age,
-            status: user.status,
-            devExperience: user.devExperience,
-            techArea: user.techArea,
-            programmingLanguages: user.programmingLanguages,
-            techStack: user.techStack,
-            preferredOS: user.preferredOS,
-            languages: user.languages,
-            gaming: user.gaming,
-            otherInterests: user.otherInterests,
-            favoriteDrinkWhileCoding: user.favoriteDrinkWhileCoding,
-            musicGenreWhileCoding: user.musicGenreWhileCoding,
-            favoriteShowMovie: user.favoriteShowMovie,
-            isOnline: user.isOnline,
-            lastSeen: user.lastSeen,
-            points: user.points,
-            rating: user.rating,
           },
         }),
 
       clearUser: () => set({ currentUser: null }),
 
-      updateUser: (userData) =>
-        set((state) => ({
-          currentUser: state.currentUser
-            ? { ...state.currentUser, ...userData }
-            : null,
-        })),
+      // Helper to check if user is authenticated
+      isAuthenticated: () => !!get().currentUser,
     }),
 
     {
-      name: "user-storage",
+      name: "user-storage", // Keep original name for compatibility
       storage: zustandStorage,
     }
   )
