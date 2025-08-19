@@ -16,7 +16,7 @@ import EditProfilePage from "../pages/EditProfilePage";
 import LoginPage from "../pages/Login/LoginPage";
 import RegisterPage from "../pages/Register/RegisterPage";
 import LandingPage from "../pages/LandingPage/LandingPage";
-import Home from "../pages/Home";
+import Home from "../pages/Home/Home";
 
 export const router = createBrowserRouter([
   {
