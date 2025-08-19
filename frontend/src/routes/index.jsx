@@ -12,11 +12,11 @@ import About from "../pages/About";
 import BuildProfile from "../pages/Profile/BuildProfile";
 import MatchOverView from "../pages/MatchOverView";
 import MatchPage from "../pages/MatchPage";
-import EditProfilePage from "../pages/EditProfilePage";
 import LoginPage from "../pages/Login/LoginPage";
 import RegisterPage from "../pages/Register/RegisterPage";
 import LandingPage from "../pages/LandingPage/LandingPage";
 import Home from "../pages/Home/Home";
+import EditProfilePage from "../pages/Profile/EditProfilePage";
 
 export const router = createBrowserRouter([
   {

@@ -135,66 +135,106 @@
 }
 
 .skillTag {
+  background: var(--color-primary-light);
+  color: var(--color-primary);
+  padding: 8px 12px;
+  border-radius: 20px;
+  font-size: 14px;
+  font-weight: 500;
+  border: 1px solid var(--color-primary);
   display: flex;
   align-items: center;
   gap: 6px;
-  background: var(--color-bg-secondary);
-  border: 2px solid var(--color-card-border);
-  border-radius: 20px;
-  padding: 8px 12px;
-  font-size: 14px;
-  font-weight: 500;
-  color: var(--color-text);
   transition: all 0.2s ease;
+  /* ✅ Wichtig: Verhindert dass Tags zusammenfließen */
+  flex-shrink: 0;
+  min-width: fit-content;
 }
 
 .skillTag:hover {
+  background: var(--color-primary);
+  color: white;
+  transform: translateY(-1px);
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.15);
+}
+
+.skillIcon {
+  flex-shrink: 0;
+}
+
+.skillName {
+  font-weight: 600;
+  white-space: nowrap; /* ✅ Verhindert Zeilenumbruch im Namen */
+}
+
+.skillLevel {
+  font-size: 12px;
+  opacity: 0.8;
+  font-weight: 400;
+  background: rgba(255, 255, 255, 0.2);
+  padding: 2px 6px;
+  border-radius: 8px;
+  white-space: nowrap; /* ✅ Verhindert Zeilenumbruch im Level */
+}
+
+/* ✅ Spezielle Styles für Programming Language Tags */
+.programmingLanguageTag {
+  background: linear-gradient(
+    135deg,
+    var(--color-primary-light),
+    rgba(var(--color-primary-rgb), 0.1)
+  );
+  border: 1px solid var(--color-primary);
+  position: relative;
+  overflow: hidden;
+}
+
+.programmingLanguageTag::before {
+  content: "";
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  height: 2px;
+  background: var(--color-primary);
+}
+
+.programmingLanguageTag:hover {
+  background: var(--color-primary);
+  color: white;
+}
+
+.programmingLanguageTag:hover .skillLevel {
+  background: rgba(255, 255, 255, 0.3);
+  color: white;
+}
+
+/* Dark Mode Support */
+[data-theme="dark"] .skillTag {
+  background: rgba(var(--color-primary-rgb), 0.15);
   border-color: var(--color-primary);
-  background: rgba(93, 63, 148, 0.1);
-  color: var(--color-primary);
 }
 
 [data-theme="dark"] .skillTag:hover {
-  background: rgba(167, 139, 250, 0.15);
+  background: var(--color-primary);
+  color: var(--color-bg);
 }
 
-.skillTag svg {
-  width: 14px;
-  height: 14px;
+[data-theme="dark"] .skillLevel {
+  background: rgba(0, 0, 0, 0.3);
 }
 
-.experienceBadge {
-  min-height: 80px;
-  display: flex;
-  align-items: center;
+[data-theme="dark"] .programmingLanguageTag {
+  background: linear-gradient(
+    135deg,
+    rgba(var(--color-primary-rgb), 0.2),
+    rgba(var(--color-primary-rgb), 0.05)
+  );
 }
 
-.levelBadge {
-  display: flex;
-  align-items: center;
-  gap: 8px;
-  padding: 12px 20px;
-  border-radius: 12px;
-  font-weight: 600;
-  font-size: 16px;
-}
-
-.levelBeginner {
-  background: rgba(16, 185, 129, 0.1);
-  color: var(--color-success);
-  border: 2px solid var(--color-success);
-}
-
-.levelIntermediate {
-  background: rgba(245, 158, 11, 0.1);
-  color: var(--color-warning);
-  border: 2px solid var(--color-warning);
-}
-
-.levelExpert {
-  background: rgba(147, 51, 234, 0.1);
-  color: var(--color-accent);
-  border: 2px solid var(--color-accent);
+[data-theme="dark"] .programmingLanguageTag:hover .skillLevel {
+  background: rgba(0, 0, 0, 0.4);
+  color: var(--color-bg);
 }
 
 .emptyState {
@@ -322,4 +362,106 @@
 .addMoreSubtext {
   font-size: 14px;
   opacity: 0.8;
+}
+
+.checkboxItem {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  padding: 12px;
+  border: 1px solid var(--color-border);
+  border-radius: 8px;
+  background: var(--color-bg);
+  transition: all 0.2s ease;
+}
+
+.checkboxItem:hover {
+  border-color: var(--color-primary);
+  background: var(--color-hover);
+}
+
+.checkboxLabel {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  cursor: pointer;
+  margin: 0;
+}
+
+.checkboxText {
+  font-weight: 500;
+  color: var(--color-text);
+}
+
+.skillLevelContainer {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  margin-left: 24px; /* Einrückung unter der Checkbox */
+  padding-top: 4px;
+}
+
+.skillLabel {
+  font-size: 12px;
+  color: var(--color-text-secondary);
+  font-weight: 500;
+  min-width: 70px;
+}
+
+.skillSelect {
+  padding: 4px 8px;
+  border: 1px solid var(--color-border);
+  border-radius: 4px;
+  background: var(--color-bg);
+  color: var(--color-text);
+  font-size: 12px;
+  min-width: 60px;
+  cursor: pointer;
+}
+
+.skillSelect:focus {
+  outline: none;
+  border-color: var(--color-primary);
+  box-shadow: 0 0 0 2px rgba(var(--color-primary-rgb), 0.2);
+}
+
+.skillSelect:disabled {
+  opacity: 0.6;
+  cursor: not-allowed;
+}
+
+/* Dark Mode Support */
+[data-theme="dark"] .checkboxItem {
+  background: var(--color-bg-secondary);
+  border-color: var(--color-border);
+}
+
+[data-theme="dark"] .skillSelect {
+  background: var(--color-bg-secondary);
+  border-color: var(--color-border);
+}
+
+/* Mobile Responsive */
+@media (max-width: 768px) {
+  .checkboxGrid {
+    grid-template-columns: 1fr;
+  }
+
+  .skillLevelContainer {
+    margin-left: 16px;
+  }
+
+  .skillsGrid {
+    gap: 6px;
+  }
+
+  .skillTag {
+    font-size: 13px;
+    padding: 6px 10px;
+  }
+
+  .skillLevel {
+    font-size: 11px;
+    padding: 1px 4px;
+  }
 }

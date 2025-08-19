@@ -156,8 +156,8 @@ export const getNewsfeed = async (req, res, next) => {
       .populate("mentions", "username")
       .populate("likes.user", "username")
       .populate("comments.author", "username avatar")
-      .populate("originalPost") // For reposts
-      .populate("originalPost.author", "username avatar") // Critical: populate original post author
+      .populate("originalPost")
+      .populate("originalPost.author", "username avatar")
       .lean();
 
     const totalPosts = await PostModel.countDocuments(matchCriteria);
@@ -383,18 +383,11 @@ export const likePost = async (req, res, next) => {
 
     const liked = post.addLike(userId);
 
-    if (!liked) {
-      return res.status(400).json({
-        success: false,
-        message: "You have already liked this post",
-      });
-    }
-
     await post.save();
 
     res.json({
       success: true,
-      message: "Post liked successfully",
+      message: liked ? "Post liked successfully" : "Post already liked",
       likeCount: post.likes.length,
     });
   } catch (error) {
@@ -418,18 +411,11 @@ export const unlikePost = async (req, res, next) => {
 
     const unliked = post.removeLike(userId);
 
-    if (!unliked) {
-      return res.status(400).json({
-        success: false,
-        message: "You haven't liked this post",
-      });
-    }
-
     await post.save();
 
     res.json({
       success: true,
-      message: "Post unliked successfully",
+      message: unliked ? "Post unliked successfully" : "Post wasn't liked",
       likeCount: post.likes.length,
     });
   } catch (error) {

@@ -1,58 +1,81 @@
-import React, { useState, useEffect } from 'react';
-import FeedToggle from './FeedToggle';
-import PostComposer from './PostComposer';
-import FeedFilters from './FeedFilters';
-import NewsfeedList from './NewsfeedList';
-import EmptyFriendsFeed from './EmptyFriendsFeed';
-import { API_URL } from '../lib/config';
+import React, { useState, useEffect } from "react";
+import FeedToggle from "./FeedToggle";
+import PostComposer from "./PostComposer";
+import FeedFilters from "./FeedFilters";
+import NewsfeedList from "./NewsfeedList";
+import EmptyFriendsFeed from "./EmptyFriendsFeed";
+import SearchBar from "./SearchBar";
+import useUserStore from "../hooks/userstore";
+import { API_URL } from "../lib/config";
 
 export default function NewsfeedContainer() {
   const [posts, setPosts] = useState([]);
-  const [feedType, setFeedType] = useState('all');
-  const [algorithm, setAlgorithm] = useState('mixed');
+  const [feedType, setFeedType] = useState("all");
+  const [algorithm, setAlgorithm] = useState("mixed");
   const [friendsCount, setFriendsCount] = useState(0);
   const [loading, setLoading] = useState(false);
   const [page, setPage] = useState(1);
   const [hasNextPage, setHasNextPage] = useState(true);
   const [error, setError] = useState(null);
 
+  const [searchQuery, setSearchQuery] = useState("");
+  const [isSearchActive, setIsSearchActive] = useState(false);
+
+  const currentUser = useUserStore((state) => state.currentUser);
+
   const fetchPosts = async (resetPosts = true) => {
     setLoading(true);
     setError(null);
-    
+
     try {
       const currentPage = resetPosts ? 1 : page;
-      const response = await fetch(
-        `${API_URL}/api/posts/newsfeed?feedType=${feedType}&algorithm=${algorithm}&page=${currentPage}&limit=20`,
-        { credentials: 'include' }
-      );
-      
+
+      let url;
+      if (isSearchActive && searchQuery.trim()) {
+        url = `${API_URL}/api/posts/search?q=${encodeURIComponent(
+          searchQuery
+        )}&page=${currentPage}&limit=20`;
+      } else {
+        url = `${API_URL}/api/posts/newsfeed?feedType=${feedType}&algorithm=${algorithm}&page=${currentPage}&limit=20`;
+      }
+
+      const response = await fetch(url, { credentials: "include" });
+
       const data = await response.json();
       if (data.success) {
         if (resetPosts) {
           setPosts(data.posts);
           setPage(2);
         } else {
-          setPosts(prev => [...prev, ...data.posts]);
-          setPage(prev => prev + 1);
+          setPosts((prev) => [...prev, ...data.posts]);
+          setPage((prev) => prev + 1);
         }
-        setFriendsCount(data.friendsCount);
+        setFriendsCount(data.friendsCount || 0);
         setHasNextPage(data.pagination.hasNextPage);
       } else {
-        setError(data.message || 'Failed to fetch posts');
+        setError(data.message || "Failed to fetch posts");
       }
     } catch (error) {
-      console.error('Error fetching posts:', error);
-      setError('Failed to load posts. Please try again.');
+      console.error("Error fetching posts:", error);
+      setError("Failed to load posts. Please try again.");
     } finally {
       setLoading(false);
     }
   };
 
-  // Fetch posts when feed type or algorithm changes
   useEffect(() => {
     fetchPosts(true);
-  }, [feedType, algorithm]);
+  }, [feedType, algorithm, isSearchActive, searchQuery]);
+
+  const handleSearch = (query) => {
+    setSearchQuery(query);
+    setIsSearchActive(!!query.trim());
+  };
+
+  const handleClearSearch = () => {
+    setSearchQuery("");
+    setIsSearchActive(false);
+  };
 
   const handleFeedTypeChange = (newFeedType) => {
     setFeedType(newFeedType);
@@ -63,39 +86,54 @@ export default function NewsfeedContainer() {
   };
 
   const handleNewPost = (newPost) => {
-    setPosts(prev => [newPost, ...prev]);
+    setPosts((prev) => [newPost, ...prev]);
   };
 
   const handleLike = (postId, isLiked, newLikeCount) => {
-    setPosts(prev => prev.map(post => 
-      post._id === postId 
-        ? { ...post, likeCount: newLikeCount }
-        : post
-    ));
+    setPosts((prevPosts) =>
+      prevPosts.map((post) =>
+        post._id === postId
+          ? {
+              ...post,
+              likeCount: newLikeCount,
+              likes: isLiked
+                ? [...(post.likes || []), { user: currentUser._id }]
+                : (post.likes || []).filter(
+                    (like) => {
+                      const likeUserId = like.user?._id || like.user;
+                      return likeUserId !== currentUser._id && likeUserId !== currentUser.userID;
+                    }
+                  ),
+            }
+          : post
+      )
+    );
   };
 
   const handleComment = (postId, newComment) => {
-    setPosts(prev => prev.map(post => 
-      post._id === postId 
-        ? { 
-            ...post, 
-            comments: [...(post.comments || []), newComment],
-            commentCount: (post.commentCount || 0) + 1
-          }
-        : post
-    ));
+    setPosts((prev) =>
+      prev.map((post) =>
+        post._id === postId
+          ? {
+              ...post,
+              comments: [...(post.comments || []), newComment],
+              commentCount: (post.commentCount || 0) + 1,
+            }
+          : post
+      )
+    );
   };
 
   const handleRepost = (newRepost) => {
-    // Add repost to the top of the feed
-    setPosts(prev => [newRepost, ...prev]);
-    
-    // Update original post repost count
-    setPosts(prev => prev.map(post => 
-      post._id === newRepost.originalPost._id 
-        ? { ...post, repostCount: (post.repostCount || 0) + 1 }
-        : post
-    ));
+    setPosts((prev) => [newRepost, ...prev]);
+
+    setPosts((prev) =>
+      prev.map((post) =>
+        post._id === newRepost.originalPost._id
+          ? { ...post, repostCount: (post.repostCount || 0) + 1 }
+          : post
+      )
+    );
   };
 
   const handleLoadMore = () => {
@@ -106,22 +144,42 @@ export default function NewsfeedContainer() {
 
   return (
     <div className="newsfeed-container">
-      {/* Feed Controls */}
-      <div className="feed-controls">
-        <FeedToggle 
-          feedType={feedType}
-          onFeedTypeChange={handleFeedTypeChange}
-          friendsCount={friendsCount}
-        />
-        
-        <FeedFilters 
-          algorithm={algorithm} 
-          onAlgorithmChange={handleAlgorithmChange} 
-        />
-      </div>
+      {/* Search Bar */}
+      <SearchBar
+        onSearch={handleSearch}
+        onClear={handleClearSearch}
+        isActive={isSearchActive}
+        query={searchQuery}
+      />
 
-      {/* Post Composer */}
-      <PostComposer onPostCreated={handleNewPost} />
+      {/* Feed Controls - Hide during search */}
+      {!isSearchActive && (
+        <div className="feed-controls">
+          <FeedToggle
+            feedType={feedType}
+            onFeedTypeChange={handleFeedTypeChange}
+            friendsCount={friendsCount}
+          />
+
+          <FeedFilters
+            algorithm={algorithm}
+            onAlgorithmChange={handleAlgorithmChange}
+          />
+        </div>
+      )}
+
+      {/* Post Composer - Hide during search */}
+      {!isSearchActive && <PostComposer onPostCreated={handleNewPost} />}
+
+      {/* Search Results Header */}
+      {isSearchActive && (
+        <div className="search-results-header">
+          <h3>Search Results for "{searchQuery}"</h3>
+          <button onClick={handleClearSearch} className="clear-search-btn">
+            Clear Search
+          </button>
+        </div>
+      )}
 
       {/* Error Message */}
       {error && (
@@ -131,14 +189,22 @@ export default function NewsfeedContainer() {
         </div>
       )}
 
-      {/* Empty Friends Feed */}
-      {feedType === 'friends' && posts.length === 0 && !loading && (
-        <EmptyFriendsFeed friendsCount={friendsCount} />
+      {/* Empty States */}
+      {!isSearchActive &&
+        feedType === "friends" &&
+        posts.length === 0 &&
+        !loading && <EmptyFriendsFeed friendsCount={friendsCount} />}
+
+      {isSearchActive && posts.length === 0 && !loading && (
+        <div className="empty-search-results">
+          <h3>No posts found</h3>
+          <p>Try different keywords or check your spelling.</p>
+        </div>
       )}
 
       {/* Posts List */}
-      {(feedType === 'all' || posts.length > 0) && (
-        <NewsfeedList 
+      {posts.length > 0 && (
+        <NewsfeedList
           posts={posts}
           onLike={handleLike}
           onComment={handleComment}
