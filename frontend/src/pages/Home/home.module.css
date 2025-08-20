@@ -4,50 +4,44 @@
   --panel: var(--color-bg-secondary);
   --border: var(--color-border);
 
+  /* Breitenvariablen für Sidebar */
+  --aside-wide: 380px;
+  --aside-mid: 200px;   /* schmalere Sidebar zwischen 900–1199px */
+
   display: grid;
-  grid-template-columns: 260px 1fr 400px; /* menu | feed | sidebar */
+  grid-template-columns: 1fr var(--aside-wide); /* feed | sidebar */
   gap: 24px;
   min-height: 100vh;
   background: var(--bg);
   color: var(--color-text);
-  padding: 24px;
   box-sizing: border-box;
 }
 
 /* Bereiche */
-.left   { border-right: 1px solid var(--border);  }
-/* .center { background: var(--panel); border: 1px solid var(--border); border-radius: 16px; } */
-.right { border-left: 1px solid var(--border); }
-
-/* Innenabstände */
-.left, .center, .right { padding: 0px; }
+.center { min-width: 0; }
+.right  { border-left: 1px solid var(--border); min-width: 0; }
 
 /* ---------- Breakpoints ---------- */
 
-/* < 1200px: Sidebar ausblenden */
+/* < 1200px: Sidebar bleibt sichtbar aber schmaler */
 @media (max-width: 1200px) {
   .page {
-    grid-template-columns: 260px 1fr;
-  }
-  .right {
-    display: none;
+    grid-template-columns: 1fr var(--aside-mid);
+    gap: 20px;
   }
 }
 
-/* < 900px: Menü schmal, nur Icons (Breite 76px) */
+/* < 900px: Sidebar ausblenden */
 @media (max-width: 900px) {
   .page {
-    grid-template-columns: 76px 1fr;
+    grid-template-columns: 1fr;
     gap: 16px;
-    padding: 16px;
   }
+  .right { display: none; }
 }
 
 /* < 520px: etwas kompakter */
 @media (max-width: 520px) {
-  .page {
-    gap: 12px;
-    padding: 12px;
-  }
+  .page { gap: 12px; }
   .center { padding: 12px; }
 }

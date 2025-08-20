@@ -1,0 +1,52 @@
+/* src/app.layout.module.css */
+.appLayout {
+  --bg: var(--color-bg);
+  --panel: var(--color-bg-secondary);
+  --border: var(--color-border);
+
+  max-width: 1400px;
+  margin: 0 auto;
+  background: var(--bg);
+  
+  display: grid;
+  grid-template-columns: 240px 1fr 380px; /* menu | content | sidebar */
+  gap: 24px;
+  min-height: 100vh;
+  color: var(--color-text);
+  box-sizing: border-box;
+}
+
+/* Bereiche */
+.navigation {
+  border-right: 1px solid var(--border);
+  min-width: 0;
+  overflow: hidden;
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.content {
+  min-width: 0;
+  display: flex;
+  flex-direction: column;
+}
+
+.sidebar {
+  border-left: 1px solid var(--border);
+  min-width: 0;
+}
+
+/* EINFACHE RESPONSIVE RULES */
+@media (max-width: 1200px) {
+  .appLayout {
+    grid-template-columns: 76px 1fr 300px; /* schmales menu */
+  }
+}
+
+@media (max-width: 900px) {
+  .appLayout {
+    grid-template-columns: 76px 1fr; /* sidebar weg */
+  }
+  .sidebar { display: none; }
+}
