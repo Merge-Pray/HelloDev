@@ -64,9 +64,86 @@ export const updateUserProfile = async (req, res, next) => {
       favoriteDrinkWhileCoding,
       musicGenreWhileCoding,
       favoriteShowMovie,
+
+      username,
+      email,
+      password,
+      currentPassword,
     } = req.body;
 
     const updateData = {};
+
+    if (username !== undefined) {
+      const existingUsername = await UserModel.findOne({
+        username: username,
+        _id: { $ne: userId },
+      });
+
+      if (existingUsername) {
+        return res.status(400).json({
+          success: false,
+          message: "Username already exists",
+        });
+      }
+
+      updateData.username = username;
+    }
+
+    if (email !== undefined) {
+      const existingEmail = await UserModel.findOne({
+        email: email,
+        _id: { $ne: userId },
+      });
+
+      if (existingEmail) {
+        return res.status(400).json({
+          success: false,
+          message: "Email already exists",
+        });
+      }
+
+      updateData.email = email;
+    }
+
+    if (password !== undefined) {
+      if (!currentPassword) {
+        return res.status(400).json({
+          success: false,
+          message: "Current password is required to update password",
+        });
+      }
+
+      const currentUser = await UserModel.findById(userId);
+
+      if (!currentUser) {
+        return res.status(404).json({
+          success: false,
+          message: "User not found",
+        });
+      }
+
+      const passwordMatch = await comparePassword(
+        currentPassword,
+        currentUser.hashedPassword
+      );
+
+      if (!passwordMatch) {
+        return res.status(401).json({
+          success: false,
+          message: "Current password is incorrect",
+        });
+      }
+
+      if (password.length < 8) {
+        return res.status(400).json({
+          success: false,
+          message: "New password must be at least 8 characters long",
+        });
+      }
+
+      const hashedPassword = await hashPassword(password);
+      updateData.hashedPassword = hashedPassword;
+    }
 
     if (aboutMe !== undefined) updateData.aboutMe = aboutMe;
     if (country !== undefined) updateData.country = country;
@@ -112,12 +189,49 @@ export const updateUserProfile = async (req, res, next) => {
       await updatedUser.save();
     }
 
+    let newToken = null;
+    if (password !== undefined) {
+      newToken = generateToken(updatedUser.username, updatedUser._id);
+
+      res.cookie("jwt", newToken, {
+        httpOnly: true,
+        secure: true,
+        sameSite: "none",
+        maxAge: 24 * 60 * 60 * 1000,
+      });
+    }
+
     return res.status(200).json({
-      message: "Profile updated successfully",
+      success: true,
+      message: password
+        ? "Profile and password updated successfully"
+        : "Profile updated successfully",
       user: updatedUser,
       isMatchable: updatedUser.isMatchable,
+      passwordUpdated: password !== undefined,
     });
   } catch (error) {
+    if (error.name === "ValidationError") {
+      const validationErrors = Object.values(error.errors).map(
+        (err) => err.message
+      );
+      return res.status(400).json({
+        success: false,
+        message: "Validation failed",
+        errors: validationErrors,
+      });
+    }
+
+    if (error.code === 11000) {
+      const field = Object.keys(error.keyValue)[0];
+      return res.status(400).json({
+        success: false,
+        message: `${
+          field.charAt(0).toUpperCase() + field.slice(1)
+        } already exists`,
+      });
+    }
+
     return next(error);
   }
 };
@@ -263,6 +377,124 @@ export const getUserData = async (req, res, next) => {
     });
   } catch (error) {
     console.error("Error fetching user:", error);
+    return next(error);
+  }
+};
+
+export const getUserProfile = async (req, res, next) => {
+  try {
+    const { userId } = req.params;
+    const requestingUserId = req.user._id;
+
+    const targetUser = await UserModel.findById(userId).select(
+      "-hashedPassword"
+    );
+
+    if (!targetUser) {
+      return res.status(404).json({
+        success: false,
+        message: "User not found",
+      });
+    }
+
+    if (userId === requestingUserId.toString()) {
+      return res.status(200).json({
+        success: true,
+        message: "Own profile data retrieved successfully",
+        user: {
+          id: targetUser._id,
+          username: targetUser.username,
+          email: targetUser.email,
+          avatar: targetUser.avatar,
+          aboutMe: targetUser.aboutMe,
+          country: targetUser.country,
+          city: targetUser.city,
+          age: targetUser.age,
+          status: targetUser.status,
+          devExperience: targetUser.devExperience,
+          techArea: targetUser.techArea,
+          favoriteTimeToCode: targetUser.favoriteTimeToCode,
+          favoriteLineOfCode: targetUser.favoriteLineOfCode,
+          programmingLanguages: targetUser.programmingLanguages,
+          techStack: targetUser.techStack,
+          preferredOS: targetUser.preferredOS,
+          languages: targetUser.languages,
+          gaming: targetUser.gaming,
+          otherInterests: targetUser.otherInterests,
+          favoriteDrinkWhileCoding: targetUser.favoriteDrinkWhileCoding,
+          musicGenreWhileCoding: targetUser.musicGenreWhileCoding,
+          favoriteShowMovie: targetUser.favoriteShowMovie,
+          isMatchable: targetUser.isMatchable,
+          rating: targetUser.rating,
+          points: targetUser.points,
+          isOnline: targetUser.isOnline,
+          lastSeen: targetUser.lastSeen,
+          createdAt: targetUser.createdAt,
+          updatedAt: targetUser.updatedAt,
+        },
+        isOwnProfile: true,
+        isContact: true,
+      });
+    }
+
+    const isContact = targetUser.contacts.some(
+      (contactId) => contactId.toString() === requestingUserId.toString()
+    );
+
+    if (isContact) {
+      return res.status(200).json({
+        success: true,
+        message: "Contact profile data retrieved successfully",
+        user: {
+          id: targetUser._id,
+          username: targetUser.username,
+          avatar: targetUser.avatar,
+          aboutMe: targetUser.aboutMe,
+          country: targetUser.country,
+          city: targetUser.city,
+          age: targetUser.age,
+          status: targetUser.status,
+          devExperience: targetUser.devExperience,
+          techArea: targetUser.techArea,
+          favoriteTimeToCode: targetUser.favoriteTimeToCode,
+          favoriteLineOfCode: targetUser.favoriteLineOfCode,
+          programmingLanguages: targetUser.programmingLanguages,
+          techStack: targetUser.techStack,
+          preferredOS: targetUser.preferredOS,
+          languages: targetUser.languages,
+          gaming: targetUser.gaming,
+          otherInterests: targetUser.otherInterests,
+          favoriteDrinkWhileCoding: targetUser.favoriteDrinkWhileCoding,
+          musicGenreWhileCoding: targetUser.musicGenreWhileCoding,
+          favoriteShowMovie: targetUser.favoriteShowMovie,
+          isMatchable: targetUser.isMatchable,
+          rating: targetUser.rating,
+          points: targetUser.points,
+          isOnline: targetUser.isOnline,
+          lastSeen: targetUser.lastSeen,
+          createdAt: targetUser.createdAt,
+          updatedAt: targetUser.updatedAt,
+        },
+        isOwnProfile: false,
+        isContact: true,
+      });
+    } else {
+      return res.status(200).json({
+        success: true,
+        message: "Public profile data retrieved successfully",
+        user: {
+          id: targetUser._id,
+          username: targetUser.username,
+          avatar: targetUser.avatar,
+          aboutMe: targetUser.aboutMe,
+          country: targetUser.country,
+        },
+        isOwnProfile: false,
+        isContact: false,
+      });
+    }
+  } catch (error) {
+    console.error("Error fetching user profile:", error);
     return next(error);
   }
 };
