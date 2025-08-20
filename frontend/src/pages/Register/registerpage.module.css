@@ -1,14 +1,85 @@
 .registerCard {
   width: 100%;
   max-width: 500px;
+  margin: 0 auto;
 }
 
-@media (max-width: 768px) {
-  .registerCard {
-    max-width: 450px;
-  }
+.container {
+  width: 100%;
+  min-height: 100vh;
+  display: flex;
+  flex-direction: column;
+  background: var(--color-bg);
+  /* ✅ Entfernt: overflow-y: auto - wird jetzt vom übergeordneten Layout gehandhabt */
 }
 
+/* Header mit Logo und DarkMode */
+.header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 1.5rem 2rem;
+  background: var(--color-bg);
+  border-bottom: 1px solid var(--color-border);
+  flex-shrink: 0;
+  /* ✅ Entfernt: position: sticky - nicht nötig bei Scrolling */
+  /* ✅ Entfernt: top: 0; z-index: 10; */
+}
+
+.logoContainer {
+  cursor: pointer;
+  transition: transform 0.2s ease;
+}
+
+.logoContainer:hover {
+  transform: scale(1.05);
+}
+
+.logo {
+  height: 40px;
+  width: auto;
+}
+
+.logoLight {
+  display: block;
+}
+
+.logoDark {
+  display: none;
+}
+
+/* Dark mode logo switch */
+[data-theme="dark"] .logoLight {
+  display: none;
+}
+
+[data-theme="dark"] .logoDark {
+  display: block;
+}
+
+.darkModeWrapper {
+  display: flex;
+  align-items: center;
+}
+
+/* Main Content */
+.main {
+  flex: 1;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 2rem;
+  /* ✅ Entfernt: min-height calc() - nicht nötig bei natürlichem Scrolling */
+}
+
+.subtitle {
+  text-align: center;
+  color: var(--color-text-secondary);
+  margin-bottom: 2rem;
+  font-size: 0.95rem;
+}
+
+/* Form Styles */
 .passwordField {
   position: relative;
 }
@@ -26,8 +97,8 @@
   transition: color 0.2s ease;
 }
 
-  .passwordToggle:hover {
-    color: var(--color-text);
+.passwordToggle:hover {
+  color: var(--color-text);
 }
 
 .requirements {
@@ -68,4 +139,69 @@
   margin: 20px 0;
   padding: 20px 0;
   border-top: 1px solid var(--color-card-border);
+}
+
+.divider {
+  display: flex;
+  align-items: center;
+  text-align: center;
+  margin: 20px 0;
+}
+
+.divider::before,
+.divider::after {
+  content: "";
+  flex: 1;
+  height: 1px;
+  background: var(--color-input-border);
+}
+
+.divider::before {
+  margin-right: 16px;
+}
+
+.divider::after {
+  margin-left: 16px;
+}
+
+.divider span {
+  color: var(--color-text-secondary);
+  font-size: 14px;
+}
+
+/* Mobile Responsive */
+@media (max-width: 768px) {
+  .header {
+    padding: 1rem 1.5rem;
+  }
+
+  .logo {
+    height: 32px;
+  }
+
+  .main {
+    padding: 1rem;
+  }
+
+  .registerCard {
+    max-width: 450px;
+  }
+}
+
+@media (max-width: 480px) {
+  .header {
+    padding: 0.75rem 1rem;
+  }
+
+  .logo {
+    height: 28px;
+  }
+
+  .main {
+    padding: 0.75rem;
+  }
+
+  .registerCard {
+    max-width: 400px;
+  }
 }

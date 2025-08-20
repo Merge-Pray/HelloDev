@@ -1,9 +1,24 @@
 import { useNavigate } from "react-router";
+import { useEffect } from "react";
+import useUserStore from "../../hooks/userstore";
 import styles from "./landingpage.module.css";
-import DarkMode from "../../components/DarkMode"; // Pfad anpassen!
+import DarkMode from "../../components/DarkMode";
 
 export default function LandingPage() {
   const navigate = useNavigate();
+  const currentUser = useUserStore((state) => state.currentUser);
+
+  // Weiterleitung zur Home-Seite wenn bereits eingeloggt
+  useEffect(() => {
+    if (currentUser) {
+      navigate("/home", { replace: true });
+    }
+  }, [currentUser, navigate]);
+
+  // Wenn User eingeloggt ist, zeige nichts an (wird eh weitergeleitet)
+  if (currentUser) {
+    return null;
+  }
 
   return (
     <div className={styles.container}>
@@ -14,19 +29,19 @@ export default function LandingPage() {
 
       {/* Linke Seite mit Logo */}
       <div className={styles.left}>
-  {/* Light-Logo */}
-  <img
-    src="/logo/HelloDev_Logo_Color.svg"
-    alt="HelloDev"
-    className={`${styles.logo} ${styles.logoLight}`}
-  />
-  {/* Dark-Logo */}
-  <img
-    src="/logo/HelloDev_Logo_White.svg"
-    alt="HelloDev"
-    className={`${styles.logo} ${styles.logoDark}`}
-  />
-</div>
+        {/* Light-Logo */}
+        <img
+          src="/logo/HelloDev_Logo_Color.svg"
+          alt="HelloDev"
+          className={`${styles.logo} ${styles.logoLight}`}
+        />
+        {/* Dark-Logo */}
+        <img
+          src="/logo/HelloDev_Logo_White.svg"
+          alt="HelloDev"
+          className={`${styles.logo} ${styles.logoDark}`}
+        />
+      </div>
 
       {/* Rechte Seite mit Text & Buttons */}
       <div className={styles.right}>
@@ -34,9 +49,7 @@ export default function LandingPage() {
           The network for nerds and hackers in software development
         </h1>
 
-        <h2 className={styles.subheadline}>
-          Welcome. Sign up today.
-        </h2>
+        <h2 className={styles.subheadline}>Welcome. Sign up today.</h2>
 
         <button
           className={styles.createAccountBtn}
