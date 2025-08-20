@@ -1,5 +1,5 @@
 import NewsfeedContainer from "../../components/NewsfeedContainer";
-import Sidebar from "../../components/Sidebar";
+import Sidebar from "../../components/Sidebar/Sidebar";
 import styles from "./home.module.css";
 
 const Home = () => {
