@@ -116,7 +116,6 @@
 /* ───────── Responsive (<1200px) ───────── */
 @media (max-width: 1200px) {
   .brand {
-    /* grid-template-columns: 44px;  <- hatte keine Wirkung (flex-Container) */
     justify-content: center;      /* zentriert Logo */
   }
 
@@ -128,26 +127,50 @@
     padding: 10px;
   }
 
-   .logo { max-width: 50px; height: 40px; font-size: 20px; }
+  .logo { 
+    max-width: 50px; 
+    height: 40px; 
+    font-size: 20px; 
+  }
 
   .label { display: none; }       /* Labels aus */
 
   .listTop,
-  .listBottom { padding: 4px; gap: 4px; }
+  .listBottom { 
+    padding: 4px; 
+    gap: 4px; 
+  }
 
-  .icon { width: 28px; height: 28px; }
+  .icon { 
+    width: 28px; 
+    height: 28px; 
+  }
+
+  .darkmode {
+    justify-content: center;
+    align-items: center;
+  }
 }
 
 /* ───────── Responsive (<900px) ───────── */
 @media (max-width: 900px) {
+  /* Hier keine weiteren Änderungen - Layout bleibt wie bei 1200px */
   .brand {
-    /* grid-template-columns: 44px;  <- entfernen */
     justify-content: center;
   }
 
-  .logo { max-width: 50px; height: 40px; font-size: 20px; }
+  .logo { 
+    max-width: 50px; 
+    height: 40px; 
+    font-size: 20px; 
+  }
 
-  .icon { width: 30px; height: 30px; object-fit: contain; text-align: center; }
+  .icon { 
+    width: 28px; 
+    height: 28px; 
+    object-fit: contain; 
+    text-align: center; 
+  }
 
   .link {
     grid-template-columns: 1fr;
@@ -158,10 +181,53 @@
   .label { display: none; }
 
   .listTop,
-  .listBottom { padding: 4px; gap: 4px; }
+  .listBottom { 
+    padding: 4px; 
+    gap: 4px; 
+  }
 
   .darkmode {
     justify-content: center;
     align-items: center;
+  }
+}
+
+/* ───────── Responsive (<520px) ───────── */
+@media (max-width: 520px) {
+  .brand {
+    justify-content: center;
+    padding: 6px 8px;  /* etwas kompakter */
+  }
+
+  .logo { 
+    max-width: 45px; 
+    height: 35px; 
+    font-size: 18px; 
+  }
+
+  .icon { 
+    width: 26px; 
+    height: 26px; 
+    object-fit: contain; 
+  }
+
+  .link {
+    grid-template-columns: 1fr;
+    justify-items: center;
+    padding: 8px;  /* etwas kompakter */
+  }
+
+  .label { display: none; }
+
+  .listTop,
+  .listBottom { 
+    padding: 3px; 
+    gap: 3px; 
+  }
+
+  .darkmode {
+    justify-content: center;
+    align-items: center;
+    padding: 8px;
   }
 }
