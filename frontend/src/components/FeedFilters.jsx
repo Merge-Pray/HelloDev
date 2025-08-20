@@ -1,44 +1,47 @@
 import React from 'react';
 import { TrendingUp, Clock, Zap } from 'lucide-react';
+import styles from './FeedFilters.module.css';
 
 export default function FeedFilters({ algorithm, onAlgorithmChange }) {
   const algorithms = [
     {
       key: 'mixed',
-      label: 'Smart Feed',
-      icon: <Zap size={16} />,
+      label: 'Smart',
+      icon: <Zap size={16} aria-hidden="true" />,
       description: 'Best posts from your network'
     },
     {
       key: 'chronological',
       label: 'Latest',
-      icon: <Clock size={16} />,
+      icon: <Clock size={16} aria-hidden="true" />,
       description: 'Most recent posts first'
     },
     {
       key: 'engagement',
       label: 'Popular',
-      icon: <TrendingUp size={16} />,
+      icon: <TrendingUp size={16} aria-hidden="true" />,
       description: 'Most liked and commented'
     }
   ];
 
   return (
-    <div className="feed-filters">
-      <h4>Feed Algorithm</h4>
-      <div className="filter-buttons">
-        {algorithms.map((algo) => (
+    <div className={styles.wrapper} role="group" aria-label="Feed filters">
+      {algorithms.map((algo) => {
+        const isActive = algorithm === algo.key;
+        return (
           <button
             key={algo.key}
-            className={`filter-btn ${algorithm === algo.key ? 'active' : ''}`}
+            type="button"
+            className={`${styles.btn} ${isActive ? styles.active : ''}`}
             onClick={() => onAlgorithmChange(algo.key)}
+            aria-pressed={isActive}
             title={algo.description}
           >
-            {algo.icon}
-            <span>{algo.label}</span>
+            <span className={styles.icon}>{algo.icon}</span>
+            <span className={styles.label}>{algo.label}</span>
           </button>
-        ))}
-      </div>
+        );
+      })}
     </div>
   );
 }

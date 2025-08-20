@@ -12,12 +12,14 @@
 /* Top: Suche / Controls */
 .feedControls {
   display: grid;
-  grid-template-columns: 1fr auto;
-  gap: 12px;
-  align-items: center;
+  grid-template-columns: 1fr; /* eine Spalte */
+  gap: 12px;                  /* Abstand zwischen Toggle und Filters */
+  align-items: stretch;       /* lässt die Kinder (optional) volle Breite nehmen */
 }
+
+/* die Mobile-Regel kannst du dann entfernen */
 @media (max-width: 720px) {
-  .feedControls { grid-template-columns: 1fr; gap: 10px; }
+  .feedControls { /* kann weg */ }
 }
 
 /* Sektionen / Trenner */

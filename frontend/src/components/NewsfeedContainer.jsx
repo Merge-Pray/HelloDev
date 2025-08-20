@@ -154,16 +154,17 @@ export default function NewsfeedContainer() {
       {/* Feed Controls - Hide during search */}
       {!isSearchActive && (
         <div className={styles.feedControls}>
+           <FeedFilters
+            algorithm={algorithm}
+            onAlgorithmChange={handleAlgorithmChange}
+          />
           <FeedToggle
             feedType={feedType}
             onFeedTypeChange={handleFeedTypeChange}
             friendsCount={friendsCount}
           />
 
-          <FeedFilters
-            algorithm={algorithm}
-            onAlgorithmChange={handleAlgorithmChange}
-          />
+         
         </div>
       )}
 
