@@ -1,24 +1,30 @@
-import React from 'react';
 import { Users, Globe } from 'lucide-react';
 import styles from './FeedToggle.module.css';
 
-export default function FeedToggle({ feedType, onFeedTypeChange, friendsCount }) {
+export default function FeedToggle({ feedType, onFeedTypeChange, friendsCount = 0 }) {
   return (
-    <div className={styles.feedToggle}>
-      <button 
-        className={`${styles.toggleBtn} ${feedType === 'all' ? styles.active : ''}`}
+    <div className={styles.wrapper} role="group" aria-label="Feed filter">
+      <button
+        type="button"
+        className={`${styles.btn} ${feedType === 'all' ? styles.active : ''}`}
         onClick={() => onFeedTypeChange('all')}
+        aria-pressed={feedType === 'all'}
       >
-        <Globe size={20} />
-        <span>All Posts</span>
+        <Globe className={styles.icon} size={18} aria-hidden="true" />
+        <span className={styles.label}>All Posts</span>
       </button>
-      
-      <button 
-        className={`${styles.toggleBtn} ${feedType === 'friends' ? styles.active : ''}`}
+
+      <button
+        type="button"
+        className={`${styles.btn} ${feedType === 'friends' ? styles.active : ''}`}
         onClick={() => onFeedTypeChange('friends')}
+        aria-pressed={feedType === 'friends'}
       >
-        <Users size={20} />
-        <span>Friends ({friendsCount})</span>
+        <Users className={styles.icon} size={18} aria-hidden="true" />
+        <span className={styles.label}>Friends</span>
+        <span className={styles.count} aria-label={`${friendsCount} friends`}>
+          {friendsCount}
+        </span>
       </button>
     </div>
   );
