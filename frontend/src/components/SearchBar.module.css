@@ -1,0 +1,121 @@
+.wrapper {
+  width: 100%;
+}
+
+
+.form {
+  display: grid;
+  grid-template-columns: 1fr auto auto; 
+  gap: 8px;
+  align-items: center;
+  padding-top: 8px;
+}
+
+/* Aktiver Zustand (wenn isActive=true) → leicht betonen */
+.wrapper[data-active="true"] .form {
+  border-color: var(--color-primary);
+  box-shadow: 0 0 0 3px var(--color-input-shadow-focus);
+}
+
+/* Eingabe */
+.input {
+  width: 100%;
+  border: 2px solid var(--color-input-border);
+  background: var(--color-input-bg);
+  color: var(--color-text);
+  border-radius: 10px;
+  padding: 12px 14px;
+  font-size: 16px;
+  line-height: 1.2;
+  transition: border-color 0.2s ease, box-shadow 0.2s ease;
+}
+
+/* Placeholder-Farbe konsistent */
+.input::placeholder {
+  color: var(--color-text-secondary);
+}
+
+/* Fokuszustand */
+.input:focus {
+  outline: none;
+  border-color: var(--color-input-border-focus);
+  box-shadow: 0 0 0 3px var(--color-input-shadow-focus);
+}
+
+/* Button-Basis */
+.button {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+
+  height: 44px;
+  padding: 0 14px;
+
+  font-size: 14px;
+  font-weight: 600;
+  border-radius: 10px;
+  border: 2px solid transparent;
+  cursor: pointer;
+  transition: transform 0.1s ease, background-color 0.2s ease, border-color 0.2s ease;
+}
+
+/* Such-Button (primär) */
+.searchButton {
+  background: var(--color-bg-gradient);
+  color: #fff;
+}
+.searchButton:hover {
+  transform: translateY(-1px);
+  background: linear-gradient(
+    135deg,
+    var(--color-primary-hover) 0%,
+    var(--color-accent) 100%
+  );
+}
+
+/* Clear-Button (sekundär) */
+.clearButton {
+  background: var(--color-input-bg);
+  color: var(--color-text);
+  border-color: var(--color-card-border);
+}
+.clearButton:hover {
+  background: var(--color-bg-secondary);
+  border-color: var(--color-primary);
+}
+
+/* Deaktiviert */
+.button:disabled {
+  opacity: 0.6;
+  cursor: not-allowed;
+  transform: none !important;
+}
+
+/* Kleines Icon (optional, falls du später SVG/Img reinsetzt) */
+.icon {
+  width: 18px;
+  height: 18px;
+  display: inline-block;
+}
+
+/* Screenreader-only Label */
+.srOnly {
+  position: absolute !important;
+  width: 1px; height: 1px;
+  padding: 0; margin: -1px;
+  overflow: hidden; clip: rect(0, 0, 0, 0);
+  white-space: nowrap; border: 0;
+}
+
+/* Responsiv: auf schmalen Screens Buttons kompakter untereinander */
+@media (max-width: 480px) {
+  .form {
+    grid-template-columns: 1fr; /* alles untereinander */
+    gap: 10px;
+  }
+  .button {
+    width: 100%;
+    height: 42px;
+  }
+}
