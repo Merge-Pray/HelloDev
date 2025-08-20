@@ -414,15 +414,15 @@
 
 .programmingLanguagesGrid {
   display: grid;
-  grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
-  gap: 16px;
+  grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+  gap: 12px;
   margin-bottom: 20px;
 }
 
 .programmingLanguageCard {
   border: 2px solid var(--color-border);
-  border-radius: 12px;
-  padding: 16px;
+  border-radius: 8px;
+  padding: 12px;
   background: var(--color-bg);
   transition: all 0.2s ease;
   cursor: pointer;
@@ -446,13 +446,13 @@
 .languageHeader {
   display: flex;
   align-items: center;
-  gap: 12px;
-  margin-bottom: 12px;
+  gap: 8px;
+  margin-bottom: 8px;
 }
 
 .languageHeader input[type="checkbox"] {
-  width: 18px;
-  height: 18px;
+  width: 16px;
+  height: 16px;
   cursor: pointer;
 }
 
@@ -461,6 +461,7 @@
   color: var(--color-text);
   cursor: pointer;
   flex: 1;
+  font-size: 0.9rem;
 }
 
 .skillSection {

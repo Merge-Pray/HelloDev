@@ -344,7 +344,7 @@ const EditProfilePage = () => {
           category={fieldName}
           selectedValues={watchedValues}
           onSelectionChange={(values) => setValue(fieldName, values)}
-          maxSelections={fieldName === 'techArea' ? 3 : 5}
+          maxSelections={null}
           allowMultiple={true}
           showButtons={true}
         />
@@ -447,7 +447,7 @@ const EditProfilePage = () => {
           onSelectionChange={(values) => {
             setValue("programmingLanguages", values);
           }}
-          maxSelections={5}
+          maxSelections={null}
           allowMultiple={true}
           showButtons={true}
           showSkillLevel={true}

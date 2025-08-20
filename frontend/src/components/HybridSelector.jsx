@@ -1,19 +1,19 @@
-import React, { useState, useEffect } from 'react';
-import { API_URL } from '../lib/config';
-import './HybridSelector.css';
+import React, { useState, useEffect } from "react";
+import { API_URL } from "../lib/config";
+import "./HybridSelector.css";
 
-function HybridSelector({ 
-  category, 
-  selectedValues = [], 
+function HybridSelector({
+  category,
+  selectedValues = [],
   onSelectionChange,
   placeholder = "Search for more options...",
   maxSelections = null,
   allowMultiple = true,
   showButtons = true,
-  showSkillLevel = false
+  showSkillLevel = false,
 }) {
   const [popularOptions, setPopularOptions] = useState([]);
-  const [searchInput, setSearchInput] = useState('');
+  const [searchInput, setSearchInput] = useState("");
   const [searchResults, setSearchResults] = useState([]);
   const [showSearchField, setShowSearchField] = useState(false);
   const [isLoading, setIsLoading] = useState(false);
@@ -37,15 +37,18 @@ function HybridSelector({
 
   const fetchPopularOptions = async () => {
     try {
-      const response = await fetch(`${API_URL}/api/suggestions/popular/${category}`, {
-        credentials: 'include'
-      });
+      const response = await fetch(
+        `${API_URL}/api/suggestions/popular/${category}`,
+        {
+          credentials: "include",
+        }
+      );
       const data = await response.json();
       if (data.success) {
         setPopularOptions(data.popular);
       }
     } catch (error) {
-      console.error('Failed to fetch popular options:', error);
+      console.error("Failed to fetch popular options:", error);
     }
   };
 
@@ -53,8 +56,10 @@ function HybridSelector({
     setIsLoading(true);
     try {
       const response = await fetch(
-        `${API_URL}/api/suggestions/search/${category}?q=${encodeURIComponent(searchInput)}`,
-        { credentials: 'include' }
+        `${API_URL}/api/suggestions/search/${category}?q=${encodeURIComponent(
+          searchInput
+        )}`,
+        { credentials: "include" }
       );
       const data = await response.json();
       if (data.success) {
@@ -62,7 +67,7 @@ function HybridSelector({
         setSelectedSuggestionIndex(-1);
       }
     } catch (error) {
-      console.error('Search failed:', error);
+      console.error("Search failed:", error);
     } finally {
       setIsLoading(false);
     }
@@ -76,12 +81,14 @@ function HybridSelector({
     }
 
     if (showSkillLevel) {
-      const existingIndex = selectedValues.findIndex(item => 
+      const existingIndex = selectedValues.findIndex((item) =>
         Array.isArray(item) ? item[0] === value : item === value
       );
-      
+
       if (existingIndex !== -1) {
-        onSelectionChange(selectedValues.filter((_, index) => index !== existingIndex));
+        onSelectionChange(
+          selectedValues.filter((_, index) => index !== existingIndex)
+        );
       } else {
         if (!maxSelections || selectedValues.length < maxSelections) {
           onSelectionChange([...selectedValues, [value, 5]]);
@@ -89,7 +96,7 @@ function HybridSelector({
       }
     } else {
       if (selectedValues.includes(value)) {
-        onSelectionChange(selectedValues.filter(v => v !== value));
+        onSelectionChange(selectedValues.filter((v) => v !== value));
       } else {
         if (!maxSelections || selectedValues.length < maxSelections) {
           onSelectionChange([...selectedValues, value]);
@@ -102,10 +109,10 @@ function HybridSelector({
     const value = valueToAdd || searchInput.trim();
     if (value) {
       if (showSkillLevel) {
-        const existingIndex = selectedValues.findIndex(item => 
+        const existingIndex = selectedValues.findIndex((item) =>
           Array.isArray(item) ? item[0] === value : item === value
         );
-        
+
         if (existingIndex === -1) {
           if (!maxSelections || selectedValues.length < maxSelections) {
             onSelectionChange([...selectedValues, [value, 5]]);
@@ -122,7 +129,7 @@ function HybridSelector({
           }
         }
       }
-      setSearchInput('');
+      setSearchInput("");
       setSearchResults([]);
       setSelectedSuggestionIndex(-1);
       setShowSearchField(false);
@@ -130,21 +137,24 @@ function HybridSelector({
   };
 
   const handleKeyDown = (e) => {
-    if (e.key === 'Enter') {
+    if (e.key === "Enter") {
       e.preventDefault();
-      if (selectedSuggestionIndex >= 0 && searchResults[selectedSuggestionIndex]) {
+      if (
+        selectedSuggestionIndex >= 0 &&
+        searchResults[selectedSuggestionIndex]
+      ) {
         handleCustomAdd(searchResults[selectedSuggestionIndex].value);
       } else {
         handleCustomAdd();
       }
-    } else if (e.key === 'ArrowDown') {
+    } else if (e.key === "ArrowDown") {
       e.preventDefault();
-      setSelectedSuggestionIndex(prev => 
+      setSelectedSuggestionIndex((prev) =>
         prev < searchResults.length - 1 ? prev + 1 : prev
       );
-    } else if (e.key === 'ArrowUp') {
+    } else if (e.key === "ArrowUp") {
       e.preventDefault();
-      setSelectedSuggestionIndex(prev => prev > -1 ? prev - 1 : -1);
+      setSelectedSuggestionIndex((prev) => (prev > -1 ? prev - 1 : -1));
     }
   };
 
@@ -153,21 +163,27 @@ function HybridSelector({
       {showButtons && popularOptions.length > 0 && (
         <div className="popular-options">
           <div className="button-grid">
-            {popularOptions.map((option) => (
-              <button
-                key={option.id}
-                type="button"
-                className={`option-button ${
-                  showSkillLevel 
-                    ? selectedValues.some(item => Array.isArray(item) ? item[0] === option.value : item === option.value)
-                    : selectedValues.includes(option.value)
-                  ? 'selected' : ''
-                }`}
-                onClick={() => handleSelection(option.value)}
-              >
-                {option.value}
-              </button>
-            ))}
+            {popularOptions.map((option) => {
+              // Determine if this option is selected
+              const isSelected = showSkillLevel
+                ? selectedValues.some((item) =>
+                    Array.isArray(item)
+                      ? item[0] === option.value
+                      : item === option.value
+                  )
+                : selectedValues.includes(option.value);
+
+              return (
+                <button
+                  key={option.id}
+                  type="button"
+                  className={`option-button ${isSelected ? "selected" : ""}`}
+                  onClick={() => handleSelection(option.value)}
+                >
+                  {option.value}
+                </button>
+              );
+            })}
           </div>
         </div>
       )}
@@ -179,7 +195,7 @@ function HybridSelector({
             className="search-toggle"
             onClick={() => setShowSearchField(true)}
           >
-            + {showButtons ? 'Other / Custom Option' : placeholder}
+            + {showButtons ? "Other / Custom Option" : placeholder}
           </button>
         ) : (
           <div className="search-input-container">
@@ -193,15 +209,17 @@ function HybridSelector({
               autoFocus
               autoComplete="off"
             />
-            
+
             {isLoading && <div className="loading">Searching...</div>}
-            
+
             {searchResults.length > 0 && (
               <div className="search-dropdown">
                 {searchResults.map((result, index) => (
                   <div
                     key={result.id}
-                    className={`search-result ${index === selectedSuggestionIndex ? 'highlighted' : ''}`}
+                    className={`search-result ${
+                      index === selectedSuggestionIndex ? "highlighted" : ""
+                    }`}
                     onClick={() => handleCustomAdd(result.value)}
                     onMouseEnter={() => setSelectedSuggestionIndex(index)}
                   >
@@ -210,24 +228,24 @@ function HybridSelector({
                 ))}
               </div>
             )}
-            
+
             {searchInput.trim() && (
               <div className="custom-add">
                 <button
                   type="button"
-                  onClick={handleCustomAdd}
+                  onClick={() => handleCustomAdd()} // Changed from onClick={handleCustomAdd}
                   className="add-custom-btn"
                 >
                   + Add "{searchInput}"
                 </button>
               </div>
             )}
-            
+
             <button
               type="button"
               onClick={() => {
                 setShowSearchField(false);
-                setSearchInput('');
+                setSearchInput("");
                 setSearchResults([]);
               }}
               className="cancel-search"
@@ -258,7 +276,9 @@ function HybridSelector({
                         </button>
                       </div>
                       <div className="skill-slider-container">
-                        <span className="skill-level-label">Skill Level: {skillLevel}/10</span>
+                        <span className="skill-level-label">
+                          Skill Level: {skillLevel}/10
+                        </span>
                         <div className="slider-wrapper">
                           <span className="slider-min">1</span>
                           <input
@@ -269,8 +289,9 @@ function HybridSelector({
                             className="skill-slider"
                             onChange={(e) => {
                               const newLevel = parseInt(e.target.value);
-                              const updatedValues = selectedValues.map((item, i) => 
-                                i === index ? [language, newLevel] : item
+                              const updatedValues = selectedValues.map(
+                                (item, i) =>
+                                  i === index ? [language, newLevel] : item
                               );
                               onSelectionChange(updatedValues);
                             }}

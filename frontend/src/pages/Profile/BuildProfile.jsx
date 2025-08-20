@@ -42,10 +42,10 @@ const ONBOARDING_STEPS = [
   {
     id: 3,
     title: "Tech Areas of Interest",
-    subtitle: "What areas of technology interest you most? (Select up to 3)",
+    subtitle: "What areas of technology interest you most? (Select as many as you want)",
     type: "hybrid-selector",
     fieldName: "techArea",
-    maxSelections: 3,
+    maxSelections: null,
   },
   {
     id: 4,
@@ -54,15 +54,15 @@ const ONBOARDING_STEPS = [
       "Which programming languages do you know? Select and rate your skill level (1-10)",
     type: "programming-languages",
     fieldName: "programmingLanguages",
-    maxSelections: 5,
+    maxSelections: null,
   },
   {
     id: 5,
     title: "Tech Stack & Tools",
-    subtitle: "What technologies and tools do you work with? (Select up to 5)",
+    subtitle: "What technologies and tools do you work with? (Select as many as you want)",
     type: "hybrid-selector",
     fieldName: "techStack",
-    maxSelections: 5,
+    maxSelections: null,
   },
   {
     id: 6,
@@ -103,13 +103,13 @@ export default function BuildProfile() {
   const watchedField = watch(fieldName);
 
   useEffect(() => {
-    if (currentStepData?.maxSelections && fieldName && watchedField) {
+    if (fieldName && watchedField) {
       const count = Array.isArray(watchedField) ? watchedField.length : 0;
       setSelectedCount(count);
     } else {
       setSelectedCount(0);
     }
-  }, [watchedField, fieldName, currentStepData?.maxSelections]);
+  }, [watchedField, fieldName]);
 
   useEffect(() => {
     reset();
@@ -277,24 +277,18 @@ export default function BuildProfile() {
             const currentSkillLevel = Array.isArray(selectedEntry)
               ? selectedEntry[1]
               : 5;
-            const isDisabled =
-              currentStepData.maxSelections &&
-              selectedValues.length >= currentStepData.maxSelections &&
-              !isSelected;
-
             return (
               <div
                 key={language}
                 className={`${styles.programmingLanguageCard} ${
-                  isDisabled ? styles.disabled : ""
-                } ${isSelected ? styles.selected : ""}`}
+                  isSelected ? styles.selected : ""
+                }`}
               >
                 <div className={styles.languageHeader}>
                   <input
                     type="checkbox"
                     id={inputId}
                     checked={isSelected}
-                    disabled={isDisabled}
                     {...register(fieldName, {
                       required:
                         "Please select at least one programming language",
