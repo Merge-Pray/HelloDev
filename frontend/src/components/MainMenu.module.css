@@ -1,19 +1,28 @@
 /* ───────── Grundlayout ───────── */
 .menu {
   position: sticky;
-  top: 16px;                      /* Abstand nach oben, an dein Layout anpassen */
-  height: calc(100dvh - 32px);    /* volle Viewport-Höhe minus top/bottom Padding */
+  top: 16px;
+  height: calc(100dvh - 32px);
   display: grid;
   grid-template-rows: auto 1fr auto; /* Brand | Top-Liste (scrollt) | Bottom fix */
   gap: 12px;
+
+  /* optional, falls du später Container Queries nutzen willst */
+  container-type: inline-size;
+
+  /* Neu: verhindert Aufdrücken */
+  min-width: 0;
 }
 
 .brand {
-  display: flex; /* flex statt grid */
+  display: flex;
   align-items: center;
   justify-content: space-between;
   padding: 8px 10px;
   gap: 8px;
+
+  /* Neu: verhindert Aufdrücken */
+  min-width: 0;
 }
 
 .logo {
@@ -22,6 +31,9 @@
   font-size: 33px;
   height: 50px;
   transition: all 0.25s ease;
+
+  /* Neu: begrenzt Logo in schmaler Spur */
+  max-width: 100%;
 }
 
 /* Zwei Logos – abhängig vom Theme */
@@ -29,33 +41,20 @@
 .logoLight {
   display: none;
   height: 50px;
-  max-width: 140px;
+  max-width: 140px;  /* bleibt als Obergrenze ok */
 }
 
-/* Darkmode → weißes Logo */
-:root[data-theme="dark"] .logoDark {
-  display: block;
-}
-
-/* Lightmode → schwarzes Logo */
-:root[data-theme="light"] .logoLight {
-  display: block;
-}
+:root[data-theme="dark"] .logoDark { display: block; }
+:root[data-theme="light"] .logoLight { display: block; }
 
 .darkmode {
-  /* border-top: 1px solid var(--border);
-  border-bottom: 1px solid var(--border); */
   display: flex;
-  justify-content: left; /* horizontal mittig */
-  align-items: center;     /* vertikal mittig */
-  padding: 10px;           /* wie bei .link */
+  justify-content: left;
+  align-items: center;
+  padding: 10px;
 }
 
-.brandText {
-  line-height: 1.05;
-  font-weight: 800;
-  letter-spacing: 0.4px;
-}
+.brandText { line-height: 1.05; font-weight: 800; letter-spacing: 0.4px; }
 
 /* ───────── Listen ───────── */
 .listTop,
@@ -67,12 +66,12 @@
   display: grid;
   gap: 5px;
   align-content: start;
+
+  /* Neu */
+  min-width: 0;
 }
 
-.listBottom {
-  padding-top: 0;
-  padding-bottom: 6px;
-}
+.listBottom { padding-top: 0; padding-bottom: 6px; }
 
 /* ───────── Links ───────── */
 .link {
@@ -86,6 +85,9 @@
   color: var(--color-text);
   border: 1px solid transparent;
   transition: background 0.2s ease, border-color 0.2s ease;
+
+  /* Neu */
+  min-width: 0;
 }
 
 .link:hover {
@@ -95,61 +97,57 @@
 }
 
 /* ───────── Icons ───────── */
-.icon {
-  width: 25px;
-  height: 25px;
-  transition: filter 0.2s ease;
-}
-
-/* Light Mode → schwarz */
-:root[data-theme="light"] .icon {
-  filter: brightness(0) saturate(100%);
-}
-
-/* Dark Mode → weiß */
-:root[data-theme="dark"] .icon {
-  filter: invert(1) brightness(100%);
-}
-
-/* Hover → heller / invertiert */
-.link:hover .icon {
-  filter: invert(1) brightness(120%);
-}
-
-/* Active → zurück in Basis-Farbe */
-.active .icon {
-  filter: inherit;
-}
+.icon { width: 25px; height: 25px; transition: filter 0.2s ease; }
+:root[data-theme="light"] .icon { filter: brightness(0) saturate(100%); }
+:root[data-theme="dark"] .icon { filter: invert(1) brightness(100%); }
+.link:hover .icon { filter: invert(1) brightness(120%); }
+.active .icon { filter: inherit; }
 
 /* ───────── Labels ───────── */
 .label {
   white-space: nowrap;
   font-size: 1.2rem;
+
+  /* falls sie irgendwo noch sichtbar sind: sauber kappen */
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+/* ───────── Responsive (<1200px) ───────── */
+@media (max-width: 1200px) {
+  .brand {
+    /* grid-template-columns: 44px;  <- hatte keine Wirkung (flex-Container) */
+    justify-content: center;      /* zentriert Logo */
+  }
+
+  .brandText { display: none; }
+
+  .link {
+    grid-template-columns: 1fr;   /* Icon alleine */
+    justify-items: center;
+    padding: 10px;
+  }
+
+   .logo { max-width: 50px; height: 40px; font-size: 20px; }
+
+  .label { display: none; }       /* Labels aus */
+
+  .listTop,
+  .listBottom { padding: 4px; gap: 4px; }
+
+  .icon { width: 28px; height: 28px; }
 }
 
 /* ───────── Responsive (<900px) ───────── */
 @media (max-width: 900px) {
   .brand {
-    grid-template-columns: 44px;
-    justify-items: center;
+    /* grid-template-columns: 44px;  <- entfernen */
+    justify-content: center;
   }
 
-  .brandText {
-    display: none;
-  }
+  .logo { max-width: 50px; height: 40px; font-size: 20px; }
 
-  .logo {
-    max-width: 50px;
-    height: 40px;
-    font-size: 20px;
-  }
-
-  .icon {
-    width: 30px;
-    height: 30px;
-    object-fit: contain;
-    text-align: center;
-  }
+  .icon { width: 30px; height: 30px; object-fit: contain; text-align: center; }
 
   .link {
     grid-template-columns: 1fr;
@@ -157,21 +155,13 @@
     padding: 10px;
   }
 
-  .label {
-    display: none;
-  }
+  .label { display: none; }
 
   .listTop,
-  .listBottom {
-    padding: 4px;
-    gap: 4px;
-  }
+  .listBottom { padding: 4px; gap: 4px; }
 
   .darkmode {
-  /* border-top: 1px solid var(--border);
-  border-bottom: 1px solid var(--border); */
-  justify-content: center; /* horizontal mittig */
-  align-items: center;     /* vertikal mittig */
-  
-}
+    justify-content: center;
+    align-items: center;
+  }
 }

@@ -4,50 +4,87 @@
   --panel: var(--color-bg-secondary);
   --border: var(--color-border);
 
+  /* Breitenvariablen */
+  --nav-wide: 240px;
+  --nav-narrow: 76px;   /* Icon-Only-Menü */
+  --aside-wide: 380px;
+  --aside-mid: 300px;   /* schmalere Sidebar zwischen 900–1199px */
+
   display: grid;
-  grid-template-columns: 260px 1fr 400px; /* menu | feed | sidebar */
+  max-width: 1200px;
+  margin: 0 auto;
+  grid-template-columns: var(--nav-wide) 1fr var(--aside-wide); /* menu | feed | sidebar */
   gap: 24px;
   min-height: 100vh;
   background: var(--bg);
   color: var(--color-text);
-  padding: 24px;
   box-sizing: border-box;
 }
 
 /* Bereiche */
-.left   { border-right: 1px solid var(--border);  }
-/* .center { background: var(--panel); border: 1px solid var(--border); border-radius: 16px; } */
-.right { border-left: 1px solid var(--border); }
+.left  { 
+  border-right: 1px solid var(--border);
+  min-width: 0;              /* verhindert Aufdrücken */
+  overflow: hidden;          /* falls Kinder breiter sind */
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
 
-/* Innenabstände */
-.left, .center, .right { padding: 0px; }
+  /* —— Container Query aktivieren —— */
+  container-type: inline-size;   /* reagiert auf Breite der linken Spalte */
+  container-name: nav;
+}
+.center { min-width: 0; }
+.right  { border-left: 1px solid var(--border); min-width: 0; }
+
+/* typische Menü-Items (optional, wenn du so eine Struktur nutzt) */
+.navItem {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  min-width: 0;             /* wichtig für Truncation */
+  white-space: nowrap;
+}
+.navLabel {
+  min-width: 0;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+/* ---------- Container Query: Linkes Menü wird icon-only, wenn die Spalte wirklich schmal ist ---------- */
+/* Greift, sobald .left (der Container) <= 120px breit ist */
+@container nav (max-width: 120px) {
+  /* Wir nutzen globale Attribute, damit es auch durch CSS-Module-Grenzen wirkt */
+  :global([data-nav-label]) { display: none; }
+  .navItem { justify-content: center; }
+}
 
 /* ---------- Breakpoints ---------- */
 
-/* < 1200px: Sidebar ausblenden */
+/* < 1200px: Menü schmal, Sidebar bleibt sichtbar aber schmaler */
 @media (max-width: 1200px) {
   .page {
-    grid-template-columns: 260px 1fr;
+    grid-template-columns: var(--nav-narrow) 1fr var(--aside-mid);
+    gap: 20px;
   }
-  .right {
-    display: none;
-  }
+
+  /* Fallback ohne Container Queries:
+     Falls du Container Queries nicht nutzen möchtest, kannst du so direkt bei <1200px umschalten */
+  .left :global([data-nav-label]) { display: none; }
+  .left :global([data-nav-icon])  { margin: 0 auto; }
 }
 
-/* < 900px: Menü schmal, nur Icons (Breite 76px) */
+/* < 900px: Sidebar ausblenden, Menü bleibt schmal */
 @media (max-width: 900px) {
   .page {
-    grid-template-columns: 76px 1fr;
+    grid-template-columns: var(--nav-narrow) 1fr;
     gap: 16px;
-    padding: 16px;
   }
+  .right { display: none; }
 }
 
 /* < 520px: etwas kompakter */
 @media (max-width: 520px) {
-  .page {
-    gap: 12px;
-    padding: 12px;
-  }
+  .page { gap: 12px; /* padding: 12px; */ }
   .center { padding: 12px; }
 }
