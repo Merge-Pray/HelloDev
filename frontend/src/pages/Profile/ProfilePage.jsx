@@ -555,7 +555,14 @@ export default function ProfilePage() {
           </h1>
 
           <p className={`subtitle ${styles.profileSubtitle}`}>
-            {profileData.status || "Developer"}
+            {{
+              searchhelp: "Seeking Help",
+              offerhelp: "Offering Help",
+              networking: "Networking",
+              learnpartner: "Learning Partner",
+            }[profileData.status] ||
+              profileData.status ||
+              "Developer"}
           </p>
 
           <button

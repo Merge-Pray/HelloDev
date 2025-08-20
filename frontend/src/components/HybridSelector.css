@@ -8,19 +8,20 @@
 
 .button-grid {
   display: grid;
-  grid-template-columns: repeat(auto-fit, minmax(120px, 1fr));
-  gap: 0.5rem;
+  grid-template-columns: repeat(auto-fit, minmax(90px, 1fr));
+  gap: 0.4rem;
   margin-bottom: 0.5rem;
 }
 
 .option-button {
-  padding: 0.5rem;
+  padding: 0.3rem 0.5rem;
   border: 1px solid #ddd;
   background: white;
   border-radius: 4px;
   cursor: pointer;
   transition: all 0.2s;
-  font-size: 0.9rem;
+  font-size: 0.8rem;
+  text-align: center;
 }
 
 .option-button:hover {
@@ -197,9 +198,9 @@
 .selected-skill-item {
   background: #f8f9fa;
   border: 1px solid #dee2e6;
-  border-radius: 8px;
-  padding: 1rem;
-  margin-bottom: 0.5rem;
+  border-radius: 6px;
+  padding: 0.6rem;
+  margin-bottom: 0.4rem;
   width: 100%;
 }
 
@@ -207,34 +208,35 @@
   display: flex;
   justify-content: space-between;
   align-items: center;
-  margin-bottom: 0.5rem;
+  margin-bottom: 0.3rem;
 }
 
 .skill-language {
   font-weight: 600;
   color: #495057;
+  font-size: 0.9rem;
 }
 
 .skill-slider-container {
-  margin-top: 0.5rem;
+  margin-top: 0.3rem;
 }
 
 .skill-level-label {
   display: block;
-  font-size: 0.9rem;
+  font-size: 0.8rem;
   color: #6c757d;
-  margin-bottom: 0.5rem;
+  margin-bottom: 0.3rem;
 }
 
 .slider-wrapper {
   display: flex;
   align-items: center;
-  gap: 0.5rem;
+  gap: 0.4rem;
 }
 
 .slider-min,
 .slider-max {
-  font-size: 0.8rem;
+  font-size: 0.7rem;
   color: #6c757d;
   min-width: 1rem;
   text-align: center;
@@ -242,7 +244,7 @@
 
 .skill-slider {
   flex: 1;
-  height: 6px;
+  height: 5px;
   border-radius: 3px;
   background: #dee2e6;
   outline: none;
