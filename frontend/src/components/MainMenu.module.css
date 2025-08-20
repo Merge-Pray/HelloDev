@@ -29,7 +29,7 @@
   display: inline-grid;
   place-items: center;
   font-size: 33px;
-  height: 50px;
+  height: 55px;
   transition: all 0.25s ease;
 
   /* Neu: begrenzt Logo in schmaler Spur */
@@ -196,7 +196,7 @@
 @media (max-width: 520px) {
   .brand {
     justify-content: center;
-    padding: 6px 8px;  /* etwas kompakter */
+    padding: 6px 8px; 
   }
 
   .logo { 
@@ -214,7 +214,7 @@
   .link {
     grid-template-columns: 1fr;
     justify-items: center;
-    padding: 8px;  /* etwas kompakter */
+    padding: 8px; 
   }
 
   .label { display: none; }

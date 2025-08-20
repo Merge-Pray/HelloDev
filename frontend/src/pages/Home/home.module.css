@@ -1,4 +1,3 @@
-/* src/pages/Home.module.css */
 .page {
   --bg: var(--color-bg);
   --panel: var(--color-bg-secondary);
@@ -6,7 +5,7 @@
 
   /* Breitenvariablen für Sidebar */
   --aside-wide: 380px;
-  --aside-mid: 200px;   /* schmalere Sidebar zwischen 900–1199px */
+  --aside-mid: 320px;   /* schmalere Sidebar zwischen 900–1199px */
 
   display: grid;
   grid-template-columns: 1fr var(--aside-wide); /* feed | sidebar */
@@ -37,11 +36,12 @@
     grid-template-columns: 1fr;
     gap: 16px;
   }
-  .right { display: none; }
+  
 }
 
 /* < 520px: etwas kompakter */
 @media (max-width: 520px) {
   .page { gap: 12px; }
   .center { padding: 12px; }
+  .right { display: none; }
 }
