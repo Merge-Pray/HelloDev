@@ -18,6 +18,9 @@ import LandingPage from "../pages/LandingPage/LandingPage";
 import Home from "../pages/Home/Home";
 import EditProfilePage from "../pages/Profile/EditProfilePage";
 import ProtectedRoute from "../components/ProtectedRoute";
+import Settings from "../pages/Settings";
+import Messages from "../pages/Messages";
+import Notifications from "../pages/Notifications";
 
 export const router = createBrowserRouter([
   {
@@ -89,6 +92,30 @@ export const router = createBrowserRouter([
         element: (
           <ProtectedRoute>
             <Searchpage />
+          </ProtectedRoute>
+        ),
+      },
+      {
+        path: "settings",
+        element: (
+          <ProtectedRoute>
+            <Settings />
+          </ProtectedRoute>
+        ),
+      },
+      {
+        path: "notifications",
+        element: (
+          <ProtectedRoute>
+            <Notifications />
+          </ProtectedRoute>
+        ),
+      },
+      {
+        path: "messages",
+        element: (
+          <ProtectedRoute>
+            <Messages />
           </ProtectedRoute>
         ),
       },
