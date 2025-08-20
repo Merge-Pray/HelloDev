@@ -1,14 +1,80 @@
+.container {
+  width: 100%;
+  height: 100vh;
+  display: flex;
+  flex-direction: column;
+  background: var(--color-bg);
+}
+
+/* Header mit Logo und DarkMode */
+.header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 1.5rem 2rem;
+  background: var(--color-bg);
+  border-bottom: 1px solid var(--color-border);
+}
+
+.logoContainer {
+  cursor: pointer;
+  transition: transform 0.2s ease;
+}
+
+.logoContainer:hover {
+  transform: scale(1.05);
+}
+
+.logo {
+  height: 40px;
+  width: auto;
+}
+
+.logoLight {
+  display: block;
+}
+
+.logoDark {
+  display: none;
+}
+
+/* Dark mode logo switch */
+[data-theme="dark"] .logoLight {
+  display: none;
+}
+
+[data-theme="dark"] .logoDark {
+  display: block;
+}
+
+.darkModeWrapper {
+  display: flex;
+  align-items: center;
+}
+
+/* Main Content */
+.main {
+  flex: 1;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 2rem;
+}
+
 .loginCard {
   width: 100%;
   max-width: 450px;
+  margin: 0 auto;
 }
 
-@media (max-width: 768px) {
-  .loginCard {
-    max-width: 400px;
-  }
+.subtitle {
+  text-align: center;
+  color: var(--color-text-secondary);
+  margin-bottom: 2rem;
+  font-size: 0.95rem;
 }
 
+/* Existing styles */
 .passwordField {
   position: relative;
 }
@@ -82,4 +148,37 @@
 
 .linkBtn:hover {
   color: var(--color-primary-hover);
+}
+
+/* Mobile Responsive */
+@media (max-width: 768px) {
+  .header {
+    padding: 1rem 1.5rem;
+  }
+
+  .logo {
+    height: 32px;
+  }
+
+  .main {
+    padding: 1rem;
+  }
+
+  .loginCard {
+    max-width: 400px;
+  }
+}
+
+@media (max-width: 480px) {
+  .header {
+    padding: 0.75rem 1rem;
+  }
+
+  .logo {
+    height: 28px;
+  }
+
+  .main {
+    padding: 0.75rem;
+  }
 }
