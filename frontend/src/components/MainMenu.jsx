@@ -17,19 +17,21 @@ const bottomItems = [
 
 export default function MainMenu() {
   return (
-    <nav className={styles.menu} aria-label="Main">
-<div className={styles.brand}>
-  <img
-    src="/logo/HelloDev_Logo_White.svg"
-    alt="Hello Dev Logo"
-    className={`${styles.logo} ${styles.logoDark}`}
-  />
-  <img
-    src="/logo/HelloDev_Logo_Color.svg"
-    alt="Hello Dev Logo"
-    className={`${styles.logo} ${styles.logoLight}`}
-  />
-</div>
+<nav className={styles.menu} aria-label="Main">
+  <div className={styles.brand}>
+    <NavLink to="/home" className={styles.logoLink}>
+      <img
+        src="/logo/HelloDev_Logo_White.svg"
+        alt="Hello Dev Logo"
+        className={`${styles.logo} ${styles.logoDark}`}
+      />
+      <img
+        src="/logo/HelloDev_Logo_Color.svg"
+        alt="Hello Dev Logo"
+        className={`${styles.logo} ${styles.logoLight}`}
+      />
+    </NavLink>
+  </div>
 
       <ul className={styles.listTop}>
         {topItems.map((item) => (
