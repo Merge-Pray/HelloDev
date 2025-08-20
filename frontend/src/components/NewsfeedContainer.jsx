@@ -162,9 +162,7 @@ export default function NewsfeedContainer() {
             feedType={feedType}
             onFeedTypeChange={handleFeedTypeChange}
             friendsCount={friendsCount}
-          />
-
-         
+          />         
         </div>
       )}
 
