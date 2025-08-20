@@ -8,14 +8,14 @@
   grid-template-columns: 1fr auto auto; 
   gap: 8px;
   align-items: center;
-  padding-top: 8px;
+  padding-top: 5px;
 }
 
 /* Aktiver Zustand (wenn isActive=true) → leicht betonen */
-.wrapper[data-active="true"] .form {
+/* .wrapper[data-active="true"] .form {
   border-color: var(--color-primary);
   box-shadow: 0 0 0 3px var(--color-input-shadow-focus);
-}
+} */
 
 /* Eingabe */
 .input {
@@ -48,7 +48,6 @@
   align-items: center;
   justify-content: center;
   gap: 8px;
-
   height: 44px;
   padding: 0 14px;
 
