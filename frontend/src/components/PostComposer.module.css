@@ -1,0 +1,167 @@
+/* Card / Wrapper */
+.composer {
+  background: var(--color-card-bg);
+  border: 1px solid var(--color-card-border);
+  border-radius: 14px;
+  box-shadow: 0 8px 20px var(--color-card-shadow);
+  padding: 12px;
+}
+
+/* Header */
+.header {
+  display: grid;
+  grid-template-columns: 44px 1fr;
+  gap: 10px;
+  align-items: center;
+  margin-bottom: 8px;
+}
+.avatar {
+  width: 44px;
+  height: 44px;
+  border-radius: 10px;
+  display: block;
+  background: var(--color-bg);
+  object-fit: cover;
+}
+.title {
+  margin: 0;
+  font-size: 1rem;
+  font-weight: 800;
+  color: var(--color-text);
+}
+
+/* Formular */
+.form { display: grid; gap: 10px; }
+
+/* Textarea */
+.input {
+  width: 100%;
+  resize: none;
+  overflow: hidden;
+  border: 2px solid var(--color-input-border);
+  background: var(--color-input-bg);
+  color: var(--color-text);
+  border-radius: 10px;
+  padding: 12px 14px;
+  font-size: 15px;
+  line-height: 1.4;
+  transition: border-color .2s ease, box-shadow .2s ease, background .2s ease;
+}
+.input::placeholder { color: var(--color-text-secondary); }
+.input:focus {
+  outline: none;
+  border-color: var(--color-input-border-focus);
+  box-shadow: 0 0 0 3px var(--color-input-shadow-focus);
+}
+
+/* Toolbar: 3 Zonen, wrappt auf klein */
+/* Toolbar → jetzt 2 Zeilen */
+.toolbar {
+  display: grid;
+  gap: 12px;
+  margin-top: 8px;
+}
+
+/* Sichtbarkeits-Toggle bleibt Grid */
+.visibilityGroup {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 8px;
+}
+
+.visBtn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 6px;
+  padding: 8px 10px;
+  background: var(--color-input-bg);
+  color: var(--color-text);
+  border: 1px solid var(--color-card-border);
+  border-radius: 10px;
+  font-weight: 700;
+  font-size: 13px;
+  cursor: pointer;
+  transition: background .15s ease, color .15s ease, border-color .15s ease;
+}
+.visBtn:hover:not(.active) {
+  background: var(--color-bg-secondary);
+  border-color: var(--color-primary);
+}
+.active {
+  background: var(--color-bg-gradient);
+  color: var(--color-primary-hover-invert);
+  border: none;
+  box-shadow: 0 3px 8px var(--color-card-shadow);
+}
+
+/* Untere Reihe: links Tools, rechts Counter + Submit */
+.bottomRow {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+
+.toolsLeft,
+.toolsRight {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+
+.toolBtn {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  padding: 8px 10px;
+  border-radius: 10px;
+  background: var(--color-input-bg);
+  border: 1px solid var(--color-card-border);
+  color: var(--color-text);
+  cursor: pointer;
+  font-size: 13px;
+  font-weight: 600;
+  transition: background .15s ease, border-color .15s ease;
+}
+.toolBtn:hover {
+  background: var(--color-bg-secondary);
+  border-color: var(--color-primary);
+}
+
+.counter {
+  font-size: 12px;
+  font-weight: 700;
+  color: var(--color-text-secondary);
+}
+.counterOver { color: var(--color-error); }
+
+.submit {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  padding: 9px 14px;
+  border-radius: 10px;
+  border: 1px solid var(--color-primary);
+  background: var(--color-bg-gradient);
+  color: #fff;
+  font-weight: 700;
+  cursor: pointer;
+  transition: transform .05s ease, filter .15s ease;
+}
+.submit:hover:not(:disabled) {
+  transform: translateY(-1px);
+  filter: brightness(1.05);
+}
+.submit:disabled { opacity: .6; cursor: not-allowed; }
+
+/* Responsive */
+@media (max-width: 780px) {
+  .toolbar { grid-template-columns: 1fr; }
+  .toolsRight { justify-content: flex-end; }
+}
+@media (max-width: 560px) {
+  .composer { padding: 10px; }
+  .header { grid-template-columns: 40px 1fr; }
+  .avatar { width: 40px; height: 40px; }
+  .submit { padding: 9px 12px; }
+}

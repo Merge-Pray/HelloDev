@@ -1,121 +1,78 @@
-/* Kapsel im Card-Look */
-.wrapper {
-  display: inline-flex;
-  align-items: center;
-  gap: 0; /* Spaltengrenze kommt durch Border der Buttons */
-  padding: 6px;
-  border-radius: 12px;
-  background: var(--color-card-bg);
-  border: 1px solid var(--color-card-border);
-  box-shadow: 0 6px 16px var(--color-card-shadow);
-  margin-bottom: 20px;
+.feedToggle {
+  width: 100%;
+  margin-bottom: 16px;
 }
 
-/* Grundstil Button (Segment) */
-.btn {
-  --seg-gap: 8px;
+/* Grid mit 2 gleich breiten Spalten */
+.wrapper {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 8px; /* Abstand zwischen den Buttons */
+  width: 100%;
+}
 
-  position: relative;
-  display: inline-flex;
+/* Buttons füllen Spalte komplett */
+.btn {
+  display: flex;
   align-items: center;
-  gap: var(--seg-gap);
-  padding: 10px 14px;
-  background: transparent;
-  color: var(--color-text);
-  border: 1px solid transparent;   /* wichtig für Focus-Outline ohne Jumping */
-  border-radius: 10px;
-  cursor: pointer;
+  justify-content: center;
+  gap: 6px;
+
+  padding: 12px;
+  width: 100%;
+
   font-weight: 600;
   font-size: 14px;
-  line-height: 1;
-  transition: background 0.15s ease, color 0.15s ease, transform 0.05s ease, border-color 0.15s ease;
+  color: var(--color-text);
+
+  background: var(--color-input-bg);
+  border: 1px solid var(--color-card-border);
+  border-radius: 10px;
+  cursor: pointer;
+  transition: background 0.15s ease, color 0.15s ease, transform 0.05s ease;
 }
 
-/* Hover (nur wenn nicht aktiv) */
 .btn:hover:not(.active) {
   background: var(--color-bg-secondary);
-  border-color: var(--color-card-border);
 }
 
-/* Active Segment (Pill) – greift Markenverlauf auf */
+/* Aktiver Button */
 .active {
   background: var(--color-bg-gradient);
-  color: #fff;
-  box-shadow: 0 4px 14px var(--color-card-shadow);
+  color: var(--color-primary-hover-invert);
+  border-color: var(--color-primary);
+  box-shadow: 0 4px 10px var(--color-card-shadow);
 }
 
-/* Dark Mode: aktive Textfarbe invertiert sich bei dir ggf. – hier abgesichert */
-[data-theme="dark"] .active {
-  color: #000; /* deine Palette nutzt bei Hover-Invert teils schwarz */
-}
-
-/* Focus sichtbar & zugänglich */
-.btn:focus-visible {
-  outline: none;
-  border-color: var(--color-input-border-focus);
-  box-shadow: 0 0 0 3px var(--color-input-shadow-focus);
-}
-
-/* Pressed Feedback */
-.btn:active {
-  transform: translateY(1px);
-}
-
-/* Icon-Grundstil */
 .icon {
   width: 18px;
   height: 18px;
-  flex: 0 0 auto;
 }
 
-/* Beschriftung */
 .label {
   white-space: nowrap;
 }
 
-/* Zähler-Badge (Friends) */
+/* Badge für Friends */
 .count {
-  display: inline-flex;
-  align-items: center;
-  justify-content: center;
-  min-width: 22px;
-  height: 20px;
-  padding: 0 6px;
-  border-radius: 999px;
+  background: var(--color-input-bg);
+  color: var(--color-text);
   font-size: 12px;
   font-weight: 700;
-  line-height: 1;
-
-  /* neutrales Badge inaktiver Zustand */
-  color: var(--color-text);
-  background: var(--color-input-bg);
+  border-radius: 999px;
+  padding: 2px 6px;
   border: 1px solid var(--color-card-border);
 }
 
-/* Wenn Segment aktiv → Badge invertiert mit Verlauf */
 .active .count {
-  color: #fff;
   background: rgba(255, 255, 255, 0.2);
+  color: var(--color-primary-hover-invert);
   border-color: rgba(255, 255, 255, 0.3);
 }
 
-/* Kompakter auf sehr schmalen Screens */
+/* Mobile: Buttons untereinander */
 @media (max-width: 480px) {
   .wrapper {
-    padding: 4px;
-    border-radius: 10px;
-  }
-  .btn {
-    padding: 8px 12px;
-    font-size: 13px;
-  }
-  .icon {
-    width: 16px;
-    height: 16px;
-  }
-  .count {
-    min-width: 20px;
-    height: 18px;
-    font-size: 11px;
+    grid-template-columns: 1fr;
   }
 }
