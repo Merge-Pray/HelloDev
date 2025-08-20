@@ -1,0 +1,271 @@
+.hybrid-selector {
+  margin-bottom: 1rem;
+}
+
+.popular-options {
+  margin-bottom: 1rem;
+}
+
+.button-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(120px, 1fr));
+  gap: 0.5rem;
+  margin-bottom: 0.5rem;
+}
+
+.option-button {
+  padding: 0.5rem;
+  border: 1px solid #ddd;
+  background: white;
+  border-radius: 4px;
+  cursor: pointer;
+  transition: all 0.2s;
+  font-size: 0.9rem;
+}
+
+.option-button:hover {
+  background: #f5f5f5;
+}
+
+.option-button.selected {
+  background: #007bff;
+  color: white;
+  border-color: #007bff;
+}
+
+.usage-count {
+  font-size: 0.8rem;
+  opacity: 0.7;
+  margin-left: 0.25rem;
+}
+
+.search-section {
+  margin-bottom: 1rem;
+}
+
+.search-toggle {
+  padding: 0.5rem 1rem;
+  border: 1px dashed #ccc;
+  background: transparent;
+  border-radius: 4px;
+  cursor: pointer;
+  color: #666;
+  width: 100%;
+}
+
+.search-toggle:hover {
+  background: #f9f9f9;
+}
+
+.search-input-container {
+  position: relative;
+}
+
+.search-input {
+  width: 100%;
+  padding: 0.5rem;
+  border: 1px solid #ddd;
+  border-radius: 4px;
+  margin-bottom: 0.5rem;
+}
+
+.loading {
+  padding: 0.5rem;
+  color: #666;
+  font-style: italic;
+}
+
+.search-dropdown {
+  position: absolute;
+  top: 100%;
+  left: 0;
+  right: 0;
+  background: white;
+  border: 1px solid #ddd;
+  border-radius: 4px;
+  max-height: 200px;
+  overflow-y: auto;
+  z-index: 1000;
+}
+
+.search-result {
+  padding: 0.5rem;
+  cursor: pointer;
+  border-bottom: 1px solid #eee;
+}
+
+.search-result:hover,
+.search-result.highlighted {
+  background: #f5f5f5;
+}
+
+.search-result:last-child {
+  border-bottom: none;
+}
+
+.custom-add {
+  margin-bottom: 0.5rem;
+}
+
+.add-custom-btn {
+  padding: 0.5rem 1rem;
+  background: #28a745;
+  color: white;
+  border: none;
+  border-radius: 4px;
+  cursor: pointer;
+}
+
+.add-custom-btn:hover {
+  background: #218838;
+}
+
+.cancel-search {
+  padding: 0.25rem 0.5rem;
+  background: #6c757d;
+  color: white;
+  border: none;
+  border-radius: 4px;
+  cursor: pointer;
+  font-size: 0.8rem;
+}
+
+.cancel-search:hover {
+  background: #5a6268;
+}
+
+.selected-values {
+  margin-top: 1rem;
+}
+
+.selected-tags {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.5rem;
+}
+
+.selected-tag {
+  background: #e9ecef;
+  padding: 0.25rem 0.5rem;
+  border-radius: 4px;
+  font-size: 0.9rem;
+  display: flex;
+  align-items: center;
+  gap: 0.25rem;
+}
+
+.remove-tag {
+  background: none;
+  border: none;
+  color: #666;
+  cursor: pointer;
+  font-weight: bold;
+  padding: 0;
+  margin-left: 0.25rem;
+}
+
+.remove-tag:hover {
+  color: #000;
+}
+
+.selected-single {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  padding: 0.5rem;
+  background: #e9ecef;
+  border-radius: 4px;
+}
+
+.selected-value {
+  flex: 1;
+}
+
+.clear-selection {
+  background: none;
+  border: none;
+  color: #666;
+  cursor: pointer;
+  font-weight: bold;
+  padding: 0;
+}
+
+.clear-selection:hover {
+  color: #000;
+}
+
+.selected-skill-item {
+  background: #f8f9fa;
+  border: 1px solid #dee2e6;
+  border-radius: 8px;
+  padding: 1rem;
+  margin-bottom: 0.5rem;
+  width: 100%;
+}
+
+.skill-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 0.5rem;
+}
+
+.skill-language {
+  font-weight: 600;
+  color: #495057;
+}
+
+.skill-slider-container {
+  margin-top: 0.5rem;
+}
+
+.skill-level-label {
+  display: block;
+  font-size: 0.9rem;
+  color: #6c757d;
+  margin-bottom: 0.5rem;
+}
+
+.slider-wrapper {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+}
+
+.slider-min,
+.slider-max {
+  font-size: 0.8rem;
+  color: #6c757d;
+  min-width: 1rem;
+  text-align: center;
+}
+
+.skill-slider {
+  flex: 1;
+  height: 6px;
+  border-radius: 3px;
+  background: #dee2e6;
+  outline: none;
+  cursor: pointer;
+}
+
+.skill-slider::-webkit-slider-thumb {
+  appearance: none;
+  width: 18px;
+  height: 18px;
+  border-radius: 50%;
+  background: #007bff;
+  cursor: pointer;
+  border: 2px solid #fff;
+  box-shadow: 0 2px 4px rgba(0,0,0,0.2);
+}
+
+.skill-slider::-moz-range-thumb {
+  width: 18px;
+  height: 18px;
+  border-radius: 50%;
+  background: #007bff;
+  cursor: pointer;
+  border: 2px solid #fff;
+  box-shadow: 0 2px 4px rgba(0,0,0,0.2);
+}

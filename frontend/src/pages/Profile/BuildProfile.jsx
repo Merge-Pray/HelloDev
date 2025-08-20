@@ -6,6 +6,8 @@ import useUserStore from "../../hooks/userstore";
 import { useUpdateProfile } from "../../hooks/useProfile";
 import styles from "./buildprofile.module.css";
 import { API_URL } from "../../lib/config";
+import HybridSelector from "../../components/HybridSelector";
+import LocationSelector from "../../components/LocationSelector";
 
 const ONBOARDING_STEPS = [
   {
@@ -15,15 +17,9 @@ const ONBOARDING_STEPS = [
     type: "mixed",
     fields: [
       {
-        name: "country",
-        label: "Country",
-        type: "text",
-        required: true,
-      },
-      {
-        name: "city",
-        label: "City",
-        type: "text",
+        name: "location",
+        label: "Location",
+        type: "location",
         required: true,
       },
       {
@@ -47,23 +43,9 @@ const ONBOARDING_STEPS = [
     id: 3,
     title: "Tech Areas of Interest",
     subtitle: "What areas of technology interest you most? (Select up to 3)",
-    type: "checkbox",
+    type: "hybrid-selector",
     fieldName: "techArea",
     maxSelections: 3,
-    options: [
-      "Web Development",
-      "Mobile Development",
-      "Game Development",
-      "AI/Machine Learning",
-      "Data Science",
-      "DevOps",
-      "Cybersecurity",
-      "Cloud Computing",
-      "Blockchain",
-      "IoT",
-      "AR/VR",
-      "Desktop Applications",
-    ],
   },
   {
     id: 4,
@@ -73,51 +55,14 @@ const ONBOARDING_STEPS = [
     type: "programming-languages",
     fieldName: "programmingLanguages",
     maxSelections: 5,
-    options: [
-      "JavaScript",
-      "Python",
-      "Java",
-      "C++",
-      "C#",
-      "TypeScript",
-      "PHP",
-      "Ruby",
-      "Go",
-      "Rust",
-      "Swift",
-      "Kotlin",
-      "C",
-      "Scala",
-      "Dart",
-    ],
   },
   {
     id: 5,
     title: "Tech Stack & Tools",
     subtitle: "What technologies and tools do you work with? (Select up to 5)",
-    type: "checkbox",
+    type: "hybrid-selector",
     fieldName: "techStack",
     maxSelections: 5,
-    options: [
-      "React",
-      "Vue.js",
-      "Angular",
-      "Node.js",
-      "Express",
-      "Django",
-      "Flask",
-      "Spring Boot",
-      "Laravel",
-      "Docker",
-      "Kubernetes",
-      "AWS",
-      "Azure",
-      "GCP",
-      "MongoDB",
-      "PostgreSQL",
-      "MySQL",
-      "Git",
-    ],
   },
   {
     id: 6,
@@ -247,6 +192,27 @@ export default function BuildProfile() {
     return (
       <div className={styles.mixedFields}>
         {currentStepData.fields.map((field) => {
+          if (field.type === "location") {
+            return (
+              <div key={field.name} className="form-field">
+                <label>{field.label}</label>
+                <LocationSelector
+                  selectedCountry={watch('country') || profileData.country || ''}
+                  selectedCity={watch('city') || profileData.city || ''}
+                  onCountryChange={(country) => {
+                    setProfileData({...profileData, country});
+                    setValue('country', country);
+                  }}
+                  onCityChange={(city) => {
+                    setProfileData({...profileData, city});
+                    setValue('city', city);
+                  }}
+                  required={field.required}
+                />
+              </div>
+            );
+          }
+
           if (field.type === "select") {
             return (
               <div key={field.name} className="form-field">
@@ -405,14 +371,42 @@ export default function BuildProfile() {
   // ✅ ÄNDERE renderOptions Funktion:
   const renderOptions = () => {
     const inputType = currentStepData.type;
+    const maxSelections = currentStepData.maxSelections;
+    const selectedValues = watchedField || [];
 
     // ✅ Spezielle Behandlung für Programming Languages
     if (inputType === "programming-languages") {
-      return renderProgrammingLanguages();
+      return (
+        <HybridSelector
+          category="programmingLanguages"
+          selectedValues={selectedValues}
+          onSelectionChange={(values) => {
+            setProfileData({...profileData, programmingLanguages: values});
+            setValue('programmingLanguages', values);
+          }}
+          maxSelections={currentStepData.maxSelections}
+          allowMultiple={true}
+          showButtons={true}
+          showSkillLevel={true}
+        />
+      );
     }
 
-    const maxSelections = currentStepData.maxSelections;
-    const selectedValues = watchedField || [];
+    if (inputType === "hybrid-selector") {
+      return (
+        <HybridSelector
+          category={currentStepData.fieldName}
+          selectedValues={watchedField || []}
+          onSelectionChange={(values) => {
+            setProfileData({...profileData, [currentStepData.fieldName]: values});
+            setValue(currentStepData.fieldName, values);
+          }}
+          maxSelections={currentStepData.maxSelections}
+          allowMultiple={true}
+          showButtons={true}
+        />
+      );
+    }
 
     return (
       <>

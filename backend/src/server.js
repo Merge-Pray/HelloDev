@@ -6,6 +6,7 @@ import db from "./db/db.js";
 import cookieParser from "cookie-parser";
 import { userRouter } from "./routes/user.js";
 import { postsRouter } from "./routes/posts.js";
+import suggestionRoutes from "./routes/suggestions.js";
 import { matchRouter } from "./routes/match.js";
 
 const PORT = process.env.PORT || 3001;
@@ -45,6 +46,7 @@ app.options("*", cors());
 
 app.use("/api/user", userRouter);
 app.use("/api/posts", postsRouter);
+app.use("/api/suggestions", suggestionRoutes);
 app.use("/api/match", matchRouter);
 app.get("/", (req, res) => {
   res.send("hello");
