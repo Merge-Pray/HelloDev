@@ -8,6 +8,8 @@ import { API_URL } from "../../lib/config";
 import DarkMode from "../../components/DarkMode";
 import { calculateProfileCompletion } from "../../utils/profileCompletion";
 import styles from "./editprofile.module.css";
+import HybridSelector from "../../components/HybridSelector";
+import LocationSelector from "../../components/LocationSelector";
 
 const EditProfilePage = () => {
   const currentUser = useUserStore((state) => state.currentUser); // Auth only
@@ -19,7 +21,6 @@ const EditProfilePage = () => {
   } = useProfile();
   const updateProfile = useUpdateProfile();
   const [activeSection, setActiveSection] = useState("personal");
-  const [editingSections, setEditingSections] = useState({});
   const [error, setError] = useState(null);
   const [success, setSuccess] = useState(null);
   const navigate = useNavigate();
@@ -84,20 +85,6 @@ const EditProfilePage = () => {
     }
   }, [profileData, setValue]);
 
-  const saveSection = async (sectionData, sectionName) => {
-    setError(null);
-    setSuccess(null);
-
-    try {
-      await updateProfile.mutateAsync(sectionData);
-      setSuccess(`${sectionName} updated successfully!`);
-      setEditingSections({ ...editingSections, [activeSection]: false });
-      setTimeout(() => setSuccess(null), 3000);
-    } catch (error) {
-      console.error("Error saving section:", error);
-      setError(error.message || "Failed to save changes. Please try again.");
-    }
-  };
 
   const saveAllChanges = async (formData) => {
     setError(null);
@@ -106,7 +93,6 @@ const EditProfilePage = () => {
     try {
       await updateProfile.mutateAsync(formData);
       setSuccess("Profile updated successfully!");
-      setEditingSections({});
       setTimeout(() => setSuccess(null), 3000);
     } catch (error) {
       console.error("Error saving profile:", error);
@@ -114,12 +100,6 @@ const EditProfilePage = () => {
     }
   };
 
-  const toggleEditing = (section) => {
-    setEditingSections({
-      ...editingSections,
-      [section]: !editingSections[section],
-    });
-  };
 
   const profileStats = calculateProfileCompletion(profileData);
   const profileCompletion = profileStats.totalCompletion;
@@ -138,51 +118,15 @@ const EditProfilePage = () => {
     { id: "preferences", title: "Coding Preferences", icon: "⭐" },
   ];
 
-  const renderSectionHeader = (title, sectionKey) => (
+  const renderSectionHeader = (title) => (
     <div className={styles.sectionHeader}>
       <h3>{title}</h3>
-      <div className={styles.sectionActions}>
-        {!editingSections[sectionKey] ? (
-          <button
-            type="button"
-            className={`${styles.btn} ${styles.btnEdit}`}
-            onClick={() => toggleEditing(sectionKey)}
-          >
-            <Edit3 size={16} />
-            Edit
-          </button>
-        ) : (
-          <div className={styles.editActions}>
-            <button
-              type="button"
-              className={`${styles.btn} ${styles.btnCancel}`}
-              onClick={() => toggleEditing(sectionKey)}
-            >
-              <X size={16} />
-              Cancel
-            </button>
-            <button
-              type="button"
-              className={`${styles.btn} ${styles.btnSave}`}
-              onClick={() => {
-                const formData = watch();
-                const sectionData = getSectionData(sectionKey, formData);
-                saveSection(sectionData, title);
-              }}
-              disabled={updateProfile.isLoading}
-            >
-              <Check size={16} />
-              {updateProfile.isLoading ? "Saving..." : "Save"}
-            </button>
-          </div>
-        )}
-      </div>
     </div>
   );
 
   const renderGamingSection = () => (
     <div className={styles.formSection}>
-      {renderSectionHeader("Gaming Preferences", "gaming")}{" "}
+      {renderSectionHeader("Gaming Preferences")}{" "}
       <div className={styles.radioGroup}>
         {[
           { value: "none", label: "No Gaming" },
@@ -196,7 +140,7 @@ const EditProfilePage = () => {
               type="radio"
               value={option.value}
               {...register("gaming")}
-              disabled={!editingSections.gaming}
+  
             />
             {option.label}
           </label>
@@ -277,31 +221,49 @@ const EditProfilePage = () => {
 
   const renderPersonalSection = () => (
     <div className={styles.formSection}>
-      {renderSectionHeader("Personal Information", "personal")}
+      {renderSectionHeader("Personal Information")}
       <div className={styles.formGrid}>
         <div className={styles.formField}>
-          <label>Country *</label>
+          <label>Username *</label>
           <input
             type="text"
-            {...register("country", { required: "Country is required" })}
-            placeholder="Enter your country"
-            disabled={!editingSections.personal}
+            {...register("username", { 
+              required: "Username is required",
+              minLength: { value: 3, message: "Username must be at least 3 characters" },
+              maxLength: { value: 20, message: "Username must be less than 20 characters" }
+            })}
+            placeholder="Enter your username"
           />
-          {errors.country && (
-            <span className={styles.error}>{errors.country.message}</span>
+          {errors.username && (
+            <span className={styles.error}>{errors.username.message}</span>
           )}
         </div>
         <div className={styles.formField}>
-          <label>City *</label>
+          <label>Email *</label>
           <input
-            type="text"
-            {...register("city", { required: "City is required" })}
-            placeholder="Enter your city"
-            disabled={!editingSections.personal}
+            type="email"
+            {...register("email", { 
+              required: "Email is required",
+              pattern: {
+                value: /^[A-Z0-9._%+-]+@[A-Z0-9.-]+\.[A-Z]{2,}$/i,
+                message: "Invalid email address"
+              }
+            })}
+            placeholder="Enter your email"
           />
-          {errors.city && (
-            <span className={styles.error}>{errors.city.message}</span>
+          {errors.email && (
+            <span className={styles.error}>{errors.email.message}</span>
           )}
+        </div>
+        <div className={styles.formField}>
+          <label>Location *</label>
+          <LocationSelector
+            selectedCountry={watch("country") || ''}
+            selectedCity={watch("city") || ''}
+            onCountryChange={(country) => setValue("country", country)}
+            onCityChange={(city) => setValue("city", city)}
+            required={true}
+          />
         </div>
         <div className={styles.formField}>
           <label>Age</label>
@@ -311,7 +273,6 @@ const EditProfilePage = () => {
             max="100"
             {...register("age")}
             placeholder="Enter your age"
-            disabled={!editingSections.personal}
           />
         </div>
         <div className={`${styles.formField} ${styles.fullWidth}`}>
@@ -320,7 +281,6 @@ const EditProfilePage = () => {
             rows={4}
             {...register("aboutMe")}
             placeholder="Tell us about yourself..."
-            disabled={!editingSections.personal}
           />
         </div>
       </div>
@@ -329,7 +289,7 @@ const EditProfilePage = () => {
 
   const renderExperienceSection = () => (
     <div className={styles.formSection}>
-      {renderSectionHeader("Experience & Status", "experience")}
+      {renderSectionHeader("Experience & Status")}
       <div className={styles.formGrid}>
         <div className={styles.formField}>
           <label>Development Experience *</label>
@@ -337,7 +297,7 @@ const EditProfilePage = () => {
             {...register("devExperience", {
               required: "Experience level is required",
             })}
-            disabled={!editingSections.experience}
+            
           >
             <option value="">Select Experience Level</option>
             <option value="beginner">Beginner</option>
@@ -352,7 +312,7 @@ const EditProfilePage = () => {
           <label>Status *</label>
           <select
             {...register("status", { required: "Status is required" })}
-            disabled={!editingSections.experience}
+            
           >
             <option value="">Select Status</option>
             <option value="searchhelp">Seeking Help</option>
@@ -380,85 +340,27 @@ const EditProfilePage = () => {
     return (
       <div className={styles.formSection}>
         {renderSectionHeader(title, sectionKey)}
-        <div className={styles.checkboxGrid}>
-          {options.map((option) => (
-            <label key={option} className={styles.checkboxLabel}>
-              <input
-                type="checkbox"
-                value={option}
-                checked={watchedValues.includes(option)}
-                {...register(
-                  fieldName,
-                  required
-                    ? {
-                        required: `At least one ${title.toLowerCase()} is required`,
-                      }
-                    : {}
-                )}
-                disabled={!editingSections[sectionKey]}
-                onChange={(e) => {
-                  const currentValues = watchedValues || [];
-                  if (e.target.checked) {
-                    setValue(fieldName, [...currentValues, option]);
-                  } else {
-                    setValue(
-                      fieldName,
-                      currentValues.filter((v) => v !== option)
-                    );
-                  }
-                }}
-              />
-              {option}
-            </label>
-          ))}
-
-          {sectionKey === "techArea" && (
-            <label className={styles.checkboxLabel}>
-              <input
-                type="checkbox"
-                value="other"
-                checked={watchedValues.includes("other")}
-                {...register(
-                  fieldName,
-                  required
-                    ? {
-                        required: `At least one ${title.toLowerCase()} is required`,
-                      }
-                    : {}
-                )}
-                disabled={!editingSections[sectionKey]}
-                onChange={(e) => {
-                  const currentValues = watchedValues || [];
-                  if (e.target.checked) {
-                    setValue(fieldName, [...currentValues, "other"]);
-                  } else {
-                    setValue(
-                      fieldName,
-                      currentValues.filter((v) => v !== "other")
-                    );
-                  }
-                }}
-              />
-              Other
-            </label>
-          )}
-        </div>
-        {required && errors[fieldName] && (
-          <span className={styles.error}>{errors[fieldName].message}</span>
-        )}
+        <HybridSelector
+          category={fieldName}
+          selectedValues={watchedValues}
+          onSelectionChange={(values) => setValue(fieldName, values)}
+          maxSelections={null}
+          allowMultiple={true}
+          showButtons={true}
+        />
       </div>
     );
   };
 
   const renderPreferencesSection = () => (
     <div className={styles.formSection}>
-      {renderSectionHeader("Coding Preferences", "preferences")}
+      {renderSectionHeader("Coding Preferences")}
       <div className={styles.formGrid}>
         <div className={styles.formField}>
           <label>Favorite Time to Code</label>
           <select
             {...register("favoriteTimeToCode")}
-            disabled={!editingSections.preferences}
+            
           >
             <option value="">Select Time</option>
             <option value="earlybird">Early Bird</option>
@@ -472,34 +374,40 @@ const EditProfilePage = () => {
             type="text"
             {...register("favoriteLineOfCode")}
             placeholder="Your favorite code snippet..."
-            disabled={!editingSections.preferences}
+            
           />
         </div>
         <div className={styles.formField}>
           <label>Favorite Drink While Coding</label>
-          <input
-            type="text"
-            {...register("favoriteDrinkWhileCoding")}
+          <HybridSelector
+            category="favoriteDrinkWhileCoding"
+            selectedValues={watch("favoriteDrinkWhileCoding") ? [watch("favoriteDrinkWhileCoding")] : []}
+            onSelectionChange={(values) => setValue("favoriteDrinkWhileCoding", values[0] || '')}
+            allowMultiple={false}
+            showButtons={false}
             placeholder="Coffee, Tea, Energy Drink..."
-            disabled={!editingSections.preferences}
           />
         </div>
         <div className={styles.formField}>
           <label>Music Genre While Coding</label>
-          <input
-            type="text"
-            {...register("musicGenreWhileCoding")}
+          <HybridSelector
+            category="musicGenreWhileCoding"
+            selectedValues={watch("musicGenreWhileCoding") ? [watch("musicGenreWhileCoding")] : []}
+            onSelectionChange={(values) => setValue("musicGenreWhileCoding", values[0] || '')}
+            allowMultiple={false}
+            showButtons={false}
             placeholder="Lo-fi, Rock, Electronic..."
-            disabled={!editingSections.preferences}
           />
         </div>
         <div className={styles.formField}>
           <label>Favorite Show/Movie</label>
-          <input
-            type="text"
-            {...register("favoriteShowMovie")}
+          <HybridSelector
+            category="favoriteShowMovie"
+            selectedValues={watch("favoriteShowMovie") ? [watch("favoriteShowMovie")] : []}
+            onSelectionChange={(values) => setValue("favoriteShowMovie", values[0] || '')}
+            allowMultiple={false}
+            showButtons={false}
             placeholder="What do you watch for inspiration?"
-            disabled={!editingSections.preferences}
           />
         </div>
       </div>
@@ -516,7 +424,6 @@ const EditProfilePage = () => {
               type="radio"
               value={os}
               {...register("preferredOS", { required: "Please select an OS" })}
-              disabled={!editingSections.environment}
             />
             {os}
           </label>
@@ -530,108 +437,21 @@ const EditProfilePage = () => {
 
   const renderProgrammingLanguagesSection = () => {
     const watchedValues = watch("programmingLanguages") || [];
-    const options = [
-      "JavaScript",
-      "Python",
-      "Java",
-      "C++",
-      "C#",
-      "TypeScript",
-      "PHP",
-      "Ruby",
-      "Go",
-      "Rust",
-      "Swift",
-      "Kotlin",
-      "C",
-      "Scala",
-      "Dart",
-    ];
 
     return (
       <div className={styles.formSection}>
-        {renderSectionHeader("Programming Languages", "languages")}
-        <div className={styles.programmingLanguagesGrid}>
-          {options.map((language) => {
-            const selectedEntry = watchedValues.find((item) =>
-              Array.isArray(item) ? item[0] === language : item === language
-            );
-            const isSelected = !!selectedEntry;
-            const currentSkillLevel = Array.isArray(selectedEntry)
-              ? selectedEntry[1]
-              : 5;
-
-            return (
-              <div key={language} className={styles.languageCard}>
-                <div className={styles.languageHeader}>
-                  <label className={styles.languageCheckbox}>
-                    <input
-                      type="checkbox"
-                      checked={isSelected}
-                      disabled={!editingSections.languages}
-                      onChange={(e) => {
-                        const currentValues = watchedValues || [];
-
-                        if (e.target.checked) {
-                          setValue("programmingLanguages", [
-                            ...currentValues,
-                            [language, 5],
-                          ]);
-                        } else {
-                          setValue(
-                            "programmingLanguages",
-                            currentValues.filter((item) =>
-                              Array.isArray(item)
-                                ? item[0] !== language
-                                : item !== language
-                            )
-                          );
-                        }
-                      }}
-                    />
-                    <span className={styles.languageName}>{language}</span>
-                  </label>
-                </div>
-
-                {isSelected && (
-                  <div className={styles.skillSliderContainer}>
-                    <div className={styles.skillLevelHeader}>
-                      <span className={styles.skillLabel}>Skill Level</span>
-                      <span className={styles.skillValue}>
-                        {currentSkillLevel}/10
-                      </span>
-                    </div>
-                    <div className={styles.sliderWrapper}>
-                      <span className={styles.sliderMinMax}>1</span>
-                      <input
-                        type="range"
-                        min="1"
-                        max="10"
-                        value={currentSkillLevel}
-                        className={styles.skillSlider}
-                        disabled={!editingSections.languages}
-                        onChange={(e) => {
-                          const newLevel = parseInt(e.target.value);
-                          const currentValues = watchedValues || [];
-
-                          const updatedValues = currentValues.map((item) => {
-                            if (Array.isArray(item) && item[0] === language) {
-                              return [language, newLevel];
-                            }
-                            return item;
-                          });
-
-                          setValue("programmingLanguages", updatedValues);
-                        }}
-                      />
-                      <span className={styles.sliderMinMax}>10</span>
-                    </div>
-                  </div>
-                )}
-              </div>
-            );
-          })}
-        </div>
+        {renderSectionHeader("Programming Languages")}
+        <HybridSelector
+          category="programmingLanguages"
+          selectedValues={watchedValues}
+          onSelectionChange={(values) => {
+            setValue("programmingLanguages", values);
+          }}
+          maxSelections={null}
+          allowMultiple={true}
+          showButtons={true}
+          showSkillLevel={true}
+        />
       </div>
     );
   };
