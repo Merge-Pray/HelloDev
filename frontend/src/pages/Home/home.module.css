@@ -6,7 +6,7 @@
 
   /* Breitenvariablen für Sidebar */
   --aside-wide: 380px;
-  --aside-mid: 300px;   /* schmalere Sidebar zwischen 900–1199px */
+  --aside-mid: 200px;   /* schmalere Sidebar zwischen 900–1199px */
 
   display: grid;
   grid-template-columns: 1fr var(--aside-wide); /* feed | sidebar */

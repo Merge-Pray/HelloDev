@@ -4,17 +4,14 @@
   --panel: var(--color-bg-secondary);
   --border: var(--color-border);
 
-  /* Breitenvariablen */
-  --nav-wide: 240px;
-  --nav-narrow: 76px;   /* Icon-Only-Menü */
-
-  display: grid;
-  max-width: 1200px;
+  max-width: 1400px;
   margin: 0 auto;
-  grid-template-columns: var(--nav-wide) 1fr; /* menu | content */
+  background: var(--bg);
+  
+  display: grid;
+  grid-template-columns: 240px 1fr 380px; /* menu | content | sidebar */
   gap: 24px;
   min-height: 100vh;
-  background: var(--bg);
   color: var(--color-text);
   box-sizing: border-box;
 }
@@ -22,15 +19,11 @@
 /* Bereiche */
 .navigation {
   border-right: 1px solid var(--border);
-  min-width: 0;              /* verhindert Aufdrücken */
-  overflow: hidden;          /* falls Kinder breiter sind */
+  min-width: 0;
+  overflow: hidden;
   display: flex;
   flex-direction: column;
   gap: 8px;
-
-  /* —— Container Query aktivieren —— */
-  container-type: inline-size;   /* reagiert auf Breite der linken Spalte */
-  container-name: nav;
 }
 
 .content {
@@ -39,50 +32,21 @@
   flex-direction: column;
 }
 
-/* typische Menü-Items (optional, wenn du so eine Struktur nutzt) */
-.navItem {
-  display: flex;
-  align-items: center;
-  gap: 12px;
-  min-width: 0;             /* wichtig für Truncation */
-  white-space: nowrap;
-}
-.navLabel {
+.sidebar {
+  border-left: 1px solid var(--border);
   min-width: 0;
-  overflow: hidden;
-  text-overflow: ellipsis;
 }
 
-/* ---------- Container Query: Linkes Menü wird icon-only, wenn die Spalte wirklich schmal ist ---------- */
-/* Greift, sobald .navigation (der Container) <= 120px breit ist */
-@container nav (max-width: 120px) {
-  /* Wir nutzen globale Attribute, damit es auch durch CSS-Module-Grenzen wirkt */
-  :global([data-nav-label]) { display: none; }
-  .navItem { justify-content: center; }
-}
-
-/* ---------- Breakpoints ---------- */
-
-/* < 1200px: Menü schmal */
+/* EINFACHE RESPONSIVE RULES */
 @media (max-width: 1200px) {
   .appLayout {
-    grid-template-columns: var(--nav-narrow) 1fr;
-    gap: 24px; /* gleicher Gap wie Desktop */
+    grid-template-columns: 76px 1fr 300px; /* schmales menu */
   }
-  .navigation :global([data-nav-label]) { display: none; }
-  .navigation :global([data-nav-icon])  { margin: 0 auto; }
 }
 
-/* < 900px: Menü bleibt schmal */
 @media (max-width: 900px) {
   .appLayout {
-    grid-template-columns: var(--nav-narrow) 1fr;
-    gap: 24px; /* gleicher Gap wie Desktop */
+    grid-template-columns: 76px 1fr; /* sidebar weg */
   }
-}
-
-/* < 520px: etwas kompakter */
-@media (max-width: 520px) {
-  .appLayout { gap: 24px; } /* gleicher Gap wie Desktop */
-  .content { padding: 12px; }
+  .sidebar { display: none; }
 }
