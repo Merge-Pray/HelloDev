@@ -14,6 +14,7 @@ export const createUser = async (req, res, next) => {
       email,
       hashedPassword,
       username,
+      nickname: username,
       isMatchable: false,
     });
 
@@ -33,6 +34,7 @@ export const createUser = async (req, res, next) => {
       user: {
         id: newAccount._id,
         username: newAccount.username,
+        nickname: newAccount.nickname,
         email: newAccount.email,
         isMatchable: false,
         avatar: newAccount.avatar,
