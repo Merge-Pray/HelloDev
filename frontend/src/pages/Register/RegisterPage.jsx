@@ -18,12 +18,6 @@ export default function RegisterPage() {
   const [showConfirmPassword, setShowConfirmPassword] = useState(false);
   const navigate = useNavigate();
 
-  useEffect(() => {
-    if (currentUser) {
-      navigate("/home", { replace: true });
-    }
-  }, [currentUser, navigate]);
-
   const {
     register,
     handleSubmit,

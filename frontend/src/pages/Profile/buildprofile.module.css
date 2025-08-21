@@ -1,52 +1,100 @@
 .buildCard {
   width: 100%;
-  max-width: 600px;
+  max-width: 650px;
   position: relative;
+  background: var(--color-card-bg);
+  border-radius: 16px;
+  padding: 30px;
+  box-shadow: 0 10px 30px var(--color-card-shadow);
+  backdrop-filter: blur(10px);
+  border: 1px solid var(--color-card-border);
+  transition: all 0.3s ease;
 }
 
 @media (max-width: 768px) {
   .buildCard {
     max-width: 500px;
+    padding: 20px;
+    margin: 10px;
   }
 }
 
 .progressBar {
   width: 100%;
-  height: 6px;
+  height: 8px;
   background: var(--color-input-border);
-  border-radius: 3px;
+  border-radius: 10px;
   margin-bottom: 30px;
   overflow: hidden;
+  box-shadow: inset 0 2px 4px rgba(0, 0, 0, 0.1);
 }
 
 .progressFill {
   height: 100%;
   background: var(--color-bg-gradient);
-  border-radius: 3px;
-  transition: width 0.3s ease;
+  border-radius: 10px;
+  transition: width 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+  position: relative;
+}
+
+.progressFill::after {
+  content: "";
+  position: absolute;
+  top: 0;
+  right: 0;
+  bottom: 0;
+  width: 20px;
+  background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.3));
+  animation: shimmer 2s infinite;
+}
+
+@keyframes shimmer {
+  0% {
+    transform: translateX(-20px);
+    opacity: 0;
+  }
+  50% {
+    opacity: 1;
+  }
+  100% {
+    transform: translateX(20px);
+    opacity: 0;
+  }
 }
 
 .stepCounter {
   position: absolute;
   top: 20px;
   right: 20px;
-  background: var(--color-bg-secondary);
-  border: 2px solid var(--color-card-border);
-  padding: 8px 12px;
+  background: var(--color-bg-gradient);
+  color: white;
+  padding: 8px 16px;
   border-radius: 20px;
   font-size: 14px;
   font-weight: 600;
-  color: var(--color-text-secondary);
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
 }
 
 .welcomeText {
   color: var(--color-primary);
-  font-size: 14px;
-  margin-bottom: 10px;
-  font-weight: 500;
+  font-size: 18px;
+  font-weight: 600;
+  text-align: center;
+  margin-bottom: 20px;
+  background: linear-gradient(
+    135deg,
+    var(--color-primary),
+    var(--color-accent)
+  );
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  background-clip: text;
 }
 
 .mixedFields {
+  display: flex;
+  flex-direction: column;
+  gap: 24px;
   margin-bottom: 30px;
 }
 
@@ -98,76 +146,90 @@
 .optionsGrid {
   display: grid;
   grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
-  gap: 12px;
+  gap: 16px;
   margin-bottom: 20px;
 }
 
 .optionItem {
-  display: flex;
-  align-items: center;
-  padding: 12px 16px;
-  background: var(--color-bg-secondary);
-  border: 2px solid var(--color-card-border);
-  border-radius: 8px;
-  cursor: pointer;
-  transition: all 0.2s ease;
-  user-select: none;
   position: relative;
+  border: 2px solid var(--color-input-border);
+  border-radius: 12px;
+  padding: 20px;
+  background: var(--color-input-bg);
+  transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+  cursor: pointer;
+  overflow: hidden;
 }
 
-.optionItem:hover:not(.disabled) {
-  background: var(--color-input-bg);
+.optionItem::before {
+  content: "";
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  height: 3px;
+  background: var(--color-bg-gradient);
+  transform: scaleX(0);
+  transform-origin: left;
+  transition: transform 0.3s ease;
+}
+
+.optionItem:hover {
   border-color: var(--color-primary);
+  transform: translateY(-2px);
+  box-shadow: 0 8px 25px rgba(var(--color-primary-rgb), 0.15);
+}
+
+.optionItem:hover::before {
+  transform: scaleX(1);
+}
+
+.optionItem.selected {
+  border-color: var(--color-primary);
+  background: linear-gradient(
+    135deg,
+    rgba(var(--color-primary-rgb), 0.1),
+    rgba(var(--color-primary-rgb), 0.05)
+  );
+  transform: translateY(-2px);
+  box-shadow: 0 8px 25px rgba(var(--color-primary-rgb), 0.2);
+}
+
+.optionItem.selected::before {
+  transform: scaleX(1);
 }
 
 .optionItem.disabled {
   opacity: 0.5;
   cursor: not-allowed;
-}
-
-.optionItem.selected {
-  background: rgba(93, 63, 148, 0.1);
-  border-color: var(--color-primary);
-  color: var(--color-primary);
-}
-
-[data-theme="dark"] .optionItem.selected {
-  background: rgba(167, 139, 250, 0.15);
+  transform: none !important;
+  box-shadow: none !important;
 }
 
 .optionItem input {
-  display: none;
-}
-
-.optionItem.disabled input {
-  cursor: not-allowed;
+  position: absolute;
+  opacity: 0;
+  pointer-events: none;
 }
 
 .optionItem label {
+  font-weight: 600;
+  color: var(--color-text);
   cursor: pointer;
-  font-weight: 500;
-  flex: 1;
-  color: inherit;
-}
-
-.optionItem.selected::before {
-  content: "✓";
-  position: absolute;
-  right: 12px;
-  color: var(--color-primary);
-  font-weight: bold;
   font-size: 16px;
+  display: block;
+  margin: 0;
 }
 
 .selectionCounter {
   text-align: center;
   font-size: 14px;
   color: var(--color-text-secondary);
-  margin-bottom: 20px;
-  padding: 8px;
   background: var(--color-bg-secondary);
-  border: 2px solid var(--color-card-border);
-  border-radius: 6px;
+  padding: 12px 20px;
+  border-radius: 20px;
+  font-weight: 500;
+  border: 2px solid var(--color-input-border);
 }
 
 .otherField {
@@ -205,35 +267,46 @@
 
 .buttonGroup {
   display: flex;
-  gap: 12px;
-  margin-top: 30px;
+  align-items: center;
+  justify-content: space-between;
+  gap: 16px;
+  margin-top: 40px;
+  padding-top: 20px;
+  border-top: 2px solid var(--color-input-border);
 }
 
 .btnBack {
   background: none;
   color: var(--color-primary);
-  padding: 8px;
+  padding: 12px;
   border: 2px solid var(--color-primary);
-  width: 40px;
-  height: 40px;
+  width: 48px;
+  height: 48px;
   display: flex;
   align-items: center;
   justify-content: center;
-  border-radius: 8px;
+  border-radius: 12px;
   cursor: pointer;
-  transition: all 0.2s ease;
+  transition: all 0.3s ease;
+  font-weight: 600;
 }
 
 .btnBack:hover {
   background: var(--color-primary);
   color: white;
+  transform: translateY(-2px);
+  box-shadow: 0 8px 25px rgba(var(--color-primary-rgb), 0.3);
 }
 
 .footer {
   text-align: center;
-  margin-top: 20px;
+  margin-top: 24px;
   font-size: 14px;
   color: var(--color-text-secondary);
+  background: var(--color-bg-secondary);
+  padding: 16px;
+  border-radius: 12px;
+  border: 1px solid var(--color-input-border);
 }
 
 /* ✅ NEU: Cancel Dialog Styles */
@@ -249,11 +322,21 @@
   align-items: center;
   justify-content: center;
   z-index: 1000;
-  backdrop-filter: blur(3px);
+  backdrop-filter: blur(8px);
+  animation: fadeIn 0.3s ease-out;
+}
+
+@keyframes fadeIn {
+  from {
+    opacity: 0;
+  }
+  to {
+    opacity: 1;
+  }
 }
 
 .dialog {
-  background: var(--color-bg);
+  background: var(--color-card-bg);
   border-radius: 16px;
   padding: 0;
   max-width: 500px;
@@ -261,8 +344,8 @@
   max-height: 80vh;
   overflow-y: auto;
   box-shadow: 0 25px 80px rgba(0, 0, 0, 0.3);
-  border: 1px solid var(--color-border);
-  animation: slideIn 0.3s ease-out;
+  border: 1px solid var(--color-card-border);
+  animation: slideIn 0.3s cubic-bezier(0.4, 0, 0.2, 1);
 }
 
 @keyframes slideIn {
@@ -278,14 +361,14 @@
 
 .dialogHeader {
   padding: 24px 24px 16px 24px;
-  border-bottom: 1px solid var(--color-border);
+  border-bottom: 2px solid var(--color-input-border);
   display: flex;
   align-items: center;
   gap: 12px;
 }
 
 .warningIcon {
-  color: #f59e0b;
+  color: var(--color-warning);
   flex-shrink: 0;
 }
 
@@ -297,96 +380,108 @@
 }
 
 .dialogContent {
-  padding: 20px 24px;
+  padding: 24px;
 }
 
 .warningBox {
-  background: rgba(239, 68, 68, 0.1);
-  border: 1px solid rgba(239, 68, 68, 0.2);
-  border-radius: 8px;
-  padding: 16px;
-  margin-bottom: 16px;
+  background: rgba(var(--color-warning-rgb), 0.1);
+  border: 2px solid rgba(var(--color-warning-rgb), 0.2);
+  border-radius: 12px;
+  padding: 20px;
+  margin-bottom: 20px;
 }
 
 .warningBox h4 {
-  margin: 0 0 12px 0;
-  color: #dc2626;
+  margin: 0 0 16px 0;
+  color: var(--color-warning);
   font-size: 16px;
   font-weight: 600;
 }
 
 .warningList {
   margin: 0;
-  padding-left: 16px;
+  padding-left: 20px;
   color: var(--color-text);
 }
 
 .warningList li {
-  margin-bottom: 8px;
-  line-height: 1.4;
+  margin-bottom: 12px;
+  line-height: 1.5;
 }
 
-.warningList li:last-child {
-  margin-bottom: 0;
+.warningList strong {
+  color: var(--color-text);
+  font-weight: 600;
 }
 
 .recommendationBox {
-  background: rgba(16, 185, 129, 0.1);
-  border: 1px solid rgba(16, 185, 129, 0.2);
-  border-radius: 8px;
-  padding: 16px;
-  margin-bottom: 20px;
+  background: rgba(var(--color-success-rgb), 0.1);
+  border: 2px solid rgba(var(--color-success-rgb), 0.2);
+  border-radius: 12px;
+  padding: 20px;
 }
 
 .recommendationBox h4 {
-  margin: 0 0 8px 0;
-  color: #059669;
+  margin: 0 0 12px 0;
+  color: var(--color-success);
   font-size: 16px;
   font-weight: 600;
 }
 
 .recommendationBox p {
   margin: 0;
-  color: var(--color-text-secondary);
-  line-height: 1.4;
+  color: var(--color-text);
+  line-height: 1.5;
 }
 
 .dialogActions {
-  padding: 0 24px 24px 24px;
   display: flex;
   gap: 12px;
+  padding: 24px;
   justify-content: flex-end;
-}
-
-.dialogActions .btn {
-  min-width: 120px;
-}
-
-/* Dark Mode Support */
-[data-theme="dark"] .dialog {
-  background: var(--color-bg-secondary);
-  border-color: var(--color-border);
-}
-
-[data-theme="dark"] .warningBox {
-  background: rgba(239, 68, 68, 0.15);
-  border-color: rgba(239, 68, 68, 0.3);
-}
-
-[data-theme="dark"] .recommendationBox {
-  background: rgba(16, 185, 129, 0.15);
-  border-color: rgba(16, 185, 129, 0.3);
+  border-top: 2px solid var(--color-input-border);
 }
 
 /* Mobile Responsive */
-@media (max-width: 480px) {
+@media (max-width: 768px) {
+  .programmingLanguagesGrid {
+    grid-template-columns: 1fr;
+    gap: 12px;
+  }
+
+  .programmingLanguageCard {
+    padding: 16px;
+  }
+
+  .optionsGrid {
+    grid-template-columns: 1fr;
+    gap: 12px;
+  }
+
+  .buttonGroup {
+    flex-direction: column;
+    gap: 12px;
+  }
+
+  .buttonGroup .btn {
+    width: 100%;
+    order: 2;
+  }
+
+  .btnBack {
+    order: 1;
+    width: 100%;
+    height: 48px;
+  }
+
   .dialog {
     max-width: 95%;
     margin: 20px;
   }
 
   .dialogActions {
-    flex-direction: column;
+    flex-direction: column-reverse;
+    gap: 12px;
   }
 
   .dialogActions .btn {
@@ -400,127 +495,39 @@
   .dialogContent {
     padding: 16px 20px;
   }
-
-  .dialogActions {
-    padding: 0 20px 20px 20px;
-  }
 }
 
-/* ✅ NEU: Programming Languages Styles für Onboarding */
-
-.programmingLanguagesContainer {
-  width: 100%;
+/* Dark Mode Support */
+[data-theme="dark"] .dialog {
+  background: var(--color-bg-secondary);
+  border-color: var(--color-border);
 }
 
-.programmingLanguagesGrid {
-  display: grid;
-  grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
-  gap: 12px;
-  margin-bottom: 20px;
+[data-theme="dark"] .warningBox {
+  background: rgba(245, 158, 11, 0.15);
+  border-color: rgba(245, 158, 11, 0.3);
 }
 
-.programmingLanguageCard {
-  border: 2px solid var(--color-border);
-  border-radius: 8px;
-  padding: 12px;
-  background: var(--color-bg);
-  transition: all 0.2s ease;
-  cursor: pointer;
+[data-theme="dark"] .recommendationBox {
+  background: rgba(16, 185, 129, 0.15);
+  border-color: rgba(16, 185, 129, 0.3);
 }
 
-.programmingLanguageCard:hover {
-  border-color: var(--color-primary);
-  transform: translateY(-1px);
+/* Smooth Transitions für bessere UX */
+* {
+  transition: background-color 0.3s ease, border-color 0.3s ease,
+    color 0.3s ease, transform 0.2s ease;
 }
 
-.programmingLanguageCard.selected {
-  border-color: var(--color-primary);
-  background: var(--color-primary-light);
+/* CSS Variablen für RGB Werte hinzufügen */
+:root {
+  --color-primary-rgb: 93, 63, 148;
+  --color-warning-rgb: 245, 158, 11;
+  --color-success-rgb: 16, 185, 129;
 }
 
-.programmingLanguageCard.disabled {
-  opacity: 0.5;
-  cursor: not-allowed;
-}
-
-.languageHeader {
-  display: flex;
-  align-items: center;
-  gap: 8px;
-  margin-bottom: 8px;
-}
-
-.languageHeader input[type="checkbox"] {
-  width: 16px;
-  height: 16px;
-  cursor: pointer;
-}
-
-.languageLabel {
-  font-weight: 600;
-  color: var(--color-text);
-  cursor: pointer;
-  flex: 1;
-  font-size: 0.9rem;
-}
-
-.skillSection {
-  border-top: 1px solid var(--color-border);
-  padding-top: 12px;
-}
-
-.skillHeader {
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
-  margin-bottom: 8px;
-  font-size: 14px;
-}
-
-.skillValue {
-  font-weight: 600;
-  color: var(--color-primary);
-  background: rgba(var(--color-primary-rgb), 0.1);
-  padding: 2px 8px;
-  border-radius: 12px;
-}
-
-.skillSlider {
-  width: 100%;
-  height: 6px;
-  border-radius: 3px;
-  background: var(--color-border);
-  outline: none;
-  cursor: pointer;
-  margin-bottom: 8px;
-}
-
-.skillSlider::-webkit-slider-thumb {
-  appearance: none;
-  width: 18px;
-  height: 18px;
-  border-radius: 50%;
-  background: var(--color-primary);
-  cursor: pointer;
-  border: 2px solid white;
-  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.2);
-}
-
-.skillLabels {
-  display: flex;
-  justify-content: space-between;
-  font-size: 12px;
-  color: var(--color-text-secondary);
-}
-
-/* Mobile Responsive */
-@media (max-width: 768px) {
-  .programmingLanguagesGrid {
-    grid-template-columns: 1fr;
-    gap: 12px;
-  }
-
-  .programmingLanguageCard {
-    padding: 12px;
-  }
+[data-theme="dark"] {
+  --color-primary-rgb: 167, 139, 250;
+  --color-warning-rgb: 251, 191, 36;
+  --color-success-rgb: 52, 211, 153;
 }
