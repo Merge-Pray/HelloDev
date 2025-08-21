@@ -101,6 +101,32 @@ body {
   box-sizing: border-box;
 }
 
+/* SCROLLBAR VERSTECKEN - Funktionalität bleibt erhalten */
+/* Webkit-basierte Browser (Chrome, Safari, Edge) */
+/* ::-webkit-scrollbar {
+  display: none;
+} */
+
+/* Firefox */
+/* * {
+  scrollbar-width: none;
+} */
+
+/* Für alle Browser - Alternative Methode */
+html, body {
+  /* -ms-overflow-style: none;   */
+  /* Internet Explorer 10+ */
+  /* scrollbar-width: none;      */
+  /* Firefox */
+}
+
+html::-webkit-scrollbar, 
+body::-webkit-scrollbar {
+  /* display: none;             */
+  /* Webkit */
+}
+/* ---------------------------------------- */
+
 /* Beispiel für Sidebar */
 .sidebar {
   background-color: var(--color-sidebar-bg);
