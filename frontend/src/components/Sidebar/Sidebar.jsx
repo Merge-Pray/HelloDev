@@ -6,13 +6,13 @@ export default function Sidebar() {
   return (
     <div className={styles.wrap}>
       <div className={styles.section}>
-        <div className={styles.title}>Search</div>
+        {/* <div className={styles.title}>Search</div>
         <input
           className={styles.input}
           placeholder="Search…"
           disabled
           aria-disabled="true"
-        />
+        /> */}
         <div className={styles.note}>Kommt später ✨</div>
       </div>
 

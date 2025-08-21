@@ -8,10 +8,10 @@ export const getUserMatches = async (req, res, next) => {
 
     const skip = (page - 1) * limit;
 
-    // Find all matches where the current user is either user1 or user2
+    
     const matches = await MatchModel.find({
       $or: [{ user1: userId }, { user2: userId }],
-      status: "pending", // Only show pending matches for now
+      status: "pending", 
     })
       .populate({
         path: "user1",
@@ -28,7 +28,7 @@ export const getUserMatches = async (req, res, next) => {
       .limit(parseInt(limit))
       .lean();
 
-    // Format the matches to always show the "other" user
+    
     const formattedMatches = matches.map((match) => {
       const isCurrentUserUser1 =
         match.user1._id.toString() === userId.toString();

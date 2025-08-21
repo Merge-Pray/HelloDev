@@ -1,4 +1,5 @@
 import React, { useState, useEffect } from "react";
+import { handleAuthErrorAndRetry, isAuthError } from "../utils/tokenRefresh";
 import FeedToggle from "./FeedToggle";
 import PostComposer from "./PostComposer";
 import FeedFilters from "./FeedFilters";
@@ -28,7 +29,7 @@ export default function NewsfeedContainer() {
     setLoading(true);
     setError(null);
 
-    try {
+    const makeRequest = async () => {
       const currentPage = resetPosts ? 1 : page;
 
       let url;
@@ -40,7 +41,16 @@ export default function NewsfeedContainer() {
         url = `${API_URL}/api/posts/newsfeed?feedType=${feedType}&algorithm=${algorithm}&page=${currentPage}&limit=20`;
       }
 
-      const response = await fetch(url, { credentials: "include" });
+      return await fetch(url, { credentials: "include" });
+    };
+
+    try {
+      let response = await makeRequest();
+
+      // Handle auth errors with token refresh
+      if (isAuthError(response)) {
+        response = await handleAuthErrorAndRetry(makeRequest);
+      }
 
       const data = await response.json();
       if (data.success) {
@@ -154,10 +164,7 @@ export default function NewsfeedContainer() {
       {/* Feed Controls - Hide during search */}
       {!isSearchActive && (
         <div className={styles.feedControls}>
-           <FeedFilters
-            algorithm={algorithm}
-            onAlgorithmChange={handleAlgorithmChange}
-          />
+           
           <FeedToggle
             feedType={feedType}
             onFeedTypeChange={handleFeedTypeChange}
@@ -197,7 +204,10 @@ export default function NewsfeedContainer() {
             className={styles.emptyFriendsFeed}
           />
         )}
-
+<FeedFilters
+            algorithm={algorithm}
+            onAlgorithmChange={handleAlgorithmChange}
+          />
       {isSearchActive && posts.length === 0 && !loading && (
         <div className={styles.emptySearchResults}>
           <h3>No posts found</h3>

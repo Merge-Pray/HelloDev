@@ -28,13 +28,22 @@ const Settings = () => {
       setIsLoggingOut(true);
       setError(null); // Clear any previous errors
 
-      const response = await fetch(`${API_URL}/api/user/logout`, {
-        method: "POST",
-        credentials: "include",
-        headers: {
-          "Content-Type": "application/json",
-        },
-      });
+      const makeRequest = async () => {
+        return await fetch(`${API_URL}/api/user/logout`, {
+          method: "POST",
+          credentials: "include",
+          headers: {
+            "Content-Type": "application/json",
+          },
+        });
+      };
+
+      let response = await makeRequest();
+
+      // Handle auth errors with token refresh (though unlikely for logout)
+      if (isAuthError(response)) {
+        response = await handleAuthErrorAndRetry(makeRequest);
+      }
 
       if (response.ok) {
         clearUser();

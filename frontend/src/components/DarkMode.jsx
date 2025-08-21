@@ -28,11 +28,10 @@ function saveTheme(theme) {
   }
 }
 
-const DarkMode = () => {
+export default function DarkMode() {
   const [isDarkMode, setIsDarkMode] = useState(false);
-  const userChoseManually = useRef(false); // merkt sich, ob User aktiv getoggelt hat
+  const userChoseManually = useRef(false);
 
-  // Initialisierung + System-Änderungen beobachten
   useEffect(() => {
     if (typeof window === "undefined") return;
 
@@ -43,22 +42,15 @@ const DarkMode = () => {
     setIsDarkMode(dark);
     setThemeAttr(dark ? DARK : LIGHT);
 
-
     const onSystemChange = (e) => {
-      if (userChoseManually.current) return; // User hat explizit gewählt → nicht überschreiben
+      if (userChoseManually.current) return;
       const nowDark = e.matches;
       setIsDarkMode(nowDark);
       setThemeAttr(nowDark ? DARK : LIGHT);
     };
 
-    // addEventListener fallback für ältere Browser
-    if (typeof media.addEventListener === "function") {
-      media.addEventListener("change", onSystemChange);
-      return () => media.removeEventListener("change", onSystemChange);
-    } else {
-      media.addListener(onSystemChange);
-      return () => media.removeListener(onSystemChange);
-    }
+    media.addEventListener?.("change", onSystemChange);
+    return () => media.removeEventListener?.("change", onSystemChange);
   }, []);
 
   const toggleDarkMode = () => {
@@ -70,40 +62,42 @@ const DarkMode = () => {
   };
 
   return (
-    <button
-      onClick={toggleDarkMode}
-      className="btn"
-      aria-pressed={isDarkMode}
-      aria-label={isDarkMode ? "Switch to light mode" : "Switch to dark mode"}
-      title={isDarkMode ? "Switch to Light Mode" : "Switch to Dark Mode"}
-      style={{
-        background: "var(--color-bg-secondary)",
-        border: "2px solid var(--color-card-border)",
-        borderRadius: "8px",
-        padding: "8px",
-        cursor: "pointer",
-        color: "var(--color-text)",
-        transition: "all 0.2s ease",
-        display: "flex",
-        alignItems: "center",
-        justifyContent: "center",
-        width: "40px",
-        height: "40px",
-      }}
-      onMouseEnter={(e) => {
-        e.currentTarget.style.background = "var(--color-primary)";
-        e.currentTarget.style.color = "white";
-        e.currentTarget.style.borderColor = "var(--color-primary)";
-      }}
-      onMouseLeave={(e) => {
-        e.currentTarget.style.background = "var(--color-bg-secondary)";
-        e.currentTarget.style.color = "var(--color-text)";
-        e.currentTarget.style.borderColor = "var(--color-card-border)";
-      }}
-    >
-      {isDarkMode ? <Sun size={20} /> : <Moon size={20} />}
-    </button>
-  );
-};
+    <>
+      <button
+        onClick={toggleDarkMode}
+        className="darkmode-btn"
+        aria-pressed={isDarkMode}
+        aria-label={isDarkMode ? "Switch to light mode" : "Switch to dark mode"}
+        title={isDarkMode ? "Switch to Light Mode" : "Switch to Dark Mode"}
+      >
+        {isDarkMode ? <Sun size={20} /> : <Moon size={20} />}
+      </button>
 
-export default DarkMode;
+      <style>{`
+        .darkmode-btn {
+          background: var(--color-bg);
+          color: var(--color-text);
+          border: none;
+          border-radius: 8px;
+          width: 40px;
+          height: 40px;
+          display: flex;
+          align-items: center;
+          justify-content: center;
+          cursor: pointer;
+          transition: background .2s ease, color .2s ease;
+        }
+
+        .darkmode-btn:hover,
+        .darkmode-btn:focus-visible {
+          background: var(--color-primary);
+          color: #fff;
+        }
+
+        .darkmode-btn:active {
+          transform: scale(0.96); /* kleines Feedback beim Klicken */
+        }
+      `}</style>
+    </>
+  );
+}

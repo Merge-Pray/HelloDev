@@ -4,16 +4,12 @@ import {
   getNewsfeed,
   getUserPosts,
   getPostById,
-  updatePost,
   deletePost,
   likePost,
   unlikePost,
-  addComment,
-  deleteComment,
+  addCommentToPost,
   searchPosts,
   getPostsByHashtag,
-  reportPost,
-  incrementViewCount,
   repostPost,
   removeRepost,
   getPostReposts,
@@ -42,11 +38,8 @@ postsRouter.post(
   "/:postId/comments",
   commentValidationRules(),
   validate,
-  addComment
+  addCommentToPost
 );
-postsRouter.delete("/:postId/comments/:commentId", deleteComment);
-postsRouter.post("/:postId/view", incrementViewCount);
-postsRouter.post("/:postId/report", reportPost);
 postsRouter.post(
   "/:postId/repost",
   repostValidationRules(),
@@ -57,5 +50,4 @@ postsRouter.delete("/:postId/repost", removeRepost);
 postsRouter.get("/:postId/reposts", getPostReposts);
 
 postsRouter.get("/:postId", getPostById);
-postsRouter.put("/:postId", postValidationRules(), validate, updatePost);
 postsRouter.delete("/:postId", deletePost);

@@ -1,13 +1,23 @@
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { API_URL } from "../lib/config";
+import { handleAuthErrorAndRetry, isAuthError } from "../utils/tokenRefresh";
 
 export const useProfile = () => {
   return useQuery({
     queryKey: ["user-profile"],
     queryFn: async () => {
-      const response = await fetch(`${API_URL}/api/user/user`, {
-        credentials: "include",
-      });
+      const makeRequest = async () => {
+        return await fetch(`${API_URL}/api/user/user`, {
+          credentials: "include",
+        });
+      };
+
+      let response = await makeRequest();
+
+      // Handle auth errors with token refresh
+      if (isAuthError(response)) {
+        response = await handleAuthErrorAndRetry(makeRequest);
+      }
 
       if (!response.ok) {
         throw new Error(`Failed to fetch profile: ${response.status}`);
@@ -27,14 +37,23 @@ export const useUpdateProfile = () => {
 
   return useMutation({
     mutationFn: async (profileData) => {
-      const response = await fetch(`${API_URL}/api/user/update`, {
-        method: "PATCH",
-        headers: {
-          "Content-Type": "application/json",
-        },
-        credentials: "include",
-        body: JSON.stringify(profileData),
-      });
+      const makeRequest = async () => {
+        return await fetch(`${API_URL}/api/user/update`, {
+          method: "PATCH",
+          headers: {
+            "Content-Type": "application/json",
+          },
+          credentials: "include",
+          body: JSON.stringify(profileData),
+        });
+      };
+
+      let response = await makeRequest();
+
+      // Handle auth errors with token refresh
+      if (isAuthError(response)) {
+        response = await handleAuthErrorAndRetry(makeRequest);
+      }
 
       if (!response.ok) {
         const errorData = await response.json();
@@ -62,9 +81,19 @@ export const usePrefetchProfile = () => {
     queryClient.prefetchQuery({
       queryKey: ["user-profile"],
       queryFn: async () => {
-        const response = await fetch(`${API_URL}/api/user/user`, {
-          credentials: "include",
-        });
+        const makeRequest = async () => {
+          return await fetch(`${API_URL}/api/user/user`, {
+            credentials: "include",
+          });
+        };
+
+        let response = await makeRequest();
+
+        // Handle auth errors with token refresh
+        if (isAuthError(response)) {
+          response = await handleAuthErrorAndRetry(makeRequest);
+        }
+
         if (!response.ok) throw new Error("Failed to prefetch profile");
         const data = await response.json();
         return data.user;
