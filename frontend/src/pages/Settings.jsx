@@ -7,7 +7,7 @@ import {
   AlertCircle,
 } from "lucide-react";
 import DarkMode from "../components/DarkMode";
-import styles from "./Settings.module.css";
+import styles from "./settings.module.css";
 import useUserStore from "../hooks/userstore";
 import { useNavigate } from "react-router";
 import { API_URL } from "../lib/config";
