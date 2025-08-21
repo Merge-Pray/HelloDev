@@ -1,7 +1,14 @@
-import { useState, useEffect } from "react";
+import { useState, useEffect, useRef } from "react";
 import { useNavigate } from "react-router";
 import { useForm } from "react-hook-form";
-import { Save, X, Edit3, Check, AlertCircle, Gamepad2 } from "lucide-react";
+import {
+  Save,
+  X,
+  Edit3,
+  Check,
+  AlertCircle,
+  AlertTriangle,
+} from "lucide-react";
 import useUserStore from "../../hooks/userstore";
 import { useProfile, useUpdateProfile } from "../../hooks/useProfile";
 import { API_URL } from "../../lib/config";
@@ -12,7 +19,7 @@ import HybridSelector from "../../components/HybridSelector";
 import LocationSelector from "../../components/LocationSelector";
 
 const EditProfilePage = () => {
-  const currentUser = useUserStore((state) => state.currentUser); // Auth only
+  const currentUser = useUserStore((state) => state.currentUser);
   const {
     data: profileData,
     isLoading,
@@ -23,6 +30,10 @@ const EditProfilePage = () => {
   const [activeSection, setActiveSection] = useState("personal");
   const [error, setError] = useState(null);
   const [success, setSuccess] = useState(null);
+  const [hasUnsavedChanges, setHasUnsavedChanges] = useState(false);
+  const [showUnsavedWarning, setShowUnsavedWarning] = useState(false);
+  const [originalData, setOriginalData] = useState({});
+  const [isDataLoaded, setIsDataLoaded] = useState(false);
   const navigate = useNavigate();
 
   const {
@@ -32,6 +43,9 @@ const EditProfilePage = () => {
     watch,
     formState: { errors },
   } = useForm();
+
+  // Watch all form values to detect changes
+  const watchedValues = watch();
 
   useEffect(() => {
     if (!currentUser) {
@@ -46,19 +60,11 @@ const EditProfilePage = () => {
       }
       setError("Failed to load profile data. Please try again.");
     }
+  }, [currentUser, navigate, profileError]);
 
-    // Initialize form with profile data when it loads
-    if (profileData) {
-      Object.keys(profileData).forEach((key) => {
-        if (profileData[key] !== null && profileData[key] !== undefined) {
-          setValue(key, profileData[key]);
-        }
-      });
-    }
-  }, [currentUser, navigate, profileError, profileData, setValue]);
-
+  // Initialize form data and original data when profile loads
   useEffect(() => {
-    if (profileData && Object.keys(profileData).length > 0) {
+    if (profileData && Object.keys(profileData).length > 0 && !isDataLoaded) {
       const arrayFields = [
         "programmingLanguages",
         "techArea",
@@ -67,39 +73,180 @@ const EditProfilePage = () => {
         "otherInterests",
       ];
 
+      const initialData = {};
+
+      // Handle array fields
       arrayFields.forEach((field) => {
-        if (profileData[field] && Array.isArray(profileData[field])) {
-          setValue(field, profileData[field]);
+        const value = profileData[field] || [];
+        setValue(field, value);
+        initialData[field] = Array.isArray(value) ? [...value] : [];
+      });
+
+      // Handle regular fields
+      Object.keys(profileData).forEach((key) => {
+        if (!arrayFields.includes(key)) {
+          const value = profileData[key];
+          if (value !== null && value !== undefined) {
+            setValue(key, value);
+            initialData[key] = value;
+          } else {
+            setValue(key, "");
+            initialData[key] = "";
+          }
         }
       });
 
-      Object.keys(profileData).forEach((key) => {
-        if (
-          profileData[key] !== null &&
-          profileData[key] !== undefined &&
-          !arrayFields.includes(key)
-        ) {
-          setValue(key, profileData[key]);
+      // ✅ Special handling for nickname - use username as default if nickname is empty
+      if (!profileData.nickname || profileData.nickname.trim() === "") {
+        const defaultNickname = profileData.username || "";
+        setValue("nickname", defaultNickname);
+        initialData["nickname"] = defaultNickname;
+      }
+
+      setOriginalData(initialData);
+      setIsDataLoaded(true);
+      setHasUnsavedChanges(false);
+    }
+  }, [profileData, setValue, isDataLoaded]);
+
+  // Deep comparison function for arrays and objects
+  const deepEqual = (a, b) => {
+    if (Array.isArray(a) && Array.isArray(b)) {
+      if (a.length !== b.length) return false;
+      const sortedA = [...a].sort();
+      const sortedB = [...b].sort();
+      return sortedA.every((val, index) => {
+        if (typeof val === "object" && val !== null) {
+          return deepEqual(val, sortedB[index]);
         }
+        return val === sortedB[index];
       });
     }
-  }, [profileData, setValue]);
 
+    if (
+      typeof a === "object" &&
+      typeof b === "object" &&
+      a !== null &&
+      b !== null
+    ) {
+      const keysA = Object.keys(a);
+      const keysB = Object.keys(b);
+      if (keysA.length !== keysB.length) return false;
+      return keysA.every((key) => deepEqual(a[key], b[key]));
+    }
+
+    return a === b;
+  };
+
+  // Detect changes by comparing current form values with original data
+  useEffect(() => {
+    if (
+      !isDataLoaded ||
+      !originalData ||
+      Object.keys(originalData).length === 0
+    ) {
+      setHasUnsavedChanges(false);
+      return;
+    }
+
+    // Only check fields that exist in originalData
+    const hasChanges = Object.keys(originalData).some((key) => {
+      const currentValue = watchedValues[key];
+      const originalValue = originalData[key];
+
+      // Handle undefined/null values
+      const normalizedCurrent =
+        currentValue === undefined || currentValue === null ? "" : currentValue;
+      const normalizedOriginal =
+        originalValue === undefined || originalValue === null
+          ? ""
+          : originalValue;
+
+      // Use deep comparison for arrays and objects
+      if (
+        Array.isArray(normalizedCurrent) ||
+        Array.isArray(normalizedOriginal)
+      ) {
+        return !deepEqual(normalizedCurrent, normalizedOriginal);
+      }
+
+      // Handle regular values
+      return normalizedCurrent !== normalizedOriginal;
+    });
+
+    setHasUnsavedChanges(hasChanges);
+  }, [watchedValues, originalData, isDataLoaded]);
 
   const saveAllChanges = async (formData) => {
     setError(null);
     setSuccess(null);
 
     try {
-      await updateProfile.mutateAsync(formData);
+      // ✅ Ensure nickname is properly set before sending
+      const processedData = { ...formData };
+
+      // If nickname is empty or just whitespace, it will be set to username in backend
+      if (!processedData.nickname || processedData.nickname.trim() === "") {
+        processedData.nickname =
+          processedData.username || profileData?.username || "";
+      }
+
+      console.log("Saving profile data:", processedData);
+
+      await updateProfile.mutateAsync(processedData);
       setSuccess("Profile updated successfully!");
-      setTimeout(() => setSuccess(null), 3000);
+
+      // ✅ Update original data with saved values and reset change detection
+      const newOriginalData = {};
+      Object.keys(processedData).forEach((key) => {
+        if (Array.isArray(processedData[key])) {
+          newOriginalData[key] = [...processedData[key]];
+        } else {
+          newOriginalData[key] = processedData[key];
+        }
+      });
+
+      setOriginalData(newOriginalData);
+      setHasUnsavedChanges(false);
+
+      // ✅ Refetch profile data to get updated values from backend
+      setTimeout(async () => {
+        try {
+          await refetch();
+          setSuccess(null);
+        } catch (error) {
+          console.error("Error refetching profile data:", error);
+        }
+      }, 1000);
     } catch (error) {
       console.error("Error saving profile:", error);
       setError(error.message || "Failed to save changes. Please try again.");
     }
   };
 
+  const handleBackToProfile = () => {
+    if (hasUnsavedChanges) {
+      setShowUnsavedWarning(true);
+    } else {
+      navigate("/profile");
+    }
+  };
+
+  const handleDiscardChanges = () => {
+    setShowUnsavedWarning(false);
+    navigate("/profile");
+  };
+
+  const handleSaveAndExit = async () => {
+    try {
+      await updateProfile.mutateAsync(watchedValues);
+      setShowUnsavedWarning(false);
+      navigate("/profile");
+    } catch (error) {
+      setError(error.message || "Failed to save changes. Please try again.");
+      setShowUnsavedWarning(false);
+    }
+  };
 
   const profileStats = calculateProfileCompletion(profileData);
   const profileCompletion = profileStats.totalCompletion;
@@ -124,9 +271,61 @@ const EditProfilePage = () => {
     </div>
   );
 
+  const renderMultiSelectSection = (
+    title,
+    fieldName,
+    options,
+    sectionKey,
+    required = false
+  ) => {
+    const watchedValues = watch(fieldName) || [];
+
+    // ✅ Use radio-style rendering for better consistency
+    return (
+      <div className={styles.formSection}>
+        {renderSectionHeader(title, sectionKey)}
+        <div className={styles.hybridSelectorContainer}>
+          <HybridSelector
+            category={fieldName}
+            selectedValues={watchedValues}
+            onSelectionChange={(values) => setValue(fieldName, values)}
+            maxSelections={null}
+            allowMultiple={true}
+            showButtons={true}
+          />
+        </div>
+      </div>
+    );
+  };
+
+  // ✅ Update Programming Languages Section with consistent styling
+  const renderProgrammingLanguagesSection = () => {
+    const watchedValues = watch("programmingLanguages") || [];
+
+    return (
+      <div className={styles.formSection}>
+        {renderSectionHeader("Programming Languages")}
+        <div className={styles.hybridSelectorContainer}>
+          <HybridSelector
+            category="programmingLanguages"
+            selectedValues={watchedValues}
+            onSelectionChange={(values) => {
+              setValue("programmingLanguages", values);
+            }}
+            maxSelections={null}
+            allowMultiple={true}
+            showButtons={true}
+            showSkillLevel={true}
+          />
+        </div>
+      </div>
+    );
+  };
+
+  // ✅ Consistent styling for Gaming section (reference for other sections)
   const renderGamingSection = () => (
     <div className={styles.formSection}>
-      {renderSectionHeader("Gaming Preferences")}{" "}
+      {renderSectionHeader("Gaming Preferences")}
       <div className={styles.radioGroup}>
         {[
           { value: "none", label: "No Gaming" },
@@ -136,13 +335,8 @@ const EditProfilePage = () => {
           { value: "board", label: "Board Games" },
         ].map((option) => (
           <label key={option.value} className={styles.radioLabel}>
-            <input
-              type="radio"
-              value={option.value}
-              {...register("gaming")}
-  
-            />
-            {option.label}
+            <input type="radio" value={option.value} {...register("gaming")} />
+            <span className={styles.radioText}>{option.label}</span>
           </label>
         ))}
       </div>
@@ -152,72 +346,27 @@ const EditProfilePage = () => {
     </div>
   );
 
-  const getSectionData = (sectionKey, formData) => {
-    const data = {};
-
-    switch (sectionKey) {
-      case "personal":
-        data.country = formData.country;
-        data.city = formData.city;
-        data.age = formData.age;
-        data.aboutMe = formData.aboutMe;
-        break;
-      case "experience":
-        data.devExperience = formData.devExperience;
-        data.status = formData.status;
-        break;
-      case "languages":
-        data.programmingLanguages = Array.isArray(formData.programmingLanguages)
-          ? formData.programmingLanguages
-          : [];
-        console.log("Saving programming languages:", data.programmingLanguages);
-        break;
-      case "interests":
-        data.techArea = Array.isArray(formData.techArea)
-          ? formData.techArea
-          : [];
-        break;
-      case "stack":
-        data.techStack = Array.isArray(formData.techStack)
-          ? formData.techStack
-          : [];
-        break;
-      case "spoken":
-        data.languages = Array.isArray(formData.languages)
-          ? formData.languages
-          : [];
-        break;
-      case "environment":
-        data.preferredOS = formData.preferredOS;
-        break;
-      case "gaming":
-        data.gaming = formData.gaming || "";
-        break;
-      case "other":
-        data.otherInterests = Array.isArray(formData.otherInterests)
-          ? formData.otherInterests
-          : [];
-        break;
-      case "preferences":
-        data.favoriteTimeToCode = formData.favoriteTimeToCode;
-        data.favoriteLineOfCode = formData.favoriteLineOfCode;
-        data.favoriteDrinkWhileCoding = formData.favoriteDrinkWhileCoding;
-        data.musicGenreWhileCoding = formData.musicGenreWhileCoding;
-        data.favoriteShowMovie = formData.favoriteShowMovie;
-        break;
-      default:
-        return formData;
-    }
-
-    Object.keys(data).forEach((key) => {
-      if (data[key] === undefined || data[key] === null) {
-        delete data[key];
-      }
-    });
-
-    console.log(`Section ${sectionKey} data:`, data);
-    return data;
-  };
+  // ✅ Update Environment section to match gaming styling
+  const renderEnvironmentSection = () => (
+    <div className={styles.formSection}>
+      {renderSectionHeader("Development Environment")}
+      <div className={styles.radioGroup}>
+        {["Windows", "macOS", "Linux", "Other"].map((os) => (
+          <label key={os} className={styles.radioLabel}>
+            <input
+              type="radio"
+              value={os}
+              {...register("preferredOS", { required: "Please select an OS" })}
+            />
+            <span className={styles.radioText}>{os}</span>
+          </label>
+        ))}
+      </div>
+      {errors.preferredOS && (
+        <span className={styles.error}>{errors.preferredOS.message}</span>
+      )}
+    </div>
+  );
 
   const renderPersonalSection = () => (
     <div className={styles.formSection}>
@@ -227,10 +376,26 @@ const EditProfilePage = () => {
           <label>Username *</label>
           <input
             type="text"
-            {...register("username", { 
+            {...register("username", {
               required: "Username is required",
-              minLength: { value: 3, message: "Username must be at least 3 characters" },
-              maxLength: { value: 20, message: "Username must be less than 20 characters" }
+              minLength: {
+                value: 3,
+                message: "Username must be at least 3 characters",
+              },
+              maxLength: {
+                value: 20,
+                message: "Username must be less than 20 characters",
+              },
+              // ✅ Add onChange handler to sync nickname if needed
+              onChange: (e) => {
+                const newUsername = e.target.value;
+                const currentNickname = watch("nickname");
+
+                // If nickname equals the old username, update it to the new username
+                if (currentNickname === profileData?.username) {
+                  setValue("nickname", newUsername);
+                }
+              },
             })}
             placeholder="Enter your username"
           />
@@ -238,16 +403,59 @@ const EditProfilePage = () => {
             <span className={styles.error}>{errors.username.message}</span>
           )}
         </div>
+
+        <div className={styles.formField}>
+          <label>
+            Nickname *
+            <span className={styles.defaultIndicator}>
+              {" "}
+              (Default: {profileData?.username})
+            </span>
+          </label>
+          <input
+            type="text"
+            {...register("nickname", {
+              required: "Nickname is required",
+              minLength: {
+                value: 2,
+                message: "Nickname must be at least 2 characters",
+              },
+              maxLength: {
+                value: 25,
+                message: "Nickname must be less than 25 characters",
+              },
+              // ✅ Add validation for nickname uniqueness if needed
+              validate: (value) => {
+                const trimmedValue = value?.trim();
+                if (!trimmedValue) {
+                  return "Nickname is required";
+                }
+                if (trimmedValue.length < 2) {
+                  return "Nickname must be at least 2 characters";
+                }
+                if (trimmedValue.length > 25) {
+                  return "Nickname must be less than 25 characters";
+                }
+                return true;
+              },
+            })}
+            placeholder={`Default: ${profileData?.username} (or enter custom nickname)`}
+          />
+          {errors.nickname && (
+            <span className={styles.error}>{errors.nickname.message}</span>
+          )}
+        </div>
+
         <div className={styles.formField}>
           <label>Email *</label>
           <input
             type="email"
-            {...register("email", { 
+            {...register("email", {
               required: "Email is required",
               pattern: {
                 value: /^[A-Z0-9._%+-]+@[A-Z0-9.-]+\.[A-Z]{2,}$/i,
-                message: "Invalid email address"
-              }
+                message: "Invalid email address",
+              },
             })}
             placeholder="Enter your email"
           />
@@ -255,16 +463,18 @@ const EditProfilePage = () => {
             <span className={styles.error}>{errors.email.message}</span>
           )}
         </div>
+
         <div className={styles.formField}>
           <label>Location *</label>
           <LocationSelector
-            selectedCountry={watch("country") || ''}
-            selectedCity={watch("city") || ''}
+            selectedCountry={watch("country") || ""}
+            selectedCity={watch("city") || ""}
             onCountryChange={(country) => setValue("country", country)}
             onCityChange={(city) => setValue("city", city)}
             required={true}
           />
         </div>
+
         <div className={styles.formField}>
           <label>Age</label>
           <input
@@ -275,6 +485,7 @@ const EditProfilePage = () => {
             placeholder="Enter your age"
           />
         </div>
+
         <div className={`${styles.formField} ${styles.fullWidth}`}>
           <label>About Me</label>
           <textarea
@@ -297,7 +508,6 @@ const EditProfilePage = () => {
             {...register("devExperience", {
               required: "Experience level is required",
             })}
-            
           >
             <option value="">Select Experience Level</option>
             <option value="beginner">Beginner</option>
@@ -310,10 +520,7 @@ const EditProfilePage = () => {
         </div>
         <div className={styles.formField}>
           <label>Status *</label>
-          <select
-            {...register("status", { required: "Status is required" })}
-            
-          >
+          <select {...register("status", { required: "Status is required" })}>
             <option value="">Select Status</option>
             <option value="searchhelp">Seeking Help</option>
             <option value="offerhelp">Offering Help</option>
@@ -328,40 +535,13 @@ const EditProfilePage = () => {
     </div>
   );
 
-  const renderMultiSelectSection = (
-    title,
-    fieldName,
-    options,
-    sectionKey,
-    required = false
-  ) => {
-    const watchedValues = watch(fieldName) || [];
-
-    return (
-      <div className={styles.formSection}>
-        {renderSectionHeader(title, sectionKey)}
-        <HybridSelector
-          category={fieldName}
-          selectedValues={watchedValues}
-          onSelectionChange={(values) => setValue(fieldName, values)}
-          maxSelections={null}
-          allowMultiple={true}
-          showButtons={true}
-        />
-      </div>
-    );
-  };
-
   const renderPreferencesSection = () => (
     <div className={styles.formSection}>
       {renderSectionHeader("Coding Preferences")}
       <div className={styles.formGrid}>
         <div className={styles.formField}>
           <label>Favorite Time to Code</label>
-          <select
-            {...register("favoriteTimeToCode")}
-            
-          >
+          <select {...register("favoriteTimeToCode")}>
             <option value="">Select Time</option>
             <option value="earlybird">Early Bird</option>
             <option value="daytime">Daytime</option>
@@ -374,15 +554,20 @@ const EditProfilePage = () => {
             type="text"
             {...register("favoriteLineOfCode")}
             placeholder="Your favorite code snippet..."
-            
           />
         </div>
         <div className={styles.formField}>
           <label>Favorite Drink While Coding</label>
           <HybridSelector
             category="favoriteDrinkWhileCoding"
-            selectedValues={watch("favoriteDrinkWhileCoding") ? [watch("favoriteDrinkWhileCoding")] : []}
-            onSelectionChange={(values) => setValue("favoriteDrinkWhileCoding", values[0] || '')}
+            selectedValues={
+              watch("favoriteDrinkWhileCoding")
+                ? [watch("favoriteDrinkWhileCoding")]
+                : []
+            }
+            onSelectionChange={(values) =>
+              setValue("favoriteDrinkWhileCoding", values[0] || "")
+            }
             allowMultiple={false}
             showButtons={false}
             placeholder="Coffee, Tea, Energy Drink..."
@@ -392,8 +577,14 @@ const EditProfilePage = () => {
           <label>Music Genre While Coding</label>
           <HybridSelector
             category="musicGenreWhileCoding"
-            selectedValues={watch("musicGenreWhileCoding") ? [watch("musicGenreWhileCoding")] : []}
-            onSelectionChange={(values) => setValue("musicGenreWhileCoding", values[0] || '')}
+            selectedValues={
+              watch("musicGenreWhileCoding")
+                ? [watch("musicGenreWhileCoding")]
+                : []
+            }
+            onSelectionChange={(values) =>
+              setValue("musicGenreWhileCoding", values[0] || "")
+            }
             allowMultiple={false}
             showButtons={false}
             placeholder="Lo-fi, Rock, Electronic..."
@@ -403,8 +594,12 @@ const EditProfilePage = () => {
           <label>Favorite Show/Movie</label>
           <HybridSelector
             category="favoriteShowMovie"
-            selectedValues={watch("favoriteShowMovie") ? [watch("favoriteShowMovie")] : []}
-            onSelectionChange={(values) => setValue("favoriteShowMovie", values[0] || '')}
+            selectedValues={
+              watch("favoriteShowMovie") ? [watch("favoriteShowMovie")] : []
+            }
+            onSelectionChange={(values) =>
+              setValue("favoriteShowMovie", values[0] || "")
+            }
             allowMultiple={false}
             showButtons={false}
             placeholder="What do you watch for inspiration?"
@@ -414,44 +609,59 @@ const EditProfilePage = () => {
     </div>
   );
 
-  const renderEnvironmentSection = () => (
-    <div className={styles.formSection}>
-      {renderSectionHeader("Development Environment", "environment")}
-      <div className={styles.radioGroup}>
-        {["Windows", "macOS", "Linux", "Other"].map((os) => (
-          <label key={os} className={styles.radioLabel}>
-            <input
-              type="radio"
-              value={os}
-              {...register("preferredOS", { required: "Please select an OS" })}
-            />
-            {os}
-          </label>
-        ))}
-      </div>
-      {errors.preferredOS && (
-        <span className={styles.error}>{errors.preferredOS.message}</span>
-      )}
-    </div>
-  );
-
-  const renderProgrammingLanguagesSection = () => {
-    const watchedValues = watch("programmingLanguages") || [];
+  const renderCurrentSection = () => {
+    const sectionContent = (() => {
+      switch (activeSection) {
+        case "personal":
+          return renderPersonalSection();
+        case "experience":
+          return renderExperienceSection();
+        case "languages":
+          return renderProgrammingLanguagesSection();
+        case "interests":
+          return renderMultiSelectSection(
+            "Tech Areas of Interest",
+            "techArea",
+            [],
+            "interests",
+            true
+          );
+        case "stack":
+          return renderMultiSelectSection(
+            "Tech Stack & Tools",
+            "techStack",
+            [],
+            "stack",
+            true
+          );
+        case "spoken":
+          return renderMultiSelectSection(
+            "Spoken Languages",
+            "languages",
+            [],
+            "spoken"
+          );
+        case "environment":
+          return renderEnvironmentSection();
+        case "gaming":
+          return renderGamingSection();
+        case "other":
+          return renderMultiSelectSection(
+            "Other Interests",
+            "otherInterests",
+            [],
+            "other"
+          );
+        case "preferences":
+          return renderPreferencesSection();
+        default:
+          return renderPersonalSection();
+      }
+    })();
 
     return (
-      <div className={styles.formSection}>
-        {renderSectionHeader("Programming Languages")}
-        <HybridSelector
-          category="programmingLanguages"
-          selectedValues={watchedValues}
-          onSelectionChange={(values) => {
-            setValue("programmingLanguages", values);
-          }}
-          maxSelections={null}
-          allowMultiple={true}
-          showButtons={true}
-          showSkillLevel={true}
-        />
+      <div id={`section-${activeSection}`} className={styles.sectionContainer}>
+        {sectionContent}
       </div>
     );
   };
@@ -474,121 +684,6 @@ const EditProfilePage = () => {
       }, 100);
     }
   }, []);
-
-  const renderCurrentSection = () => {
-    const sectionContent = (() => {
-      switch (activeSection) {
-        case "personal":
-          return renderPersonalSection();
-        case "experience":
-          return renderExperienceSection();
-        case "languages":
-          return renderProgrammingLanguagesSection(); // ✅ Neue Funktion statt renderMultiSelectSection
-        case "interests":
-          return renderMultiSelectSection(
-            "Tech Areas of Interest",
-            "techArea",
-            [
-              "Web Development",
-              "Mobile Development",
-              "Game Development",
-              "AI/Machine Learning",
-              "Data Science",
-              "DevOps",
-              "Cybersecurity",
-              "Cloud Computing",
-              "Blockchain",
-              "IoT",
-              "AR/VR",
-              "Robotics",
-            ],
-            "interests",
-            true
-          );
-        case "stack":
-          return renderMultiSelectSection(
-            "Tech Stack & Tools",
-            "techStack",
-            [
-              "React",
-              "Vue.js",
-              "Angular",
-              "Node.js",
-              "Express",
-              "Django",
-              "Flask",
-              "Spring Boot",
-              "Docker",
-              "Kubernetes",
-              "AWS",
-              "Azure",
-              "GCP",
-              "MongoDB",
-              "PostgreSQL",
-              "MySQL",
-            ],
-            "stack",
-            true
-          );
-        case "spoken":
-          return renderMultiSelectSection(
-            "Spoken Languages",
-            "languages",
-            [
-              "English",
-              "Spanish",
-              "French",
-              "German",
-              "Italian",
-              "Portuguese",
-              "Russian",
-              "Chinese (Mandarin)",
-              "Japanese",
-              "Korean",
-              "Arabic",
-              "Hindi",
-            ],
-            "spoken"
-          );
-        case "environment":
-          return renderEnvironmentSection();
-        case "gaming":
-          return renderGamingSection();
-        case "other":
-          return renderMultiSelectSection(
-            "Other Interests",
-            "otherInterests",
-            [
-              "Reading",
-              "Music",
-              "Sports",
-              "Photography",
-              "Travel",
-              "Cooking",
-              "Art & Design",
-              "Writing",
-              "Podcasts",
-              "YouTube",
-              "Streaming",
-              "Fitness",
-              "Hiking",
-              "Cycling",
-            ],
-            "other"
-          );
-        case "preferences":
-          return renderPreferencesSection();
-        default:
-          return renderPersonalSection();
-      }
-    })();
-
-    return (
-      <div id={`section-${activeSection}`} className={styles.sectionContainer}>
-        {sectionContent}
-      </div>
-    );
-  };
 
   if (isLoading) {
     return (
@@ -633,14 +728,65 @@ const EditProfilePage = () => {
               <br />
               {isMatchable ? (
                 <span style={{ color: "var(--color-success)" }}>
-                  You are able to match!
+                  ✅ You are able to match!
                 </span>
               ) : (
-                <span style={{ color: "var(--color-warning)" }}>
-                  ❌ {profileStats.missingRequiredFields} required fields
-                  missing to match
-                </span>
+                <div className={styles.missingFieldsInfo}>
+                  <span style={{ color: "var(--color-warning)" }}>
+                    ❌ {profileStats.missingRequiredFields} required fields
+                    missing to match
+                  </span>
+
+                  {profileStats.missingRequiredFieldsList &&
+                    profileStats.missingRequiredFieldsList.length > 0 && (
+                      <div className={styles.missingFieldsList}>
+                        <strong>Missing required fields:</strong>
+                        <ul>
+                          {profileStats.missingRequiredFieldsList.map(
+                            ({ field, label }) => (
+                              <li key={field}>
+                                <button
+                                  type="button"
+                                  className={styles.missingFieldLink}
+                                  onClick={() => {
+                                    // Jump to appropriate section
+                                    const sectionMap = {
+                                      country: "personal",
+                                      city: "personal",
+                                      status: "experience",
+                                      devExperience: "experience",
+                                      techArea: "interests",
+                                      programmingLanguages: "languages",
+                                      techStack: "stack",
+                                      preferredOS: "environment",
+                                    };
+                                    setActiveSection(
+                                      sectionMap[field] || "personal"
+                                    );
+                                  }}
+                                >
+                                  {label}
+                                </button>
+                              </li>
+                            )
+                          )}
+                        </ul>
+                      </div>
+                    )}
+                </div>
               )}
+            </div>
+          </div>
+
+          {/* ✅ NEU: Info über vorausgefüllte Werte */}
+          <div className={styles.defaultValuesInfo}>
+            <div className={styles.infoHeader}>
+              <AlertCircle size={14} />
+              Default Values
+            </div>
+            <div className={styles.infoText}>
+              Some fields are pre-filled with default values. You can customize
+              them to better represent yourself.
             </div>
           </div>
 
@@ -649,11 +795,42 @@ const EditProfilePage = () => {
             {sections.map((section) => (
               <li key={section.id}>
                 <button
-                  className={activeSection === section.id ? styles.active : ""}
+                  className={`${
+                    activeSection === section.id ? styles.active : ""
+                  } ${
+                    // ✅ Markiere Sections mit fehlenden Pflichtfeldern
+                    profileStats.missingRequiredFieldsList?.some(
+                      ({ field }) => {
+                        const sectionMap = {
+                          personal: ["country", "city"],
+                          experience: ["status", "devExperience"],
+                          interests: ["techArea"],
+                          languages: ["programmingLanguages"],
+                          stack: ["techStack"],
+                          environment: ["preferredOS"],
+                        };
+                        return sectionMap[section.id]?.includes(field);
+                      }
+                    )
+                      ? styles.hasRequiredFields
+                      : ""
+                  }`}
                   onClick={() => setActiveSection(section.id)}
                 >
                   <span>{section.icon}</span>
                   {section.title}
+                  {/* ✅ Badge für fehlende Pflichtfelder */}
+                  {profileStats.missingRequiredFieldsList?.some(({ field }) => {
+                    const sectionMap = {
+                      personal: ["country", "city"],
+                      experience: ["status", "devExperience"],
+                      interests: ["techArea"],
+                      languages: ["programmingLanguages"],
+                      stack: ["techStack"],
+                      environment: ["preferredOS"],
+                    };
+                    return sectionMap[section.id]?.includes(field);
+                  }) && <span className={styles.requiredBadge}>!</span>}
                 </button>
               </li>
             ))}
@@ -686,7 +863,7 @@ const EditProfilePage = () => {
               <button
                 type="button"
                 className={`${styles.btn} ${styles.btnSecondary}`}
-                onClick={() => navigate("/profile")}
+                onClick={handleBackToProfile}
               >
                 <X size={16} />
                 Back to Profile
@@ -694,17 +871,65 @@ const EditProfilePage = () => {
               <button
                 type="submit"
                 className={`${styles.btn} ${styles.btnPrimary}`}
-                disabled={updateProfile.isLoading}
+                disabled={updateProfile.isLoading || !hasUnsavedChanges}
               >
                 <Save size={16} />
                 {updateProfile.isLoading
                   ? "Saving All Changes..."
-                  : "Save All Changes"}
+                  : hasUnsavedChanges
+                  ? "Save All Changes"
+                  : "No Changes to Save"}
               </button>
             </div>
           </form>
         </div>
       </div>
+
+      {/* Unsaved Changes Warning Modal */}
+      {showUnsavedWarning && (
+        <div className={styles.modalOverlay}>
+          <div className={styles.modalContent}>
+            <div className={styles.modalHeader}>
+              <div className={styles.modalIcon}>
+                <AlertTriangle size={24} />
+              </div>
+              <button
+                className={styles.modalClose}
+                onClick={() => setShowUnsavedWarning(false)}
+                aria-label="Close"
+              >
+                <X size={20} />
+              </button>
+            </div>
+
+            <div className={styles.modalBody}>
+              <h3>Unsaved Changes</h3>
+              <p>
+                You have unsaved changes that will be lost if you leave this
+                page. Would you like to save your changes before leaving?
+              </p>
+            </div>
+
+            <div className={styles.modalFooter}>
+              <button
+                className={styles.btnCancel}
+                onClick={handleDiscardChanges}
+                disabled={updateProfile.isLoading}
+              >
+                Discard Changes
+              </button>
+              <button
+                className={styles.btnSave}
+                onClick={handleSaveAndExit}
+                disabled={updateProfile.isLoading}
+              >
+                <Save size={16} />
+                {updateProfile.isLoading ? "Saving..." : "Save & Exit"}
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
     </div>
   );
 };

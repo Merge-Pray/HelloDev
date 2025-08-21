@@ -17,6 +17,13 @@ const ONBOARDING_STEPS = [
     type: "mixed",
     fields: [
       {
+        name: "nickname",
+        label: "Nickname",
+        type: "text",
+        required: true,
+        placeholder: "Enter your display name (how others see you)",
+      },
+      {
         name: "location",
         label: "Location",
         type: "location",
@@ -42,7 +49,8 @@ const ONBOARDING_STEPS = [
   {
     id: 3,
     title: "Tech Areas of Interest",
-    subtitle: "What areas of technology interest you most? (Select as many as you want)",
+    subtitle:
+      "What areas of technology interest you most? (Select as many as you want)",
     type: "hybrid-selector",
     fieldName: "techArea",
     maxSelections: null,
@@ -59,7 +67,8 @@ const ONBOARDING_STEPS = [
   {
     id: 5,
     title: "Tech Stack & Tools",
-    subtitle: "What technologies and tools do you work with? (Select as many as you want)",
+    subtitle:
+      "What technologies and tools do you work with? (Select as many as you want)",
     type: "hybrid-selector",
     fieldName: "techStack",
     maxSelections: null,
@@ -82,7 +91,8 @@ export default function BuildProfile() {
   const [isLoading, setIsLoading] = useState(false);
   const [selectedCount, setSelectedCount] = useState(0);
   const [error, setError] = useState(null);
-  const [showCancelDialog, setShowCancelDialog] = useState(false); // ✅ NEU
+  const [showCancelDialog, setShowCancelDialog] = useState(false);
+  const [userProfileData, setUserProfileData] = useState(null); // ✅ NEW: Store user data from backend
   const navigate = useNavigate();
 
   const {
@@ -93,6 +103,42 @@ export default function BuildProfile() {
     setValue,
     formState: { errors },
   } = useForm();
+
+  // ✅ NEW: Fetch user data on component mount
+  useEffect(() => {
+    const fetchUserData = async () => {
+      if (!currentUser) {
+        navigate("/login");
+        return;
+      }
+
+      try {
+        const response = await fetch(`${API_URL}/api/user/user`, {
+          credentials: "include",
+          headers: {
+            "Content-Type": "application/json",
+          },
+        });
+
+        if (response.ok) {
+          const userData = await response.json();
+          setUserProfileData(userData);
+
+          // Set initial nickname to empty for display, but store username for fallback
+          setProfileData((prev) => ({
+            ...prev,
+            username: userData.username, // Store username for potential fallback
+          }));
+        } else {
+          console.error("Failed to fetch user data");
+        }
+      } catch (error) {
+        console.error("Error fetching user data:", error);
+      }
+    };
+
+    fetchUserData();
+  }, [currentUser, navigate]);
 
   const currentStepData = ONBOARDING_STEPS.find(
     (step) => step.id === currentStep
@@ -158,17 +204,39 @@ export default function BuildProfile() {
         setCurrentStep((prev) => prev + 1);
       }
     },
-    [currentStepData, profileData, fieldName, isLastStep, currentUser, navigate]
+    [
+      currentStepData,
+      profileData,
+      fieldName,
+      isLastStep,
+      currentUser,
+      navigate,
+      updateProfile,
+    ]
   );
+
+  // ✅ Updated handleCancel to set nickname = username if canceled
+  const confirmCancel = useCallback(async () => {
+    setShowCancelDialog(false);
+
+    // ✅ Set nickname to username when canceling onboarding
+    try {
+      const fallbackData = {
+        nickname: userProfileData?.username || currentUser?.username || "",
+      };
+
+      await updateProfile.mutateAsync(fallbackData);
+      console.log("Set nickname to username on cancel");
+    } catch (error) {
+      console.error("Error setting fallback nickname:", error);
+    }
+
+    navigate("/profile");
+  }, [navigate, updateProfile, userProfileData, currentUser]);
 
   const handleCancel = useCallback(() => {
     setShowCancelDialog(true);
   }, []);
-
-  const confirmCancel = useCallback(() => {
-    setShowCancelDialog(false);
-    navigate("/profile");
-  }, [navigate]);
 
   const stayInOnboarding = useCallback(() => {
     setShowCancelDialog(false);
@@ -197,15 +265,17 @@ export default function BuildProfile() {
               <div key={field.name} className="form-field">
                 <label>{field.label}</label>
                 <LocationSelector
-                  selectedCountry={watch('country') || profileData.country || ''}
-                  selectedCity={watch('city') || profileData.city || ''}
+                  selectedCountry={
+                    watch("country") || profileData.country || ""
+                  }
+                  selectedCity={watch("city") || profileData.city || ""}
                   onCountryChange={(country) => {
-                    setProfileData({...profileData, country});
-                    setValue('country', country);
+                    setProfileData({ ...profileData, country });
+                    setValue("country", country);
                   }}
                   onCityChange={(city) => {
-                    setProfileData({...profileData, city});
-                    setValue('city', city);
+                    setProfileData({ ...profileData, city });
+                    setValue("city", city);
                   }}
                   required={field.required}
                 />
@@ -239,6 +309,39 @@ export default function BuildProfile() {
             );
           }
 
+          // ✅ Handle nickname field specially - show empty but store username for fallback
+          if (field.name === "nickname") {
+            return (
+              <div key={field.name} className="form-field">
+                <label>{field.label}</label>
+                <input
+                  className="form-input"
+                  type="text"
+                  placeholder={
+                    field.placeholder ||
+                    `Enter your ${field.label.toLowerCase()}`
+                  }
+                  {...register(field.name, {
+                    required: field.required
+                      ? `${field.label} is required`
+                      : false,
+                    minLength: {
+                      value: 2,
+                      message: "Nickname must be at least 2 characters",
+                    },
+                    maxLength: {
+                      value: 25,
+                      message: "Nickname must be less than 25 characters",
+                    },
+                  })}
+                />
+                {errors[field.name] && (
+                  <div className="form-hint">{errors[field.name].message}</div>
+                )}
+              </div>
+            );
+          }
+
           return (
             <div key={field.name} className="form-field">
               <label>{field.label}</label>
@@ -250,7 +353,9 @@ export default function BuildProfile() {
                     ? `${field.label} is required`
                     : false,
                 })}
-                placeholder={`Enter your ${field.label.toLowerCase()}`}
+                placeholder={
+                  field.placeholder || `Enter your ${field.label.toLowerCase()}`
+                }
               />
               {errors[field.name] && (
                 <div className="form-hint">{errors[field.name].message}</div>
@@ -375,8 +480,8 @@ export default function BuildProfile() {
           category="programmingLanguages"
           selectedValues={selectedValues}
           onSelectionChange={(values) => {
-            setProfileData({...profileData, programmingLanguages: values});
-            setValue('programmingLanguages', values);
+            setProfileData({ ...profileData, programmingLanguages: values });
+            setValue("programmingLanguages", values);
           }}
           maxSelections={currentStepData.maxSelections}
           allowMultiple={true}
@@ -392,7 +497,10 @@ export default function BuildProfile() {
           category={currentStepData.fieldName}
           selectedValues={watchedField || []}
           onSelectionChange={(values) => {
-            setProfileData({...profileData, [currentStepData.fieldName]: values});
+            setProfileData({
+              ...profileData,
+              [currentStepData.fieldName]: values,
+            });
             setValue(currentStepData.fieldName, values);
           }}
           maxSelections={currentStepData.maxSelections}
@@ -465,7 +573,8 @@ export default function BuildProfile() {
         </div>
 
         <div className={styles.welcomeText}>
-          Welcome, {currentUser?.nickname || currentUser?.username || "Developer"}! 👋
+          Welcome,{" "}
+          {currentUser?.nickname || currentUser?.username || "Developer"}! 👋
         </div>
 
         <h1 className="title">{currentStepData?.title}</h1>
@@ -527,7 +636,7 @@ export default function BuildProfile() {
         </div>
       </div>
 
-      {/* ✅ NEU: Cancel Confirmation Dialog */}
+      {/* ✅ Updated Cancel Confirmation Dialog */}
       {showCancelDialog && (
         <div className={styles.dialogOverlay}>
           <div className={styles.dialog}>
@@ -542,6 +651,10 @@ export default function BuildProfile() {
                   <li>
                     <strong>All unsaved changes will be lost</strong> - Your
                     progress in this session won't be saved
+                  </li>
+                  <li>
+                    <strong>Your nickname will be set to your username</strong>{" "}
+                    - You can change this later in your profile settings
                   </li>
                   <li>
                     <strong>You need 50% profile completion to match</strong> -

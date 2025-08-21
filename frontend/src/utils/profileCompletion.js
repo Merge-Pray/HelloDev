@@ -1,5 +1,6 @@
 export const calculateProfileCompletion = (profileData) => {
   const allProfileFields = [
+    "nickname", // ✅ Added nickname
     "country",
     "city",
     "age",
@@ -11,7 +12,7 @@ export const calculateProfileCompletion = (profileData) => {
     "techStack",
     "languages",
     "preferredOS",
-    "gaming", // ✅ Korrekt: "gaming" statt "gamingPreferences"
+    "gaming",
     "otherInterests",
     "favoriteTimeToCode",
     "favoriteLineOfCode",
@@ -21,6 +22,7 @@ export const calculateProfileCompletion = (profileData) => {
   ];
 
   const requiredFields = [
+    "nickname", // ✅ Added nickname as required
     "country",
     "city",
     "status",
@@ -30,6 +32,19 @@ export const calculateProfileCompletion = (profileData) => {
     "techStack",
     "preferredOS",
   ];
+
+  // ✅ Mapping für benutzerfreundliche Feldnamen
+  const fieldLabels = {
+    nickname: "Nickname",
+    country: "Country",
+    city: "City",
+    status: "Status",
+    devExperience: "Development Experience",
+    techArea: "Tech Areas of Interest",
+    programmingLanguages: "Programming Languages",
+    techStack: "Tech Stack & Tools",
+    preferredOS: "Preferred Operating System",
+  };
 
   const isFieldCompleted = (field) => {
     const value = profileData[field];
@@ -41,6 +56,9 @@ export const calculateProfileCompletion = (profileData) => {
 
   const completedFields = allProfileFields.filter(isFieldCompleted);
   const completedRequiredFields = requiredFields.filter(isFieldCompleted);
+  const missingRequiredFields = requiredFields.filter(
+    (field) => !isFieldCompleted(field)
+  );
 
   return {
     totalCompletion: Math.round(
@@ -52,7 +70,12 @@ export const calculateProfileCompletion = (profileData) => {
     isMatchable: completedRequiredFields.length >= requiredFields.length,
     completedFieldsCount: completedFields.length,
     totalFieldsCount: allProfileFields.length,
-    missingRequiredFields:
-      requiredFields.length - completedRequiredFields.length,
+    missingRequiredFields: missingRequiredFields.length,
+    missingRequiredFieldsList: missingRequiredFields.map((field) => ({
+      field,
+      label: fieldLabels[field] || field,
+    })),
+    completedRequiredFieldsCount: completedRequiredFields.length,
+    totalRequiredFieldsCount: requiredFields.length,
   };
 };
