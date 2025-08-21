@@ -57,7 +57,7 @@ export default function PostComposer({ onPostCreated }) {
         <textarea
           ref={taRef}
           className={styles.input}
-          placeholder="What's on your mind?"
+          placeholder="Hey Nerd 👋 What's on your mind?"
           value={text}
           onChange={(e) => setText(e.target.value)}
           rows={1}
