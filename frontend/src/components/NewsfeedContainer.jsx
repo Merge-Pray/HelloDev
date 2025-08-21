@@ -154,10 +154,7 @@ export default function NewsfeedContainer() {
       {/* Feed Controls - Hide during search */}
       {!isSearchActive && (
         <div className={styles.feedControls}>
-           <FeedFilters
-            algorithm={algorithm}
-            onAlgorithmChange={handleAlgorithmChange}
-          />
+           
           <FeedToggle
             feedType={feedType}
             onFeedTypeChange={handleFeedTypeChange}
@@ -197,7 +194,10 @@ export default function NewsfeedContainer() {
             className={styles.emptyFriendsFeed}
           />
         )}
-
+<FeedFilters
+            algorithm={algorithm}
+            onAlgorithmChange={handleAlgorithmChange}
+          />
       {isSearchActive && posts.length === 0 && !loading && (
         <div className={styles.emptySearchResults}>
           <h3>No posts found</h3>
