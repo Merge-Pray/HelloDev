@@ -28,7 +28,7 @@
 
 .actionBtn:hover,
 .actionBtn:focus-visible {
-  color: var( --color-comment, rgba(0,0,0,0.04));
+  color: var(   --color-primary, rgba(0,0,0,0.04));
 }
 
 /* Klick-Feedback, aber ohne Farbwechsel */
