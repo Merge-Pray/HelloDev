@@ -2,6 +2,7 @@ import React, { useState, useEffect } from "react";
 import { Heart, MessageCircle, Repeat, Share2 } from "lucide-react";
 import RepostModal from "./RepostModal";
 import { API_URL } from "../lib/config";
+import styles from "./PostActions.module.css";
 
 export default function PostActions({
   post,
@@ -16,7 +17,6 @@ export default function PostActions({
 
   const checkIfLiked = () => {
     if (!post?.likes || !currentUser?._id) return false;
-
     return post.likes.some((like) => {
       const likeUserId = like.user?._id || like.user;
       return likeUserId === currentUser._id;
@@ -34,25 +34,18 @@ export default function PostActions({
 
     setIsProcessing(true);
     const wasLiked = isLiked;
-
     setIsLiked(!wasLiked);
 
     try {
       const endpoint = wasLiked ? "unlike" : "like";
       const response = await fetch(
         `${API_URL}/api/posts/${post._id}/${endpoint}`,
-        {
-          method: "POST",
-          credentials: "include",
-        }
+        { method: "POST", credentials: "include" }
       );
 
-      if (!response.ok) {
-        throw new Error(`HTTP error! status: ${response.status}`);
-      }
+      if (!response.ok) throw new Error(`HTTP error! status: ${response.status}`);
 
       const data = await response.json();
-
       if (data.success) {
         onLike(post._id, !wasLiked, data.likeCount);
       } else {
@@ -91,6 +84,7 @@ export default function PostActions({
     try {
       const postUrl = `${window.location.origin}/post/${post._id}`;
       await navigator.clipboard.writeText(postUrl);
+      // Optional: Toast/Hint einbauen
     } catch (error) {
       console.error("Failed to copy URL:", error);
     }
@@ -98,100 +92,72 @@ export default function PostActions({
 
   const isOwnPost = post?.author?._id === currentUser?._id;
   const likeCount = post?.likeCount || post?.likes?.length || 0;
+  const commentCount = post?.commentCount || post?.comments?.length || 0;
+  const repostCount = post?.repostCount || 0;
 
   return (
-    <div
-      className="post-actions"
-      style={{
-        display: "flex",
-        gap: "16px",
-        padding: "12px 0",
-      }}
-    >
-      {/* Like Button */}
-      <button
-        onClick={handleLike}
-        disabled={isProcessing}
-        style={{
-          background: "none",
-          border: "none",
-          cursor: isProcessing ? "not-allowed" : "pointer",
-          display: "flex",
-          alignItems: "center",
-          gap: "6px",
-          opacity: isProcessing ? 0.6 : 1,
-          transition: "opacity 0.2s ease",
-        }}
-      >
-        <Heart
-          size={20}
-          fill={isLiked ? "#dc2626" : "none"}
-          color={isLiked ? "#dc2626" : "#64748b"}
-          style={{
-            transition: "all 0.2s ease",
-          }}
-        />
-        <span
-          style={{
-            color: isLiked ? "#dc2626" : "#64748b",
-            fontWeight: isLiked ? "600" : "normal",
-            transition: "all 0.2s ease",
-          }}
+    <>
+      <div className={styles.actions} role="toolbar" aria-label="Post actions">
+        {/* Like */}
+        <button
+          type="button"
+          onClick={handleLike}
+          disabled={isProcessing}
+          aria-pressed={isLiked}
+          className={[
+            styles.actionBtn,
+            styles.like,
+            isLiked ? styles.active : "",
+            isProcessing ? styles.isProcessing : "",
+          ].join(" ")}
         >
-          {likeCount}
-        </span>
-      </button>
+          <Heart
+            size={20}
+            className={styles.icon}
+            // Lucide füllt per CSS via currentColor (siehe CSS)
+          />
+          <span className={styles.count}>{likeCount}</span>
+        </button>
 
-      {/* Comment Button */}
-      <button
-        onClick={onToggleComments}
-        style={{
-          background: "none",
-          border: "none",
-          cursor: "pointer",
-          display: "flex",
-          alignItems: "center",
-          gap: "6px",
-          color: "#64748b",
-        }}
-      >
-        <MessageCircle size={20} />
-        <span>{post?.commentCount || post?.comments?.length || 0}</span>
-      </button>
+        {/* Comment */}
+        <button
+          type="button"
+          onClick={onToggleComments}
+          className={[styles.actionBtn, styles.comment].join(" ")}
+          aria-label="Show comments"
+        >
+          <MessageCircle size={20} className={styles.icon} />
+          <span className={styles.count}>{commentCount}</span>
+        </button>
 
-      {/* Repost Button */}
-      <button
-        onClick={() => setShowRepostModal(true)}
-        disabled={isOwnPost}
-        style={{
-          background: "none",
-          border: "none",
-          cursor: isOwnPost ? "not-allowed" : "pointer",
-          display: "flex",
-          alignItems: "center",
-          gap: "6px",
-          color: isReposted ? "#059669" : "#64748b",
-          opacity: isOwnPost ? 0.5 : 1,
-        }}
-      >
-        <Repeat size={20} />
-        <span>{post?.repostCount || 0}</span>
-      </button>
+        {/* Repost */}
+        <button
+          type="button"
+          onClick={() => setShowRepostModal(true)}
+          disabled={isOwnPost}
+          aria-pressed={isReposted}
+          className={[
+            styles.actionBtn,
+            styles.repost,
+            isReposted ? styles.active : "",
+            isOwnPost ? styles.disabled : "",
+          ].join(" ")}
+        >
+          <Repeat size={20} className={styles.icon} />
+          <span className={styles.count}>{repostCount}</span>
+        </button>
 
-      {/* Share Button */}
-      <button
-        onClick={handleShare}
-        style={{
-          background: "none",
-          border: "none",
-          cursor: "pointer",
-          color: "#64748b",
-        }}
-      >
-        <Share2 size={20} />
-      </button>
+        {/* Share */}
+        <button
+          type="button"
+          onClick={handleShare}
+          className={[styles.actionBtn, styles.share].join(" ")}
+          aria-label="Copy post link"
+        >
+          <Share2 size={20} className={styles.icon} />
+        </button>
+      </div>
 
-      {/* Repost Modal */}
       {showRepostModal && (
         <RepostModal
           post={post}
@@ -199,6 +165,6 @@ export default function PostActions({
           onClose={() => setShowRepostModal(false)}
         />
       )}
-    </div>
+    </>
   );
 }
