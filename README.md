@@ -1,4 +1,7 @@
-# HelloDev.social 🚀
+# HelloDev.social
+
+![alt text](image_readme.png)
+
 ## The Social Network Built by Developers, for Developers
 
 **HelloDev.social** is a modern, full-stack social networking platform designed specifically for the developer community. Whether you're a seasoned engineer, a coding bootcamp graduate, or someone just starting their tech journey – this is where you connect, collaborate, and grow together.
