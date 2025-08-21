@@ -6,6 +6,7 @@ import useUserStore from "../../hooks/userstore";
 import styles from "./loginpage.module.css";
 import { API_URL } from "../../lib/config";
 import DarkMode from "../../components/DarkMode";
+import { handleAuthErrorAndRetry, isAuthError } from "../../utils/tokenRefresh";
 
 export default function LoginPage() {
   const currentUser = useUserStore((state) => state.currentUser);
@@ -38,13 +39,22 @@ export default function LoginPage() {
     setIsLoading(true);
     setError(null);
 
-    try {
-      const res = await fetch(`${API_URL}/api/user/login`, {
+    const makeRequest = async () => {
+      return await fetch(`${API_URL}/api/user/login`, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         credentials: "include",
         body: JSON.stringify(values),
       });
+    };
+
+    try {
+      let res = await makeRequest();
+
+      // Handle auth errors with token refresh (though unlikely for login)
+      if (isAuthError(res)) {
+        res = await handleAuthErrorAndRetry(makeRequest);
+      }
 
       const data = await res.json();
       if (!res.ok) throw new Error(data.message || "Login failed");

@@ -10,6 +10,7 @@ import {
 } from "lucide-react";
 import useUserStore from "../hooks/userstore";
 import { API_URL } from "../lib/config";
+import { handleAuthErrorAndRetry, isAuthError } from "../utils/tokenRefresh";
 
 export default function PostComposer({ onPostCreated }) {
   const [text, setText] = useState("");
@@ -32,10 +33,8 @@ export default function PostComposer({ onPostCreated }) {
     const payload = text.trim();
     if (!payload || submitting) return;
 
-    try {
-      setSubmitting(true);
-
-      const response = await fetch(`${API_URL}/api/posts`, {
+    const makeRequest = async () => {
+      return await fetch(`${API_URL}/api/posts`, {
         method: "POST",
         headers: {
           "Content-Type": "application/json",
@@ -47,6 +46,17 @@ export default function PostComposer({ onPostCreated }) {
           hashtags: [],
         }),
       });
+    };
+
+    try {
+      setSubmitting(true);
+
+      let response = await makeRequest();
+
+      // Handle auth errors with token refresh
+      if (isAuthError(response)) {
+        response = await handleAuthErrorAndRetry(makeRequest);
+      }
 
       if (!response.ok) {
         throw new Error(`HTTP error! status: ${response.status}`);

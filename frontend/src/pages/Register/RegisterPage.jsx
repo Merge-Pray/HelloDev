@@ -6,6 +6,7 @@ import useUserStore from "../../hooks/userstore";
 import styles from "./registerpage.module.css";
 import { API_URL } from "../../lib/config";
 import DarkMode from "../../components/DarkMode";
+import { handleAuthErrorAndRetry, isAuthError } from "../../utils/tokenRefresh";
 
 export default function RegisterPage() {
   const currentUser = useUserStore((state) => state.currentUser);
@@ -45,10 +46,9 @@ export default function RegisterPage() {
     setError(null);
     setValidationErrors({});
 
-    try {
+    const makeRequest = async () => {
       const { confirmPassword, ...submitData } = values;
-
-      const response = await fetch(`${API_URL}/api/user/register`, {
+      return await fetch(`${API_URL}/api/user/register`, {
         method: "POST",
         headers: {
           "Content-Type": "application/json",
@@ -56,6 +56,15 @@ export default function RegisterPage() {
         credentials: "include",
         body: JSON.stringify(submitData),
       });
+    };
+
+    try {
+      let response = await makeRequest();
+
+      // Handle auth errors with token refresh (though unlikely for register)
+      if (isAuthError(response)) {
+        response = await handleAuthErrorAndRetry(makeRequest);
+      }
 
       if (!response.ok) {
         const errorData = await response.json();
