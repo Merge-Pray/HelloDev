@@ -790,6 +790,3 @@ export const getImagePosts = async (req, res, next) => {
     next(error);
   }
 };
-
-// Rest of your existing controller functions remain unchanged...
-// (getNewsfeed, getUserPosts, getPostById, deletePost, likePost, etc.)
