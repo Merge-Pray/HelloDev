@@ -248,6 +248,7 @@
 .formField {
   display: flex;
   flex-direction: column;
+  position: relative;
 }
 
 .formField.fullWidth {
@@ -258,6 +259,9 @@
   margin-bottom: 8px;
   font-weight: 600;
   color: var(--color-text);
+  display: flex;
+  align-items: center;
+  gap: 4px;
 }
 
 .formField input,
@@ -265,12 +269,13 @@
 .formField select {
   padding: 12px 16px;
   border: 2px solid var(--color-input-border);
-  border-radius: 8px;
+  border-radius: 10px; /* ✅ Konsistent mit restlicher Website */
   font-size: 16px;
   transition: all 0.3s ease;
   font-family: "Helvetica Neue", Helvetica, Arial, sans-serif;
   background: var(--color-input-bg);
   color: var(--color-text);
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.05); /* ✅ Subtle shadow */
 }
 
 .formField input:disabled,
@@ -286,8 +291,9 @@
 .formField textarea:focus,
 .formField select:focus {
   outline: none;
-  border-color: var(--color-input-border-focus);
-  box-shadow: 0 0 0 3px var(--color-input-shadow-focus);
+  border-color: var(--color-primary);
+  box-shadow: 0 0 0 3px rgba(var(--color-primary-rgb), 0.1);
+  transform: translateY(-1px); /* ✅ Subtle lift effect */
 }
 
 .formField input::placeholder,
@@ -362,9 +368,9 @@
 }
 
 .btn {
-  padding: 10px 20px;
+  padding: 12px 24px; /* ✅ Größeres Padding */
   border: none;
-  border-radius: 8px;
+  border-radius: 10px; /* ✅ Konsistent mit Website */
   font-size: 14px;
   font-weight: 600;
   cursor: pointer;
@@ -373,6 +379,7 @@
   align-items: center;
   gap: 8px;
   font-family: "Helvetica Neue", Helvetica, Arial, sans-serif;
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1); /* ✅ Subtle shadow */
 }
 
 .btn:disabled {
@@ -381,7 +388,7 @@
 }
 
 .btnPrimary {
-  background: var(--color-primary);
+  background: var(--color-bg-gradient); /* ✅ Gradient wie auf der Website */
   color: white;
 }
 
@@ -752,4 +759,505 @@ html {
     width: 100%;
     justify-content: center;
   }
+}
+
+/* ✅ NEU: Missing Fields Info */
+.missingFieldsInfo {
+  margin-top: 8px;
+}
+
+.missingFieldsList {
+  margin-top: 12px;
+  padding: 12px;
+  background: rgba(245, 158, 11, 0.05);
+  border-radius: 6px;
+  border: 1px solid rgba(245, 158, 11, 0.2);
+}
+
+.missingFieldsList strong {
+  color: var(--color-warning);
+  font-size: 12px;
+  display: block;
+  margin-bottom: 8px;
+}
+
+.missingFieldsList ul {
+  list-style: none;
+  padding: 0;
+  margin: 0;
+}
+
+.missingFieldsList li {
+  margin-bottom: 4px;
+}
+
+.missingFieldLink {
+  background: none;
+  border: none;
+  color: var(--color-primary);
+  font-size: 11px;
+  cursor: pointer;
+  text-decoration: underline;
+  padding: 0;
+  font-family: inherit;
+  transition: color 0.2s ease;
+}
+
+.missingFieldLink:hover {
+  color: var(--color-primary-hover);
+}
+
+/* ✅ NEU: Default Values Info Box */
+.defaultValuesInfo {
+  margin-bottom: 20px;
+  padding: 12px;
+  background: rgba(59, 130, 246, 0.05);
+  border-radius: 6px;
+  border: 1px solid rgba(59, 130, 246, 0.2);
+}
+
+.infoHeader {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  color: var(--color-comment);
+  font-weight: 600;
+  font-size: 12px;
+  margin-bottom: 6px;
+}
+
+.infoText {
+  font-size: 11px;
+  color: var(--color-text-secondary);
+  line-height: 1.4;
+}
+
+/* ✅ NEU: Section Navigation mit Required Fields */
+.sectionNav button.hasRequiredFields {
+  position: relative;
+  border-left: 3px solid var(--color-warning);
+  background: rgba(245, 158, 11, 0.05);
+}
+
+.requiredBadge {
+  background: var(--color-warning);
+  color: white;
+  font-size: 10px;
+  font-weight: bold;
+  padding: 2px 6px;
+  border-radius: 50%;
+  margin-left: auto;
+  min-width: 16px;
+  height: 16px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  animation: pulse 2s infinite;
+}
+
+@keyframes pulse {
+  0% {
+    box-shadow: 0 0 0 0 rgba(245, 158, 11, 0.7);
+  }
+  70% {
+    box-shadow: 0 0 0 6px rgba(245, 158, 11, 0);
+  }
+  100% {
+    box-shadow: 0 0 0 0 rgba(245, 158, 11, 0);
+  }
+}
+
+/* ✅ Verbesserte Feld-Styles */
+.formField {
+  display: flex;
+  flex-direction: column;
+  position: relative;
+}
+
+.formField label {
+  margin-bottom: 8px;
+  font-weight: 600;
+  color: var(--color-text);
+  display: flex;
+  align-items: center;
+  gap: 4px;
+}
+
+/* ✅ Required Field Indicator */
+.formField label.required::after {
+  content: "*";
+  color: var(--color-error);
+  font-weight: bold;
+}
+
+/* ✅ Default Value Indicator */
+.formField.hasDefaultValue {
+  position: relative;
+}
+
+.formField.hasDefaultValue::before {
+  content: "Default";
+  position: absolute;
+  top: -8px;
+  right: 8px;
+  background: var(--color-comment);
+  color: white;
+  font-size: 10px;
+  padding: 2px 6px;
+  border-radius: 4px;
+  z-index: 1;
+}
+
+/* ✅ Verbesserte Form Input Styles */
+.formField input,
+.formField textarea,
+.formField select {
+  padding: 12px 16px;
+  border: 2px solid var(--color-input-border);
+  border-radius: 10px; /* ✅ Konsistent mit restlicher Website */
+  font-size: 16px;
+  transition: all 0.3s ease;
+  font-family: "Helvetica Neue", Helvetica, Arial, sans-serif;
+  background: var(--color-input-bg);
+  color: var(--color-text);
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.05); /* ✅ Subtle shadow */
+}
+
+.formField input:focus,
+.formField textarea:focus,
+.formField select:focus {
+  outline: none;
+  border-color: var(--color-primary);
+  box-shadow: 0 0 0 3px rgba(var(--color-primary-rgb), 0.1);
+  transform: translateY(-1px); /* ✅ Subtle lift effect */
+}
+
+/* ✅ Warning für fehlende Required Fields */
+.formField.required.empty {
+  border-left: 4px solid var(--color-warning);
+  padding-left: 12px;
+  background: rgba(245, 158, 11, 0.02);
+}
+
+/* ✅ Success für ausgefüllte Required Fields */
+.formField.required.filled {
+  border-left: 4px solid var(--color-success);
+  padding-left: 12px;
+  background: rgba(16, 185, 129, 0.02);
+}
+
+/* ✅ Konsistente Button Styles */
+.btn {
+  padding: 12px 24px; /* ✅ Größeres Padding */
+  border: none;
+  border-radius: 10px; /* ✅ Konsistent mit Website */
+  font-size: 14px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  font-family: "Helvetica Neue", Helvetica, Arial, sans-serif;
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1); /* ✅ Subtle shadow */
+}
+
+.btn:hover:not(:disabled) {
+  transform: translateY(-2px);
+  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.15);
+}
+
+.btnPrimary {
+  background: var(--color-bg-gradient); /* ✅ Gradient wie auf der Website */
+  color: white;
+}
+
+.btnSecondary {
+  background: var(--color-input-bg);
+  color: var(--color-text);
+  border: 2px solid var(--color-input-border);
+}
+
+/* Dark Mode Anpassungen */
+[data-theme="dark"] .missingFieldsList {
+  background: rgba(245, 158, 11, 0.1);
+  border-color: rgba(245, 158, 11, 0.3);
+}
+
+[data-theme="dark"] .defaultValuesInfo {
+  background: rgba(59, 130, 246, 0.1);
+  border-color: rgba(59, 130, 246, 0.3);
+}
+
+[data-theme="dark"] .formField.hasDefaultValue::before {
+  background: rgba(59, 130, 246, 0.8);
+}
+
+/* ✅ Enhanced form field styling for nickname */
+.formField input[name="nickname"] {
+  font-weight: 600;
+  color: var(--color-primary);
+  border: 2px solid var(--color-primary-light);
+}
+
+.formField input[name="nickname"]:focus {
+  border-color: var(--color-primary);
+  box-shadow: 0 0 0 3px rgba(var(--color-primary-rgb), 0.15);
+}
+
+/* ✅ Special styling for required nickname field */
+.formField.required.empty input[name="nickname"] {
+  border-color: var(--color-warning);
+  background: rgba(245, 158, 11, 0.05);
+}
+
+.formField.required.filled input[name="nickname"] {
+  border-color: var(--color-success);
+  background: rgba(16, 185, 129, 0.05);
+}
+
+/* ✅ Add visual indicator for nickname importance */
+.formField input[name="nickname"]::placeholder {
+  color: var(--color-text-secondary);
+  font-style: italic;
+}
+
+/* ✅ Default Indicator für Nickname */
+.defaultIndicator {
+  color: var(--color-text-secondary);
+  font-weight: 400;
+  font-size: 0.875rem;
+}
+
+/* ✅ Enhanced Radio Group Styling (consistent across all sections) */
+.radioGroup {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+  gap: 12px;
+  margin-top: 16px;
+}
+
+.radioLabel {
+  display: flex;
+  align-items: center;
+  padding: 16px 20px;
+  background: var(--color-input-bg);
+  border: 2px solid var(--color-input-border);
+  border-radius: 12px;
+  cursor: pointer;
+  transition: all 0.3s ease;
+  font-weight: 500;
+  position: relative;
+  min-height: 60px;
+}
+
+.radioLabel:hover {
+  border-color: var(--color-primary);
+  background: var(--color-primary-light);
+  transform: translateY(-2px);
+  box-shadow: 0 4px 12px rgba(var(--color-primary-rgb), 0.15);
+}
+
+.radioLabel:has(input:checked) {
+  background: var(--color-primary);
+  border-color: var(--color-primary);
+  color: white;
+  box-shadow: 0 4px 16px rgba(var(--color-primary-rgb), 0.3);
+}
+
+.radioLabel:has(input:disabled) {
+  opacity: 0.5;
+  cursor: not-allowed;
+  transform: none;
+}
+
+.radioLabel input {
+  position: absolute;
+  opacity: 0;
+  width: 0;
+  height: 0;
+}
+
+.radioText {
+  flex: 1;
+  font-size: 14px;
+  font-weight: 500;
+}
+
+/* ✅ Custom radio button indicator */
+.radioLabel::before {
+  content: "";
+  width: 20px;
+  height: 20px;
+  border: 2px solid var(--color-input-border);
+  border-radius: 50%;
+  margin-right: 12px;
+  transition: all 0.3s ease;
+  background: var(--color-input-bg);
+}
+
+.radioLabel:hover::before {
+  border-color: var(--color-primary);
+}
+
+.radioLabel:has(input:checked)::before {
+  background: white;
+  border-color: white;
+  box-shadow: inset 0 0 0 4px var(--color-primary);
+}
+
+/* ✅ HybridSelector Container Styling */
+.hybridSelectorContainer {
+  margin-top: 16px;
+  background: var(--color-input-bg);
+  border: 2px solid var(--color-input-border);
+  border-radius: 12px;
+  padding: 20px;
+  transition: all 0.3s ease;
+}
+
+.hybridSelectorContainer:hover {
+  border-color: var(--color-primary-light);
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.05);
+}
+
+.hybridSelectorContainer:focus-within {
+  border-color: var(--color-primary);
+  box-shadow: 0 0 0 3px rgba(var(--color-primary-rgb), 0.1);
+}
+
+/* ✅ Enhanced Checkbox Grid (für HybridSelector wenn nötig) */
+.checkboxGrid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
+  gap: 12px;
+  margin-top: 16px;
+}
+
+.checkboxLabel {
+  display: flex;
+  align-items: center;
+  padding: 14px 18px;
+  background: var(--color-input-bg);
+  border: 2px solid var(--color-input-border);
+  border-radius: 10px;
+  cursor: pointer;
+  transition: all 0.3s ease;
+  font-weight: 500;
+  position: relative;
+  min-height: 56px;
+}
+
+.checkboxLabel:hover {
+  border-color: var(--color-primary);
+  background: var(--color-primary-light);
+  transform: translateY(-1px);
+  box-shadow: 0 3px 10px rgba(var(--color-primary-rgb), 0.12);
+}
+
+.checkboxLabel:has(input:checked) {
+  background: linear-gradient(
+    135deg,
+    var(--color-primary),
+    var(--color-primary-dark)
+  );
+  border-color: var(--color-primary);
+  color: white;
+  box-shadow: 0 4px 14px rgba(var(--color-primary-rgb), 0.25);
+}
+
+.checkboxLabel:has(input:disabled) {
+  opacity: 0.5;
+  cursor: not-allowed;
+  transform: none;
+}
+
+.checkboxLabel input {
+  position: absolute;
+  opacity: 0;
+  width: 0;
+  height: 0;
+}
+
+/* ✅ Custom checkbox indicator */
+.checkboxLabel::before {
+  content: "";
+  width: 18px;
+  height: 18px;
+  border: 2px solid var(--color-input-border);
+  border-radius: 4px;
+  margin-right: 10px;
+  transition: all 0.3s ease;
+  background: var(--color-input-bg);
+}
+
+.checkboxLabel:hover::before {
+  border-color: var(--color-primary);
+}
+
+.checkboxLabel:has(input:checked)::before {
+  background: white;
+  border-color: white;
+  background-image: url("data:image/svg+xml,%3csvg viewBox='0 0 16 16' fill='%23000' xmlns='http://www.w3.org/2000/svg'%3e%3cpath d='m13.854 3.646-7.5 7.5a.5.5 0 0 1-.708 0l-3.5-3.5a.5.5 0 1 1 .708-.708L6 10.293l7.146-7.147a.5.5 0 0 1 .708.708z'/%3e%3c/svg%3e");
+}
+
+/* ✅ Responsive Design für alle Radio/Checkbox Groups */
+@media (max-width: 768px) {
+  .radioGroup,
+  .checkboxGrid {
+    grid-template-columns: 1fr;
+    gap: 8px;
+  }
+
+  .radioLabel,
+  .checkboxLabel {
+    padding: 12px 16px;
+    min-height: 50px;
+  }
+
+  .hybridSelectorContainer {
+    padding: 16px;
+  }
+}
+
+/* ✅ Dark Mode Anpassungen */
+[data-theme="dark"] .radioLabel,
+[data-theme="dark"] .checkboxLabel {
+  background: var(--color-bg-secondary);
+  border-color: var(--color-border-dark);
+}
+
+[data-theme="dark"] .radioLabel:hover,
+[data-theme="dark"] .checkboxLabel:hover {
+  background: rgba(var(--color-primary-rgb), 0.1);
+}
+
+[data-theme="dark"] .hybridSelectorContainer {
+  background: var(--color-bg-secondary);
+  border-color: var(--color-border-dark);
+}
+
+/* ✅ Animation für checked states */
+.radioLabel:has(input:checked),
+.checkboxLabel:has(input:checked) {
+  animation: selectPulse 0.3s ease-out;
+}
+
+@keyframes selectPulse {
+  0% {
+    transform: scale(1);
+  }
+  50% {
+    transform: scale(1.02);
+  }
+  100% {
+    transform: scale(1);
+  }
+}
+
+/* ✅ Focus styles für accessibility */
+.radioLabel:focus-within,
+.checkboxLabel:focus-within {
+  outline: 2px solid var(--color-primary);
+  outline-offset: 2px;
 }

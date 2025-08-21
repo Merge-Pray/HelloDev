@@ -96,6 +96,13 @@ const EditProfilePage = () => {
         }
       });
 
+      // ✅ Special handling for nickname - use username as default if nickname is empty
+      if (!profileData.nickname || profileData.nickname.trim() === "") {
+        const defaultNickname = profileData.username || "";
+        setValue("nickname", defaultNickname);
+        initialData["nickname"] = defaultNickname;
+      }
+
       setOriginalData(initialData);
       setIsDataLoaded(true);
       setHasUnsavedChanges(false);
@@ -175,23 +182,42 @@ const EditProfilePage = () => {
     setSuccess(null);
 
     try {
-      await updateProfile.mutateAsync(formData);
+      // ✅ Ensure nickname is properly set before sending
+      const processedData = { ...formData };
+
+      // If nickname is empty or just whitespace, it will be set to username in backend
+      if (!processedData.nickname || processedData.nickname.trim() === "") {
+        processedData.nickname =
+          processedData.username || profileData?.username || "";
+      }
+
+      console.log("Saving profile data:", processedData);
+
+      await updateProfile.mutateAsync(processedData);
       setSuccess("Profile updated successfully!");
 
-      // Update original data with saved values and reset change detection
+      // ✅ Update original data with saved values and reset change detection
       const newOriginalData = {};
-      Object.keys(formData).forEach((key) => {
-        if (Array.isArray(formData[key])) {
-          newOriginalData[key] = [...formData[key]];
+      Object.keys(processedData).forEach((key) => {
+        if (Array.isArray(processedData[key])) {
+          newOriginalData[key] = [...processedData[key]];
         } else {
-          newOriginalData[key] = formData[key];
+          newOriginalData[key] = processedData[key];
         }
       });
 
       setOriginalData(newOriginalData);
       setHasUnsavedChanges(false);
 
-      setTimeout(() => setSuccess(null), 3000);
+      // ✅ Refetch profile data to get updated values from backend
+      setTimeout(async () => {
+        try {
+          await refetch();
+          setSuccess(null);
+        } catch (error) {
+          console.error("Error refetching profile data:", error);
+        }
+      }, 1000);
     } catch (error) {
       console.error("Error saving profile:", error);
       setError(error.message || "Failed to save changes. Please try again.");
@@ -245,6 +271,58 @@ const EditProfilePage = () => {
     </div>
   );
 
+  const renderMultiSelectSection = (
+    title,
+    fieldName,
+    options,
+    sectionKey,
+    required = false
+  ) => {
+    const watchedValues = watch(fieldName) || [];
+
+    // ✅ Use radio-style rendering for better consistency
+    return (
+      <div className={styles.formSection}>
+        {renderSectionHeader(title, sectionKey)}
+        <div className={styles.hybridSelectorContainer}>
+          <HybridSelector
+            category={fieldName}
+            selectedValues={watchedValues}
+            onSelectionChange={(values) => setValue(fieldName, values)}
+            maxSelections={null}
+            allowMultiple={true}
+            showButtons={true}
+          />
+        </div>
+      </div>
+    );
+  };
+
+  // ✅ Update Programming Languages Section with consistent styling
+  const renderProgrammingLanguagesSection = () => {
+    const watchedValues = watch("programmingLanguages") || [];
+
+    return (
+      <div className={styles.formSection}>
+        {renderSectionHeader("Programming Languages")}
+        <div className={styles.hybridSelectorContainer}>
+          <HybridSelector
+            category="programmingLanguages"
+            selectedValues={watchedValues}
+            onSelectionChange={(values) => {
+              setValue("programmingLanguages", values);
+            }}
+            maxSelections={null}
+            allowMultiple={true}
+            showButtons={true}
+            showSkillLevel={true}
+          />
+        </div>
+      </div>
+    );
+  };
+
+  // ✅ Consistent styling for Gaming section (reference for other sections)
   const renderGamingSection = () => (
     <div className={styles.formSection}>
       {renderSectionHeader("Gaming Preferences")}
@@ -258,12 +336,34 @@ const EditProfilePage = () => {
         ].map((option) => (
           <label key={option.value} className={styles.radioLabel}>
             <input type="radio" value={option.value} {...register("gaming")} />
-            {option.label}
+            <span className={styles.radioText}>{option.label}</span>
           </label>
         ))}
       </div>
       {errors.gaming && (
         <span className={styles.error}>{errors.gaming.message}</span>
+      )}
+    </div>
+  );
+
+  // ✅ Update Environment section to match gaming styling
+  const renderEnvironmentSection = () => (
+    <div className={styles.formSection}>
+      {renderSectionHeader("Development Environment")}
+      <div className={styles.radioGroup}>
+        {["Windows", "macOS", "Linux", "Other"].map((os) => (
+          <label key={os} className={styles.radioLabel}>
+            <input
+              type="radio"
+              value={os}
+              {...register("preferredOS", { required: "Please select an OS" })}
+            />
+            <span className={styles.radioText}>{os}</span>
+          </label>
+        ))}
+      </div>
+      {errors.preferredOS && (
+        <span className={styles.error}>{errors.preferredOS.message}</span>
       )}
     </div>
   );
@@ -286,6 +386,16 @@ const EditProfilePage = () => {
                 value: 20,
                 message: "Username must be less than 20 characters",
               },
+              // ✅ Add onChange handler to sync nickname if needed
+              onChange: (e) => {
+                const newUsername = e.target.value;
+                const currentNickname = watch("nickname");
+
+                // If nickname equals the old username, update it to the new username
+                if (currentNickname === profileData?.username) {
+                  setValue("nickname", newUsername);
+                }
+              },
             })}
             placeholder="Enter your username"
           />
@@ -293,6 +403,49 @@ const EditProfilePage = () => {
             <span className={styles.error}>{errors.username.message}</span>
           )}
         </div>
+
+        <div className={styles.formField}>
+          <label>
+            Nickname *
+            <span className={styles.defaultIndicator}>
+              {" "}
+              (Default: {profileData?.username})
+            </span>
+          </label>
+          <input
+            type="text"
+            {...register("nickname", {
+              required: "Nickname is required",
+              minLength: {
+                value: 2,
+                message: "Nickname must be at least 2 characters",
+              },
+              maxLength: {
+                value: 25,
+                message: "Nickname must be less than 25 characters",
+              },
+              // ✅ Add validation for nickname uniqueness if needed
+              validate: (value) => {
+                const trimmedValue = value?.trim();
+                if (!trimmedValue) {
+                  return "Nickname is required";
+                }
+                if (trimmedValue.length < 2) {
+                  return "Nickname must be at least 2 characters";
+                }
+                if (trimmedValue.length > 25) {
+                  return "Nickname must be less than 25 characters";
+                }
+                return true;
+              },
+            })}
+            placeholder={`Default: ${profileData?.username} (or enter custom nickname)`}
+          />
+          {errors.nickname && (
+            <span className={styles.error}>{errors.nickname.message}</span>
+          )}
+        </div>
+
         <div className={styles.formField}>
           <label>Email *</label>
           <input
@@ -310,6 +463,7 @@ const EditProfilePage = () => {
             <span className={styles.error}>{errors.email.message}</span>
           )}
         </div>
+
         <div className={styles.formField}>
           <label>Location *</label>
           <LocationSelector
@@ -320,6 +474,7 @@ const EditProfilePage = () => {
             required={true}
           />
         </div>
+
         <div className={styles.formField}>
           <label>Age</label>
           <input
@@ -330,6 +485,7 @@ const EditProfilePage = () => {
             placeholder="Enter your age"
           />
         </div>
+
         <div className={`${styles.formField} ${styles.fullWidth}`}>
           <label>About Me</label>
           <textarea
@@ -378,30 +534,6 @@ const EditProfilePage = () => {
       </div>
     </div>
   );
-
-  const renderMultiSelectSection = (
-    title,
-    fieldName,
-    options,
-    sectionKey,
-    required = false
-  ) => {
-    const watchedValues = watch(fieldName) || [];
-
-    return (
-      <div className={styles.formSection}>
-        {renderSectionHeader(title, sectionKey)}
-        <HybridSelector
-          category={fieldName}
-          selectedValues={watchedValues}
-          onSelectionChange={(values) => setValue(fieldName, values)}
-          maxSelections={null}
-          allowMultiple={true}
-          showButtons={true}
-        />
-      </div>
-    );
-  };
 
   const renderPreferencesSection = () => (
     <div className={styles.formSection}>
@@ -477,67 +609,6 @@ const EditProfilePage = () => {
     </div>
   );
 
-  const renderEnvironmentSection = () => (
-    <div className={styles.formSection}>
-      {renderSectionHeader("Development Environment", "environment")}
-      <div className={styles.radioGroup}>
-        {["Windows", "macOS", "Linux", "Other"].map((os) => (
-          <label key={os} className={styles.radioLabel}>
-            <input
-              type="radio"
-              value={os}
-              {...register("preferredOS", { required: "Please select an OS" })}
-            />
-            {os}
-          </label>
-        ))}
-      </div>
-      {errors.preferredOS && (
-        <span className={styles.error}>{errors.preferredOS.message}</span>
-      )}
-    </div>
-  );
-
-  const renderProgrammingLanguagesSection = () => {
-    const watchedValues = watch("programmingLanguages") || [];
-
-    return (
-      <div className={styles.formSection}>
-        {renderSectionHeader("Programming Languages")}
-        <HybridSelector
-          category="programmingLanguages"
-          selectedValues={watchedValues}
-          onSelectionChange={(values) => {
-            setValue("programmingLanguages", values);
-          }}
-          maxSelections={null}
-          allowMultiple={true}
-          showButtons={true}
-          showSkillLevel={true}
-        />
-      </div>
-    );
-  };
-
-  useEffect(() => {
-    const urlParams = new URLSearchParams(window.location.search);
-    const section = urlParams.get("section");
-
-    if (section) {
-      setActiveSection(section);
-
-      setTimeout(() => {
-        const sectionElement = document.getElementById(`section-${section}`);
-        if (sectionElement) {
-          sectionElement.scrollIntoView({
-            behavior: "smooth",
-            block: "start",
-          });
-        }
-      }, 100);
-    }
-  }, []);
-
   const renderCurrentSection = () => {
     const sectionContent = (() => {
       switch (activeSection) {
@@ -595,6 +666,25 @@ const EditProfilePage = () => {
     );
   };
 
+  useEffect(() => {
+    const urlParams = new URLSearchParams(window.location.search);
+    const section = urlParams.get("section");
+
+    if (section) {
+      setActiveSection(section);
+
+      setTimeout(() => {
+        const sectionElement = document.getElementById(`section-${section}`);
+        if (sectionElement) {
+          sectionElement.scrollIntoView({
+            behavior: "smooth",
+            block: "start",
+          });
+        }
+      }, 100);
+    }
+  }, []);
+
   if (isLoading) {
     return (
       <div className={`${styles.page} ${styles.loading}`}>
@@ -638,14 +728,65 @@ const EditProfilePage = () => {
               <br />
               {isMatchable ? (
                 <span style={{ color: "var(--color-success)" }}>
-                  You are able to match!
+                  ✅ You are able to match!
                 </span>
               ) : (
-                <span style={{ color: "var(--color-warning)" }}>
-                  ❌ {profileStats.missingRequiredFields} required fields
-                  missing to match
-                </span>
+                <div className={styles.missingFieldsInfo}>
+                  <span style={{ color: "var(--color-warning)" }}>
+                    ❌ {profileStats.missingRequiredFields} required fields
+                    missing to match
+                  </span>
+
+                  {profileStats.missingRequiredFieldsList &&
+                    profileStats.missingRequiredFieldsList.length > 0 && (
+                      <div className={styles.missingFieldsList}>
+                        <strong>Missing required fields:</strong>
+                        <ul>
+                          {profileStats.missingRequiredFieldsList.map(
+                            ({ field, label }) => (
+                              <li key={field}>
+                                <button
+                                  type="button"
+                                  className={styles.missingFieldLink}
+                                  onClick={() => {
+                                    // Jump to appropriate section
+                                    const sectionMap = {
+                                      country: "personal",
+                                      city: "personal",
+                                      status: "experience",
+                                      devExperience: "experience",
+                                      techArea: "interests",
+                                      programmingLanguages: "languages",
+                                      techStack: "stack",
+                                      preferredOS: "environment",
+                                    };
+                                    setActiveSection(
+                                      sectionMap[field] || "personal"
+                                    );
+                                  }}
+                                >
+                                  {label}
+                                </button>
+                              </li>
+                            )
+                          )}
+                        </ul>
+                      </div>
+                    )}
+                </div>
               )}
+            </div>
+          </div>
+
+          {/* ✅ NEU: Info über vorausgefüllte Werte */}
+          <div className={styles.defaultValuesInfo}>
+            <div className={styles.infoHeader}>
+              <AlertCircle size={14} />
+              Default Values
+            </div>
+            <div className={styles.infoText}>
+              Some fields are pre-filled with default values. You can customize
+              them to better represent yourself.
             </div>
           </div>
 
@@ -654,11 +795,42 @@ const EditProfilePage = () => {
             {sections.map((section) => (
               <li key={section.id}>
                 <button
-                  className={activeSection === section.id ? styles.active : ""}
+                  className={`${
+                    activeSection === section.id ? styles.active : ""
+                  } ${
+                    // ✅ Markiere Sections mit fehlenden Pflichtfeldern
+                    profileStats.missingRequiredFieldsList?.some(
+                      ({ field }) => {
+                        const sectionMap = {
+                          personal: ["country", "city"],
+                          experience: ["status", "devExperience"],
+                          interests: ["techArea"],
+                          languages: ["programmingLanguages"],
+                          stack: ["techStack"],
+                          environment: ["preferredOS"],
+                        };
+                        return sectionMap[section.id]?.includes(field);
+                      }
+                    )
+                      ? styles.hasRequiredFields
+                      : ""
+                  }`}
                   onClick={() => setActiveSection(section.id)}
                 >
                   <span>{section.icon}</span>
                   {section.title}
+                  {/* ✅ Badge für fehlende Pflichtfelder */}
+                  {profileStats.missingRequiredFieldsList?.some(({ field }) => {
+                    const sectionMap = {
+                      personal: ["country", "city"],
+                      experience: ["status", "devExperience"],
+                      interests: ["techArea"],
+                      languages: ["programmingLanguages"],
+                      stack: ["techStack"],
+                      environment: ["preferredOS"],
+                    };
+                    return sectionMap[section.id]?.includes(field);
+                  }) && <span className={styles.requiredBadge}>!</span>}
                 </button>
               </li>
             ))}

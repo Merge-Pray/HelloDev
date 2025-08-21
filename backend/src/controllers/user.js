@@ -50,6 +50,7 @@ export const updateUserProfile = async (req, res, next) => {
     const userId = req.user._id;
     const {
       username,
+      nickname,
       email,
       aboutMe,
       country,
@@ -72,7 +73,7 @@ export const updateUserProfile = async (req, res, next) => {
       password,
       currentPassword,
     } = req.body;
-
+    console.log(nickname);
     const updateData = {};
 
     if (username !== undefined) {
@@ -148,6 +149,7 @@ export const updateUserProfile = async (req, res, next) => {
     }
 
     if (aboutMe !== undefined) updateData.aboutMe = aboutMe;
+    if (nickname !== undefined) updateData.nickname = nickname;
     if (country !== undefined) updateData.country = country;
     if (city !== undefined) updateData.city = city;
     if (age !== undefined) updateData.age = age;
