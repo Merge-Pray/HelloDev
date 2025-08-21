@@ -16,6 +16,11 @@ const PostSchema = new Schema(
       trim: true,
     },
 
+    imageUrl: {
+      type: String,
+      default: null,
+    },
+
     mentions: [
       {
         type: Schema.Types.ObjectId,
@@ -79,26 +84,10 @@ const PostSchema = new Schema(
       index: true,
     },
 
-    isReported: {
-      type: Boolean,
-      default: false,
-      index: true,
-    },
-
-    reportCount: {
-      type: Number,
-      default: 0,
-    },
-
     isHidden: {
       type: Boolean,
       default: false,
       index: true,
-    },
-
-    viewCount: {
-      type: Number,
-      default: 0,
     },
 
     engagementScore: {
@@ -172,6 +161,7 @@ PostSchema.index({ engagementScore: -1, createdAt: -1 });
 PostSchema.index({ isRepost: 1, createdAt: -1 });
 PostSchema.index({ originalPost: 1, createdAt: -1 });
 PostSchema.index({ repostCount: -1, createdAt: -1 });
+PostSchema.index({ imageUrl: 1, createdAt: -1 });
 
 PostSchema.index({
   visibility: 1,
@@ -182,99 +172,6 @@ PostSchema.index({
 PostSchema.index({
   content: "text",
   hashtags: "text",
-});
-
-PostSchema.virtual("likeCount").get(function () {
-  return this.likes ? this.likes.length : 0;
-});
-
-PostSchema.virtual("commentCount").get(function () {
-  return this.comments ? this.comments.length : 0;
-});
-
-PostSchema.methods.calculateEngagementScore = function () {
-  const ageInHours = (Date.now() - this.createdAt) / (1000 * 60 * 60);
-  const likeWeight = 2;
-  const commentWeight = 5;
-  const repostWeight = 10;
-  const viewWeight = 0.1;
-
-  const decayFactor = Math.exp(-ageInHours / 24);
-
-  const score =
-    (this.likes.length * likeWeight +
-      this.comments.length * commentWeight +
-      this.repostCount * repostWeight +
-      this.viewCount * viewWeight) *
-    decayFactor;
-
-  return Math.round(score * 100) / 100;
-};
-
-PostSchema.methods.canUserView = function (userId, userContacts = []) {
-  if (this.isHidden) return false;
-
-  switch (this.visibility) {
-    case "public":
-      return true;
-    case "contacts_only":
-      return (
-        userContacts.includes(this.author.toString()) ||
-        this.author.toString() === userId.toString()
-      );
-    case "private":
-      return this.author.toString() === userId.toString();
-    default:
-      return false;
-  }
-};
-
-PostSchema.methods.addLike = function (userId) {
-  const existingLike = this.likes.find(
-    (like) => like.user.toString() === userId.toString()
-  );
-
-  if (!existingLike) {
-    this.likes.push({ user: userId });
-    this.engagementScore = this.calculateEngagementScore();
-    return true;
-  }
-  return false;
-};
-
-PostSchema.methods.removeLike = function (userId) {
-  const likeIndex = this.likes.findIndex(
-    (like) => like.user.toString() === userId.toString()
-  );
-
-  if (likeIndex > -1) {
-    this.likes.splice(likeIndex, 1);
-    this.engagementScore = this.calculateEngagementScore();
-    return true;
-  }
-  return false;
-};
-
-PostSchema.methods.addComment = function (authorId, content, mentions = []) {
-  this.comments.push({
-    author: authorId,
-    content: content.trim(),
-    mentions: mentions,
-    createdAt: new Date(),
-  });
-  this.engagementScore = this.calculateEngagementScore();
-};
-
-PostSchema.pre("save", function (next) {
-  if (
-    this.isModified("likes") ||
-    this.isModified("comments") ||
-    this.isModified("viewCount") ||
-    this.isModified("repostCount")
-  ) {
-    this.engagementScore = this.calculateEngagementScore();
-  }
-  next();
 });
 
 const PostModel = model("Post", PostSchema);

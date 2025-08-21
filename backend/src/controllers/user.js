@@ -378,7 +378,6 @@ export const getUserData = async (req, res, next) => {
       },
     });
   } catch (error) {
-    console.error("Error fetching user:", error);
     return next(error);
   }
 };
@@ -501,7 +500,6 @@ export const getUserProfile = async (req, res, next) => {
       });
     }
   } catch (error) {
-    console.error("Error fetching user profile:", error);
     return next(error);
   }
 };
