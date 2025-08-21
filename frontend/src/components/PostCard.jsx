@@ -25,18 +25,14 @@ export default function PostCard({
     );
   }
 
+  // Text -> Hashtags & Mentions hervorheben
   const renderContent = (content) => {
-    let processedContent = content.replace(
-      /#(\w+)/g,
-      '<span class="hashtag" data-hashtag="$1">#$1</span>'
-    );
-
-    processedContent = processedContent.replace(
-      /@(\w+)/g,
-      '<span class="mention" data-username="$1">@$1</span>'
-    );
-
-    return { __html: processedContent };
+    let processed = (content || "")
+      // #hashtags
+      .replace(/#(\w+)/g, '<span class="hashtag" data-hashtag="$1">#$1</span>')
+      // @mentions
+      .replace(/@(\w+)/g, '<span class="mention" data-username="$1">@$1</span>');
+    return { __html: processed };
   };
 
   const handleHashtagClick = (hashtag) => {
@@ -48,12 +44,13 @@ export default function PostCard({
   };
 
   const handleContentClick = (e) => {
-    if (e.target.classList.contains("hashtag")) {
-      const hashtag = e.target.dataset.hashtag;
-      handleHashtagClick(hashtag);
-    } else if (e.target.classList.contains("mention")) {
-      const username = e.target.dataset.username;
-      handleMentionClick(username);
+    const t = e.target;
+    if (t.classList?.contains("hashtag")) {
+      const hashtag = t.dataset.hashtag;
+      if (hashtag) handleHashtagClick(hashtag);
+    } else if (t.classList?.contains("mention")) {
+      const username = t.dataset.username;
+      if (username) handleMentionClick(username);
     }
   };
 
@@ -68,52 +65,73 @@ export default function PostCard({
     );
   }
 
+  const cardClass = [
+    styles.postCard,
+    isEmbedded ? styles.isEmbedded : "",
+  ].join(" ");
+
   return (
-    <div className={styles.postCard}>
-      <div className="post-header">
-        <img
-          src={post.author?.avatar || "/default-avatar.png"}
-          alt={post.author?.username || "Unknown User"}
-          className="author-avatar"
-        />
-        <div className="author-info">
-          <h4>{post.author?.username || "Unknown User"}</h4>
-          <div className="post-meta">
-            <span className="post-time">
-              {formatDistanceToNow(new Date(post.createdAt), {
-                addSuffix: true,
-              })}
-            </span>
-            {post.author?.isOnline && (
-              <span className="online-indicator">●</span>
-            )}
-          </div>
+    <article className={cardClass} data-post-id={post._id}>
+      <header className={styles.header}>
+  <img
+    src={post.author?.avatar || "/default-avatar.png"}
+    alt={post.author?.username || "Unknown User"}
+    className={styles.avatar}
+    loading="lazy"
+    decoding="async"
+  />
+
+  <div className={styles.authorInfo}>
+    <div className={styles.nameRow}>
+      {/* Anzeigename, z. B. voller Name */}
+      <span className={styles.displayName}>
+        {post.author?.nickname || post.author?.username}
+      </span>
+
+      {/* Username / Handle */}
+      <span className={styles.handle}>
+        @{post.author?.username}.HelloDev.social
+      </span>
+    </div>
+
+    <div className={styles.meta}>
+      <time
+        className={styles.time}
+        dateTime={new Date(post.createdAt).toISOString()}
+        title={new Date(post.createdAt).toLocaleString()}
+      >
+        {formatDistanceToNow(new Date(post.createdAt), { addSuffix: true })}
+      </time>
+      {post.author?.isOnline && (
+        <span className={styles.onlineDot} aria-label="Online" />
+      )}
+    </div>
+  </div>
+
+  {post.visibility !== "public" && (
+    <span className={styles.visibilityBadge} title={post.visibility}>
+      {post.visibility === "contacts_only" ? "Friends" : "Private"}
+    </span>
+  )}
+</header>
+
+      {post.content && (
+        <div className={styles.content} onClick={handleContentClick}>
+          <p dangerouslySetInnerHTML={renderContent(post.content)} />
         </div>
+      )}
 
-        {post.visibility !== "public" && (
-          <span className="visibility-badge">
-            {post.visibility === "contacts_only" ? "Friends" : "Private"}
-          </span>
-        )}
-      </div>
-
-      <div className="post-content">
-        <p
-          dangerouslySetInnerHTML={renderContent(post.content)}
-          onClick={handleContentClick}
-        />
-      </div>
-
-      {post.hashtags && post.hashtags.length > 0 && (
-        <div className="post-hashtags">
-          {post.hashtags.map((tag, index) => (
-            <span
-              key={index}
-              className="hashtag-pill"
+      {Array.isArray(post.hashtags) && post.hashtags.length > 0 && (
+        <div className={styles.hashtags}>
+          {post.hashtags.map((tag) => (
+            <button
+              key={tag}
+              type="button"
+              className={styles.hashtagPill}
               onClick={() => handleHashtagClick(tag)}
             >
               #{tag}
-            </span>
+            </button>
           ))}
         </div>
       )}
@@ -123,7 +141,7 @@ export default function PostCard({
         currentUser={currentUser}
         onLike={onLike}
         onRepost={onRepost}
-        onToggleComments={() => setShowComments(!showComments)}
+        onToggleComments={() => setShowComments((v) => !v)}
       />
 
       {showComments && (
@@ -133,6 +151,6 @@ export default function PostCard({
           onComment={onComment}
         />
       )}
-    </div>
+    </article>
   );
 }

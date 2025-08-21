@@ -1,14 +1,162 @@
+/* Card */
 .postCard {
-  border-top: 1px solid var( --color-border);
-    /* border-bottom: 1px solid var( --color-border); */
-  /* border-radius: 8px; */
+  border-top: 1px solid var(--color-border);
   padding: 16px;
-  /* margin-bottom: 10px; */
+  /* margin-bottom: 16px; */
+  background: var(--color-bg);
+  transition: box-shadow 0.2s ease, transform 0.2s ease;
 }
 
-.error {
-     border: 1px solid var( --color-border);
-  border-color: #ff0000;
-  border-radius: 8px;
+/* .postCard:hover {
+  box-shadow: 0 4px 12px rgba(0,0,0,0.08);
+  transform: translateY(-2px);
+} */
 
+.nameRow {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+}
+
+.displayName {
+  font-weight: 600;
+  font-size: 1rem;
+  color: var(--color-text);
+}
+
+.handle {
+  font-size: 0.85rem;
+  color: var(--color-text-secondary);
+}
+/* Kompaktere Variante z. B. in Embeds */
+.isEmbedded {
+  border-radius: 10px;
+  padding: 12px;
+  margin-bottom: 12px;
+}
+
+/* Header */
+.header {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  margin-bottom: 12px;
+}
+
+.avatar {
+  width: 48px;
+  height: 48px;
+  
+  object-fit: cover;
+  
+  flex: 0 0 48px;
+}
+
+.authorInfo {
+  display: flex;
+  flex-direction: column;
+  min-width: 0;
+}
+
+.username {
+  margin: 0;
+  font-size: 1rem;
+  font-weight: 600;
+  color: var(--color-text);
+  line-height: 1.2;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.meta {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  color: var(--color-text-muted);
+  font-size: 0.8rem;
+}
+
+.time {
+  white-space: nowrap;
+}
+
+.onlineDot {
+  width: 8px;
+  height: 8px;
+  border-radius: 50%;
+  background: var(--color-success, #28a745);
+  display: inline-block;
+}
+
+/* Sichtbarkeit */
+.visibilityBadge {
+  margin-left: auto;
+  font-size: 0.7rem;
+  padding: 4px 8px;
+  border-radius: 12px;
+  background: var(--color-bg-secondary);
+  color: var(--color-text-muted);
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+}
+
+/* Content */
+.content p {
+  margin: 0 0 12px;
+  font-size: 0.95rem;
+  line-height: 1.5;
+  color: var(--color-text);
+  white-space: pre-line; /* Respektiert \n */
+}
+
+/* Hashtags/Mentions aus dangerouslySetInnerHTML müssen global gestylt werden */
+:global(.hashtag),
+:global(.mention) {
+  color: var(--color-primary);
+  cursor: pointer;
+  font-weight: 500;
+}
+
+:global(.hashtag:hover),
+:global(.mention:hover) {
+  text-decoration: underline;
+}
+
+/* Hashtag-Pills unter dem Content */
+.hashtags {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px;
+  margin-bottom: 12px;
+}
+
+.hashtagPill {
+  background: var(--color-bg-secondary);
+  color: var(--color-primary);
+  padding: 4px 10px;
+  border-radius: 999px;
+  font-size: 0.8rem;
+  border: none;
+  cursor: pointer;
+  transition: background 0.2s ease, color 0.2s ease, transform 0.1s ease;
+}
+
+.hashtagPill:hover,
+.hashtagPill:focus-visible {
+  background: var(--color-primary);
+  color: #fff;
+}
+
+.hashtagPill:active {
+  transform: scale(0.98);
+}
+
+/* Fehlerzustand */
+.error {
+  border: 1px solid #ff4d4d;
+  background: rgba(255, 0, 0, 0.06);
+  border-radius: 10px;
+  color: #e60000;
+  padding: 12px;
 }
