@@ -551,7 +551,7 @@ export default function ProfilePage() {
           </div>
 
           <h1 className={`title ${styles.profileName}`}>
-            {currentUser?.username || "Your Name"}
+            {currentUser?.nickname || currentUser?.username || "Your Name"}
           </h1>
 
           <p className={`subtitle ${styles.profileSubtitle}`}>

@@ -465,7 +465,7 @@ export default function BuildProfile() {
         </div>
 
         <div className={styles.welcomeText}>
-          Welcome, {currentUser?.username || "Developer"}! 👋
+          Welcome, {currentUser?.nickname || currentUser?.username || "Developer"}! 👋
         </div>
 
         <h1 className="title">{currentStepData?.title}</h1>
