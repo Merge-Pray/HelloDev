@@ -54,7 +54,7 @@ function HybridSelector({
 
   const searchOptions = async () => {
     setIsLoading(true);
-    
+
     try {
       const response = await fetch(
         `${API_URL}/api/suggestions/search/${category}?q=${encodeURIComponent(
@@ -165,7 +165,6 @@ function HybridSelector({
         <div className="popular-options">
           <div className="button-grid">
             {popularOptions.map((option) => {
-              // Determine if this option is selected
               const isSelected = showSkillLevel
                 ? selectedValues.some((item) =>
                     Array.isArray(item)
@@ -234,7 +233,7 @@ function HybridSelector({
               <div className="custom-add">
                 <button
                   type="button"
-                  onClick={() => handleCustomAdd()} // Changed from onClick={handleCustomAdd}
+                  onClick={() => handleCustomAdd()}
                   className="add-custom-btn"
                 >
                   + Add "{searchInput}"

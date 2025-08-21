@@ -49,10 +49,6 @@ export const handleAuthErrorAndRetry = async (originalRequestFn) => {
   }
 };
 
-/**
- * Performs the actual token refresh
- * @returns {Promise<{success: boolean, user?: object, error?: string}>}
- */
 const performTokenRefresh = async () => {
   try {
     const refreshResponse = await fetch(`${API_URL}/api/user/refresh`, {
@@ -71,11 +67,6 @@ const performTokenRefresh = async () => {
   }
 };
 
-/**
- * Check if response indicates an auth error
- * @param {Response} response - The fetch response
- * @returns {boolean} - Whether this is an auth error
- */
 export const isAuthError = (response) => {
   return response?.status === 401 || response?.status === 419;
 };
