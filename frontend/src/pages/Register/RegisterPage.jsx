@@ -46,9 +46,10 @@ export default function RegisterPage() {
     setError(null);
     setValidationErrors({});
 
-    const makeRequest = async () => {
+    try {
       const { confirmPassword, ...submitData } = values;
-      return await fetch(`${API_URL}/api/user/register`, {
+
+      const response = await fetch(`${API_URL}/api/user/register`, {
         method: "POST",
         headers: {
           "Content-Type": "application/json",
@@ -56,15 +57,6 @@ export default function RegisterPage() {
         credentials: "include",
         body: JSON.stringify(submitData),
       });
-    };
-
-    try {
-      let response = await makeRequest();
-
-      // Handle auth errors with token refresh (though unlikely for register)
-      if (isAuthError(response)) {
-        response = await handleAuthErrorAndRetry(makeRequest);
-      }
 
       if (!response.ok) {
         const errorData = await response.json();
