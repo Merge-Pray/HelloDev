@@ -1,7 +1,6 @@
 import React, { useState, useEffect } from "react";
 import { API_URL } from "../lib/config";
 import "./HybridSelector.css";
-import { handleAuthErrorAndRetry, isAuthError } from "../utils/tokenRefresh";
 
 function HybridSelector({
   category,
@@ -37,23 +36,13 @@ function HybridSelector({
   }, [searchInput]);
 
   const fetchPopularOptions = async () => {
-    const makeRequest = async () => {
-      return await fetch(
+    try {
+      const response = await fetch(
         `${API_URL}/api/suggestions/popular/${category}`,
         {
           credentials: "include",
         }
       );
-    };
-
-    try {
-      let response = await makeRequest();
-
-      // Handle auth errors with token refresh
-      if (isAuthError(response)) {
-        response = await handleAuthErrorAndRetry(makeRequest);
-      }
-
       const data = await response.json();
       if (data.success) {
         setPopularOptions(data.popular);
@@ -66,23 +55,13 @@ function HybridSelector({
   const searchOptions = async () => {
     setIsLoading(true);
     
-    const makeRequest = async () => {
-      return await fetch(
+    try {
+      const response = await fetch(
         `${API_URL}/api/suggestions/search/${category}?q=${encodeURIComponent(
           searchInput
         )}`,
         { credentials: "include" }
       );
-    };
-
-    try {
-      let response = await makeRequest();
-
-      // Handle auth errors with token refresh
-      if (isAuthError(response)) {
-        response = await handleAuthErrorAndRetry(makeRequest);
-      }
-
       const data = await response.json();
       if (data.success) {
         setSearchResults(data.suggestions);
