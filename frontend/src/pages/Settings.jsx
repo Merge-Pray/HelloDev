@@ -26,26 +26,17 @@ const Settings = () => {
   const handleLogoutConfirm = async () => {
     try {
       setIsLoggingOut(true);
-      setError(null); // Clear any previous errors
+      setError(null);
 
-      const makeRequest = async () => {
-        return await fetch(`${API_URL}/api/user/logout`, {
-          method: "POST",
-          credentials: "include",
-          headers: {
-            "Content-Type": "application/json",
-          },
-        });
-      };
+      const response = await fetch(`${API_URL}/api/user/logout`, {
+        method: "POST",
+        credentials: "include",
+        headers: {
+          "Content-Type": "application/json",
+        },
+      });
 
-      let response = await makeRequest();
-
-      // Handle auth errors with token refresh (though unlikely for logout)
-      if (isAuthError(response)) {
-        response = await handleAuthErrorAndRetry(makeRequest);
-      }
-
-      if (response.ok) {
+      if (response.ok || response.status === 401 || response.status === 419) {
         clearUser();
         navigate("/");
       } else {
@@ -54,7 +45,9 @@ const Settings = () => {
       }
     } catch (error) {
       console.error("Error during logout:", error);
-      setError("Network error. Please check your connection and try again.");
+
+      clearUser();
+      navigate("/");
     } finally {
       setIsLoggingOut(false);
       setShowLogoutConfirm(false);

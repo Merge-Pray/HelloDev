@@ -16,12 +16,12 @@ export const getUserMatches = async (req, res, next) => {
       .populate({
         path: "user1",
         select:
-          "username avatar aboutMe country city techArea programmingLanguages devExperience status isOnline lastSeen",
+          "username nickname avatar aboutMe country city techArea programmingLanguages devExperience status isOnline lastSeen",
       })
       .populate({
         path: "user2",
         select:
-          "username avatar aboutMe country city techArea programmingLanguages devExperience status isOnline lastSeen",
+          "username nickname avatar aboutMe country city techArea programmingLanguages devExperience status isOnline lastSeen",
       })
       .sort({ compatibilityScore: -1, createdAt: -1 })
       .skip(skip)
@@ -39,6 +39,7 @@ export const getUserMatches = async (req, res, next) => {
         user: {
           id: otherUser._id,
           username: otherUser.username,
+          nickname: otherUser.nickname,
           avatar: otherUser.avatar,
           aboutMe: otherUser.aboutMe,
           country: otherUser.country,

@@ -73,6 +73,7 @@ export const refreshToken = async (req, res, next) => {
       user: {
         id: user._id,
         username: user.username,
+        nickname: user.nickname,
         email: user.email,
         isMatchable: user.isMatchable,
         avatar: user.avatar,
@@ -132,6 +133,7 @@ export const checkAuthStatus = async (req, res, next) => {
       user: {
         id: user._id,
         username: user.username,
+        nickname: user.nickname,
         email: user.email,
         isMatchable: user.isMatchable,
         avatar: user.avatar,

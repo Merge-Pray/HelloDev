@@ -76,13 +76,13 @@ export default function CommentSection({ postId, comments, onComment }) {
             <div key={comment._id} className="comment">
               <img
                 src={comment.author.avatar || "/default-avatar.png"}
-                alt={comment.author.username}
+                alt={comment.author.nickname || comment.author.username}
                 className="comment-avatar"
               />
               <div className="comment-content">
                 <div className="comment-header">
                   <strong className="comment-author">
-                    {comment.author.username}
+                    {comment.author.nickname || comment.author.username}
                   </strong>
                   <span className="comment-time">
                     {formatDistanceToNow(new Date(comment.createdAt), {

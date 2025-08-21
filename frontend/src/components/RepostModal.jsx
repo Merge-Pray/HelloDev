@@ -58,11 +58,11 @@ export default function RepostModal({ post, onRepost, onClose }) {
               <div className={styles.previewHeader}>
                 <img 
                   src={post.author.avatar || '/default-avatar.png'} 
-                  alt={post.author.username}
+                  alt={post.author.nickname || post.author.username}
                   className={styles.previewAvatar}
                 />
                 <span className={styles.previewAuthor}>
-                  {post.author.username}
+                  {post.author.nickname || post.author.username}
                 </span>
               </div>
               <div className={styles.previewContent}>
