@@ -1,10 +1,93 @@
 import PostModel from "../models/post.js";
 import UserModel from "../models/user.js";
 
+const calculateEngagementScore = (post) => {
+  const ageInHours = (Date.now() - post.createdAt) / (1000 * 60 * 60);
+  const likeWeight = 2;
+  const commentWeight = 5;
+  const repostWeight = 10;
+
+  const decayFactor = Math.exp(-ageInHours / 24);
+
+  const score =
+    (post.likes.length * likeWeight +
+      post.comments.length * commentWeight +
+      post.repostCount * repostWeight) *
+    decayFactor;
+
+  return Math.round(score * 100) / 100;
+};
+
+const canUserView = (post, userId, userContacts = []) => {
+  if (post.isHidden) return false;
+
+  switch (post.visibility) {
+    case "public":
+      return true;
+    case "contacts_only":
+      return (
+        userContacts.includes(post.author.toString()) ||
+        post.author.toString() === userId.toString()
+      );
+    case "private":
+      return post.author.toString() === userId.toString();
+    default:
+      return false;
+  }
+};
+
+const addLike = (post, userId) => {
+  const existingLike = post.likes.find(
+    (like) => like.user.toString() === userId.toString()
+  );
+
+  if (!existingLike) {
+    post.likes.push({ user: userId });
+    post.engagementScore = calculateEngagementScore(post);
+    return true;
+  }
+  return false;
+};
+
+const removeLike = (post, userId) => {
+  const likeIndex = post.likes.findIndex(
+    (like) => like.user.toString() === userId.toString()
+  );
+
+  if (likeIndex > -1) {
+    post.likes.splice(likeIndex, 1);
+    post.engagementScore = calculateEngagementScore(post);
+    return true;
+  }
+  return false;
+};
+
+const addComment = (post, authorId, content, mentions = []) => {
+  post.comments.push({
+    author: authorId,
+    content: content.trim(),
+    mentions: mentions,
+    createdAt: new Date(),
+  });
+  post.engagementScore = calculateEngagementScore(post);
+};
+
 export const createPost = async (req, res, next) => {
   try {
     const userId = req.user._id;
-    const { content, hashtags = [], visibility = "public" } = req.body;
+    const {
+      content,
+      hashtags = [],
+      visibility = "public",
+      imageUrl,
+    } = req.body;
+
+    if (!content.trim() && !imageUrl) {
+      return res.status(400).json({
+        success: false,
+        message: "Post must contain either text content or an image",
+      });
+    }
 
     const mentionMatches = content.match(/@(\w+)/g) || [];
     const mentionUsernames = mentionMatches.map((match) => match.slice(1));
@@ -18,6 +101,7 @@ export const createPost = async (req, res, next) => {
     const newPost = new PostModel({
       author: userId,
       content: content.trim(),
+      imageUrl: imageUrl || null,
       mentions,
       hashtags: hashtags.map((tag) => tag.toLowerCase().replace(/^#/, "")),
       visibility,
@@ -63,7 +147,6 @@ export const getNewsfeed = async (req, res, next) => {
             author: { $in: userContacts },
             visibility: { $in: ["public", "contacts_only"] },
           },
-
           { author: userId },
         ],
       };
@@ -206,9 +289,7 @@ export const getUserPosts = async (req, res, next) => {
         visibility: { $in: ["public", "contacts_only"] },
       };
     } else {
-      visibilityFilter = {
-        visibility: "public",
-      };
+      visibilityFilter = { visibility: "public" };
     }
 
     const posts = await PostModel.find({
@@ -264,7 +345,7 @@ export const getPostById = async (req, res, next) => {
     }
 
     const currentUser = await UserModel.findById(userId).select("contacts");
-    if (!post.canUserView(userId, currentUser.contacts)) {
+    if (!canUserView(post, userId, currentUser.contacts)) {
       return res.status(403).json({
         success: false,
         message: "You don't have permission to view this post",
@@ -273,61 +354,6 @@ export const getPostById = async (req, res, next) => {
 
     res.json({
       success: true,
-      post,
-    });
-  } catch (error) {
-    next(error);
-  }
-};
-
-export const updatePost = async (req, res, next) => {
-  try {
-    const { postId } = req.params;
-    const userId = req.user._id;
-    const updates = req.body;
-
-    const post = await PostModel.findById(postId);
-
-    if (!post) {
-      return res.status(404).json({
-        success: false,
-        message: "Post not found",
-      });
-    }
-
-    if (post.author.toString() !== userId.toString()) {
-      return res.status(403).json({
-        success: false,
-        message: "You can only update your own posts",
-      });
-    }
-
-    if (updates.content) {
-      const mentionMatches = updates.content.match(/@(\w+)/g) || [];
-      const mentionUsernames = mentionMatches.map((match) => match.slice(1));
-
-      const mentionedUsers = await UserModel.find({
-        username: { $in: mentionUsernames },
-      }).select("_id");
-
-      updates.mentions = mentionedUsers.map((user) => user._id);
-    }
-
-    if (updates.hashtags) {
-      updates.hashtags = updates.hashtags.map((tag) =>
-        tag.toLowerCase().replace(/^#/, "")
-      );
-    }
-
-    Object.assign(post, updates);
-    await post.save();
-
-    await post.populate("author", "username avatar");
-    await post.populate("mentions", "username");
-
-    res.json({
-      success: true,
-      message: "Post updated successfully",
       post,
     });
   } catch (error) {
@@ -381,7 +407,7 @@ export const likePost = async (req, res, next) => {
       });
     }
 
-    const liked = post.addLike(userId);
+    const liked = addLike(post, userId);
 
     await post.save();
 
@@ -409,7 +435,7 @@ export const unlikePost = async (req, res, next) => {
       });
     }
 
-    const unliked = post.removeLike(userId);
+    const unliked = removeLike(post, userId);
 
     await post.save();
 
@@ -423,7 +449,7 @@ export const unlikePost = async (req, res, next) => {
   }
 };
 
-export const addComment = async (req, res, next) => {
+export const addCommentToPost = async (req, res, next) => {
   try {
     const { postId } = req.params;
     const userId = req.user._id;
@@ -447,7 +473,7 @@ export const addComment = async (req, res, next) => {
 
     const mentions = mentionedUsers.map((user) => user._id);
 
-    post.addComment(userId, content, mentions);
+    addComment(post, userId, content, mentions);
     await post.save();
 
     await post.populate("comments.author", "username avatar");
@@ -464,53 +490,6 @@ export const addComment = async (req, res, next) => {
   }
 };
 
-export const deleteComment = async (req, res, next) => {
-  try {
-    const { postId, commentId } = req.params;
-    const userId = req.user._id;
-
-    const post = await PostModel.findById(postId);
-
-    if (!post) {
-      return res.status(404).json({
-        success: false,
-        message: "Post not found",
-      });
-    }
-
-    const comment = post.comments.id(commentId);
-
-    if (!comment) {
-      return res.status(404).json({
-        success: false,
-        message: "Comment not found",
-      });
-    }
-
-    if (
-      comment.author.toString() !== userId.toString() &&
-      post.author.toString() !== userId.toString()
-    ) {
-      return res.status(403).json({
-        success: false,
-        message: "You can only delete your own comments",
-      });
-    }
-
-    comment.deleteOne();
-    post.engagementScore = post.calculateEngagementScore();
-    await post.save();
-
-    res.json({
-      success: true,
-      message: "Comment deleted successfully",
-      commentCount: post.comments.length,
-    });
-  } catch (error) {
-    next(error);
-  }
-};
-
 export const searchPosts = async (req, res, next) => {
   try {
     const { q, page = 1, limit = 20 } = req.query;
@@ -519,7 +498,7 @@ export const searchPosts = async (req, res, next) => {
     if (!q || q.trim().length < 2) {
       return res.status(400).json({
         success: false,
-        message: "Search query must be at least 2 characters",
+        message: "Search query must be at least 2 characters long",
       });
     }
 
@@ -615,57 +594,6 @@ export const getPostsByHashtag = async (req, res, next) => {
   }
 };
 
-export const reportPost = async (req, res, next) => {
-  try {
-    const { postId } = req.params;
-    const { reason } = req.body;
-
-    const post = await PostModel.findById(postId);
-
-    if (!post) {
-      return res.status(404).json({
-        success: false,
-        message: "Post not found",
-      });
-    }
-
-    post.reportCount += 1;
-    post.isReported = true;
-
-    if (post.reportCount >= 5) {
-      post.isHidden = true;
-    }
-
-    await post.save();
-
-    res.json({
-      success: true,
-      message: "Post reported successfully",
-    });
-  } catch (error) {
-    next(error);
-  }
-};
-
-export const incrementViewCount = async (req, res, next) => {
-  try {
-    const { postId } = req.params;
-
-    await PostModel.findByIdAndUpdate(
-      postId,
-      { $inc: { viewCount: 1 } },
-      { new: true }
-    );
-
-    res.json({
-      success: true,
-      message: "View count updated",
-    });
-  } catch (error) {
-    next(error);
-  }
-};
-
 export const repostPost = async (req, res, next) => {
   try {
     const userId = req.user._id;
@@ -703,6 +631,7 @@ export const repostPost = async (req, res, next) => {
     const repost = new PostModel({
       author: userId,
       content: originalPost.content,
+      imageUrl: originalPost.imageUrl,
       isRepost: true,
       originalPost: postId,
       repostComment: comment.trim(),
@@ -722,6 +651,9 @@ export const repostPost = async (req, res, next) => {
         },
       },
     });
+
+    originalPost.engagementScore = calculateEngagementScore(originalPost);
+    await originalPost.save();
 
     await repost.populate("author", "username avatar");
     await repost.populate("originalPost");
@@ -755,10 +687,15 @@ export const removeRepost = async (req, res, next) => {
       });
     }
 
-    await PostModel.findByIdAndUpdate(postId, {
+    const originalPost = await PostModel.findByIdAndUpdate(postId, {
       $inc: { repostCount: -1 },
       $pull: { reposts: { user: userId } },
     });
+
+    if (originalPost) {
+      originalPost.engagementScore = calculateEngagementScore(originalPost);
+      await originalPost.save();
+    }
 
     res.json({
       success: true,
@@ -799,6 +736,54 @@ export const getPostReposts = async (req, res, next) => {
         currentPage: parseInt(page),
         totalPages: Math.ceil(totalReposts / limit),
         hasNextPage: reposts.length === parseInt(limit),
+      },
+    });
+  } catch (error) {
+    next(error);
+  }
+};
+
+// Add endpoint to get posts with images only
+export const getImagePosts = async (req, res, next) => {
+  try {
+    const userId = req.user._id;
+    const { page = 1, limit = 20 } = req.query;
+
+    const skip = (page - 1) * limit;
+
+    const currentUser = await UserModel.findById(userId).select("contacts");
+    const userContacts = currentUser.contacts || [];
+
+    const matchCriteria = {
+      imageUrl: { $ne: null }, // Only posts with images
+      isHidden: false,
+      $or: [
+        { visibility: "public" },
+        {
+          visibility: "contacts_only",
+          $or: [{ author: { $in: userContacts } }, { author: userId }],
+        },
+        { visibility: "private", author: userId },
+      ],
+    };
+
+    const posts = await PostModel.find(matchCriteria)
+      .sort({ createdAt: -1 })
+      .skip(skip)
+      .limit(parseInt(limit))
+      .populate("author", "username avatar")
+      .populate("mentions", "username")
+      .lean();
+
+    const totalPosts = await PostModel.countDocuments(matchCriteria);
+
+    res.json({
+      success: true,
+      posts,
+      pagination: {
+        currentPage: parseInt(page),
+        totalPages: Math.ceil(totalPosts / limit),
+        hasNextPage: posts.length === parseInt(limit),
       },
     });
   } catch (error) {
