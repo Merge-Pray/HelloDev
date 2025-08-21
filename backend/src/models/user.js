@@ -7,6 +7,11 @@ const UserSchema = new Schema(
       unique: true,
       required: false,
     },
+    nickname: {
+      type: String,
+      required: false,
+      default: "",
+    },
     email: {
       type: String,
       unique: true,

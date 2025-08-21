@@ -25,13 +25,15 @@ export default function PostCard({
     );
   }
 
-  // Text -> Hashtags & Mentions hervorheben
   const renderContent = (content) => {
     let processed = (content || "")
-      // #hashtags
+
       .replace(/#(\w+)/g, '<span class="hashtag" data-hashtag="$1">#$1</span>')
-      // @mentions
-      .replace(/@(\w+)/g, '<span class="mention" data-username="$1">@$1</span>');
+
+      .replace(
+        /@(\w+)/g,
+        '<span class="mention" data-username="$1">@$1</span>'
+      );
     return { __html: processed };
   };
 
@@ -65,55 +67,56 @@ export default function PostCard({
     );
   }
 
-  const cardClass = [
-    styles.postCard,
-    isEmbedded ? styles.isEmbedded : "",
-  ].join(" ");
+  const cardClass = [styles.postCard, isEmbedded ? styles.isEmbedded : ""].join(
+    " "
+  );
 
   return (
     <article className={cardClass} data-post-id={post._id}>
       <header className={styles.header}>
-  <img
-    src={post.author?.avatar || "/default-avatar.png"}
-    alt={post.author?.username || "Unknown User"}
-    className={styles.avatar}
-    loading="lazy"
-    decoding="async"
-  />
+        <img
+          src={post.author?.avatar || "/default-avatar.png"}
+          alt={post.author?.nickname || post.author?.username || "Unknown User"}
+          className={styles.avatar}
+          loading="lazy"
+          decoding="async"
+        />
 
-  <div className={styles.authorInfo}>
-    <div className={styles.nameRow}>
-      {/* Anzeigename, z. B. voller Name */}
-      <span className={styles.displayName}>
-        {post.author?.nickname || post.author?.username}
-      </span>
+        <div className={styles.authorInfo}>
+          <div className={styles.nameRow}>
+            {/* Anzeigename, z. B. voller Name */}
+            <span className={styles.displayName}>
+              {post.author?.nickname || post.author?.username}
+            </span>
 
-      {/* Username / Handle */}
-      <span className={styles.handle}>
-        @{post.author?.username}.HelloDev.social
-      </span>
-    </div>
+            {/* Username / Handle */}
+            <span className={styles.handle}>
+              @{post.author?.username}.HelloDev.social
+            </span>
+          </div>
 
-    <div className={styles.meta}>
-      <time
-        className={styles.time}
-        dateTime={new Date(post.createdAt).toISOString()}
-        title={new Date(post.createdAt).toLocaleString()}
-      >
-        {formatDistanceToNow(new Date(post.createdAt), { addSuffix: true })}
-      </time>
-      {post.author?.isOnline && (
-        <span className={styles.onlineDot} aria-label="Online" />
-      )}
-    </div>
-  </div>
+          <div className={styles.meta}>
+            <time
+              className={styles.time}
+              dateTime={new Date(post.createdAt).toISOString()}
+              title={new Date(post.createdAt).toLocaleString()}
+            >
+              {formatDistanceToNow(new Date(post.createdAt), {
+                addSuffix: true,
+              })}
+            </time>
+            {post.author?.isOnline && (
+              <span className={styles.onlineDot} aria-label="Online" />
+            )}
+          </div>
+        </div>
 
-  {post.visibility !== "public" && (
-    <span className={styles.visibilityBadge} title={post.visibility}>
-      {post.visibility === "contacts_only" ? "Friends" : "Private"}
-    </span>
-  )}
-</header>
+        {post.visibility !== "public" && (
+          <span className={styles.visibilityBadge} title={post.visibility}>
+            {post.visibility === "contacts_only" ? "Friends" : "Private"}
+          </span>
+        )}
+      </header>
 
       {post.content && (
         <div className={styles.content} onClick={handleContentClick}>

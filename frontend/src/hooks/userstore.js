@@ -24,6 +24,7 @@ const useUserStore = create(
           currentUser: {
             _id: user.id || user._id,
             username: user.username,
+            nickname: user.nickname,
           },
         }),
 

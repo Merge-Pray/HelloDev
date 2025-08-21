@@ -30,11 +30,11 @@ export default function RepostCard({ repost, onLike, onComment, onRepost }) {
         <Repeat size={16} />
         <img
           src={repost.author?.avatar || "/default-avatar.png"}
-          alt={repost.author?.username || "Unknown User"}
+          alt={repost.author?.nickname || repost.author?.username || "Unknown User"}
           className="repost-author-avatar"
         />
         <span className="repost-info">
-          <strong>{repost.author?.username || "Unknown User"}</strong> reposted
+          <strong>{repost.author?.nickname || repost.author?.username || "Unknown User"}</strong> reposted
         </span>
         <time className="repost-time">
           {formatDistanceToNow(new Date(repost.createdAt), { addSuffix: true })}

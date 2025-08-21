@@ -109,8 +109,8 @@ export const createPost = async (req, res, next) => {
 
     await newPost.save();
 
-    await newPost.populate("author", "username avatar");
-    await newPost.populate("mentions", "username");
+    await newPost.populate("author", "username nickname avatar");
+    await newPost.populate("mentions", "username nickname");
 
     res.status(201).json({
       success: true,
@@ -210,10 +210,10 @@ export const getNewsfeed = async (req, res, next) => {
         const mixedPosts = await PostModel.aggregate(pipeline);
 
         const populatedMixedPosts = await PostModel.populate(mixedPosts, [
-          { path: "author", select: "username avatar isOnline lastSeen" },
-          { path: "mentions", select: "username" },
-          { path: "likes.user", select: "username" },
-          { path: "comments.author", select: "username avatar" },
+          { path: "author", select: "username nickname avatar isOnline lastSeen" },
+          { path: "mentions", select: "username nickname" },
+          { path: "likes.user", select: "username nickname" },
+          { path: "comments.author", select: "username nickname avatar" },
         ]);
 
         return res.json({
@@ -235,12 +235,12 @@ export const getNewsfeed = async (req, res, next) => {
       .sort(sortCriteria)
       .skip(skip)
       .limit(parseInt(limit))
-      .populate("author", "username avatar isOnline lastSeen")
-      .populate("mentions", "username")
-      .populate("likes.user", "username")
-      .populate("comments.author", "username avatar")
+      .populate("author", "username nickname avatar isOnline lastSeen")
+      .populate("mentions", "username nickname")
+      .populate("likes.user", "username nickname")
+      .populate("comments.author", "username nickname avatar")
       .populate("originalPost")
-      .populate("originalPost.author", "username avatar")
+      .populate("originalPost.author", "username nickname avatar")
       .lean();
 
     const totalPosts = await PostModel.countDocuments(matchCriteria);
@@ -300,10 +300,10 @@ export const getUserPosts = async (req, res, next) => {
       .sort({ createdAt: -1 })
       .skip(skip)
       .limit(parseInt(limit))
-      .populate("author", "username avatar")
-      .populate("mentions", "username")
-      .populate("likes.user", "username")
-      .populate("comments.author", "username avatar")
+      .populate("author", "username nickname avatar")
+      .populate("mentions", "username nickname")
+      .populate("likes.user", "username nickname")
+      .populate("comments.author", "username nickname avatar")
       .lean();
 
     const totalPosts = await PostModel.countDocuments({
@@ -332,10 +332,10 @@ export const getPostById = async (req, res, next) => {
     const userId = req.user._id;
 
     const post = await PostModel.findById(postId)
-      .populate("author", "username avatar isOnline lastSeen")
-      .populate("mentions", "username")
-      .populate("likes.user", "username")
-      .populate("comments.author", "username avatar");
+      .populate("author", "username nickname avatar isOnline lastSeen")
+      .populate("mentions", "username nickname")
+      .populate("likes.user", "username nickname")
+      .populate("comments.author", "username nickname avatar");
 
     if (!post) {
       return res.status(404).json({
@@ -476,7 +476,7 @@ export const addCommentToPost = async (req, res, next) => {
     addComment(post, userId, content, mentions);
     await post.save();
 
-    await post.populate("comments.author", "username avatar");
+    await post.populate("comments.author", "username nickname avatar");
     const newComment = post.comments[post.comments.length - 1];
 
     res.status(201).json({
@@ -524,8 +524,8 @@ export const searchPosts = async (req, res, next) => {
       .sort({ score: { $meta: "textScore" }, createdAt: -1 })
       .skip(skip)
       .limit(parseInt(limit))
-      .populate("author", "username avatar")
-      .populate("mentions", "username")
+      .populate("author", "username nickname avatar")
+      .populate("mentions", "username nickname")
       .lean();
 
     const totalPosts = await PostModel.countDocuments(matchCriteria);
@@ -573,8 +573,8 @@ export const getPostsByHashtag = async (req, res, next) => {
       .sort({ createdAt: -1 })
       .skip(skip)
       .limit(parseInt(limit))
-      .populate("author", "username avatar")
-      .populate("mentions", "username")
+      .populate("author", "username nickname avatar")
+      .populate("mentions", "username nickname")
       .lean();
 
     const totalPosts = await PostModel.countDocuments(matchCriteria);
@@ -655,9 +655,9 @@ export const repostPost = async (req, res, next) => {
     originalPost.engagementScore = calculateEngagementScore(originalPost);
     await originalPost.save();
 
-    await repost.populate("author", "username avatar");
+    await repost.populate("author", "username nickname avatar");
     await repost.populate("originalPost");
-    await repost.populate("originalPost.author", "username avatar");
+    await repost.populate("originalPost.author", "username nickname avatar");
 
     res.status(201).json({
       success: true,
@@ -720,7 +720,7 @@ export const getPostReposts = async (req, res, next) => {
       .sort({ createdAt: -1 })
       .skip(skip)
       .limit(parseInt(limit))
-      .populate("author", "username avatar")
+      .populate("author", "username nickname avatar")
       .populate("originalPost")
       .lean();
 
@@ -771,8 +771,8 @@ export const getImagePosts = async (req, res, next) => {
       .sort({ createdAt: -1 })
       .skip(skip)
       .limit(parseInt(limit))
-      .populate("author", "username avatar")
-      .populate("mentions", "username")
+      .populate("author", "username nickname avatar")
+      .populate("mentions", "username nickname")
       .lean();
 
     const totalPosts = await PostModel.countDocuments(matchCriteria);

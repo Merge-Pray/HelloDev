@@ -87,7 +87,7 @@ export default function PostComposer({ onPostCreated }) {
         <img
           className={styles.avatar}
           src={currentUser?.avatar || "/default-avatar.png"}
-          alt={currentUser?.username || "User"}
+          alt={currentUser?.nickname || currentUser?.username || "User"}
           aria-hidden="true"
         />
         <h3 className={styles.title}>Share something</h3>

@@ -348,6 +348,7 @@ export const getUserData = async (req, res, next) => {
       user: {
         id: user._id,
         username: user.username,
+        nickname: user.nickname,
         email: user.email,
         avatar: user.avatar,
         aboutMe: user.aboutMe,
@@ -405,6 +406,7 @@ export const getUserProfile = async (req, res, next) => {
         user: {
           id: targetUser._id,
           username: targetUser.username,
+          nickname: targetUser.nickname,
           email: targetUser.email,
           avatar: targetUser.avatar,
           aboutMe: targetUser.aboutMe,
@@ -449,6 +451,7 @@ export const getUserProfile = async (req, res, next) => {
         user: {
           id: targetUser._id,
           username: targetUser.username,
+          nickname: targetUser.nickname,
           avatar: targetUser.avatar,
           aboutMe: targetUser.aboutMe,
           country: targetUser.country,
@@ -486,6 +489,7 @@ export const getUserProfile = async (req, res, next) => {
         user: {
           id: targetUser._id,
           username: targetUser.username,
+          nickname: targetUser.nickname,
           avatar: targetUser.avatar,
           aboutMe: targetUser.aboutMe,
           country: targetUser.country,
