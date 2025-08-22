@@ -205,12 +205,33 @@ export default function ProfilePage() {
   ) => {
     if (!hasData(data)) return null;
 
-    // ✅ Icon-Mapping für Section Headers
     const getSectionHeaderIcon = () => {
-      if (title === "Programming Languages") return <Code size={20} />;
-      if (title === "Tech Stack & Tools") return <Wrench size={20} />;
-      if (title === "Tech Interests") return <Heart size={20} />;
-      if (title === "Other Interests") return <Heart size={20} />;
+      // if (title === "Programming Languages") return <Code size={20} />;
+      // if (title === "Tech Stack & Tools") return <Wrench size={20} />;
+      // if (title === "Tech Interests") return <Heart size={20} />;
+      // if (title === "Other Interests") return <Heart size={20} />;
+      return null;
+    };
+
+    const getSkillLevelInfo = (numericLevel) => {
+      if (!numericLevel || numericLevel < 1 || numericLevel > 10) {
+        return null;
+      }
+
+      if (numericLevel >= 1 && numericLevel <= 3) {
+        return {
+          className: "skillLevelBeginner",
+        };
+      } else if (numericLevel >= 4 && numericLevel <= 7) {
+        return {
+          className: "skillLevelIntermediate",
+        };
+      } else if (numericLevel >= 8 && numericLevel <= 10) {
+        return {
+          className: "skillLevelAdvanced",
+        };
+      }
+
       return null;
     };
 
@@ -234,42 +255,111 @@ export default function ProfilePage() {
         </div>
 
         {hasData(data) ? (
-          <div className={styles.skillsGrid}>
-            {data.map((item, index) => {
-              if (title === "Programming Languages") {
+          <>
+            <div className={styles.skillsGrid}>
+              {data.map((item, index) => {
+                if (title === "Programming Languages") {
+                  let skillName = item;
+                  let numericLevel = null;
+
+                  if (Array.isArray(item)) {
+                    skillName = item[0];
+                    numericLevel = item[1];
+                  } else if (typeof item === "object" && item.name) {
+                    skillName = item.name;
+                    numericLevel = item.level;
+                  }
+
+                  const skillInfo = getSkillLevelInfo(numericLevel);
+
+                  return (
+                    <div
+                      key={index}
+                      className={`${styles.skillTag} ${
+                        skillInfo ? styles.programmingLanguageTag : ""
+                      }`}
+                    >
+                      <Code size={14} className={styles.skillIcon} />
+                      <span className={styles.skillName}>{skillName}</span>
+                      {skillInfo && (
+                        <span
+                          className={`${styles.skillLevel} ${
+                            styles[skillInfo.className]
+                          }`}
+                        >
+                          {skillInfo.level}
+                        </span>
+                      )}
+                    </div>
+                  );
+                }
+
+                if (title === "Tech Stack & Tools") {
+                  return (
+                    <div key={index} className={styles.skillTag}>
+                      <Wrench size={14} className={styles.skillIcon} />
+                      <span className={styles.skillName}>{item}</span>
+                    </div>
+                  );
+                }
+
+                if (title === "Tech Interests" || title === "Other Interests") {
+                  return (
+                    <div key={index} className={styles.skillTag}>
+                      <Heart size={14} className={styles.skillIcon} />
+                      <span className={styles.skillName}>{item}</span>
+                    </div>
+                  );
+                }
+
                 return (
                   <div key={index} className={styles.skillTag}>
-                    <Code size={14} className={styles.skillIcon} />
                     <span className={styles.skillName}>{item}</span>
                   </div>
                 );
-              }
+              })}
+            </div>
 
-              if (title === "Tech Stack & Tools") {
-                return (
-                  <div key={index} className={styles.skillTag}>
-                    <Wrench size={14} className={styles.skillIcon} />
-                    <span className={styles.skillName}>{item}</span>
+            {title === "Programming Languages" &&
+              data.some((item) => {
+                if (Array.isArray(item)) return item[1] != null;
+                if (typeof item === "object" && item.level) return true;
+                return false;
+              }) && (
+                <div className={styles.skillLegend}>
+                  <div className={styles.legendTitle}>Skill Levels:</div>
+                  <div className={styles.legendItems}>
+                    <div className={styles.legendItem}>
+                      <span
+                        className={`${styles.legendDot} ${styles.skillLevelBeginner}`}
+                      ></span>
+                      <span className={styles.legendLabel}>Beginner</span>
+                      <span className={styles.legendDescription}>
+                        Level 1-3: Basic understanding
+                      </span>
+                    </div>
+                    <div className={styles.legendItem}>
+                      <span
+                        className={`${styles.legendDot} ${styles.skillLevelIntermediate}`}
+                      ></span>
+                      <span className={styles.legendLabel}>Intermediate</span>
+                      <span className={styles.legendDescription}>
+                        Level 4-7: Solid experience
+                      </span>
+                    </div>
+                    <div className={styles.legendItem}>
+                      <span
+                        className={`${styles.legendDot} ${styles.skillLevelAdvanced}`}
+                      ></span>
+                      <span className={styles.legendLabel}>Advanced</span>
+                      <span className={styles.legendDescription}>
+                        Level 8-10: Expert level
+                      </span>
+                    </div>
                   </div>
-                );
-              }
-
-              if (title === "Tech Interests" || title === "Other Interests") {
-                return (
-                  <div key={index} className={styles.skillTag}>
-                    <Heart size={14} className={styles.skillIcon} />
-                    <span className={styles.skillName}>{item}</span>
-                  </div>
-                );
-              }
-
-              return (
-                <div key={index} className={styles.skillTag}>
-                  <span className={styles.skillName}>{item}</span>
                 </div>
-              );
-            })}
-          </div>
+              )}
+          </>
         ) : (
           <div className={styles.emptyState}>
             <span>{emptyText}</span>
@@ -329,7 +419,6 @@ export default function ProfilePage() {
       <div className="card enhanced">
         <div className={styles.sectionHeader}>
           <div className={styles.sectionTitleContainer}>
-            {/* ✅ Icon entfernt */}
             <h3 className={styles.sectionTitle}>Coding Preferences</h3>
           </div>
           <button
@@ -418,7 +507,6 @@ export default function ProfilePage() {
       <div className="card enhanced">
         <div className={styles.sectionHeader}>
           <div className={styles.sectionTitleContainer}>
-            {/* ✅ Icon entfernt */}
             <h3 className={styles.sectionTitle}>Gaming Preferences</h3>
           </div>
           <button
@@ -554,7 +642,6 @@ export default function ProfilePage() {
           </p>
         </div>
 
-        {/* ✅ Profile Actions Card mit Edit Button und Status */}
         <div className={`card enhanced ${styles.profileActionsCard}`}>
           <div className={styles.profileActionsContainer}>
             <button
@@ -570,7 +657,6 @@ export default function ProfilePage() {
                 const profileStats = calculateProfileCompletion(profileData);
                 return (
                   <>
-                    {/* Profile Completion */}
                     <div className={styles.completionSection}>
                       <div className={styles.completionHeader}>
                         <Target size={16} />
@@ -589,7 +675,6 @@ export default function ProfilePage() {
                       </div>
                     </div>
 
-                    {/* Matching Status */}
                     <div className={styles.matchingSection}>
                       {profileStats.isMatchable ? (
                         <div className={styles.matchingEnabled}>

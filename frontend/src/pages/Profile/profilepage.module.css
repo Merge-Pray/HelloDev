@@ -16,13 +16,12 @@
 
 .handle {
   display: block;
-  font-size: 14px;
-  color: rgba(255, 255, 255, 0.8);
+  font-size: 0.85rem;
+  color: var(--color-text-secondary);
   margin-bottom: 12px;
   font-weight: 500;
 }
 
-/* ✅ Avatar Styling */
 .avatar {
   position: relative;
   margin: 0 auto 20px auto;
@@ -64,7 +63,6 @@
   font-size: 18px;
 }
 
-/* ✅ Profile Actions Card */
 .profileActionsCard {
   margin-bottom: 20px;
   background: linear-gradient(
@@ -75,18 +73,16 @@
   border: 2px solid var(--color-primary);
 }
 
-/* ✅ Profile Actions Container - alle Elemente mittig */
 .profileActionsContainer {
   display: flex;
-  flex-direction: column; /* ✅ Vertikal statt horizontal */
-  align-items: center; /* ✅ Horizontal zentriert */
-  justify-content: center; /* ✅ Vertikal zentriert */
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
   gap: 20px;
   width: 100%;
-  text-align: center; /* ✅ Text zentriert */
+  text-align: center;
 }
 
-/* ✅ Edit Button mittig */
 .editProfileBtn {
   min-width: 200px;
   padding: 12px 24px;
@@ -94,7 +90,7 @@
   font-weight: 600;
   border-radius: 12px;
   transition: all 0.3s ease;
-  align-self: center; /* ✅ Selbst zentriert */
+  align-self: center;
 }
 
 .editProfileBtn:hover {
@@ -102,17 +98,15 @@
   box-shadow: 0 8px 25px rgba(var(--color-primary-rgb), 0.3);
 }
 
-/* ✅ Profile Status Container - schmaler und gleiche Breite */
 .profileStatusContainer {
   display: flex;
   flex-direction: column;
   gap: 16px;
   width: 100%;
-  max-width: 400px; /* ✅ Schmaler gemacht */
+  max-width: 400px;
   align-items: center;
 }
 
-/* ✅ Completion Section - feste Breite */
 .completionSection {
   display: flex;
   flex-direction: column;
@@ -122,11 +116,10 @@
   border: 2px solid var(--color-input-border);
   border-radius: 12px;
   transition: all 0.3s ease;
-  width: 100%; /* ✅ Volle Breite des Containers */
+  width: 100%;
   text-align: center;
 }
 
-/* ✅ Matching Section - gleiche Breite */
 .matchingEnabled,
 .matchingDisabled {
   display: flex;
@@ -135,12 +128,11 @@
   gap: 12px;
   padding: 16px 20px;
   border-radius: 12px;
-  width: 100%; /* ✅ Volle Breite des Containers */
+  width: 100%;
   transition: all 0.3s ease;
   text-align: center;
 }
 
-/* ✅ Profile Status Container rechts */
 .profileStatusContainer {
   display: flex;
   flex-direction: column;
@@ -150,7 +142,6 @@
   min-width: 300px;
 }
 
-/* ✅ Completion Section */
 .completionSection {
   display: flex;
   flex-direction: column;
@@ -171,7 +162,7 @@
 .completionHeader {
   display: flex;
   align-items: center;
-  justify-content: center; /* ✅ Header zentriert */
+  justify-content: center;
   gap: 8px;
   font-weight: 600;
   color: var(--color-text);
@@ -231,7 +222,6 @@
   color: var(--color-text-secondary);
 }
 
-/* ✅ Matching Section */
 .matchingSection {
   display: flex;
   justify-content: flex-start;
@@ -316,7 +306,6 @@
   margin-top: 20px;
 }
 
-/* ✅ Stats Section */
 .statsSection {
   grid-column: 1 / -1;
   background: var(--color-bg-secondary);
@@ -366,7 +355,6 @@
   font-weight: 500;
 }
 
-/* ✅ Add More Section */
 .addMoreSection {
   grid-column: 1 / -1;
   background: var(--color-bg-secondary);
@@ -421,7 +409,6 @@
   max-width: 300px;
 }
 
-/* ✅ Section Header Styles */
 .sectionHeader {
   display: flex;
   justify-content: space-between;
@@ -461,9 +448,8 @@
   box-shadow: 0 4px 12px rgba(var(--color-primary-rgb), 0.2);
 }
 
-/* ✅ About Me Section */
 .aboutSection {
-  grid-column: 1 / -1; /* ✅ Über die ganze Seite */
+  grid-column: 1 / -1;
   margin-bottom: 20px;
 }
 
@@ -488,7 +474,6 @@
   border-radius: 12px;
 }
 
-/* ✅ Info Grid für Personal Info und Gaming */
 .infoGrid {
   display: flex;
   flex-direction: column;
@@ -518,7 +503,6 @@
   flex-shrink: 0;
 }
 
-/* ✅ Skills Grid */
 .skillsGrid {
   display: flex;
   flex-wrap: wrap;
@@ -556,12 +540,10 @@
   white-space: nowrap;
 }
 
-/* ✅ Hover effects */
 .skillTag:hover .skillIcon {
   transform: scale(1.1);
 }
 
-/* ✅ Experience Badge */
 .experienceBadge {
   margin-top: 16px;
   display: flex;
@@ -611,7 +593,6 @@
   font-weight: 600;
 }
 
-/* ✅ Preferences Grid */
 .preferencesGrid {
   display: grid;
   grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
@@ -657,7 +638,6 @@
   font-weight: 600;
 }
 
-/* ✅ Responsive Design für Preferences und Experience */
 @media (max-width: 768px) {
   .preferencesGrid {
     grid-template-columns: 1fr;
@@ -678,7 +658,6 @@
   }
 }
 
-/* ✅ Dark Mode für Experience und Preferences */
 [data-theme="dark"] .prefItem {
   background: var(--color-bg-tertiary);
   border-color: var(--color-border);
@@ -701,7 +680,219 @@
   box-shadow: 0 4px 15px rgba(139, 92, 246, 0.2);
 }
 
-/* ✅ Hover effects für Preferences und Experience */
 .prefItem:hover .prefIcon {
   transform: scale(1.1);
+}
+
+.programmingLanguageTag {
+  position: relative;
+  background: linear-gradient(
+    135deg,
+    rgba(var(--color-primary-rgb), 0.1),
+    rgba(var(--color-primary-rgb), 0.05)
+  );
+  border: 2px solid rgba(var(--color-primary-rgb), 0.2);
+  padding: 10px 14px;
+  min-height: 42px;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.programmingLanguageTag:hover {
+  border-color: var(--color-primary);
+  background: linear-gradient(
+    135deg,
+    rgba(var(--color-primary-rgb), 0.15),
+    rgba(var(--color-primary-rgb), 0.08)
+  );
+  transform: translateY(-2px);
+  box-shadow: 0 4px 12px rgba(var(--color-primary-rgb), 0.2);
+}
+
+.programmingLanguageTag .skillName {
+  flex: 1;
+  font-weight: 600;
+}
+
+.skillLevel {
+  padding: 3px;
+  border-radius: 50%;
+  border: 1px solid rgba(255, 255, 255, 0.3);
+  transition: all 0.3s ease;
+  flex-shrink: 0;
+  color: white;
+}
+
+.skillLevelBeginner {
+  background: linear-gradient(135deg, #ef4444, #dc2626);
+  box-shadow: 0 2px 4px rgba(239, 68, 68, 0.3);
+}
+
+.skillLevelIntermediate {
+  background: linear-gradient(135deg, #eab308, #ca8a04);
+  box-shadow: 0 2px 4px rgba(234, 179, 8, 0.3);
+}
+
+.skillLevelAdvanced {
+  background: linear-gradient(135deg, #22c55e, #16a34a);
+  box-shadow: 0 2px 4px rgba(34, 197, 94, 0.3);
+}
+
+.programmingLanguageTag:hover .skillLevel {
+  transform: scale(1.02);
+  box-shadow: 0 3px 8px rgba(0, 0, 0, 0.3);
+  border-color: rgba(255, 255, 255, 0.5);
+}
+
+.skillLegend {
+  margin-top: 16px;
+  padding: 12px;
+  background: var(--color-bg-secondary);
+  border: 2px solid var(--color-input-border);
+  border-radius: 10px;
+}
+
+.legendTitle {
+  font-size: 13px;
+  font-weight: 600;
+  color: var(--color-text);
+  margin-bottom: 10px;
+  display: flex;
+  align-items: center;
+  gap: 6px;
+}
+
+.legendTitle::before {
+  content: "📊";
+  font-size: 14px;
+}
+
+.legendItems {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+
+.legendItem {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 4px 0;
+}
+
+.legendDot {
+  width: 10px;
+  height: 10px;
+  border-radius: 50%;
+  flex-shrink: 0;
+}
+
+.legendLabel {
+  font-weight: 600;
+  color: var(--color-text);
+  min-width: 70px;
+  font-size: 12px;
+}
+
+.legendDescription {
+  font-size: 11px;
+  color: var(--color-text-secondary);
+  font-style: italic;
+}
+
+.legendDot.skillLevelBeginner {
+  background: linear-gradient(135deg, #ef4444, #dc2626);
+  box-shadow: 0 1px 2px rgba(239, 68, 68, 0.3);
+}
+
+.legendDot.skillLevelIntermediate {
+  background: linear-gradient(135deg, #eab308, #ca8a04);
+  box-shadow: 0 1px 2px rgba(234, 179, 8, 0.3);
+}
+
+.legendDot.skillLevelAdvanced {
+  background: linear-gradient(135deg, #22c55e, #16a34a);
+  box-shadow: 0 1px 2px rgba(34, 197, 94, 0.3);
+}
+
+@media (max-width: 768px) {
+  .programmingLanguageTag {
+    padding: 8px 12px;
+    min-height: 38px;
+    flex-direction: row;
+    align-items: center;
+    gap: 6px;
+  }
+
+  .legendItems {
+    gap: 4px;
+  }
+
+  .legendItem {
+    padding: 2px 0;
+  }
+
+  .legendLabel {
+    min-width: 60px;
+    font-size: 11px;
+  }
+
+  .legendDescription {
+    font-size: 10px;
+  }
+
+  .legendDot {
+    width: 8px;
+    height: 8px;
+  }
+}
+
+/* ✅ Dark Mode - angepasst für kleinere Elemente */
+[data-theme="dark"] .programmingLanguageTag {
+  background: linear-gradient(
+    135deg,
+    rgba(var(--color-primary-rgb), 0.2),
+    rgba(var(--color-primary-rgb), 0.1)
+  );
+  border-color: rgba(var(--color-primary-rgb), 0.4);
+}
+
+[data-theme="dark"] .skillLegend {
+  background: var(--color-bg-tertiary);
+  border-color: var(--color-border);
+}
+
+[data-theme="dark"] .skillLevelBeginner {
+  box-shadow: 0 2px 4px rgba(239, 68, 68, 0.4);
+}
+
+[data-theme="dark"] .skillLevelIntermediate {
+  box-shadow: 0 2px 4px rgba(234, 179, 8, 0.4);
+}
+
+[data-theme="dark"] .skillLevelAdvanced {
+  box-shadow: 0 2px 4px rgba(34, 197, 94, 0.4);
+}
+
+[data-theme="dark"] .legendDot.skillLevelBeginner {
+  box-shadow: 0 1px 2px rgba(239, 68, 68, 0.4);
+}
+
+[data-theme="dark"] .legendDot.skillLevelIntermediate {
+  box-shadow: 0 1px 2px rgba(234, 179, 8, 0.4);
+}
+
+[data-theme="dark"] .legendDot.skillLevelAdvanced {
+  box-shadow: 0 1px 2px rgba(34, 197, 94, 0.4);
+}
+
+.legendItem:hover .legendDot {
+  transform: scale(1.1);
+  transition: transform 0.2s ease;
+}
+
+.legendItem:hover .legendLabel {
+  color: var(--color-primary);
+  transition: color 0.2s ease;
 }
