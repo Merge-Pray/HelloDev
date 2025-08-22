@@ -688,7 +688,12 @@ const EditProfilePage = () => {
   if (isLoading) {
     return (
       <div className={`${styles.page} ${styles.loading}`}>
-        <div className={styles.loadingSpinner}>Loading profile data...</div>
+        <div className="card enhanced">
+          <div style={{ textAlign: "center", padding: "40px" }}>
+            <div className="loading-spinner"></div>
+            <p>Loading profile data...</p>
+          </div>
+        </div>
       </div>
     );
   }
@@ -870,15 +875,24 @@ const EditProfilePage = () => {
               </button>
               <button
                 type="submit"
-                className={`${styles.btn} ${styles.btnPrimary}`}
+                className={`${styles.btn} ${styles.btnPrimary} ${
+                  updateProfile.isLoading ? styles.loading : ""
+                }`}
                 disabled={updateProfile.isLoading || !hasUnsavedChanges}
               >
-                <Save size={16} />
-                {updateProfile.isLoading
-                  ? "Saving All Changes..."
-                  : hasUnsavedChanges
-                  ? "Save All Changes"
-                  : "No Changes to Save"}
+                {updateProfile.isLoading ? (
+                  <>
+                    <div className="loading-spinner-small"></div>
+                    Saving...
+                  </>
+                ) : hasUnsavedChanges ? (
+                  <>
+                    <Save size={16} />
+                    Save Changes
+                  </>
+                ) : (
+                  "No Changes to Save"
+                )}
               </button>
             </div>
           </form>

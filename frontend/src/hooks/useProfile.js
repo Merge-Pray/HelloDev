@@ -1,6 +1,7 @@
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { API_URL } from "../lib/config";
 import { handleAuthErrorAndRetry, isAuthError } from "../utils/tokenRefresh";
+import useUserStore from "./userstore";
 
 export const useProfile = () => {
   return useQuery({
@@ -14,7 +15,6 @@ export const useProfile = () => {
 
       let response = await makeRequest();
 
-      // Handle auth errors with token refresh
       if (isAuthError(response)) {
         response = await handleAuthErrorAndRetry(makeRequest);
       }
@@ -50,7 +50,6 @@ export const useUpdateProfile = () => {
 
       let response = await makeRequest();
 
-      // Handle auth errors with token refresh
       if (isAuthError(response)) {
         response = await handleAuthErrorAndRetry(makeRequest);
       }
@@ -64,6 +63,16 @@ export const useUpdateProfile = () => {
     },
     onSuccess: (data) => {
       queryClient.setQueryData(["user-profile"], data.user);
+
+      const { setCurrentUser } = useUserStore.getState();
+      setCurrentUser({
+        id: data.user._id,
+        username: data.user.username,
+        nickname: data.user.nickname,
+        email: data.user.email,
+        avatar: data.user.avatar,
+        isMatchable: data.user.isMatchable,
+      });
     },
     onError: (error) => {
       console.error("Profile update failed:", error);
@@ -89,7 +98,6 @@ export const usePrefetchProfile = () => {
 
         let response = await makeRequest();
 
-        // Handle auth errors with token refresh
         if (isAuthError(response)) {
           response = await handleAuthErrorAndRetry(makeRequest);
         }
