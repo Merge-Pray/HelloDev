@@ -20,7 +20,7 @@ export default function PostActions({
     if (!post?.likes || !currentUser?._id) return false;
     return post.likes.some((like) => {
       const likeUserId = like.user?._id || like.user;
-      return likeUserId === currentUser._id;
+      return likeUserId?.toString() === currentUser._id?.toString();
     });
   };
 
@@ -109,7 +109,7 @@ export default function PostActions({
     }
   };
 
-  const isOwnPost = post?.author?._id === currentUser?._id;
+  const isOwnPost = post?.author?._id?.toString() === currentUser?._id?.toString();
   const likeCount = post?.likeCount || post?.likes?.length || 0;
   const commentCount = post?.commentCount || post?.comments?.length || 0;
   const repostCount = post?.repostCount || 0;

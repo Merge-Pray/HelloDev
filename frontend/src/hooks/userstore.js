@@ -22,7 +22,7 @@ const useUserStore = create(
       setCurrentUser: (user) =>
         set({
           currentUser: {
-            _id: user.id || user._id,
+            _id: user._id,
             username: user.username,
             nickname: user.nickname,
           },

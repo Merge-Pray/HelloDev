@@ -73,7 +73,7 @@ export const updateUserProfile = async (req, res, next) => {
       password,
       currentPassword,
     } = req.body;
-    console.log(nickname);
+
     const updateData = {};
 
     if (username !== undefined) {
@@ -294,6 +294,7 @@ export const verifyLogin = async (req, res, next) => {
       user: {
         id: existingUser._id,
         username: existingUser.username,
+        nickname: existingUser.nickname,
         email: existingUser.email,
         isMatchable: existingUser.isMatchable,
         avatar: existingUser.avatar,

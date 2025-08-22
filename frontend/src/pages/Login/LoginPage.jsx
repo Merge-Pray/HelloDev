@@ -49,7 +49,11 @@ export default function LoginPage() {
       const data = await res.json();
       if (!res.ok) throw new Error(data.message || "Login failed");
 
-      setCurrentUser(data.user);
+      setCurrentUser({
+        _id: data.user.id,
+        username: data.user.username,
+        nickname: data.user.nickname,
+      });
       navigate("/home");
     } catch (err) {
       console.error("Login error:", err);

@@ -66,17 +66,48 @@ export const useUpdateProfile = () => {
 
       const { setCurrentUser } = useUserStore.getState();
       setCurrentUser({
-        id: data.user._id,
+        _id: data.user.id,
         username: data.user.username,
         nickname: data.user.nickname,
-        email: data.user.email,
-        avatar: data.user.avatar,
-        isMatchable: data.user.isMatchable,
       });
     },
     onError: (error) => {
       console.error("Profile update failed:", error);
     },
+  });
+};
+
+/**
+ * Hook to fetch another user's profile data
+ * @param {string} userId - The ID of the user whose profile to fetch
+ */
+export const useOtherUserProfile = (userId) => {
+  return useQuery({
+    queryKey: ["user-profile", userId],
+    queryFn: async () => {
+      const makeRequest = async () => {
+        return await fetch(`${API_URL}/api/user/profile/${userId}`, {
+          credentials: "include",
+        });
+      };
+
+      let response = await makeRequest();
+
+      if (isAuthError(response)) {
+        response = await handleAuthErrorAndRetry(makeRequest);
+      }
+
+      if (!response.ok) {
+        throw new Error(`Failed to fetch user profile: ${response.status}`);
+      }
+
+      const data = await response.json();
+      return data.user;
+    },
+    staleTime: 2 * 60 * 1000,  // Fresh for 2 minutes (shorter than own profile)
+    cacheTime: 5 * 60 * 1000,  // Keep in memory for 5 minutes
+    retry: 2,
+    enabled: !!userId, // Only run if userId is provided
   });
 };
 
