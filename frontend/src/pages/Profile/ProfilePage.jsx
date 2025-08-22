@@ -539,13 +539,6 @@ export default function ProfilePage() {
     <div className="page">
       <div className={styles.profileContainer}>
         <div className={`card enhanced ${styles.profileHeader}`}>
-          <div className={styles.headerButtons}>
-            <DarkMode />
-            <button className={`btn btn-secondary ${styles.settingsBtn}`}>
-              <Settings size={20} />
-            </button>
-          </div>
-
           <div className={styles.avatar}>
             <User size={32} />
           </div>
@@ -553,6 +546,9 @@ export default function ProfilePage() {
           <h1 className={`title ${styles.profileName}`}>
             {currentUser?.nickname || currentUser?.username || "Your Name"}
           </h1>
+          <span className={styles.handle}>
+            @{currentUser?.username}.HelloDev.social
+          </span>
 
           <p className={`subtitle ${styles.profileSubtitle}`}>
             {{
