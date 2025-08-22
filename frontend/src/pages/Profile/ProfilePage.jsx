@@ -31,7 +31,7 @@ import { API_URL } from "../../lib/config";
 import { calculateProfileCompletion } from "../../utils/profileCompletion";
 
 export default function ProfilePage() {
-  const currentUser = useUserStore((state) => state.currentUser); // Auth only
+  const currentUser = useUserStore((state) => state.currentUser);
   const {
     data: profileData,
     isLoading,
