@@ -203,25 +203,47 @@ export default function ProfilePage() {
     sectionKey,
     isBasic = false
   ) => {
-    if (!hasData(data)) {
-      return (
-        <div className={`card ${isBasic ? "basic" : "enhanced"}`}>
-          <div className={styles.sectionHeader}>
-            <div className={styles.sectionTitleContainer}>
-              {icon}
-              <h3 className={styles.sectionTitle}>{title}</h3>
-            </div>
-          </div>
-          <p className={styles.emptyState}>{emptyText}</p>
-        </div>
-      );
-    }
+    if (!hasData(data)) return null;
+
+    const getSectionHeaderIcon = () => {
+      // if (title === "Programming Languages") return <Code size={20} />;
+      // if (title === "Tech Stack & Tools") return <Wrench size={20} />;
+      // if (title === "Tech Interests") return <Heart size={20} />;
+      // if (title === "Other Interests") return <Heart size={20} />;
+      return null;
+    };
+
+    const getSkillLevelInfo = (numericLevel) => {
+      if (!numericLevel || numericLevel < 1 || numericLevel > 10) {
+        return null;
+      }
+
+      if (numericLevel >= 1 && numericLevel <= 3) {
+        return {
+          className: "skillLevelBeginner",
+        };
+      } else if (numericLevel >= 4 && numericLevel <= 7) {
+        return {
+          className: "skillLevelIntermediate",
+        };
+      } else if (numericLevel >= 8 && numericLevel <= 10) {
+        return {
+          className: "skillLevelAdvanced",
+        };
+      }
+
+      return null;
+    };
 
     return (
-      <div className={`card ${isBasic ? "basic" : "enhanced"}`}>
+      <div className="card enhanced">
         <div className={styles.sectionHeader}>
           <div className={styles.sectionTitleContainer}>
-            {icon}
+            {getSectionHeaderIcon() && (
+              <span className={styles.sectionIcon}>
+                {getSectionHeaderIcon()}
+              </span>
+            )}
             <h3 className={styles.sectionTitle}>{title}</h3>
           </div>
           <button
@@ -231,54 +253,118 @@ export default function ProfilePage() {
             <Edit3 size={16} />
           </button>
         </div>
-        <div className={styles.skillsGrid}>
-          {Array.isArray(data)
-            ? data.map((item, index) => {
-                if (
-                  sectionKey === "languages" &&
-                  Array.isArray(item) &&
-                  item.length === 2
-                ) {
+
+        {hasData(data) ? (
+          <>
+            <div className={styles.skillsGrid}>
+              {data.map((item, index) => {
+                if (title === "Programming Languages") {
+                  let skillName = item;
+                  let numericLevel = null;
+
+                  if (Array.isArray(item)) {
+                    skillName = item[0];
+                    numericLevel = item[1];
+                  } else if (typeof item === "object" && item.name) {
+                    skillName = item.name;
+                    numericLevel = item.level;
+                  }
+
+                  const skillInfo = getSkillLevelInfo(numericLevel);
+
                   return (
-                    <span
-                      key={`${item[0]}-${index}`}
-                      className={`${styles.skillTag} ${styles.programmingLanguageTag}`}
+                    <div
+                      key={index}
+                      className={`${styles.skillTag} ${
+                        skillInfo ? styles.programmingLanguageTag : ""
+                      }`}
                     >
                       <Code size={14} className={styles.skillIcon} />
-                      <span className={styles.skillName}>{item[0]}</span>
-                      <span className={styles.skillLevel}>({item[1]}/10)</span>
-                    </span>
+                      <span className={styles.skillName}>{skillName}</span>
+                      {skillInfo && (
+                        <span
+                          className={`${styles.skillLevel} ${
+                            styles[skillInfo.className]
+                          }`}
+                        >
+                          {skillInfo.level}
+                        </span>
+                      )}
+                    </div>
                   );
                 }
 
-                if (sectionKey === "languages" && typeof item === "string") {
+                if (title === "Tech Stack & Tools") {
                   return (
-                    <span
-                      key={`${item}-${index}`}
-                      className={`${styles.skillTag} ${styles.programmingLanguageTag}`}
-                    >
-                      <Code size={14} className={styles.skillIcon} />
+                    <div key={index} className={styles.skillTag}>
+                      <Wrench size={14} className={styles.skillIcon} />
                       <span className={styles.skillName}>{item}</span>
-                      <span className={styles.skillLevel}>(5/10)</span>
-                    </span>
+                    </div>
+                  );
+                }
+
+                if (title === "Tech Interests" || title === "Other Interests") {
+                  return (
+                    <div key={index} className={styles.skillTag}>
+                      <Heart size={14} className={styles.skillIcon} />
+                      <span className={styles.skillName}>{item}</span>
+                    </div>
                   );
                 }
 
                 return (
-                  <span key={`${item}-${index}`} className={styles.skillTag}>
-                    {item}
-                  </span>
+                  <div key={index} className={styles.skillTag}>
+                    <span className={styles.skillName}>{item}</span>
+                  </div>
                 );
-              })
-            : data.split(",").map((item, index) => (
-                <span
-                  key={`${item.trim()}-${index}`}
-                  className={styles.skillTag}
-                >
-                  {item.trim()}
-                </span>
-              ))}
-        </div>
+              })}
+            </div>
+
+            {title === "Programming Languages" &&
+              data.some((item) => {
+                if (Array.isArray(item)) return item[1] != null;
+                if (typeof item === "object" && item.level) return true;
+                return false;
+              }) && (
+                <div className={styles.skillLegend}>
+                  <div className={styles.legendTitle}>Skill Levels:</div>
+                  <div className={styles.legendItems}>
+                    <div className={styles.legendItem}>
+                      <span
+                        className={`${styles.legendDot} ${styles.skillLevelBeginner}`}
+                      ></span>
+                      <span className={styles.legendLabel}>Beginner</span>
+                      <span className={styles.legendDescription}>
+                        Level 1-3: Basic understanding
+                      </span>
+                    </div>
+                    <div className={styles.legendItem}>
+                      <span
+                        className={`${styles.legendDot} ${styles.skillLevelIntermediate}`}
+                      ></span>
+                      <span className={styles.legendLabel}>Intermediate</span>
+                      <span className={styles.legendDescription}>
+                        Level 4-7: Solid experience
+                      </span>
+                    </div>
+                    <div className={styles.legendItem}>
+                      <span
+                        className={`${styles.legendDot} ${styles.skillLevelAdvanced}`}
+                      ></span>
+                      <span className={styles.legendLabel}>Advanced</span>
+                      <span className={styles.legendDescription}>
+                        Level 8-10: Expert level
+                      </span>
+                    </div>
+                  </div>
+                </div>
+              )}
+          </>
+        ) : (
+          <div className={styles.emptyState}>
+            <span>{emptyText}</span>
+          </div>
+        )}
       </div>
     );
   };
@@ -305,7 +391,6 @@ export default function ProfilePage() {
       <div className="card enhanced">
         <div className={styles.sectionHeader}>
           <div className={styles.sectionTitleContainer}>
-            <Briefcase size={20} className={styles.sectionIcon} />
             <h3 className={styles.sectionTitle}>Experience Level</h3>
           </div>
           <button
@@ -334,7 +419,6 @@ export default function ProfilePage() {
       <div className="card enhanced">
         <div className={styles.sectionHeader}>
           <div className={styles.sectionTitleContainer}>
-            <Settings size={20} className={styles.sectionIcon} />
             <h3 className={styles.sectionTitle}>Coding Preferences</h3>
           </div>
           <button
@@ -462,8 +546,8 @@ export default function ProfilePage() {
         icon: <Heart size={16} />,
       },
       {
-        label: "Profile Complete",
-        value: `${profileStats.totalCompletion}%`,
+        label: "Total Fields",
+        value: `${profileStats.completedFieldsCount}/${profileStats.totalFieldsCount}`,
         icon: <Target size={16} />,
       },
     ];
@@ -472,8 +556,7 @@ export default function ProfilePage() {
       <div className={`card enhanced ${styles.statsSection}`}>
         <div className={styles.sectionHeader}>
           <div className={styles.sectionTitleContainer}>
-            <Award size={20} className={styles.sectionIcon} />
-            <h3 className={styles.sectionTitle}>Profile Stats</h3>
+            <h3 className={styles.sectionTitle}>Profile Statistics</h3>
           </div>
         </div>
         <div className={styles.statsGrid}>
@@ -484,26 +567,6 @@ export default function ProfilePage() {
               <div className={styles.statLabel}>{stat.label}</div>
             </div>
           ))}
-        </div>
-        <div className={styles.matchingStatus}>
-          {profileStats.isMatchable ? (
-            <span className={styles.matchingEnabled}>
-              ✅ You are able to match! (
-              {profileStats.completedRequiredFieldsCount}/
-              {profileStats.totalRequiredFieldsCount} required fields)
-            </span>
-          ) : (
-            <span className={styles.matchingDisabled}>
-              ❌ {profileStats.missingRequiredFields} required fields missing to
-              match
-            </span>
-          )}
-        </div>
-        <div className={styles.profileProgress}>
-          <small>
-            {profileStats.completedFieldsCount} of{" "}
-            {profileStats.totalFieldsCount} total profile fields completed
-          </small>
         </div>
       </div>
     );
@@ -539,20 +602,33 @@ export default function ProfilePage() {
     <div className="page">
       <div className={styles.profileContainer}>
         <div className={`card enhanced ${styles.profileHeader}`}>
-          <div className={styles.headerButtons}>
-            <DarkMode />
-            <button className={`btn btn-secondary ${styles.settingsBtn}`}>
-              <Settings size={20} />
-            </button>
-          </div>
-
           <div className={styles.avatar}>
-            <User size={32} />
+            {profileData?.avatar || currentUser?.avatar ? (
+              <img
+                src={profileData?.avatar || currentUser?.avatar}
+                alt={`${
+                  currentUser?.nickname || currentUser?.username
+                }'s avatar`}
+                className={styles.avatarImage}
+                onError={(e) => {
+                  e.target.src = "/avatars/default.png";
+                }}
+              />
+            ) : (
+              <img
+                src="/avatars/default.png"
+                alt="Default avatar"
+                className={styles.avatarImage}
+              />
+            )}
           </div>
 
           <h1 className={`title ${styles.profileName}`}>
             {currentUser?.nickname || currentUser?.username || "Your Name"}
           </h1>
+          <span className={styles.handle}>
+            @{currentUser?.username}.HelloDev.social
+          </span>
 
           <p className={`subtitle ${styles.profileSubtitle}`}>
             {{
@@ -564,14 +640,76 @@ export default function ProfilePage() {
               profileData.status ||
               "Developer"}
           </p>
+        </div>
 
-          <button
-            className={`btn btn-primary ${styles.editProfileBtn}`}
-            onClick={handleEditProfile}
-          >
-            <Edit3 size={16} />
-            Edit Basic Profile
-          </button>
+        <div className={`card enhanced ${styles.profileActionsCard}`}>
+          <div className={styles.profileActionsContainer}>
+            <button
+              className={`btn btn-primary ${styles.editProfileBtn}`}
+              onClick={handleEditProfile}
+            >
+              <Edit3 size={16} />
+              Edit Basic Profile
+            </button>
+
+            <div className={styles.profileStatusContainer}>
+              {(() => {
+                const profileStats = calculateProfileCompletion(profileData);
+                return (
+                  <>
+                    <div className={styles.completionSection}>
+                      <div className={styles.completionHeader}>
+                        <Target size={16} />
+                        <span>Profile Completion</span>
+                      </div>
+                      <div className={styles.progressBar}>
+                        <div
+                          className={styles.progressFill}
+                          style={{ width: `${profileStats.totalCompletion}%` }}
+                        />
+                      </div>
+                      <div className={styles.progressText}>
+                        {profileStats.totalCompletion}% Complete (
+                        {profileStats.completedFieldsCount}/
+                        {profileStats.totalFieldsCount} fields)
+                      </div>
+                    </div>
+
+                    <div className={styles.matchingSection}>
+                      {profileStats.isMatchable ? (
+                        <div className={styles.matchingEnabled}>
+                          <div className={styles.matchingIcon}>✅</div>
+                          <div className={styles.matchingText}>
+                            <div className={styles.matchingTitle}>
+                              Ready to Match!
+                            </div>
+                            <div className={styles.matchingSubtitle}>
+                              {profileStats.completedRequiredFieldsCount}/
+                              {profileStats.totalRequiredFieldsCount} required
+                              fields completed
+                            </div>
+                          </div>
+                        </div>
+                      ) : (
+                        <div className={styles.matchingDisabled}>
+                          <div className={styles.matchingIcon}>❌</div>
+                          <div className={styles.matchingText}>
+                            <div className={styles.matchingTitle}>
+                              Complete Profile to Match
+                            </div>
+                            <div className={styles.matchingSubtitle}>
+                              {profileStats.missingRequiredFields} more required
+                              fields needed
+                            </div>
+                          </div>
+                        </div>
+                      )}
+                    </div>
+                  </>
+                );
+              })()}
+            </div>
+          </div>
         </div>
 
         <div className={styles.profileContent}>
@@ -584,7 +722,7 @@ export default function ProfilePage() {
           {hasData(profileData.programmingLanguages) &&
             renderSkillSection(
               "Programming Languages",
-              <Code size={20} className={styles.sectionIcon} />,
+              null,
               profileData.programmingLanguages,
               "No programming languages added yet",
               "languages",
@@ -594,7 +732,7 @@ export default function ProfilePage() {
           {hasData(profileData.techStack) &&
             renderSkillSection(
               "Tech Stack & Tools",
-              <Wrench size={20} className={styles.sectionIcon} />,
+              null,
               profileData.techStack,
               "No tech stack added yet",
               "stack",
@@ -604,7 +742,7 @@ export default function ProfilePage() {
           {hasData(profileData.techArea) &&
             renderSkillSection(
               "Tech Interests",
-              <Heart size={20} className={styles.sectionIcon} />,
+              null,
               profileData.techArea,
               "No tech interests added yet",
               "interests",
@@ -618,7 +756,7 @@ export default function ProfilePage() {
           {hasData(profileData.otherInterests) &&
             renderSkillSection(
               "Other Interests",
-              <Users size={20} className={styles.sectionIcon} />,
+              null,
               profileData.otherInterests,
               "No other interests added yet",
               "other"
@@ -626,7 +764,52 @@ export default function ProfilePage() {
 
           {hasCodingPreferences() && renderCodingPreferences()}
 
-          {renderStats()}
+          {(() => {
+            const profileStats = calculateProfileCompletion(profileData);
+            const stats = [
+              {
+                label: "Languages",
+                value: profileData.programmingLanguages?.length || 0,
+                icon: <Code size={16} />,
+              },
+              {
+                label: "Tech Stack",
+                value: profileData.techStack?.length || 0,
+                icon: <Wrench size={16} />,
+              },
+              {
+                label: "Interests",
+                value: profileData.techArea?.length || 0,
+                icon: <Heart size={16} />,
+              },
+              {
+                label: "Total Fields",
+                value: `${profileStats.completedFieldsCount}/${profileStats.totalFieldsCount}`,
+                icon: <Target size={16} />,
+              },
+            ];
+
+            return (
+              <div className={`card enhanced ${styles.statsSection}`}>
+                <div className={styles.sectionHeader}>
+                  <div className={styles.sectionTitleContainer}>
+                    <h3 className={styles.sectionTitle}>Profile Statistics</h3>
+                  </div>
+                </div>
+                <div className={styles.statsGrid}>
+                  {stats.map((stat, index) => (
+                    <div key={index} className={styles.statItem}>
+                      <div className={styles.statIconContainer}>
+                        {stat.icon}
+                      </div>
+                      <div className={styles.statNumber}>{stat.value}</div>
+                      <div className={styles.statLabel}>{stat.label}</div>
+                    </div>
+                  ))}
+                </div>
+              </div>
+            );
+          })()}
 
           <div
             className={styles.addMoreSection}
