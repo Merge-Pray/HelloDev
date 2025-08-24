@@ -124,6 +124,18 @@ export default function PostCard({
         </div>
       )}
 
+      {post.imageUrl && (
+        <div className={styles.mediaContainer}>
+          <img
+            src={post.imageUrl}
+            alt="Post media"
+            className={styles.mediaImage}
+            loading="lazy"
+            decoding="async"
+          />
+        </div>
+      )}
+
       {Array.isArray(post.hashtags) && post.hashtags.length > 0 && (
         <div className={styles.hashtags}>
           {post.hashtags.map((tag) => (
