@@ -1,4 +1,5 @@
 import React, { useState, useRef, useEffect } from "react";
+import EmojiPicker from "emoji-picker-react";
 import styles from "./PostComposer.module.css";
 import {
   Image as ImageIcon,
@@ -16,7 +17,9 @@ export default function PostComposer({ onPostCreated }) {
   const [text, setText] = useState("");
   const [submitting, setSubmitting] = useState(false);
   const [visibility, setVisibility] = useState("public");
+  const [showEmojiPicker, setShowEmojiPicker] = useState(false);
   const taRef = useRef(null);
+  const emojiPickerRef = useRef(null);
   const MAX = 2000;
 
   const currentUser = useUserStore((state) => state.currentUser);
@@ -27,6 +30,22 @@ export default function PostComposer({ onPostCreated }) {
     el.style.height = "0px";
     el.style.height = el.scrollHeight + "px";
   }, [text]);
+
+  useEffect(() => {
+    const handleClickOutside = (event) => {
+      if (emojiPickerRef.current && !emojiPickerRef.current.contains(event.target)) {
+        setShowEmojiPicker(false);
+      }
+    };
+
+    if (showEmojiPicker) {
+      document.addEventListener("mousedown", handleClickOutside);
+    }
+
+    return () => {
+      document.removeEventListener("mousedown", handleClickOutside);
+    };
+  }, [showEmojiPicker]);
 
   const handleSubmit = async (e) => {
     e.preventDefault();
@@ -76,6 +95,27 @@ export default function PostComposer({ onPostCreated }) {
     } finally {
       setSubmitting(false);
     }
+  };
+
+  const handleEmojiClick = (emojiData) => {
+    const emoji = emojiData.emoji;
+    const textarea = taRef.current;
+    const cursorPosition = textarea.selectionStart;
+    const textBefore = text.substring(0, cursorPosition);
+    const textAfter = text.substring(cursorPosition);
+    const newText = textBefore + emoji + textAfter;
+    
+    setText(newText);
+    setShowEmojiPicker(false);
+    
+    setTimeout(() => {
+      textarea.focus();
+      textarea.setSelectionRange(cursorPosition + emoji.length, cursorPosition + emoji.length);
+    }, 0);
+  };
+
+  const toggleEmojiPicker = () => {
+    setShowEmojiPicker(!showEmojiPicker);
   };
 
   const remaining = MAX - text.length;
@@ -166,14 +206,32 @@ export default function PostComposer({ onPostCreated }) {
                 <ImageIcon size={18} aria-hidden="true" />
                 <span className={styles.toolLabel}>Image</span>
               </button>
-              <button
-                type="button"
-                className={styles.toolBtn}
-                disabled={submitting}
-              >
-                <Smile size={18} aria-hidden="true" />
-                <span className={styles.toolLabel}>Emoji</span>
-              </button>
+              <div className={styles.emojiContainer} ref={emojiPickerRef}>
+                <button
+                  type="button"
+                  className={`${styles.toolBtn} ${showEmojiPicker ? styles.active : ""}`}
+                  onClick={toggleEmojiPicker}
+                  disabled={submitting}
+                  aria-label="Add emoji"
+                >
+                  <Smile size={18} aria-hidden="true" />
+                  <span className={styles.toolLabel}>Emoji</span>
+                </button>
+                {showEmojiPicker && (
+                  <div className={styles.emojiPicker}>
+                    <EmojiPicker
+                      onEmojiClick={handleEmojiClick}
+                      width={300}
+                      height={400}
+                      previewConfig={{
+                        showPreview: false
+                      }}
+                      skinTonesDisabled
+                      searchDisabled={false}
+                    />
+                  </div>
+                )}
+              </div>
             </div>
 
             <div className={styles.toolsRight}>

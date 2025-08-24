@@ -126,6 +126,11 @@
   background: var(--color-bg-secondary);
   border-color: var(--color-primary);
 }
+.toolBtn.active {
+  background: var(--color-primary);
+  color: white;
+  border-color: var(--color-primary);
+}
 
 .counter {
   font-size: 12px;
@@ -152,6 +157,53 @@
   filter: brightness(1.05);
 }
 .submit:disabled { opacity: .6; cursor: not-allowed; }
+
+/* Emoji Picker Styles */
+.emojiContainer {
+  position: relative;
+}
+
+.emojiPicker {
+  position: absolute;
+  top: 100%;
+  left: 0;
+  z-index: 1000;
+  margin-top: 8px;
+  border-radius: 12px;
+  box-shadow: 0 8px 32px rgba(0, 0, 0, 0.15);
+  border: 1px solid var(--color-border);
+  overflow: hidden;
+  background: var(--color-card-bg);
+}
+
+.emojiPicker :global(.epr-main) {
+  background: var(--color-card-bg) !important;
+  border: none !important;
+}
+
+.emojiPicker :global(.epr-header) {
+  background: var(--color-card-bg) !important;
+  border-bottom: 1px solid var(--color-border) !important;
+}
+
+.emojiPicker :global(.epr-category-nav) {
+  background: var(--color-card-bg) !important;
+}
+
+.emojiPicker :global(.epr-emoji-category-label) {
+  background: var(--color-card-bg) !important;
+  color: var(--color-text) !important;
+}
+
+.emojiPicker :global(.epr-search-container input) {
+  background: var(--color-input-bg) !important;
+  border: 1px solid var(--color-input-border) !important;
+  color: var(--color-text) !important;
+}
+
+.emojiPicker :global(.epr-search-container input::placeholder) {
+  color: var(--color-text-secondary) !important;
+}
 
 /* Responsive */
 @media (max-width: 780px) {
