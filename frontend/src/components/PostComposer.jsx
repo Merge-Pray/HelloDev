@@ -260,10 +260,7 @@ export default function PostComposer({ onPostCreated }) {
                 {showGifPicker && (
                   <div className={styles.gifPicker}>
                     <GifPicker
-                      tenorApiKey={
-                        import.meta.env.VITE_TENOR_API_KEY ||
-                        "AIzaSyAyimkuYQYF_FXVALexPuGQctUWRURdCYQ"
-                      }
+                      tenorApiKey={import.meta.env.VITE_TENOR_API_KEY}
                       onGifClick={handleGifClick}
                       width={350}
                       height={400}
