@@ -1,15 +1,9 @@
 import React from 'react';
-import { TrendingUp, Clock, Zap } from 'lucide-react';
+import { TrendingUp, Clock } from 'lucide-react';
 import styles from './FeedFilters.module.css';
 
 export default function FeedFilters({ algorithm, onAlgorithmChange }) {
   const algorithms = [
-    {
-      key: 'mixed',
-      label: 'Smart',
-      icon: <Zap size={16} aria-hidden="true" />,
-      description: 'Best posts from your network'
-    },
     {
       key: 'chronological',
       label: 'Latest',

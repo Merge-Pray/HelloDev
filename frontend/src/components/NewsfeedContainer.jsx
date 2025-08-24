@@ -13,8 +13,8 @@ import styles from "./NewsfeedContainer.module.css";
 export default function NewsfeedContainer() {
   const [posts, setPosts] = useState([]);
   const [feedType, setFeedType] = useState("all");
-  const [algorithm, setAlgorithm] = useState("mixed");
-  const [friendsCount, setFriendsCount] = useState(0);
+  const [algorithm, setAlgorithm] = useState("chronological");
+  const [contactsCount, setContactsCount] = useState(0);
   const [loading, setLoading] = useState(false);
   const [page, setPage] = useState(1);
   const [hasNextPage, setHasNextPage] = useState(true);
@@ -61,7 +61,7 @@ export default function NewsfeedContainer() {
           setPosts((prev) => [...prev, ...data.posts]);
           setPage((prev) => prev + 1);
         }
-        setFriendsCount(data.friendsCount || 0);
+        setContactsCount(data.contactsCount || 0);
         setHasNextPage(data.pagination.hasNextPage);
       } else {
         setError(data.message || "Failed to fetch posts");
@@ -168,7 +168,7 @@ export default function NewsfeedContainer() {
           <FeedToggle
             feedType={feedType}
             onFeedTypeChange={handleFeedTypeChange}
-            friendsCount={friendsCount}
+            contactsCount={contactsCount}
           />         
         </div>
       )}
@@ -196,11 +196,11 @@ export default function NewsfeedContainer() {
 
       {/* Empty States */}
       {!isSearchActive &&
-        feedType === "friends" &&
+        feedType === "contacts" &&
         posts.length === 0 &&
         !loading && (
           <EmptyFriendsFeed
-            friendsCount={friendsCount}
+            friendsCount={contactsCount}
             className={styles.emptyFriendsFeed}
           />
         )}

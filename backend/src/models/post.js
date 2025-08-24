@@ -138,15 +138,6 @@ const PostSchema = new Schema(
       },
     ],
 
-    isPinned: {
-      type: Boolean,
-      default: false,
-      index: true,
-    },
-
-    pinnedUntil: {
-      type: Date,
-    },
   },
   {
     timestamps: true,
