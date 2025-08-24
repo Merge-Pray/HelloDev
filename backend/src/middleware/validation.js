@@ -46,10 +46,9 @@ const validate = (req, res, next) => {
 const postValidationRules = () => {
   return [
     body("content")
-      .notEmpty()
-      .withMessage("Post content is required.")
-      .isLength({ min: 1, max: 2000 })
-      .withMessage("Post content must be between 1 and 2000 characters."),
+      .optional()
+      .isLength({ max: 2000 })
+      .withMessage("Post content must be less than 2000 characters."),
 
     body("visibility")
       .optional()

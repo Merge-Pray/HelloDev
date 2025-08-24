@@ -59,18 +59,20 @@ export default function PostComposer({ onPostCreated }) {
     if ((!payload && !selectedGif) || submitting) return;
 
     const makeRequest = async () => {
+      const requestBody = {
+        content: payload || "",
+        visibility: visibility === "contacts" ? "contacts_only" : visibility,
+        hashtags: [],
+        imageUrl: selectedGif || null,
+      };
+
       return await fetch(`${API_URL}/api/posts`, {
         method: "POST",
         headers: {
           "Content-Type": "application/json",
         },
         credentials: "include",
-        body: JSON.stringify({
-          content: payload,
-          visibility: visibility === "contacts" ? "contacts_only" : visibility,
-          hashtags: [],
-          imageUrl: selectedGif,
-        }),
+        body: JSON.stringify(requestBody),
       });
     };
 

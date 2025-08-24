@@ -78,7 +78,7 @@ export const createPost = async (req, res, next) => {
       imageUrl,
     } = req.body;
 
-    if (!content.trim() && !imageUrl) {
+    if ((!content || !content.trim()) && !imageUrl) {
       return res.status(400).json({
         success: false,
         message: "Post must contain either text content or an image",
