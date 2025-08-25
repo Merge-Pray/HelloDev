@@ -25,9 +25,7 @@ import {
 } from "lucide-react";
 import useUserStore from "../../hooks/userstore";
 import { useProfile } from "../../hooks/useProfile";
-import DarkMode from "../../components/DarkMode";
 import styles from "./profilepage.module.css";
-import { API_URL } from "../../lib/config";
 import { calculateProfileCompletion } from "../../utils/profileCompletion";
 
 export default function ProfilePage() {
@@ -205,14 +203,6 @@ export default function ProfilePage() {
   ) => {
     if (!hasData(data)) return null;
 
-    const getSectionHeaderIcon = () => {
-      // if (title === "Programming Languages") return <Code size={20} />;
-      // if (title === "Tech Stack & Tools") return <Wrench size={20} />;
-      // if (title === "Tech Interests") return <Heart size={20} />;
-      // if (title === "Other Interests") return <Heart size={20} />;
-      return null;
-    };
-
     const getSkillLevelInfo = (numericLevel) => {
       if (!numericLevel || numericLevel < 1 || numericLevel > 10) {
         return null;
@@ -239,11 +229,6 @@ export default function ProfilePage() {
       <div className="card enhanced">
         <div className={styles.sectionHeader}>
           <div className={styles.sectionTitleContainer}>
-            {getSectionHeaderIcon() && (
-              <span className={styles.sectionIcon}>
-                {getSectionHeaderIcon()}
-              </span>
-            )}
             <h3 className={styles.sectionTitle}>{title}</h3>
           </div>
           <button
@@ -335,7 +320,7 @@ export default function ProfilePage() {
                       ></span>
                       <span className={styles.legendLabel}>Beginner</span>
                       <span className={styles.legendDescription}>
-                        Level 1-3: Basic understanding
+                        Level 1-3
                       </span>
                     </div>
                     <div className={styles.legendItem}>
@@ -344,7 +329,7 @@ export default function ProfilePage() {
                       ></span>
                       <span className={styles.legendLabel}>Intermediate</span>
                       <span className={styles.legendDescription}>
-                        Level 4-7: Solid experience
+                        Level 4-7
                       </span>
                     </div>
                     <div className={styles.legendItem}>
@@ -353,7 +338,7 @@ export default function ProfilePage() {
                       ></span>
                       <span className={styles.legendLabel}>Advanced</span>
                       <span className={styles.legendDescription}>
-                        Level 8-10: Expert level
+                        Level 8-10
                       </span>
                     </div>
                   </div>
