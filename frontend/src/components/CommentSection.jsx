@@ -1,14 +1,12 @@
 import React, { useState } from "react";
 import { formatDistanceToNow } from "date-fns";
 import useUserStore from "../hooks/userstore";
-import { useProfile } from "../hooks/useProfile";
 import { authenticatedFetch } from "../utils/authenticatedFetch";
 
 export default function CommentSection({ postId, comments, onComment }) {
   const [newComment, setNewComment] = useState("");
   const [isSubmitting, setIsSubmitting] = useState(false);
   const currentUser = useUserStore((state) => state.currentUser);
-  const { data: profile } = useProfile();
 
   const handleSubmit = async (e) => {
     e.preventDefault();
