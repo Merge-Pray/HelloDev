@@ -505,27 +505,6 @@ export default function GetProfilePage() {
   return (
     <div className="page">
       <div className={styles.profileContainer}>
-        {/* Debug Info - Entferne das später */}
-        <div
-          style={{
-            marginBottom: "10px",
-            padding: "10px",
-            background: "#f0f0f0",
-            fontSize: "12px",
-            borderRadius: "4px",
-          }}
-        >
-          <strong>Debug Info:</strong>
-          <br />
-          URL userId: {userId}
-          <br />
-          Current user ID: {currentUser?._id}
-          <br />
-          Is Contact: {isContact ? "Yes" : "No"}
-          <br />
-          Profile username: {profileData?.username}
-        </div>
-
         {/* Back Button */}
         <div style={{ marginBottom: "20px" }}>
           <button
