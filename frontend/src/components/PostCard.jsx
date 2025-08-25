@@ -1,5 +1,6 @@
 import React, { useState } from "react";
 import { formatDistanceToNow } from "date-fns";
+import { useNavigate } from "react-router";
 import PostActions from "./PostActions";
 import CommentSection from "./CommentSection";
 import RepostCard from "./RepostCard";
@@ -15,6 +16,7 @@ export default function PostCard({
 }) {
   const [showComments, setShowComments] = useState(false);
   const currentUser = useUserStore((state) => state.currentUser);
+  const navigate = useNavigate();
 
   if (!post || !post.author) {
     console.error("PostCard received invalid post data:", post);
@@ -27,9 +29,7 @@ export default function PostCard({
 
   const renderContent = (content) => {
     let processed = (content || "")
-
       .replace(/#(\w+)/g, '<span class="hashtag" data-hashtag="$1">#$1</span>')
-
       .replace(
         /@(\w+)/g,
         '<span class="mention" data-username="$1">@$1</span>'
@@ -53,6 +53,18 @@ export default function PostCard({
     } else if (t.classList?.contains("mention")) {
       const username = t.dataset.username;
       if (username) handleMentionClick(username);
+    }
+  };
+
+  const handleAuthorClick = (e) => {
+    e.preventDefault();
+    e.stopPropagation();
+
+    // Prüfen ob es das eigene Profil ist
+    if (post.author._id === currentUser?._id) {
+      navigate("/profile");
+    } else {
+      navigate(`/profile/${post.author._id}`);
     }
   };
 
@@ -80,12 +92,18 @@ export default function PostCard({
           className={styles.avatar}
           loading="lazy"
           decoding="async"
+          onClick={handleAuthorClick}
+          style={{ cursor: "pointer" }}
         />
 
         <div className={styles.authorInfo}>
           <div className={styles.nameRow}>
             {/* Anzeigename, z. B. voller Name */}
-            <span className={styles.displayName}>
+            <span
+              className={styles.displayName}
+              onClick={handleAuthorClick}
+              style={{ cursor: "pointer" }}
+            >
               {post.author?.nickname || post.author?.username}
             </span>
 
