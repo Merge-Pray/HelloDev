@@ -25,7 +25,12 @@ export const handleAuthErrorAndRetry = async (originalRequestFn) => {
 
     if (refreshResult.success) {
       if (refreshResult.user) {
-        setCurrentUser(refreshResult.user);
+        setCurrentUser({
+          _id: refreshResult.user.id,
+          username: refreshResult.user.username,
+          nickname: refreshResult.user.nickname,
+          avatar: refreshResult.user.avatar,
+        });
       }
 
       const retryResponse = await originalRequestFn();

@@ -4,8 +4,7 @@ import GifPicker from "gif-picker-react";
 import styles from "./PostComposer.module.css";
 import { FileImage, Smile, Send, Globe, Users, Lock } from "lucide-react";
 import useUserStore from "../hooks/userstore";
-import { API_URL } from "../lib/config";
-import { handleAuthErrorAndRetry, isAuthError } from "../utils/tokenRefresh";
+import { authenticatedFetch } from "../utils/authenticatedFetch";
 
 export default function PostComposer({ onPostCreated }) {
   const [text, setText] = useState("");
@@ -58,7 +57,9 @@ export default function PostComposer({ onPostCreated }) {
     const payload = text.trim();
     if ((!payload && !selectedGif) || submitting) return;
 
-    const makeRequest = async () => {
+    try {
+      setSubmitting(true);
+
       const requestBody = {
         content: payload || "",
         visibility: visibility === "contacts" ? "contacts_only" : visibility,
@@ -66,31 +67,10 @@ export default function PostComposer({ onPostCreated }) {
         imageUrl: selectedGif || null,
       };
 
-      return await fetch(`${API_URL}/api/posts`, {
+      const data = await authenticatedFetch("/api/posts", {
         method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-        },
-        credentials: "include",
         body: JSON.stringify(requestBody),
       });
-    };
-
-    try {
-      setSubmitting(true);
-
-      let response = await makeRequest();
-
-      // Handle auth errors with token refresh
-      if (isAuthError(response)) {
-        response = await handleAuthErrorAndRetry(makeRequest);
-      }
-
-      if (!response.ok) {
-        throw new Error(`HTTP error! status: ${response.status}`);
-      }
-
-      const data = await response.json();
 
       if (data.success) {
         onPostCreated?.(data.post);
@@ -111,6 +91,7 @@ export default function PostComposer({ onPostCreated }) {
     const emoji = emojiData.emoji;
     const textarea = taRef.current;
     const cursorPosition = textarea.selectionStart;
+
     const textBefore = text.substring(0, cursorPosition);
     const textAfter = text.substring(cursorPosition);
     const newText = textBefore + emoji + textAfter;
@@ -175,7 +156,6 @@ export default function PostComposer({ onPostCreated }) {
           disabled={submitting}
         />
 
-        {/* GIF Prev */}
         {selectedGif && (
           <div className={styles.gifPreview}>
             <img
@@ -194,9 +174,7 @@ export default function PostComposer({ onPostCreated }) {
           </div>
         )}
 
-        {/* Sichtbarkeit + Tools + Submit */}
         <div className={styles.toolbar}>
-          {/* Sichtbarkeit */}
           <div
             className={styles.visibilityGroup}
             role="radiogroup"
@@ -243,7 +221,6 @@ export default function PostComposer({ onPostCreated }) {
             </button>
           </div>
 
-          {/* Zeile 2: Tools + Submit */}
           <div className={styles.bottomRow}>
             <div className={styles.toolsLeft}>
               <div className={styles.gifContainer} ref={gifPickerRef}>
@@ -262,7 +239,7 @@ export default function PostComposer({ onPostCreated }) {
                 {showGifPicker && (
                   <div className={styles.gifPicker}>
                     <GifPicker
-                      // tenorApiKey={import.meta.env.VITE_TENOR_API_KEY}
+                      tenorApiKey={import.meta.env.VITE_TENOR_API_KEY}
                       onGifClick={handleGifClick}
                       width={350}
                       height={400}

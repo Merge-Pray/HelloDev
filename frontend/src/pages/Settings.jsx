@@ -10,7 +10,7 @@ import DarkMode from "../components/DarkMode";
 import styles from "./settings.module.css";
 import useUserStore from "../hooks/userstore";
 import { useNavigate } from "react-router";
-import { API_URL } from "../lib/config";
+import { authenticatedFetch } from "../utils/authenticatedFetch";
 
 const Settings = () => {
   const clearUser = useUserStore((state) => state.clearUser);
@@ -28,26 +28,14 @@ const Settings = () => {
       setIsLoggingOut(true);
       setError(null);
 
-      const response = await fetch(`${API_URL}/api/user/logout`, {
+      await authenticatedFetch("/api/user/logout", {
         method: "POST",
-        credentials: "include",
-        headers: {
-          "Content-Type": "application/json",
-        },
       });
 
-      if (response.ok || response.status === 401 || response.status === 419) {
-        clearUser();
-        navigate("/");
-      } else {
-        const errorData = await response.json().catch(() => ({}));
-        setError(errorData.message || "Failed to sign out. Please try again.");
-      }
-    } catch (error) {
-      console.error("Error during logout:", error);
-
       clearUser();
-      navigate("/");
+      navigate("/login");
+    } catch (error) {
+      setError("Logout failed. Please try again.");
     } finally {
       setIsLoggingOut(false);
       setShowLogoutConfirm(false);
@@ -58,21 +46,16 @@ const Settings = () => {
     setShowLogoutConfirm(false);
   };
 
-  const closeError = () => {
-    setError(null);
-  };
-
   return (
-    <div className={styles.settingsContainer}>
+    <div className={styles.settingsPage}>
       {error && (
-        <div className={styles.errorToast}>
-          <div className={styles.errorContent}>
+        <div className={styles.errorAlert}>
+          <div className={styles.errorHeader}>
             <AlertCircle size={20} />
-            <span>{error}</span>
+            <span>Error</span>
             <button
-              onClick={closeError}
+              onClick={() => setError(null)}
               className={styles.errorClose}
-              aria-label="Close error"
             >
               <X size={16} />
             </button>

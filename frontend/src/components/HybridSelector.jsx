@@ -1,5 +1,6 @@
 import React, { useState, useEffect } from "react";
 import { API_URL } from "../lib/config";
+import { authenticatedFetch } from "../utils/authenticatedFetch";
 import "./HybridSelector.css";
 
 function HybridSelector({
@@ -37,13 +38,9 @@ function HybridSelector({
 
   const fetchPopularOptions = async () => {
     try {
-      const response = await fetch(
-        `${API_URL}/api/suggestions/popular/${category}`,
-        {
-          credentials: "include",
-        }
+      const data = await authenticatedFetch(
+        `/api/suggestions/popular/${category}`
       );
-      const data = await response.json();
       if (data.success) {
         setPopularOptions(data.popular);
       }
@@ -56,19 +53,16 @@ function HybridSelector({
     setIsLoading(true);
 
     try {
-      const response = await fetch(
-        `${API_URL}/api/suggestions/search/${category}?q=${encodeURIComponent(
+      const data = await authenticatedFetch(
+        `/api/suggestions/search/${category}?q=${encodeURIComponent(
           searchInput
-        )}`,
-        { credentials: "include" }
+        )}`
       );
-      const data = await response.json();
       if (data.success) {
         setSearchResults(data.suggestions);
-        setSelectedSuggestionIndex(-1);
       }
     } catch (error) {
-      console.error("Search failed:", error);
+      console.error("Failed to search options:", error);
     } finally {
       setIsLoading(false);
     }

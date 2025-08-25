@@ -69,6 +69,7 @@ export const useUpdateProfile = () => {
         _id: data.user.id,
         username: data.user.username,
         nickname: data.user.nickname,
+        avatar: data.user.avatar,
       });
     },
     onError: (error) => {
@@ -77,10 +78,6 @@ export const useUpdateProfile = () => {
   });
 };
 
-/**
- * Hook to fetch another user's profile data
- * @param {string} userId - The ID of the user whose profile to fetch
- */
 export const useOtherUserProfile = (userId) => {
   return useQuery({
     queryKey: ["user-profile", userId],
@@ -104,16 +101,13 @@ export const useOtherUserProfile = (userId) => {
       const data = await response.json();
       return data.user;
     },
-    staleTime: 2 * 60 * 1000,  // Fresh for 2 minutes (shorter than own profile)
-    cacheTime: 5 * 60 * 1000,  // Keep in memory for 5 minutes
+    staleTime: 2 * 60 * 1000,
+    cacheTime: 5 * 60 * 1000,
     retry: 2,
-    enabled: !!userId, // Only run if userId is provided
+    enabled: !!userId,
   });
 };
 
-/**
- * Hook to prefetch profile data (useful for performance)
- */
 export const usePrefetchProfile = () => {
   const queryClient = useQueryClient();
 

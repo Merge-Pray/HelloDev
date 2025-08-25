@@ -611,12 +611,12 @@ export default function ProfilePage() {
                 }'s avatar`}
                 className={styles.avatarImage}
                 onError={(e) => {
-                  e.target.src = "/avatars/default.png";
+                  e.target.src = "/default-avatar.png";
                 }}
               />
             ) : (
               <img
-                src="/avatars/default.png"
+                src="/default-avatar.png"
                 alt="Default avatar"
                 className={styles.avatarImage}
               />

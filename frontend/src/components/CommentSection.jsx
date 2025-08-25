@@ -1,9 +1,8 @@
 import React, { useState } from "react";
 import { formatDistanceToNow } from "date-fns";
-import { API_URL } from "../lib/config";
 import useUserStore from "../hooks/userstore";
 import { useProfile } from "../hooks/useProfile";
-import { handleAuthErrorAndRetry, isAuthError } from "../utils/tokenRefresh";
+import { authenticatedFetch } from "../utils/authenticatedFetch";
 
 export default function CommentSection({ postId, comments, onComment }) {
   const [newComment, setNewComment] = useState("");
@@ -15,25 +14,13 @@ export default function CommentSection({ postId, comments, onComment }) {
     e.preventDefault();
     if (!newComment.trim()) return;
 
-    const makeRequest = async () => {
-      return await fetch(`${API_URL}/api/posts/${postId}/comments`, {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        credentials: "include",
-        body: JSON.stringify({ content: newComment.trim() }),
-      });
-    };
-
     setIsSubmitting(true);
     try {
-      let response = await makeRequest();
+      const data = await authenticatedFetch(`/api/posts/${postId}/comments`, {
+        method: "POST",
+        body: JSON.stringify({ content: newComment.trim() }),
+      });
 
-      // Handle auth errors with token refresh
-      if (isAuthError(response)) {
-        response = await handleAuthErrorAndRetry(makeRequest);
-      }
-
-      const data = await response.json();
       if (data.success) {
         setNewComment("");
         onComment(postId, data.comment);
@@ -104,7 +91,7 @@ export default function CommentSection({ postId, comments, onComment }) {
       {/* Add comment form */}
       <form onSubmit={handleSubmit} className="comment-form">
         <img
-          src={profile?.avatar || "/default-avatar.png"}
+          src={currentUser?.avatar || "/default-avatar.png"}
           alt="Your avatar"
           className="comment-form-avatar"
         />
