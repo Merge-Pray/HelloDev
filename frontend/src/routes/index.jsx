@@ -21,6 +21,7 @@ import ProtectedRoute from "../components/ProtectedRoute";
 import Settings from "../pages/Settings";
 import Messages from "../pages/Messages";
 import Notifications from "../pages/Notifications";
+import GetProfilePage from "../pages/Profile/GetProfilePage";
 
 export const router = createBrowserRouter([
   {
@@ -52,6 +53,14 @@ export const router = createBrowserRouter([
         element: (
           <ProtectedRoute>
             <Profilepage />
+          </ProtectedRoute>
+        ),
+      },
+      {
+        path: "profile/:userId",
+        element: (
+          <ProtectedRoute>
+            <GetProfilePage />
           </ProtectedRoute>
         ),
       },
