@@ -1,5 +1,4 @@
 import React, { useState, useEffect } from "react";
-import { handleAuthErrorAndRetry, isAuthError } from "../utils/tokenRefresh";
 import FeedToggle from "./FeedToggle";
 import PostComposer from "./PostComposer";
 import FeedFilters from "./FeedFilters";
@@ -7,7 +6,7 @@ import NewsfeedList from "./NewsfeedList";
 import EmptyFriendsFeed from "./EmptyFriendsFeed";
 import SearchBar from "./SearchBar";
 import useUserStore from "../hooks/userstore";
-import { API_URL } from "../lib/config";
+import { authenticatedFetch } from "../utils/authenticatedFetch";
 import styles from "./NewsfeedContainer.module.css";
 
 export default function NewsfeedContainer() {
@@ -29,30 +28,20 @@ export default function NewsfeedContainer() {
     setLoading(true);
     setError(null);
 
-    const makeRequest = async () => {
+    try {
       const currentPage = resetPosts ? 1 : page;
 
-      let url;
+      let endpoint;
       if (isSearchActive && searchQuery.trim()) {
-        url = `${API_URL}/api/posts/search?q=${encodeURIComponent(
+        endpoint = `/api/posts/search?q=${encodeURIComponent(
           searchQuery
         )}&page=${currentPage}&limit=20`;
       } else {
-        url = `${API_URL}/api/posts/newsfeed?feedType=${feedType}&algorithm=${algorithm}&page=${currentPage}&limit=20`;
+        endpoint = `/api/posts/newsfeed?feedType=${feedType}&algorithm=${algorithm}&page=${currentPage}&limit=20`;
       }
 
-      return await fetch(url, { credentials: "include" });
-    };
+      const data = await authenticatedFetch(endpoint);
 
-    try {
-      let response = await makeRequest();
-
-      // Handle auth errors with token refresh
-      if (isAuthError(response)) {
-        response = await handleAuthErrorAndRetry(makeRequest);
-      }
-
-      const data = await response.json();
       if (data.success) {
         if (resetPosts) {
           setPosts(data.posts);
@@ -164,12 +153,15 @@ export default function NewsfeedContainer() {
       {/* Feed Controls - Hide during search */}
       {!isSearchActive && (
         <div className={styles.feedControls}>
-           
           <FeedToggle
             feedType={feedType}
             onFeedTypeChange={handleFeedTypeChange}
             contactsCount={contactsCount}
-          />         
+          />
+          <FeedFilters
+            algorithm={algorithm}
+            onAlgorithmChange={handleAlgorithmChange}
+          />
         </div>
       )}
 
@@ -204,10 +196,6 @@ export default function NewsfeedContainer() {
             className={styles.emptyFriendsFeed}
           />
         )}
-<FeedFilters
-            algorithm={algorithm}
-            onAlgorithmChange={handleAlgorithmChange}
-          />
       {isSearchActive && posts.length === 0 && !loading && (
         <div className={styles.emptySearchResults}>
           <h3>No posts found</h3>

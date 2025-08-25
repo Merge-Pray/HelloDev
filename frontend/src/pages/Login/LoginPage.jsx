@@ -53,6 +53,7 @@ export default function LoginPage() {
         _id: data.user.id,
         username: data.user.username,
         nickname: data.user.nickname,
+        avatar: data.user.avatar,
       });
       navigate("/home");
     } catch (err) {

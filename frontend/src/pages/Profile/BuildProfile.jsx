@@ -4,8 +4,8 @@ import { useForm } from "react-hook-form";
 import { ArrowLeft, ArrowRight, Check, X, AlertTriangle } from "lucide-react";
 import useUserStore from "../../hooks/userstore";
 import { useUpdateProfile } from "../../hooks/useProfile";
+import { authenticatedFetch } from "../../utils/authenticatedFetch";
 import styles from "./buildprofile.module.css";
-import { API_URL } from "../../lib/config";
 import HybridSelector from "../../components/HybridSelector";
 import LocationSelector from "../../components/LocationSelector";
 
@@ -92,7 +92,7 @@ export default function BuildProfile() {
   const [selectedCount, setSelectedCount] = useState(0);
   const [error, setError] = useState(null);
   const [showCancelDialog, setShowCancelDialog] = useState(false);
-  const [userProfileData, setUserProfileData] = useState(null); // ✅ NEW: Store user data from backend
+  const [userProfileData, setUserProfileData] = useState(null);
   const navigate = useNavigate();
 
   const {
@@ -104,7 +104,6 @@ export default function BuildProfile() {
     formState: { errors },
   } = useForm();
 
-  // ✅ NEW: Fetch user data on component mount
   useEffect(() => {
     const fetchUserData = async () => {
       if (!currentUser) {
@@ -113,27 +112,16 @@ export default function BuildProfile() {
       }
 
       try {
-        const response = await fetch(`${API_URL}/api/user/user`, {
-          credentials: "include",
-          headers: {
-            "Content-Type": "application/json",
-          },
-        });
+        const userData = await authenticatedFetch("/api/user/user");
+        setUserProfileData(userData);
 
-        if (response.ok) {
-          const userData = await response.json();
-          setUserProfileData(userData);
-
-          // Set initial nickname to empty for display, but store username for fallback
-          setProfileData((prev) => ({
-            ...prev,
-            username: userData.username, // Store username for potential fallback
-          }));
-        } else {
-          console.error("Failed to fetch user data");
-        }
+        setProfileData((prev) => ({
+          ...prev,
+          username: userData.username,
+        }));
       } catch (error) {
         console.error("Error fetching user data:", error);
+        setError("Failed to load user data. Please try again.");
       }
     };
 
@@ -215,11 +203,9 @@ export default function BuildProfile() {
     ]
   );
 
-  // ✅ Updated handleCancel to set nickname = username if canceled
   const confirmCancel = useCallback(async () => {
     setShowCancelDialog(false);
 
-    // ✅ Set nickname to username when canceling onboarding
     try {
       const fallbackData = {
         nickname: userProfileData?.username || currentUser?.username || "",
@@ -309,7 +295,6 @@ export default function BuildProfile() {
             );
           }
 
-          // ✅ Handle nickname field specially - show empty but store username for fallback
           if (field.name === "nickname") {
             return (
               <div key={field.name} className="form-field">
@@ -401,11 +386,9 @@ export default function BuildProfile() {
                     onChange={(e) => {
                       const currentValues = selectedValues || [];
                       if (e.target.checked) {
-                        // Hinzufügen mit Default Skill Level 5
                         const newValues = [...currentValues, [language, 5]];
                         setValue(fieldName, newValues);
                       } else {
-                        // Entfernen
                         const newValues = currentValues.filter((item) =>
                           Array.isArray(item)
                             ? item[0] !== language
@@ -420,7 +403,6 @@ export default function BuildProfile() {
                   </label>
                 </div>
 
-                {/* ✅ Skill Level Slider */}
                 {isSelected && (
                   <div className={styles.skillSection}>
                     <div className={styles.skillHeader}>
@@ -467,13 +449,11 @@ export default function BuildProfile() {
     );
   };
 
-  // ✅ ÄNDERE renderOptions Funktion:
   const renderOptions = () => {
     const inputType = currentStepData.type;
     const maxSelections = currentStepData.maxSelections;
     const selectedValues = watchedField || [];
 
-    // ✅ Spezielle Behandlung für Programming Languages
     if (inputType === "programming-languages") {
       return (
         <HybridSelector
@@ -636,7 +616,6 @@ export default function BuildProfile() {
         </div>
       </div>
 
-      {/* ✅ Updated Cancel Confirmation Dialog */}
       {showCancelDialog && (
         <div className={styles.dialogOverlay}>
           <div className={styles.dialog}>

@@ -1,9 +1,8 @@
 import React, { useState, useEffect } from "react";
 import { Heart, MessageCircle, Repeat, Share2 } from "lucide-react";
 import RepostModal from "./RepostModal";
-import { API_URL } from "../lib/config";
 import styles from "./PostActions.module.css";
-import { handleAuthErrorAndRetry, isAuthError } from "../utils/tokenRefresh";
+import { authenticatedFetch } from "../utils/authenticatedFetch";
 
 export default function PostActions({
   post,
@@ -37,25 +36,15 @@ export default function PostActions({
     const wasLiked = isLiked;
     setIsLiked(!wasLiked);
 
-    const makeRequest = async () => {
-      const endpoint = wasLiked ? "unlike" : "like";
-      return await fetch(
-        `${API_URL}/api/posts/${post._id}/${endpoint}`,
-        { method: "POST", credentials: "include" }
-      );
-    };
-
     try {
-      let response = await makeRequest();
+      const endpoint = wasLiked ? "unlike" : "like";
+      const data = await authenticatedFetch(
+        `/api/posts/${post._id}/${endpoint}`,
+        {
+          method: "POST",
+        }
+      );
 
-      // Handle auth errors with token refresh
-      if (isAuthError(response)) {
-        response = await handleAuthErrorAndRetry(makeRequest);
-      }
-
-      if (!response.ok) throw new Error(`HTTP error! status: ${response.status}`);
-
-      const data = await response.json();
       if (data.success) {
         onLike(post._id, !wasLiked, data.likeCount);
       } else {
@@ -71,24 +60,12 @@ export default function PostActions({
   };
 
   const handleRepost = async (comment = "") => {
-    const makeRequest = async () => {
-      return await fetch(`${API_URL}/api/posts/${post._id}/repost`, {
+    try {
+      const data = await authenticatedFetch(`/api/posts/${post._id}/repost`, {
         method: "POST",
-        headers: { "Content-Type": "application/json" },
-        credentials: "include",
         body: JSON.stringify({ comment }),
       });
-    };
 
-    try {
-      let response = await makeRequest();
-
-      // Handle auth errors with token refresh
-      if (isAuthError(response)) {
-        response = await handleAuthErrorAndRetry(makeRequest);
-      }
-
-      const data = await response.json();
       if (data.success) {
         setIsReposted(true);
         setShowRepostModal(false);
@@ -103,13 +80,13 @@ export default function PostActions({
     try {
       const postUrl = `${window.location.origin}/post/${post._id}`;
       await navigator.clipboard.writeText(postUrl);
-      // Optional: Toast/Hint einbauen
     } catch (error) {
       console.error("Failed to copy URL:", error);
     }
   };
 
-  const isOwnPost = post?.author?._id?.toString() === currentUser?._id?.toString();
+  const isOwnPost =
+    post?.author?._id?.toString() === currentUser?._id?.toString();
   const likeCount = post?.likeCount || post?.likes?.length || 0;
   const commentCount = post?.commentCount || post?.comments?.length || 0;
   const repostCount = post?.repostCount || 0;

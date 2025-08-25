@@ -6,7 +6,6 @@ import useUserStore from "../../hooks/userstore";
 import styles from "./registerpage.module.css";
 import { API_URL } from "../../lib/config";
 import DarkMode from "../../components/DarkMode";
-import { handleAuthErrorAndRetry, isAuthError } from "../../utils/tokenRefresh";
 
 export default function RegisterPage() {
   const currentUser = useUserStore((state) => state.currentUser);
@@ -88,7 +87,12 @@ export default function RegisterPage() {
       } else {
         const data = await response.json();
 
-        setCurrentUser(data.user);
+        setCurrentUser({
+          _id: data.user.id,
+          username: data.user.username,
+          nickname: data.user.nickname,
+          avatar: data.user.avatar,
+        });
         navigate("/buildprofile");
       }
     } catch (err) {
