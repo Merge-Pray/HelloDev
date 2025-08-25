@@ -11,7 +11,7 @@ const PostSchema = new Schema(
 
     content: {
       type: String,
-      required: true,
+      required: false,
       maxlength: 2000,
       trim: true,
     },
@@ -138,15 +138,6 @@ const PostSchema = new Schema(
       },
     ],
 
-    isPinned: {
-      type: Boolean,
-      default: false,
-      index: true,
-    },
-
-    pinnedUntil: {
-      type: Date,
-    },
   },
   {
     timestamps: true,

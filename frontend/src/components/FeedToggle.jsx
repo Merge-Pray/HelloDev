@@ -1,7 +1,7 @@
 import { Users, Globe } from 'lucide-react';
 import styles from './FeedToggle.module.css';
 
-export default function FeedToggle({ feedType, onFeedTypeChange, friendsCount = 0 }) {
+export default function FeedToggle({ feedType, onFeedTypeChange, contactsCount = 0 }) {
   return (
     <div className={styles.feedToggle}>
       <div className={styles.wrapper} role="group" aria-label="Feed filter">
@@ -17,13 +17,13 @@ export default function FeedToggle({ feedType, onFeedTypeChange, friendsCount = 
 
         <button
           type="button"
-          className={`${styles.btn} ${feedType === 'friends' ? styles.active : ''}`}
-          onClick={() => onFeedTypeChange('friends')}
-          aria-pressed={feedType === 'friends'}
+          className={`${styles.btn} ${feedType === 'contacts' ? styles.active : ''}`}
+          onClick={() => onFeedTypeChange('contacts')}
+          aria-pressed={feedType === 'contacts'}
         >
           <Users className={styles.icon} size={18} aria-hidden="true" />
-          <span className={styles.label}>Friends</span>
-          <span className={styles.count}>{friendsCount}</span>
+          <span className={styles.label}>Contacts</span>
+          <span className={styles.count}>{contactsCount}</span>
         </button>
       </div>
     </div>

@@ -2,23 +2,19 @@ import PostModel from "../models/post.js";
 import UserModel from "../models/user.js";
 
 const calculateEngagementScore = (post) => {
-  const ageInHours = (Date.now() - post.createdAt) / (1000 * 60 * 60);
-  const likeWeight = 2;
-  const commentWeight = 5;
-  const repostWeight = 10;
-
-  const decayFactor = Math.exp(-ageInHours / 24);
+  const likeWeight = 1;
+  const commentWeight = 2;
+  const repostWeight = 3;
 
   const score =
-    (post.likes.length * likeWeight +
-      post.comments.length * commentWeight +
-      post.repostCount * repostWeight) *
-    decayFactor;
+    post.likes.length * likeWeight +
+    post.comments.length * commentWeight +
+    post.repostCount * repostWeight;
 
-  return Math.round(score * 100) / 100;
+  return score;
 };
 
-const canUserView = (post, userId, userContacts = []) => {
+const canUserView = (post, userId, authorContacts = []) => {
   if (post.isHidden) return false;
 
   switch (post.visibility) {
@@ -26,7 +22,7 @@ const canUserView = (post, userId, userContacts = []) => {
       return true;
     case "contacts_only":
       return (
-        userContacts.includes(post.author.toString()) ||
+        authorContacts.includes(userId.toString()) ||
         post.author.toString() === userId.toString()
       );
     case "private":
@@ -82,7 +78,7 @@ export const createPost = async (req, res, next) => {
       imageUrl,
     } = req.body;
 
-    if (!content.trim() && !imageUrl) {
+    if ((!content || !content.trim()) && !imageUrl) {
       return res.status(400).json({
         success: false,
         message: "Post must contain either text content or an image",
@@ -128,7 +124,7 @@ export const getNewsfeed = async (req, res, next) => {
     const {
       page = 1,
       limit = 20,
-      algorithm = "mixed",
+      algorithm = "chronological",
       feedType = "all",
     } = req.query;
 
@@ -139,7 +135,7 @@ export const getNewsfeed = async (req, res, next) => {
 
     let matchCriteria;
 
-    if (feedType === "friends") {
+    if (feedType === "contacts") {
       matchCriteria = {
         isHidden: false,
         $or: [
@@ -151,84 +147,29 @@ export const getNewsfeed = async (req, res, next) => {
         ],
       };
     } else {
+      const authorsWithUserInContacts = await UserModel.find({
+        contacts: userId
+      }).select("_id");
+      const authorIds = authorsWithUserInContacts.map(user => user._id);
+
       matchCriteria = {
         isHidden: false,
         $or: [
           { visibility: "public" },
-          { visibility: "contacts_only", author: userId },
+          {
+            visibility: "contacts_only",
+            author: { $in: authorIds }
+          },
           { visibility: "private", author: userId },
         ],
       };
     }
 
     let sortCriteria;
-
-    switch (algorithm) {
-      case "chronological":
-        sortCriteria = { createdAt: -1 };
-        break;
-      case "engagement":
-        sortCriteria = { engagementScore: -1, createdAt: -1 };
-        break;
-      case "mixed":
-      default:
-        const pipeline = [
-          { $match: matchCriteria },
-          {
-            $addFields: {
-              isFromContact: {
-                $cond: {
-                  if: { $in: ["$author", userContacts] },
-                  then: 1.5,
-                  else: 1,
-                },
-              },
-              recencyScore: {
-                $divide: [
-                  { $subtract: [new Date(), "$createdAt"] },
-                  1000 * 60 * 60 * 24,
-                ],
-              },
-            },
-          },
-          {
-            $addFields: {
-              finalScore: {
-                $multiply: [
-                  "$engagementScore",
-                  "$isFromContact",
-                  { $exp: { $multiply: ["$recencyScore", -0.1] } },
-                ],
-              },
-            },
-          },
-          { $sort: { finalScore: -1, createdAt: -1 } },
-          { $skip: skip },
-          { $limit: parseInt(limit) },
-        ];
-
-        const mixedPosts = await PostModel.aggregate(pipeline);
-
-        const populatedMixedPosts = await PostModel.populate(mixedPosts, [
-          { path: "author", select: "username nickname avatar isOnline lastSeen" },
-          { path: "mentions", select: "username nickname" },
-          { path: "likes.user", select: "username nickname" },
-          { path: "comments.author", select: "username nickname avatar" },
-        ]);
-
-        return res.json({
-          success: true,
-          posts: populatedMixedPosts,
-          feedType,
-          friendsCount: userContacts.length,
-          pagination: {
-            currentPage: parseInt(page),
-            totalPages: Math.ceil(
-              (await PostModel.countDocuments(matchCriteria)) / limit
-            ),
-            hasNextPage: populatedMixedPosts.length === parseInt(limit),
-          },
-        });
+    if (algorithm === "engagement") {
+      sortCriteria = { engagementScore: -1, createdAt: -1 };
+    } else {
+      sortCriteria = { createdAt: -1 };
     }
 
     const posts = await PostModel.find(matchCriteria)
@@ -249,7 +190,7 @@ export const getNewsfeed = async (req, res, next) => {
       success: true,
       posts,
       feedType,
-      friendsCount: userContacts.length,
+      contactsCount: userContacts.length,
       pagination: {
         currentPage: parseInt(page),
         totalPages: Math.ceil(totalPosts / limit),
@@ -504,20 +445,37 @@ export const searchPosts = async (req, res, next) => {
 
     const skip = (page - 1) * limit;
 
-    const currentUser = await UserModel.findById(userId).select("contacts");
-    const userContacts = currentUser.contacts || [];
+    const authorsWithUserInContacts = await UserModel.find({
+      contacts: userId
+    }).select("_id");
+    const authorIds = authorsWithUserInContacts.map(user => user._id);
+
+    const searchUsers = await UserModel.find({
+      $or: [
+        { username: { $regex: q, $options: "i" } },
+        { nickname: { $regex: q, $options: "i" } }
+      ]
+    }).select("_id");
+    const userIds = searchUsers.map(user => user._id);
 
     let matchCriteria = {
-      $text: { $search: q },
-      isHidden: false,
       $or: [
-        { visibility: "public" },
-        {
-          visibility: "contacts_only",
-          $or: [{ author: { $in: userContacts } }, { author: userId }],
-        },
-        { visibility: "private", author: userId },
+        { $text: { $search: q } },
+        { author: { $in: userIds } }
       ],
+      isHidden: false,
+      $and: [
+        {
+          $or: [
+            { visibility: "public" },
+            {
+              visibility: "contacts_only",
+              author: { $in: authorIds }
+            },
+            { visibility: "private", author: userId },
+          ]
+        }
+      ]
     };
 
     const posts = await PostModel.find(matchCriteria)
@@ -553,8 +511,10 @@ export const getPostsByHashtag = async (req, res, next) => {
     const skip = (page - 1) * limit;
     const cleanHashtag = hashtag.toLowerCase().replace(/^#/, "");
 
-    const currentUser = await UserModel.findById(userId).select("contacts");
-    const userContacts = currentUser.contacts || [];
+    const authorsWithUserInContacts = await UserModel.find({
+      contacts: userId
+    }).select("_id");
+    const authorIds = authorsWithUserInContacts.map(user => user._id);
 
     const matchCriteria = {
       hashtags: cleanHashtag,
@@ -563,7 +523,7 @@ export const getPostsByHashtag = async (req, res, next) => {
         { visibility: "public" },
         {
           visibility: "contacts_only",
-          $or: [{ author: { $in: userContacts } }, { author: userId }],
+          author: { $in: authorIds }
         },
         { visibility: "private", author: userId },
       ],
