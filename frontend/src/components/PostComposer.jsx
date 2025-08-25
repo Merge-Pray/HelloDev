@@ -1,6 +1,6 @@
 import React, { useState, useRef, useEffect } from "react";
 import EmojiPicker from "emoji-picker-react";
-import GifPicker from "gif-picker-react";
+import KlipyGifPicker from "./KlipyGifPicker/KlipyGifPicker";
 import styles from "./PostComposer.module.css";
 import { FileImage, Smile, Send, Globe, Users, Lock } from "lucide-react";
 import useUserStore from "../hooks/userstore";
@@ -238,11 +238,11 @@ export default function PostComposer({ onPostCreated }) {
                 </button>
                 {showGifPicker && (
                   <div className={styles.gifPicker}>
-                    <GifPicker
-                      tenorApiKey={import.meta.env.VITE_TENOR_API_KEY}
+                    <KlipyGifPicker
                       onGifClick={handleGifClick}
                       width={350}
                       height={400}
+                      searchPlaceholder="Search GIFs..."
                     />
                   </div>
                 )}
