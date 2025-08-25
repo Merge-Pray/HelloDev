@@ -260,20 +260,41 @@ export default function PostComposer({ onPostCreated }) {
                   <Smile size={18} aria-hidden="true" />
                   <span className={styles.toolLabel}>Emoji</span>
                 </button>
-                {showEmojiPicker && (
-                  <div className={styles.emojiPicker}>
-                    <EmojiPicker
-                      onEmojiClick={handleEmojiClick}
-                      width={300}
-                      height={400}
-                      previewConfig={{
-                        showPreview: false,
-                      }}
-                      skinTonesDisabled
-                      searchDisabled={false}
-                    />
-                  </div>
-                )}
+                <div
+                  className={styles.emojiPicker}
+                  style={{ display: showEmojiPicker ? "block" : "none" }}
+                >
+                  <EmojiPicker
+                    onEmojiClick={handleEmojiClick}
+                    width={300}
+                    height={400}
+                    previewConfig={{
+                      showPreview: false,
+                    }}
+                    skinTonesDisabled
+                    searchDisabled={false}
+                    lazyLoadEmojis={true}
+                    categoriesConfig={[
+                      {
+                        category: "suggested",
+                        name: "Recently Used",
+                      },
+                      {
+                        category: "smileys_people",
+                        name: "Smileys & People",
+                      },
+                      {
+                        category: "animals_nature",
+                        name: "Animals & Nature",
+                      },
+                      {
+                        category: "food_drink",
+                        name: "Food & Drink",
+                      },
+                    ]}
+                    emojiStyle="native"
+                  />
+                </div>
               </div>
             </div>
 
