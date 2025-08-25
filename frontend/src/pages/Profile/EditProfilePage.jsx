@@ -11,7 +11,7 @@ import {
 } from "lucide-react";
 import useUserStore from "../../hooks/userstore";
 import { useProfile, useUpdateProfile } from "../../hooks/useProfile";
-import { API_URL } from "../../lib/config";
+
 import DarkMode from "../../components/DarkMode";
 import { calculateProfileCompletion } from "../../utils/profileCompletion";
 import styles from "./editprofile.module.css";
@@ -44,7 +44,6 @@ const EditProfilePage = () => {
     formState: { errors },
   } = useForm();
 
-  // Watch all form values to detect changes
   const watchedValues = watch();
 
   useEffect(() => {
@@ -62,7 +61,6 @@ const EditProfilePage = () => {
     }
   }, [currentUser, navigate, profileError]);
 
-  // Initialize form data and original data when profile loads
   useEffect(() => {
     if (profileData && Object.keys(profileData).length > 0 && !isDataLoaded) {
       const arrayFields = [
@@ -75,14 +73,12 @@ const EditProfilePage = () => {
 
       const initialData = {};
 
-      // Handle array fields
       arrayFields.forEach((field) => {
         const value = profileData[field] || [];
         setValue(field, value);
         initialData[field] = Array.isArray(value) ? [...value] : [];
       });
 
-      // Handle regular fields
       Object.keys(profileData).forEach((key) => {
         if (!arrayFields.includes(key)) {
           const value = profileData[key];
@@ -96,7 +92,6 @@ const EditProfilePage = () => {
         }
       });
 
-      // ✅ Special handling for nickname - use username as default if nickname is empty
       if (!profileData.nickname || profileData.nickname.trim() === "") {
         const defaultNickname = profileData.username || "";
         setValue("nickname", defaultNickname);
@@ -109,7 +104,6 @@ const EditProfilePage = () => {
     }
   }, [profileData, setValue, isDataLoaded]);
 
-  // Deep comparison function for arrays and objects
   const deepEqual = (a, b) => {
     if (Array.isArray(a) && Array.isArray(b)) {
       if (a.length !== b.length) return false;
@@ -138,7 +132,6 @@ const EditProfilePage = () => {
     return a === b;
   };
 
-  // Detect changes by comparing current form values with original data
   useEffect(() => {
     if (
       !isDataLoaded ||
@@ -149,12 +142,10 @@ const EditProfilePage = () => {
       return;
     }
 
-    // Only check fields that exist in originalData
     const hasChanges = Object.keys(originalData).some((key) => {
       const currentValue = watchedValues[key];
       const originalValue = originalData[key];
 
-      // Handle undefined/null values
       const normalizedCurrent =
         currentValue === undefined || currentValue === null ? "" : currentValue;
       const normalizedOriginal =
@@ -162,7 +153,6 @@ const EditProfilePage = () => {
           ? ""
           : originalValue;
 
-      // Use deep comparison for arrays and objects
       if (
         Array.isArray(normalizedCurrent) ||
         Array.isArray(normalizedOriginal)
@@ -170,7 +160,6 @@ const EditProfilePage = () => {
         return !deepEqual(normalizedCurrent, normalizedOriginal);
       }
 
-      // Handle regular values
       return normalizedCurrent !== normalizedOriginal;
     });
 
@@ -182,10 +171,8 @@ const EditProfilePage = () => {
     setSuccess(null);
 
     try {
-      // ✅ Ensure nickname is properly set before sending
       const processedData = { ...formData };
 
-      // If nickname is empty or just whitespace, it will be set to username in backend
       if (!processedData.nickname || processedData.nickname.trim() === "") {
         processedData.nickname =
           processedData.username || profileData?.username || "";
@@ -196,7 +183,6 @@ const EditProfilePage = () => {
       await updateProfile.mutateAsync(processedData);
       setSuccess("Profile updated successfully!");
 
-      // ✅ Update original data with saved values and reset change detection
       const newOriginalData = {};
       Object.keys(processedData).forEach((key) => {
         if (Array.isArray(processedData[key])) {
@@ -209,7 +195,6 @@ const EditProfilePage = () => {
       setOriginalData(newOriginalData);
       setHasUnsavedChanges(false);
 
-      // ✅ Refetch profile data to get updated values from backend
       setTimeout(async () => {
         try {
           await refetch();
@@ -253,16 +238,16 @@ const EditProfilePage = () => {
   const isMatchable = profileStats.isMatchable;
 
   const sections = [
-    { id: "personal", title: "Personal Info", icon: "👤" },
-    { id: "experience", title: "Experience", icon: "💼" },
-    { id: "languages", title: "Programming Languages", icon: "💻" },
-    { id: "interests", title: "Tech Interests", icon: "🚀" },
-    { id: "stack", title: "Tech Stack", icon: "🛠️" },
-    { id: "spoken", title: "Spoken Languages", icon: "🌍" },
-    { id: "environment", title: "Development Environment", icon: "⚙️" },
-    { id: "gaming", title: "Gaming", icon: "🎮" },
-    { id: "other", title: "Other Interests", icon: "🎨" },
-    { id: "preferences", title: "Coding Preferences", icon: "⭐" },
+    { id: "personal", title: "Personal Info" },
+    { id: "experience", title: "Experience" },
+    { id: "languages", title: "Programming Languages" },
+    { id: "interests", title: "Tech Interests" },
+    { id: "stack", title: "Tech Stack" },
+    { id: "spoken", title: "Spoken Languages" },
+    { id: "environment", title: "Development Environment" },
+    { id: "gaming", title: "Gaming" },
+    { id: "other", title: "Other Interests" },
+    { id: "preferences", title: "Coding Preferences" },
   ];
 
   const renderSectionHeader = (title) => (
@@ -280,7 +265,6 @@ const EditProfilePage = () => {
   ) => {
     const watchedValues = watch(fieldName) || [];
 
-    // ✅ Use radio-style rendering for better consistency
     return (
       <div className={styles.formSection}>
         {renderSectionHeader(title, sectionKey)}
@@ -298,7 +282,6 @@ const EditProfilePage = () => {
     );
   };
 
-  // ✅ Update Programming Languages Section with consistent styling
   const renderProgrammingLanguagesSection = () => {
     const watchedValues = watch("programmingLanguages") || [];
 
@@ -322,7 +305,6 @@ const EditProfilePage = () => {
     );
   };
 
-  // ✅ Consistent styling for Gaming section (reference for other sections)
   const renderGamingSection = () => (
     <div className={styles.formSection}>
       {renderSectionHeader("Gaming Preferences")}
@@ -346,7 +328,6 @@ const EditProfilePage = () => {
     </div>
   );
 
-  // ✅ Update Environment section to match gaming styling
   const renderEnvironmentSection = () => (
     <div className={styles.formSection}>
       {renderSectionHeader("Development Environment")}
@@ -386,12 +367,11 @@ const EditProfilePage = () => {
                 value: 20,
                 message: "Username must be less than 20 characters",
               },
-              // ✅ Add onChange handler to sync nickname if needed
+
               onChange: (e) => {
                 const newUsername = e.target.value;
                 const currentNickname = watch("nickname");
 
-                // If nickname equals the old username, update it to the new username
                 if (currentNickname === profileData?.username) {
                   setValue("nickname", newUsername);
                 }
@@ -424,7 +404,7 @@ const EditProfilePage = () => {
                 value: 25,
                 message: "Nickname must be less than 25 characters",
               },
-              // ✅ Add validation for nickname uniqueness if needed
+
               validate: (value) => {
                 const trimmedValue = value?.trim();
                 if (!trimmedValue) {
@@ -754,7 +734,6 @@ const EditProfilePage = () => {
                                   type="button"
                                   className={styles.missingFieldLink}
                                   onClick={() => {
-                                    // Jump to appropriate section
                                     const sectionMap = {
                                       country: "personal",
                                       city: "personal",
@@ -783,7 +762,6 @@ const EditProfilePage = () => {
             </div>
           </div>
 
-          {/* ✅ NEU: Info über vorausgefüllte Werte */}
           <div className={styles.defaultValuesInfo}>
             <div className={styles.infoHeader}>
               <AlertCircle size={14} />
@@ -803,7 +781,6 @@ const EditProfilePage = () => {
                   className={`${
                     activeSection === section.id ? styles.active : ""
                   } ${
-                    // ✅ Markiere Sections mit fehlenden Pflichtfeldern
                     profileStats.missingRequiredFieldsList?.some(
                       ({ field }) => {
                         const sectionMap = {
@@ -822,9 +799,8 @@ const EditProfilePage = () => {
                   }`}
                   onClick={() => setActiveSection(section.id)}
                 >
-                  <span>{section.icon}</span>
                   {section.title}
-                  {/* ✅ Badge für fehlende Pflichtfelder */}
+
                   {profileStats.missingRequiredFieldsList?.some(({ field }) => {
                     const sectionMap = {
                       personal: ["country", "city"],
@@ -899,7 +875,6 @@ const EditProfilePage = () => {
         </div>
       </div>
 
-      {/* Unsaved Changes Warning Modal */}
       {showUnsavedWarning && (
         <div className={styles.modalOverlay}>
           <div className={styles.modalContent}>
