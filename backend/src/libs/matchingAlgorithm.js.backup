@@ -2,7 +2,7 @@ import UserModel from "../models/user.js";
 import MatchModel from "../models/match.js";
 import { fuzzyMatch } from "../utils/textNormalization.js";
 import { storeSimilarity } from "../utils/similarityTracker.js";
-export function calculateTechnicalScore(user1, user2) {
+export async function calculateTechnicalScore(user1, user2) {
   let totalScore = 0;
   let factors = 0;
 
@@ -11,19 +11,19 @@ export function calculateTechnicalScore(user1, user2) {
     user2.programmingLanguages?.length
   ) {
     factors++;
-    const langScore = calculateProgrammingLanguageScore(user1, user2);
+    const langScore = await calculateProgrammingLanguageScore(user1, user2);
     totalScore += langScore * 0.5;
   }
 
   if (user1.techArea?.length && user2.techArea?.length) {
     factors++;
-    const areaScore = calculateTechAreaScore(user1, user2);
+    const areaScore = await calculateTechAreaScore(user1, user2);
     totalScore += areaScore * 0.3;
   }
 
   if (user1.techStack?.length && user2.techStack?.length) {
     factors++;
-    const stackScore = calculateTechStackScore(user1, user2);
+    const stackScore = await calculateTechStackScore(user1, user2);
     totalScore += stackScore * 0.2;
   }
 
@@ -37,10 +37,10 @@ export function calculateGoalAlignmentScore(user1, user2) {
   return statusScore * 0.7 + experienceScore * 0.3;
 }
 
-export function calculatePersonalScore(user1, user2) {
+export async function calculatePersonalScore(user1, user2) {
   const scores = [];
 
-  const interestsScore = calculatePersonalInterestsScore(user1, user2);
+  const interestsScore = await calculatePersonalInterestsScore(user1, user2);
   if (interestsScore !== null) {
     scores.push({ score: interestsScore, weight: 0.4 }); 
   }
@@ -56,7 +56,7 @@ export function calculatePersonalScore(user1, user2) {
   }
 
   
-  const languageScore = calculateSpokenLanguageScore(user1, user2);
+  const languageScore = await calculateSpokenLanguageScore(user1, user2);
   if (languageScore > 0) {
     scores.push({ score: languageScore, weight: 0.15 }); 
   }
@@ -86,40 +86,29 @@ export function calculateLocationCompatibility(user1, user2) {
   return 40;
 }
 
-export function calculatePersonalInterestsScore(user1, user2) {
+export async function calculatePersonalInterestsScore(user1, user2) {
   const user1Interests = extractAllInterests(user1);
   const user2Interests = extractAllInterests(user2);
 
-  if (user1Interests.size === 0 && user2Interests.size === 0) {
-    return null;
+  if (user1Interests.size === 0 && user2Interests.size === 0) return null;
+  if (user1Interests.size === 0 || user2Interests.size === 0) return 20;
+
+  let totalScore = 0;
+  let comparisons = 0;
+
+  for (const interest1 of user1Interests) {
+    for (const interest2 of user2Interests) {
+      const similarity = fuzzyMatch(interest1, interest2);
+      if (similarity > 70) {
+        totalScore += similarity;
+        comparisons++;
+        await storeSimilarity(interest1, interest2, "otherInterests", similarity);
+      }
+    }
   }
 
-  if (user1Interests.size === 0 || user2Interests.size === 0) {
-    return 20;
-  }
-
-  const compatibilityScores = [];
-
-  const directOverlap = calculateDirectOverlap(user1Interests, user2Interests);
-  compatibilityScores.push({ score: directOverlap, weight: 0.6 });
-
-  const lifestyleScore = calculateLifestyleCompatibility(user1, user2);
-  if (lifestyleScore !== null) {
-    compatibilityScores.push({ score: lifestyleScore, weight: 0.4 });
-  }
-
-  const totalWeight = compatibilityScores.reduce(
-    (sum, item) => sum + item.weight,
-    0
-  );
-  const weightedSum = compatibilityScores.reduce(
-    (sum, item) => sum + item.score * item.weight,
-    0
-  );
-
-  return weightedSum / totalWeight;
+  return comparisons > 0 ? totalScore / comparisons : 20;
 }
-
 function extractAllInterests(user) {
   const interests = new Set();
 
@@ -221,71 +210,67 @@ function normalizeInterest(interest) {
     .replace(/[^\w\s]/g, "");
 }
 
-export function calculateProgrammingLanguageScore(user1, user2) {
-  if (
-    !user1.programmingLanguages?.length ||
-    !user2.programmingLanguages?.length
-  ) {
-    return 0;
-  }
-
-  const user1Map = new Map(user1.programmingLanguages);
-  const user2Map = new Map(user2.programmingLanguages);
+export async function calculateProgrammingLanguageScore(user1, user2) {
+  if (!user1.programmingLanguages?.length || !user2.programmingLanguages?.length) return 0;
 
   let totalScore = 0;
   let comparisons = 0;
 
-  const allLanguages = new Set([...user1Map.keys(), ...user2Map.keys()]);
-
-  for (const language of allLanguages) {
-    const skill1 = user1Map.get(language) || 0;
-    const skill2 = user2Map.get(language) || 0;
-
-    if (skill1 > 0 && skill2 > 0) {
-      const skillDiff = Math.abs(skill1 - skill2);
-      const languageScore = Math.max(0, 100 - skillDiff * 10);
-      totalScore += languageScore;
-      comparisons++;
+  for (const lang1 of user1.programmingLanguages) {
+    for (const lang2 of user2.programmingLanguages) {
+      const similarity = fuzzyMatch(lang1[0], lang2[0]);
+      if (similarity > 70) {
+        const skillDiff = Math.abs(lang1[1] - lang2[1]);
+        const languageScore = (similarity / 100) * Math.max(0, 100 - skillDiff * 10);
+        totalScore += languageScore;
+        comparisons++;
+        await storeSimilarity(lang1[0], lang2[0], "programmingLanguages", similarity);
+      }
     }
   }
 
   return comparisons > 0 ? totalScore / comparisons : 0;
 }
-
-export function calculateTechStackScore(user1, user2) {
-  if (!user1.techStack?.length || !user2.techStack?.length) {
-    return 0;
-  }
-
-  const user1Stack = new Set(user1.techStack.map((tech) => tech.toLowerCase()));
-  const user2Stack = new Set(user2.techStack.map((tech) => tech.toLowerCase()));
-
-  const intersection = new Set(
-    [...user1Stack].filter((tech) => user2Stack.has(tech))
-  );
-  const union = new Set([...user1Stack, ...user2Stack]);
-
-  return (intersection.size / union.size) * 100;
+  return comparisons > 0 ? totalScore / comparisons : 0;
 }
 
-export function calculateTechAreaScore(user1, user2) {
-  if (!user1.techArea?.length || !user2.techArea?.length) {
-    return 0;
+export async function calculateTechStackScore(user1, user2) {
+  if (!user1.techStack?.length || !user2.techStack?.length) return 0;
+
+  let totalScore = 0;
+  let comparisons = 0;
+
+  for (const stack1 of user1.techStack) {
+    for (const stack2 of user2.techStack) {
+      const similarity = fuzzyMatch(stack1, stack2);
+      if (similarity > 70) {
+        totalScore += similarity;
+        comparisons++;
+        await storeSimilarity(stack1, stack2, "techStack", similarity);
+      }
+    }
   }
 
-  const user1Areas = new Set(user1.techArea.map((area) => area.toLowerCase()));
-  const user2Areas = new Set(user2.techArea.map((area) => area.toLowerCase()));
+  return comparisons > 0 ? totalScore / comparisons : 0;
+}export async function calculateTechAreaScore(user1, user2) {
+  if (!user1.techArea?.length || !user2.techArea?.length) return 0;
 
-  const intersection = new Set(
-    [...user1Areas].filter((area) => user2Areas.has(area))
-  );
-  const union = new Set([...user1Areas, ...user2Areas]);
+  let totalScore = 0;
+  let comparisons = 0;
 
-  return (intersection.size / union.size) * 100;
-}
+  for (const area1 of user1.techArea) {
+    for (const area2 of user2.techArea) {
+      const similarity = fuzzyMatch(area1, area2);
+      if (similarity > 70) {
+        totalScore += similarity;
+        comparisons++;
+        await storeSimilarity(area1, area2, "techArea", similarity);
+      }
+    }
+  }
 
-export function calculateStatusAlignment(user1, user2) {
-  const status1 = user1.status;
+  return comparisons > 0 ? totalScore / comparisons : 0;
+}  const status1 = user1.status;
   const status2 = user2.status;
 
   if (status1 === "searchhelp" && status2 === "offerhelp") return 100;
@@ -482,10 +467,10 @@ export function generateMatchBadges(user1, user2, scores) {
   return badges;
 }
 
-export function calculateCompatibility(user1, user2) {
-  const technicalScore = calculateTechnicalScore(user1, user2);
+export async function calculateCompatibility(user1, user2) {
+  const technicalScore = await calculateTechnicalScore(user1, user2);
   const goalAlignmentScore = calculateGoalAlignmentScore(user1, user2);
-  const personalScore = calculatePersonalScore(user1, user2);
+  const personalScore = await calculatePersonalScore(user1, user2);
 
   let compatibilityScore;
   if (personalScore === null) {
@@ -567,7 +552,7 @@ export async function runMatchingForAllUsers() {
           continue;
         }
 
-        const matchData = calculateCompatibility(user1, user2);
+        const matchData = await calculateCompatibility(user1, user2);
 
         if (matchData.compatibilityScore >= 45) {
           const existingMatch = await MatchModel.findOne({
@@ -646,31 +631,23 @@ export async function getMatchesForUser(userId, limit = 10) {
 }
 
 
-export function calculateSpokenLanguageScore(user1, user2) {
-  if (!user1.languages?.length || !user2.languages?.length) {
-    return 0;
+export async function calculateSpokenLanguageScore(user1, user2) {
+  if (!user1.languages?.length || !user2.languages?.length) return 0;
+
+  let totalScore = 0;
+  let comparisons = 0;
+
+  for (const lang1 of user1.languages) {
+    for (const lang2 of user2.languages) {
+      const similarity = fuzzyMatch(lang1, lang2);
+      if (similarity > 70) {
+        totalScore += similarity;
+        comparisons++;
+        await storeSimilarity(lang1, lang2, "languages", similarity);
+      }
+    }
   }
 
-  const user1Languages = new Set(
-    user1.languages.map((lang) => lang.toLowerCase())
-  );
-  const user2Languages = new Set(
-    user2.languages.map((lang) => lang.toLowerCase())
-  );
-
-  const commonLanguages = new Set(
-    [...user1Languages].filter((lang) => user2Languages.has(lang))
-  );
-
-  if (commonLanguages.size === 0) {
-    return 0;
-  }
-
-  
-  const baseScore = 60;
-
-  
-  const multiLanguageBonus = Math.min(commonLanguages.size * 15, 40);
-
-  return Math.min(100, baseScore + multiLanguageBonus);
+  return comparisons > 0 ? totalScore / comparisons : 0;
+}  return Math.min(100, baseScore + multiLanguageBonus);
 }

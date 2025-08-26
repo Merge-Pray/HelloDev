@@ -5,44 +5,8 @@ export function normalizeText(text) {
     .toLowerCase()
     .trim()
     .replace(/[^\w\s]/g, '')
-    .replace(/\s+/g, ' ')
-    .replace(/\b(js|javascript)\b/g, 'javascript')
-    .replace(/\b(ts|typescript)\b/g, 'typescript')
-    .replace(/\b(py|python)\b/g, 'python')
-    .replace(/\b(cpp|c\+\+)\b/g, 'cplusplus')
-    .replace(/\b(cs|csharp|c#)\b/g, 'csharp')
-    .replace(/\b(nodejs|node\.js)\b/g, 'nodejs')
-    .replace(/\b(reactjs|react\.js)\b/g, 'react')
-    .replace(/\b(vuejs|vue\.js)\b/g, 'vuejs');
 }
 
-export function generateAliases(value) {
-  const aliases = [];
-  const normalized = normalizeText(value);
-  
-  const aliasMap = {
-    'javascript': ['js', 'ecmascript'],
-    'typescript': ['ts'],
-    'python': ['py'],
-    'cplusplus': ['cpp', 'c++'],
-    'csharp': ['cs', 'c#'],
-    'nodejs': ['node.js', 'node'],
-    'react': ['reactjs', 'react.js'],
-    'vuejs': ['vue.js', 'vue'],
-    'angular': ['angularjs'],
-    'postgresql': ['postgres'],
-    'mongodb': ['mongo'],
-    'express': ['expressjs'],
-    'nextjs': ['next.js'],
-    'nuxtjs': ['nuxt.js']
-  };
-  
-  if (aliasMap[normalized]) {
-    aliases.push(...aliasMap[normalized]);
-  }
-  
-  return aliases;
-}
 
 export function fuzzyMatch(searchTerm, targetValue, aliases = []) {
   const normalizedSearch = normalizeText(searchTerm);

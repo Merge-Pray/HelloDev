@@ -41,8 +41,8 @@ function HybridSelector({
       const data = await authenticatedFetch(
         `/api/suggestions/popular/${category}`
       );
-      if (data.success) {
-        setPopularOptions(data.popular);
+      if (data.suggestions) {
+        setPopularOptions(data.suggestions);
       }
     } catch (error) {
       console.error("Failed to fetch popular options:", error);
@@ -58,8 +58,10 @@ function HybridSelector({
           searchInput
         )}`
       );
-      if (data.success) {
+      if (data.suggestions && data.suggestions.length > 0) {
         setSearchResults(data.suggestions);
+      } else {
+        setSearchResults([]);
       }
     } catch (error) {
       console.error("Failed to search options:", error);
