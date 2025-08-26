@@ -3,7 +3,6 @@ import {
   getUserMatches,
   contactMatch,
   dismissMatch,
-  getMatchDetails,
 } from "../controllers/match.js";
 import { authorizeJwt } from "../middleware/auth.js";
 
