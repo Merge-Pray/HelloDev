@@ -211,14 +211,17 @@ export default function ProfilePage() {
       if (numericLevel >= 1 && numericLevel <= 3) {
         return {
           className: "skillLevelBeginner",
+          label: `Beginner (${numericLevel}/10)`,
         };
       } else if (numericLevel >= 4 && numericLevel <= 7) {
         return {
           className: "skillLevelIntermediate",
+          label: `Intermediate (${numericLevel}/10)`,
         };
       } else if (numericLevel >= 8 && numericLevel <= 10) {
         return {
           className: "skillLevelAdvanced",
+          label: `Advanced (${numericLevel}/10)`,
         };
       }
 
@@ -267,13 +270,16 @@ export default function ProfilePage() {
                       <Code size={14} className={styles.skillIcon} />
                       <span className={styles.skillName}>{skillName}</span>
                       {skillInfo && (
-                        <span
-                          className={`${styles.skillLevel} ${
-                            styles[skillInfo.className]
-                          }`}
-                        >
-                          {skillInfo.level}
-                        </span>
+                        <>
+                          <span
+                            className={`${styles.skillLevel} ${
+                              styles[skillInfo.className]
+                            }`}
+                          ></span>
+                          <div className={styles.skillLevelTooltip}>
+                            {skillInfo.label}
+                          </div>
+                        </>
                       )}
                     </div>
                   );
@@ -312,34 +318,30 @@ export default function ProfilePage() {
                 return false;
               }) && (
                 <div className={styles.skillLegend}>
-                  <div className={styles.legendTitle}>Skill Levels:</div>
+                  <div className={styles.legendTitle}>
+                    Hover over dots for skill levels:
+                  </div>
                   <div className={styles.legendItems}>
                     <div className={styles.legendItem}>
                       <span
                         className={`${styles.legendDot} ${styles.skillLevelBeginner}`}
                       ></span>
                       <span className={styles.legendLabel}>Beginner</span>
-                      <span className={styles.legendDescription}>
-                        Level 1-3
-                      </span>
+                      <span className={styles.legendDescription}>(1-3)</span>
                     </div>
                     <div className={styles.legendItem}>
                       <span
                         className={`${styles.legendDot} ${styles.skillLevelIntermediate}`}
                       ></span>
                       <span className={styles.legendLabel}>Intermediate</span>
-                      <span className={styles.legendDescription}>
-                        Level 4-7
-                      </span>
+                      <span className={styles.legendDescription}>(4-7)</span>
                     </div>
                     <div className={styles.legendItem}>
                       <span
                         className={`${styles.legendDot} ${styles.skillLevelAdvanced}`}
                       ></span>
                       <span className={styles.legendLabel}>Advanced</span>
-                      <span className={styles.legendDescription}>
-                        Level 8-10
-                      </span>
+                      <span className={styles.legendDescription}>(8-10)</span>
                     </div>
                   </div>
                 </div>

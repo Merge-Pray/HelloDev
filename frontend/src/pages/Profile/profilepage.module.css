@@ -697,6 +697,7 @@
   font-weight: 500;
   color: var(--color-text);
   transition: all 0.3s ease;
+  position: relative;
 }
 
 .programmingLanguageTag:hover {
@@ -716,6 +717,7 @@
   border-radius: 50%;
   flex-shrink: 0;
   margin-left: 4px;
+  transition: all 0.3s ease;
 }
 
 .skillLevelBeginner {
@@ -728,6 +730,44 @@
 
 .skillLevelAdvanced {
   background: #22c55e;
+}
+
+.skillLevelTooltip {
+  position: absolute;
+  top: -40px;
+  left: 50%;
+  transform: translateX(-50%);
+  background: var(--color-bg-dark, #1f2937);
+  color: white;
+  padding: 8px 12px;
+  border-radius: 12px;
+  font-size: 12px;
+  font-weight: 600;
+  white-space: nowrap;
+  opacity: 0;
+  visibility: hidden;
+  transition: all 0.3s ease;
+  pointer-events: none;
+  z-index: 10;
+  box-shadow: 0 8px 25px rgba(0, 0, 0, 0.15);
+  border: 2px solid var(--color-input-border);
+}
+
+.skillLevelTooltip::after {
+  content: "";
+  position: absolute;
+  top: 100%;
+  left: 50%;
+  transform: translateX(-50%);
+  border: 6px solid transparent;
+  border-top-color: var(--color-bg-dark, #1f2937);
+}
+
+.programmingLanguageTag:hover .skillLevelTooltip {
+  opacity: 1;
+  visibility: visible;
+  top: -48px;
+  transform: translateX(-50%) translateY(-2px);
 }
 
 .programmingLanguageTag:hover .skillLevel {
@@ -799,4 +839,46 @@
 
 .legendItem:hover .legendLabel {
   color: var(--color-primary);
+}
+
+/* Fallback für ältere Browser ohne CSS Custom Properties */
+@supports not (color: var(--color-bg-dark)) {
+  .skillLevelTooltip {
+    background: #1f2937;
+    border-color: #374151;
+  }
+
+  .skillLevelTooltip::after {
+    border-top-color: #1f2937;
+  }
+}
+
+/* Mobile Optimierungen */
+@media (max-width: 768px) {
+  .skillLevelTooltip {
+    position: fixed;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    max-width: 200px;
+    padding: 12px 16px;
+    font-size: 14px;
+  }
+
+  .skillLevelTooltip::after {
+    display: none;
+  }
+
+  .programmingLanguageTag:hover .skillLevelTooltip {
+    top: 50%;
+    transform: translate(-50%, -50%);
+  }
+
+  .legendItems {
+    gap: 12px;
+  }
+
+  .legendItem {
+    font-size: 11px;
+  }
 }

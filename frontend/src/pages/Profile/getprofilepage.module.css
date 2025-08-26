@@ -12,6 +12,8 @@
   padding: 40px 20px;
   border-radius: 20px;
   box-shadow: 0 10px 30px rgba(0, 0, 0, 0.1);
+  position: relative;
+  z-index: 10;
 }
 
 .handle {
@@ -63,36 +65,6 @@
   font-size: 18px;
 }
 
-.connectionStatus {
-  display: inline-flex;
-  align-items: center;
-  gap: 8px;
-  padding: 12px 20px;
-  border-radius: 12px;
-  font-weight: 600;
-  margin-top: 16px;
-}
-
-.contactBadge {
-  background: linear-gradient(
-    135deg,
-    rgba(16, 185, 129, 0.1),
-    rgba(16, 185, 129, 0.05)
-  );
-  border: 2px solid #10b981;
-  color: #10b981;
-}
-
-.publicBadge {
-  background: linear-gradient(
-    135deg,
-    rgba(59, 130, 246, 0.1),
-    rgba(59, 130, 246, 0.05)
-  );
-  border: 2px solid #3b82f6;
-  color: #3b82f6;
-}
-
 .profileContent {
   display: grid;
   grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
@@ -103,6 +75,8 @@
 .aboutSection {
   grid-column: 1 / -1;
   margin-bottom: 20px;
+  position: relative;
+  z-index: 1;
 }
 
 .aboutContent {
@@ -330,6 +304,7 @@
   font-weight: 500;
   color: var(--color-text);
   transition: all 0.3s ease;
+  position: relative;
 }
 
 .programmingLanguageTag:hover {
@@ -345,6 +320,7 @@
   border-radius: 50%;
   flex-shrink: 0;
   margin-left: 4px;
+  transition: all 0.3s ease;
 }
 
 .skillLevelBeginner {
@@ -359,26 +335,66 @@
   background: #22c55e;
 }
 
+.skillLevelTooltip {
+  position: absolute;
+  top: -40px;
+  left: 50%;
+  transform: translateX(-50%);
+  background: var(--color-bg-dark, #1f2937);
+  color: white;
+  padding: 8px 12px;
+  border-radius: 12px;
+  font-size: 12px;
+  font-weight: 600;
+  white-space: nowrap;
+  opacity: 0;
+  visibility: hidden;
+  transition: all 0.3s ease;
+  pointer-events: none;
+  z-index: 10;
+  box-shadow: 0 8px 25px rgba(0, 0, 0, 0.15);
+  border: 2px solid var(--color-input-border);
+}
+
+.skillLevelTooltip::after {
+  content: "";
+  position: absolute;
+  top: 100%;
+  left: 50%;
+  transform: translateX(-50%);
+  border: 6px solid transparent;
+  border-top-color: var(--color-bg-dark, #1f2937);
+}
+
+.programmingLanguageTag:hover .skillLevelTooltip {
+  opacity: 1;
+  visibility: visible;
+  top: -48px;
+  transform: translateX(-50%) translateY(-2px);
+}
+
+/* Skill Level Legend */
 .skillLegend {
   margin-top: 16px;
-  padding: 12px;
+  padding: 16px;
   background: var(--color-bg-secondary);
   border: 2px solid var(--color-input-border);
   border-radius: 12px;
-  text-align: center;
+  transition: all 0.3s ease;
 }
 
 .legendTitle {
-  font-size: 13px;
+  font-size: 14px;
   font-weight: 600;
-  color: var(--color-text);
-  margin-bottom: 8px;
+  color: var(--color-text-secondary);
+  margin-bottom: 12px;
+  text-align: center;
 }
 
 .legendItems {
   display: flex;
   justify-content: center;
-  gap: 16px;
+  gap: 20px;
   flex-wrap: wrap;
 }
 
@@ -388,6 +404,7 @@
   gap: 6px;
   font-size: 12px;
   color: var(--color-text-secondary);
+  font-weight: 500;
 }
 
 .legendDot {
@@ -397,17 +414,228 @@
   flex-shrink: 0;
 }
 
-.restrictedBadge {
-  display: inline-flex;
+@supports not (color: var(--color-bg-dark)) {
+  .skillLevelTooltip {
+    background: #1f2937;
+    border-color: #374151;
+  }
+
+  .skillLevelTooltip::after {
+    border-top-color: #1f2937;
+  }
+}
+
+@media (max-width: 768px) {
+  .skillLevelTooltip {
+    position: fixed;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    max-width: 200px;
+    padding: 12px 16px;
+    font-size: 14px;
+  }
+
+  .skillLevelTooltip::after {
+    display: none;
+  }
+
+  .programmingLanguageTag:hover .skillLevelTooltip {
+    top: 50%;
+    transform: translate(-50%, -50%);
+  }
+
+  .legendItems {
+    gap: 12px;
+  }
+
+  .legendItem {
+    font-size: 11px;
+  }
+}
+
+.actionButtons {
+  display: flex;
+  gap: 12px;
+  justify-content: center;
+  align-items: center;
+  flex-wrap: wrap;
+  margin-top: 24px;
+}
+
+.actionButton {
+  min-width: 160px;
+  padding: 12px 24px;
+  font-weight: 600;
+  border-radius: 12px;
+  transition: all 0.3s ease;
+  display: flex;
   align-items: center;
   gap: 8px;
-  padding: 12px 20px;
+  justify-content: center;
+}
+
+.actionButton:hover:not(:disabled) {
+  transform: translateY(-2px);
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+}
+
+.actionButton:disabled {
+  opacity: 0.7;
+  cursor: not-allowed;
+  transform: none;
+}
+
+.spin {
+  animation: spin 1s linear infinite;
+}
+
+@keyframes spin {
+  from {
+    transform: rotate(0deg);
+  }
+  to {
+    transform: rotate(360deg);
+  }
+}
+
+/* Dropdown Animation */
+.dropdown {
+  animation: dropdownFadeIn 0.2s ease-out;
+}
+
+@keyframes dropdownFadeIn {
+  from {
+    opacity: 0;
+    transform: translateY(-8px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+.dropdownContainer {
+  position: relative;
+  display: inline-block;
+}
+
+.friendButton {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding-right: 12px;
+}
+
+.chevronIcon {
+  transition: transform 0.3s ease;
+  margin-left: 4px;
+}
+
+.dropdownContainer:hover .chevronIcon {
+  transform: rotate(180deg);
+}
+
+.dropdown {
+  position: absolute;
+  top: 100%;
+  left: 0;
+  right: 0;
+  background: var(--color-bg);
+  border: 2px solid var(--color-input-border);
   border-radius: 12px;
-  background: rgba(245, 158, 11, 0.1);
-  border: 2px solid #f59e0b;
-  color: #f59e0b;
+  box-shadow: 0 8px 25px rgba(0, 0, 0, 0.15);
+  z-index: 1001; /* Höhere z-index Wert */
+  overflow: hidden;
+  margin-top: 4px;
+  opacity: 0;
+  visibility: hidden;
+  transform: translateY(-8px);
+  transition: opacity 0.3s ease, visibility 0.3s ease, transform 0.3s ease;
+  pointer-events: none;
+  padding-top: 8px;
+  margin-top: -4px;
+}
+
+.dropdownContainer:hover .dropdown,
+.dropdown:hover {
+  opacity: 1;
+  visibility: visible;
+  transform: translateY(0);
+  pointer-events: auto;
+  transition-delay: 0.1s;
+}
+
+.dropdownItem {
+  width: 100%;
+  padding: 12px 16px;
+  background: transparent;
+  border: none;
+  color: var(--color-text);
+  font-size: 14px;
   font-weight: 600;
-  margin-top: 16px;
+  font-family: inherit;
+  cursor: pointer;
+  transition: all 0.3s ease;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  text-align: left;
+  margin-top: 8px;
+}
+
+.dropdownItem:first-child {
+  margin-top: 0;
+}
+
+.dropdownItem:hover {
+  background: var(--color-bg-secondary);
+  color: #ef4444;
+}
+
+.dropdownItem:hover svg {
+  color: #ef4444;
+}
+
+.contactBadge {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  background: var(--color-success);
+  color: white;
+  padding: 6px 12px;
+  border-radius: 20px;
+  font-size: 12px;
+  font-weight: 600;
+  margin-bottom: 12px;
+}
+
+.publicBadge {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  background: var(--color-bg-secondary);
+  color: var(--color-text-secondary);
+  border: 2px solid var(--color-input-border);
+  padding: 6px 12px;
+  border-radius: 20px;
+  font-size: 12px;
+  font-weight: 600;
+  margin-bottom: 12px;
+}
+
+.restrictedBadge {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 16px 20px;
+  background: rgba(249, 115, 22, 0.1);
+  border: 2px solid #f97316;
+  border-radius: 12px;
+  color: #f97316;
+  font-weight: 600;
+  text-align: center;
+  justify-content: center;
 }
 
 @media (max-width: 768px) {
@@ -427,5 +655,35 @@
 
   .levelText {
     font-size: 14px;
+  }
+
+  .actionButtons {
+    flex-direction: column;
+    width: 100%;
+  }
+
+  .actionButton {
+    width: 100%;
+    min-width: unset;
+  }
+
+  .dropdownContainer {
+    width: 100%;
+  }
+
+  .dropdown {
+    left: 0;
+    right: 0;
+    z-index: 1001;
+    padding-top: 8px;
+    margin-top: -4px;
+  }
+
+  .dropdownContainer:active .dropdown {
+    opacity: 1;
+    visibility: visible;
+    transform: translateY(0);
+    pointer-events: auto;
+    transition-delay: 2s;
   }
 }
