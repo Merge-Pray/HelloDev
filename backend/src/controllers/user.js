@@ -2,7 +2,6 @@ import checkIsMatchable from "../../utils/profileValidator.js";
 import { generateToken } from "../libs/jwt.js";
 import { hashPassword, comparePassword } from "../libs/pw.js";
 import UserModel from "../models/user.js";
-import { updateSuggestionsFromProfile } from "../utils/suggestionManager.js";
 
 export const createUser = async (req, res, next) => {
   try {
@@ -186,7 +185,6 @@ export const updateUserProfile = async (req, res, next) => {
       return next(error);
     }
 
-    await updateSuggestionsFromProfile(updatedUser);
 
     const isNowMatchable = checkIsMatchable(updatedUser);
 

@@ -2,16 +2,18 @@
   "name": "backend",
   "version": "1.0.0",
   "main": "src/server.js",
+  "type": "module",
+  "description": "",
+  "author": "mergepray",
+  "license": "MIT",
+  "keywords": [],
   "scripts": {
     "test": "echo \"Error: no test specified\" && exit 1",
     "start": "node src/server.js",
     "dev": "nodemon src/server.js",
-    "match": "node src/scripts/runMatching.js"
+    "match": "node src/scripts/runMatching.js",
+    "enhance": "node src/scripts/enhanceAliases.js"
   },
-  "keywords": [],
-  "author": "mergepray",
-  "license": "MIT",
-  "description": "",
   "dependencies": {
     "bcrypt": "^6.0.0",
     "cookie-parser": "^1.4.7",
@@ -22,6 +24,5 @@
     "jsonwebtoken": "^9.0.2",
     "mongoose": "^8.17.1",
     "nodemon": "^3.1.10"
-  },
-  "type": "module"
+  }
 }

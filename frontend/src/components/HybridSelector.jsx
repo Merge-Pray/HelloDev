@@ -16,7 +16,6 @@ function HybridSelector({
   const [popularOptions, setPopularOptions] = useState([]);
   const [searchInput, setSearchInput] = useState("");
   const [searchResults, setSearchResults] = useState([]);
-  const [showSearchField, setShowSearchField] = useState(false);
   const [isLoading, setIsLoading] = useState(false);
   const [selectedSuggestionIndex, setSelectedSuggestionIndex] = useState(-1);
 
@@ -41,8 +40,8 @@ function HybridSelector({
       const data = await authenticatedFetch(
         `/api/suggestions/popular/${category}`
       );
-      if (data.success) {
-        setPopularOptions(data.popular);
+      if (data.suggestions) {
+        setPopularOptions(data.suggestions);
       }
     } catch (error) {
       console.error("Failed to fetch popular options:", error);
@@ -58,8 +57,10 @@ function HybridSelector({
           searchInput
         )}`
       );
-      if (data.success) {
+      if (data.suggestions && data.suggestions.length > 0) {
         setSearchResults(data.suggestions);
+      } else {
+        setSearchResults([]);
       }
     } catch (error) {
       console.error("Failed to search options:", error);
@@ -71,7 +72,6 @@ function HybridSelector({
   const handleSelection = (value) => {
     if (!allowMultiple) {
       onSelectionChange([value]);
-      setShowSearchField(false);
       return;
     }
 
@@ -127,7 +127,6 @@ function HybridSelector({
       setSearchInput("");
       setSearchResults([]);
       setSelectedSuggestionIndex(-1);
-      setShowSearchField(false);
     }
   };
 
@@ -183,71 +182,45 @@ function HybridSelector({
       )}
 
       <div className="search-section">
-        {!showSearchField ? (
+        <div className="search-input-container">
+          <input
+            type="text"
+            value={searchInput}
+            onChange={(e) => setSearchInput(e.target.value)}
+            onKeyDown={handleKeyDown}
+            placeholder="Add a custom option..."
+            className="search-input"
+            autoComplete="off"
+          />
+
+          {isLoading && <div className="loading">Searching...</div>}
+
+          {searchResults.length > 0 && (
+            <div className="search-dropdown">
+              {searchResults.map((result, index) => (
+                <div
+                  key={result.id}
+                  className={`search-result ${
+                    index === selectedSuggestionIndex ? "highlighted" : ""
+                  }`}
+                  onClick={() => handleCustomAdd(result.value)}
+                  onMouseEnter={() => setSelectedSuggestionIndex(index)}
+                >
+                  {result.value}
+                </div>
+              ))}
+            </div>
+          )}
+
           <button
             type="button"
-            className="search-toggle"
-            onClick={() => setShowSearchField(true)}
+            onClick={() => handleCustomAdd()}
+            className="add-custom-btn"
+            disabled={!searchInput.trim()}
           >
-            + {showButtons ? "Other / Custom Option" : placeholder}
+            + Add{searchInput.trim() ? ` "${searchInput}"` : ""}
           </button>
-        ) : (
-          <div className="search-input-container">
-            <input
-              type="text"
-              value={searchInput}
-              onChange={(e) => setSearchInput(e.target.value)}
-              onKeyDown={handleKeyDown}
-              placeholder={placeholder}
-              className="search-input"
-              autoFocus
-              autoComplete="off"
-            />
-
-            {isLoading && <div className="loading">Searching...</div>}
-
-            {searchResults.length > 0 && (
-              <div className="search-dropdown">
-                {searchResults.map((result, index) => (
-                  <div
-                    key={result.id}
-                    className={`search-result ${
-                      index === selectedSuggestionIndex ? "highlighted" : ""
-                    }`}
-                    onClick={() => handleCustomAdd(result.value)}
-                    onMouseEnter={() => setSelectedSuggestionIndex(index)}
-                  >
-                    {result.value}
-                  </div>
-                ))}
-              </div>
-            )}
-
-            {searchInput.trim() && (
-              <div className="custom-add">
-                <button
-                  type="button"
-                  onClick={() => handleCustomAdd()}
-                  className="add-custom-btn"
-                >
-                  + Add "{searchInput}"
-                </button>
-              </div>
-            )}
-
-            <button
-              type="button"
-              onClick={() => {
-                setShowSearchField(false);
-                setSearchInput("");
-                setSearchResults([]);
-              }}
-              className="cancel-search"
-            >
-              Cancel
-            </button>
-          </div>
-        )}
+        </div>
       </div>
 
       {selectedValues.length > 0 && (
