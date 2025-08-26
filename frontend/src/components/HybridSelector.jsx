@@ -157,7 +157,7 @@ function HybridSelector({
       {showButtons && popularOptions.length > 0 && (
         <div className="popular-options">
           <div className="button-grid">
-            {popularOptions.map((option) => {
+            {popularOptions.map((option, index) => {
               const isSelected = showSkillLevel
                 ? selectedValues.some((item) =>
                     Array.isArray(item)
@@ -168,7 +168,7 @@ function HybridSelector({
 
               return (
                 <button
-                  key={option.id}
+                  key={`${option.value}-${index}`}
                   type="button"
                   className={`option-button ${isSelected ? "selected" : ""}`}
                   onClick={() => handleSelection(option.value)}
@@ -199,7 +199,7 @@ function HybridSelector({
             <div className="search-dropdown">
               {searchResults.map((result, index) => (
                 <div
-                  key={result.id}
+                  key={result.value || index}
                   className={`search-result ${
                     index === selectedSuggestionIndex ? "highlighted" : ""
                   }`}
@@ -231,10 +231,14 @@ function HybridSelector({
                 if (showSkillLevel && Array.isArray(value)) {
                   const [language, skillLevel] = value;
                   return (
-                    <div key={index} className="selected-skill-item">
+                    <div
+                      key={`skill-item-${index}-${language}`}
+                      className="selected-skill-item"
+                    >
                       <div className="skill-header">
                         <span className="skill-language">{language}</span>
                         <button
+                          key={`remove-skill-${index}-${language}`}
                           type="button"
                           onClick={() => handleSelection(language)}
                           className="remove-tag"
@@ -271,9 +275,13 @@ function HybridSelector({
                 } else {
                   const displayValue = Array.isArray(value) ? value[0] : value;
                   return (
-                    <span key={index} className="selected-tag">
+                    <span
+                      key={`regular-tag-${index}-${displayValue}`}
+                      className="selected-tag"
+                    >
                       {displayValue}
                       <button
+                        key={`remove-tag-${index}-${displayValue}`}
                         type="button"
                         onClick={() => handleSelection(displayValue)}
                         className="remove-tag"
