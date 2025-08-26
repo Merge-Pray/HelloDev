@@ -4,9 +4,6 @@ import UserModel from "../models/user.js";
 export const getUserMatches = async (req, res, next) => {
   try {
     const userId = req.user._id;
-    const { page = 1, limit = 20 } = req.query;
-
-    const skip = (page - 1) * limit;
 
     const matches = await MatchModel.find({
       $or: [{ user1: userId }, { user2: userId }],
@@ -15,16 +12,14 @@ export const getUserMatches = async (req, res, next) => {
       .populate({
         path: "user1",
         select:
-          "username nickname avatar status aboutMe country programmingLanguages techStack techArea languages preferredOS createdAt",
+          "username nickname avatar status aboutMe country programmingLanguages techStack techArea languages preferredOS createdAt devExperience",
       })
       .populate({
         path: "user2",
         select:
-          "username nickname avatar status aboutMe country programmingLanguages techStack techArea languages preferredOS createdAt",
+          "username nickname avatar status aboutMe country programmingLanguages techStack techArea languages preferredOS createdAt devExperience",
       })
       .sort({ compatibilityScore: -1, createdAt: -1 })
-      .skip(skip)
-      .limit(parseInt(limit))
       .lean();
 
     const formattedMatches = matches.map((match) => {
@@ -32,10 +27,15 @@ export const getUserMatches = async (req, res, next) => {
         match.user1._id.toString() === userId.toString();
       const otherUser = isCurrentUserUser1 ? match.user2 : match.user1;
 
-      const hasUserContacted = match.contactedBy.some(
+      // FIX: Ensure contactedBy is always an array
+      const contactedBy = Array.isArray(match.contactedBy)
+        ? match.contactedBy
+        : [];
+
+      const hasUserContacted = contactedBy.some(
         (contactId) => contactId.toString() === userId.toString()
       );
-      const hasOtherContacted = match.contactedBy.some(
+      const hasOtherContacted = contactedBy.some(
         (contactId) => contactId.toString() !== userId.toString()
       );
 
@@ -54,17 +54,18 @@ export const getUserMatches = async (req, res, next) => {
           techArea: otherUser.techArea,
           languages: otherUser.languages,
           preferredOS: otherUser.preferredOS,
+          devExperience: otherUser.devExperience,
           createdAt: otherUser.createdAt,
         },
-        compatibilityScore: match.compatibilityScore,
+        compatibilityScore: match.compatibilityScore || 0,
         scores: {
           technical: match.scores?.technical || 0,
           goalAlignment: match.scores?.goalAlignment || 0,
           personal: match.scores?.personal || 0,
         },
-        badges: match.badges || [],
-        matchType: match.matchType,
-        quality: match.quality,
+        badges: Array.isArray(match.badges) ? match.badges : [],
+        matchType: match.matchType || "networking",
+        quality: match.quality || "fair",
         status: match.status,
         hasUserContacted,
         hasOtherContacted,
@@ -74,20 +75,10 @@ export const getUserMatches = async (req, res, next) => {
       };
     });
 
-    const totalMatches = await MatchModel.countDocuments({
-      $or: [{ user1: userId }, { user2: userId }],
-      status: { $in: ["pending", "contacted"] },
-    });
-
     res.json({
       success: true,
       matches: formattedMatches,
-      pagination: {
-        currentPage: parseInt(page),
-        totalPages: Math.ceil(totalMatches / limit),
-        hasNextPage: formattedMatches.length === parseInt(limit),
-        totalMatches,
-      },
+      totalMatches: formattedMatches.length,
     });
   } catch (error) {
     console.error("Error fetching user matches:", error);
@@ -121,7 +112,7 @@ export const contactMatch = async (req, res, next) => {
     }
 
     if (match.status === "dismissed") {
-      return res.status(400).json({
+      return res.status(404).json({
         success: false,
         message: "This match has been dismissed",
       });
@@ -146,14 +137,24 @@ export const contactMatch = async (req, res, next) => {
     }
 
     match.contactedBy.push(userId);
-
     if (match.contactedBy.length === 1) {
       match.status = "contacted";
     } else if (match.contactedBy.length === 2) {
       match.status = "connected";
       match.connectedAt = new Date();
+      const user1Id = match.user1;
+      const user2Id = match.user2;
+      await UserModel.findByIdAndUpdate(
+        user1Id,
+        { $addToSet: { contacts: user2Id } },
+        { new: true }
+      );
+      await UserModel.findByIdAndUpdate(
+        user2Id,
+        { $addToSet: { contacts: user1Id } },
+        { new: true }
+      );
     }
-
     await match.save();
 
     const isCurrentUserUser1 = match.user1.toString() === userId.toString();
@@ -166,7 +167,7 @@ export const contactMatch = async (req, res, next) => {
       success: true,
       message:
         match.status === "connected"
-          ? `You and ${otherUser.nickname} are now connected!`
+          ? `You and ${otherUser.nickname} are now connected! You can now see each other's posts and interact.`
           : `Contact request sent to ${otherUser.nickname}`,
       match: {
         matchId: match._id,
@@ -174,6 +175,10 @@ export const contactMatch = async (req, res, next) => {
         contactedBy: match.contactedBy,
         connectedAt: match.connectedAt,
       },
+      ...(match.status === "connected" && {
+        contactsUpdated: true,
+        message: `You and ${otherUser.nickname} are now contacts! You can see each other's posts in your feed.`,
+      }),
     });
   } catch (error) {
     console.error("Error contacting match:", error);
