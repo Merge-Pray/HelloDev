@@ -1,18 +1,14 @@
 .settingsContainer {
-  max-width: 800px;
+  max-width: 1200px;
   margin: 0 auto;
-  padding: 2rem;
+  padding: 20px;
   background: var(--color-bg);
   min-height: 100vh;
 }
 
 .settingsHeader {
-  display: flex;
-  align-items: center;
-  gap: 1rem;
-  margin-bottom: 2rem;
-  padding-bottom: 1rem;
-  border-bottom: 2px solid var(--color-card-border);
+  margin-bottom: 32px;
+  text-align: center;
 }
 
 .settingsHeader h1 {
@@ -29,7 +25,7 @@
 .settingsContent {
   display: flex;
   flex-direction: column;
-  gap: 2rem;
+  gap: 20px;
 }
 
 .settingsSection {
@@ -46,7 +42,9 @@
 }
 
 .settingsSectionHeader {
-  margin-bottom: 1.5rem;
+  margin-bottom: 20px;
+  padding-bottom: 12px;
+  border-bottom: 2px solid var(--color-input-border);
 }
 
 .settingsSectionHeader h2 {
@@ -54,6 +52,9 @@
   font-size: 1.25rem;
   font-weight: 600;
   margin: 0;
+  display: flex;
+  align-items: center;
+  gap: 8px;
 }
 
 .settingsItem {
@@ -61,11 +62,11 @@
   align-items: center;
   justify-content: space-between;
   gap: 1rem;
-  padding: 1rem 0;
+  padding: 16px 0;
 }
 
 .settingsItem:not(:last-child) {
-  border-bottom: 1px solid var(--color-card-border);
+  border-bottom: 1px solid var(--color-input-border);
 }
 
 .settingsItemInfo {
@@ -75,12 +76,12 @@
 .settingsItemInfo h3 {
   color: var(--color-text);
   font-size: 1rem;
-  font-weight: 500;
-  margin: 0 0 0.25rem 0;
+  font-weight: 600;
+  margin: 0 0 4px 0;
 }
 
 .settingsItemInfo p {
-  color: var(--color-text-muted);
+  color: var(--color-text-secondary);
   font-size: 0.875rem;
   margin: 0;
   line-height: 1.4;
@@ -93,28 +94,34 @@
 .logoutBtn {
   display: flex;
   align-items: center;
-  gap: 0.5rem;
-  background: var(--color-danger, #dc3545);
+  gap: 8px;
+  background: #ef4444;
   color: white;
   border: none;
-  border-radius: 8px;
-  padding: 0.75rem 1.5rem;
-  font-size: 0.875rem;
-  font-weight: 500;
+  border-radius: 12px;
+  padding: 12px 24px;
+  font-size: 14px;
+  font-weight: 600;
   cursor: pointer;
-  transition: all 0.2s ease;
+  transition: all 0.3s ease;
   min-width: 140px;
   justify-content: center;
 }
 
 .logoutBtn:hover:not(:disabled) {
-  background: var(--color-danger-dark, #c82333);
-  transform: translateY(-1px);
-  box-shadow: 0 4px 8px rgba(220, 53, 69, 0.3);
+  background: #dc2626;
+  transform: translateY(-2px);
+  box-shadow: 0 4px 12px rgba(239, 68, 68, 0.3);
 }
 
 .logoutBtn:active:not(:disabled) {
   transform: translateY(0);
+}
+
+.logoutBtn:disabled {
+  opacity: 0.6;
+  cursor: not-allowed;
+  transform: none;
 }
 
 /* Modal Styles */
@@ -133,55 +140,55 @@
 }
 
 .modalContent {
-  background: var(--color-bg-secondary);
-  border: 2px solid var(--color-card-border);
+  background: var(--color-bg);
+  border: 2px solid var(--color-input-border);
   border-radius: 12px;
   max-width: 400px;
   width: 90%;
   margin: 1rem;
-  animation: modalSlideIn 0.2s ease-out;
-  box-shadow: 0 8px 32px rgba(0, 0, 0, 0.2);
+  animation: modalSlideIn 0.3s ease-out;
+  box-shadow: 0 8px 25px rgba(0, 0, 0, 0.15);
 }
 
 .modalHeader {
   display: flex;
   align-items: center;
   justify-content: space-between;
-  padding: 1.5rem 1.5rem 0 1.5rem;
+  padding: 20px 20px 0 20px;
 }
 
 .modalIcon {
-  color: var(--color-warning, #ffc107);
+  color: #f59e0b;
 }
 
 .modalClose {
   background: none;
   border: none;
-  color: var(--color-text-muted);
+  color: var(--color-text-secondary);
   cursor: pointer;
-  padding: 0.25rem;
-  border-radius: 4px;
-  transition: all 0.2s ease;
+  padding: 4px;
+  border-radius: 6px;
+  transition: all 0.3s ease;
 }
 
 .modalClose:hover {
-  background: var(--color-bg);
+  background: var(--color-bg-secondary);
   color: var(--color-text);
 }
 
 .modalBody {
-  padding: 1rem 1.5rem;
+  padding: 16px 20px;
 }
 
 .modalBody h3 {
   color: var(--color-text);
   font-size: 1.25rem;
   font-weight: 600;
-  margin: 0 0 0.5rem 0;
+  margin: 0 0 8px 0;
 }
 
 .modalBody p {
-  color: var(--color-text-muted);
+  color: var(--color-text-secondary);
   font-size: 0.875rem;
   margin: 0;
   line-height: 1.4;
@@ -189,53 +196,89 @@
 
 .modalFooter {
   display: flex;
-  gap: 0.75rem;
-  padding: 1.5rem;
+  gap: 12px;
+  padding: 20px;
   justify-content: flex-end;
 }
 
 .btnSecondary {
-  background: var(--color-bg);
+  background: var(--color-bg-secondary);
   color: var(--color-text);
-  border: 2px solid var(--color-card-border);
-  border-radius: 8px;
-  padding: 0.75rem 1.5rem;
-  font-size: 0.875rem;
-  font-weight: 500;
+  border: 2px solid var(--color-input-border);
+  border-radius: 12px;
+  padding: 12px 24px;
+  font-size: 14px;
+  font-weight: 600;
   cursor: pointer;
-  transition: all 0.2s ease;
+  transition: all 0.3s ease;
 }
 
 .btnSecondary:hover:not(:disabled) {
-  background: var(--color-bg-secondary);
+  background: var(--color-bg);
   border-color: var(--color-primary);
+  transform: translateY(-2px);
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
 }
 
 .btnDanger {
   display: flex;
   align-items: center;
-  gap: 0.5rem;
-  background: var(--color-danger, #dc3545);
+  gap: 8px;
+  background: #ef4444;
   color: white;
   border: none;
-  border-radius: 8px;
-  padding: 0.75rem 1.5rem;
-  font-size: 0.875rem;
-  font-weight: 500;
+  border-radius: 12px;
+  padding: 12px 24px;
+  font-size: 14px;
+  font-weight: 600;
   cursor: pointer;
-  transition: all 0.2s ease;
+  transition: all 0.3s ease;
   min-width: 140px;
   justify-content: center;
 }
 
 .btnDanger:hover:not(:disabled) {
-  background: var(--color-danger-dark, #c82333);
+  background: #dc2626;
+  transform: translateY(-2px);
+  box-shadow: 0 4px 12px rgba(239, 68, 68, 0.3);
 }
 
 .btnSecondary:disabled,
 .btnDanger:disabled {
   opacity: 0.6;
   cursor: not-allowed;
+  transform: none;
+}
+
+.errorAlert {
+  background: rgba(239, 68, 68, 0.1);
+  border: 2px solid #ef4444;
+  border-radius: 12px;
+  padding: 16px;
+  margin-bottom: 20px;
+}
+
+.errorHeader {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  color: #ef4444;
+  font-weight: 600;
+}
+
+.errorClose {
+  background: none;
+  border: none;
+  color: #ef4444;
+  cursor: pointer;
+  padding: 4px;
+  border-radius: 6px;
+  margin-left: auto;
+  transition: all 0.3s ease;
+}
+
+.errorClose:hover {
+  background: rgba(239, 68, 68, 0.2);
 }
 
 @keyframes modalSlideIn {
@@ -252,7 +295,7 @@
 /* Responsive Design */
 @media (max-width: 768px) {
   .settingsContainer {
-    padding: 1rem;
+    padding: 16px;
   }
 
   .settingsHeader h1 {
@@ -262,7 +305,7 @@
   .settingsItem {
     flex-direction: column;
     align-items: flex-start;
-    gap: 1rem;
+    gap: 16px;
   }
 
   .settingsItemControl {

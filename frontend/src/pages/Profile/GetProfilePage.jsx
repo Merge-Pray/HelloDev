@@ -1,4 +1,4 @@
-import { useState, useEffect } from "react";
+import { useState, useEffect, useRef } from "react";
 import { useParams, useNavigate } from "react-router";
 import {
   MapPin,
@@ -6,7 +6,6 @@ import {
   Globe,
   Code,
   Heart,
-  Users,
   Monitor,
   Gamepad2,
   Coffee,
@@ -19,8 +18,13 @@ import {
   Target,
   Wrench,
   Lock,
-  Eye,
   ArrowLeft,
+  MessageCircle,
+  UserPlus,
+  UserMinus,
+  Loader,
+  ChevronDown,
+  UserCheck,
 } from "lucide-react";
 import useUserStore from "../../hooks/userstore";
 import { authenticatedFetch } from "../../utils/authenticatedFetch";
@@ -34,6 +38,9 @@ export default function GetProfilePage() {
   const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState(null);
   const [isContact, setIsContact] = useState(false);
+  const [contactActionLoading, setContactActionLoading] = useState(false);
+  const [showDropdown, setShowDropdown] = useState(false);
+  const dropdownRef = useRef(null);
 
   useEffect(() => {
     if (!currentUser) {
@@ -46,18 +53,27 @@ export default function GetProfilePage() {
       return;
     }
 
-    // ✅ Frontend-Check: Eigenes Profil direkt abfangen
     if (userId === currentUser._id) {
       console.log("Own profile detected, redirecting to /profile");
       navigate("/profile");
       return;
     }
 
-    console.log("Fetching profile for userId:", userId);
-    console.log("Current user ID:", currentUser._id);
-
     fetchProfile();
   }, [currentUser, userId, navigate]);
+
+  useEffect(() => {
+    const handleClickOutside = (event) => {
+      if (dropdownRef.current && !dropdownRef.current.contains(event.target)) {
+        setShowDropdown(false);
+      }
+    };
+
+    document.addEventListener("mousedown", handleClickOutside);
+    return () => {
+      document.removeEventListener("mousedown", handleClickOutside);
+    };
+  }, []);
 
   const fetchProfile = async () => {
     try {
@@ -68,7 +84,6 @@ export default function GetProfilePage() {
 
       console.log("API Response:", data);
 
-      // ✅ Zusätzlicher Backend-Check
       if (data.isOwnProfile) {
         console.log("Backend says it's own profile, redirecting...");
         navigate("/profile");
@@ -94,46 +109,115 @@ export default function GetProfilePage() {
     }
   };
 
-  if (isLoading) {
-    return (
-      <div className="page centered">
-        <div className="card enhanced">
-          <div style={{ textAlign: "center", padding: "40px" }}>
-            <div className="loading-spinner"></div>
-            <p>Loading profile...</p>
+  const handleSendMessage = () => {
+    navigate(`/chat?userId=${userId}&username=${profileData.username}`);
+  };
+
+  const handleSendFriendRequest = async () => {
+    try {
+      setContactActionLoading(true);
+
+      // Simuliere API-Aufruf mit Delay (placeholder)
+      await new Promise((resolve) => setTimeout(resolve, 1000));
+
+      console.log(`Would send friend request to user ${userId}`);
+      // TODO: Hier wird später die echte API-Anfrage implementiert
+
+      // Placeholder: Nach erfolgreichem Senden der Anfrage könnte man den Status ändern
+      // setIsContact(true); // Nur wenn die Anfrage sofort akzeptiert wird
+    } catch (err) {
+      console.error("Error sending friend request:", err);
+      setError("Failed to send friend request");
+    } finally {
+      setContactActionLoading(false);
+    }
+  };
+
+  const handleRemoveContact = async () => {
+    try {
+      setContactActionLoading(true);
+      setShowDropdown(false);
+
+      // Simuliere API-Aufruf mit Delay (placeholder)
+      await new Promise((resolve) => setTimeout(resolve, 1000));
+
+      console.log(`Would remove contact ${userId}`);
+      // TODO: Hier wird später die echte API-Anfrage implementiert
+
+      // Placeholder: Nach erfolgreichem Entfernen den Status ändern
+      setIsContact(false);
+    } catch (err) {
+      console.error("Error removing contact:", err);
+      setError("Failed to remove contact");
+    } finally {
+      setContactActionLoading(false);
+    }
+  };
+
+  const toggleDropdown = () => {
+    setShowDropdown(!showDropdown);
+  };
+
+  const renderActionButtons = () => {
+    if (contactActionLoading) {
+      return (
+        <div className={styles.actionButtons}>
+          <button className={`btn btn-primary ${styles.actionButton}`} disabled>
+            <Loader size={16} className={styles.spin} />
+            <span>Loading...</span>
+          </button>
+        </div>
+      );
+    }
+
+    if (isContact) {
+      return (
+        <div className={styles.actionButtons}>
+          <div className={styles.dropdownContainer} ref={dropdownRef}>
+            <button
+              className={`btn btn-secondary ${styles.actionButton} ${styles.friendButton}`}
+              onClick={toggleDropdown}
+            >
+              <UserCheck size={16} />
+              <span>Friend</span>
+              <ChevronDown size={14} className={styles.chevronIcon} />
+            </button>
+
+            {showDropdown && (
+              <div className={styles.dropdown}>
+                <button
+                  className={styles.dropdownItem}
+                  onClick={handleRemoveContact}
+                >
+                  <UserMinus size={16} />
+                  <span>Remove Friend</span>
+                </button>
+              </div>
+            )}
           </div>
-        </div>
-      </div>
-    );
-  }
-
-  if (error) {
-    return (
-      <div className="page centered">
-        <div className="card enhanced">
-          <div className="alert alert-error">{error}</div>
-          <button className="btn btn-primary" onClick={() => navigate("/home")}>
-            <ArrowLeft size={16} />
-            Back to Home
+          <button
+            className={`btn btn-primary ${styles.actionButton}`}
+            onClick={handleSendMessage}
+          >
+            <MessageCircle size={16} />
+            <span>Send Message</span>
           </button>
         </div>
-      </div>
-    );
-  }
+      );
+    }
 
-  if (!profileData) {
     return (
-      <div className="page centered">
-        <div className="card enhanced">
-          <div className="alert alert-error">No profile data available</div>
-          <button className="btn btn-primary" onClick={() => navigate("/home")}>
-            <ArrowLeft size={16} />
-            Back to Home
-          </button>
-        </div>
+      <div className={styles.actionButtons}>
+        <button
+          className={`btn btn-primary ${styles.actionButton}`}
+          onClick={handleSendFriendRequest}
+        >
+          <UserPlus size={16} />
+          <span>Send Friend Request</span>
+        </button>
       </div>
     );
-  }
+  };
 
   const hasData = (data) => {
     if (Array.isArray(data)) return data.length > 0;
@@ -225,11 +309,20 @@ export default function GetProfilePage() {
       }
 
       if (numericLevel >= 1 && numericLevel <= 3) {
-        return { className: "skillLevelBeginner" };
+        return {
+          className: "skillLevelBeginner",
+          label: `Beginner (${numericLevel}/10)`,
+        };
       } else if (numericLevel >= 4 && numericLevel <= 7) {
-        return { className: "skillLevelIntermediate" };
+        return {
+          className: "skillLevelIntermediate",
+          label: `Intermediate (${numericLevel}/10)`,
+        };
       } else if (numericLevel >= 8 && numericLevel <= 10) {
-        return { className: "skillLevelAdvanced" };
+        return {
+          className: "skillLevelAdvanced",
+          label: `Advanced (${numericLevel}/10)`,
+        };
       }
 
       return null;
@@ -269,11 +362,16 @@ export default function GetProfilePage() {
                   <Code size={14} className={styles.skillIcon} />
                   <span className={styles.skillName}>{skillName}</span>
                   {skillInfo && (
-                    <span
-                      className={`${styles.skillLevel} ${
-                        styles[skillInfo.className]
-                      }`}
-                    ></span>
+                    <>
+                      <span
+                        className={`${styles.skillLevel} ${
+                          styles[skillInfo.className]
+                        }`}
+                      ></span>
+                      <div className={styles.skillLevelTooltip}>
+                        {skillInfo.label}
+                      </div>
+                    </>
                   )}
                 </div>
               );
@@ -310,31 +408,7 @@ export default function GetProfilePage() {
             if (Array.isArray(item)) return item[1] != null;
             if (typeof item === "object" && item.level) return true;
             return false;
-          }) && (
-            <div className={styles.skillLegend}>
-              <div className={styles.legendTitle}>Skill Levels:</div>
-              <div className={styles.legendItems}>
-                <div className={styles.legendItem}>
-                  <span
-                    className={`${styles.legendDot} ${styles.skillLevelBeginner}`}
-                  ></span>
-                  <span>Beginner (1-3)</span>
-                </div>
-                <div className={styles.legendItem}>
-                  <span
-                    className={`${styles.legendDot} ${styles.skillLevelIntermediate}`}
-                  ></span>
-                  <span>Intermediate (4-7)</span>
-                </div>
-                <div className={styles.legendItem}>
-                  <span
-                    className={`${styles.legendDot} ${styles.skillLevelAdvanced}`}
-                  ></span>
-                  <span>Advanced (8-10)</span>
-                </div>
-              </div>
-            </div>
-          )}
+          })}
       </div>
     );
   };
@@ -502,6 +576,47 @@ export default function GetProfilePage() {
     return statusMap[status] || status || "Developer";
   };
 
+  if (isLoading) {
+    return (
+      <div className="page centered">
+        <div className="card enhanced">
+          <div style={{ textAlign: "center", padding: "40px" }}>
+            <div className="loading-spinner"></div>
+            <p>Loading profile...</p>
+          </div>
+        </div>
+      </div>
+    );
+  }
+
+  if (error) {
+    return (
+      <div className="page centered">
+        <div className="card enhanced">
+          <div className="alert alert-error">{error}</div>
+          <button className="btn btn-primary" onClick={() => navigate("/home")}>
+            <ArrowLeft size={16} />
+            Back to Home
+          </button>
+        </div>
+      </div>
+    );
+  }
+
+  if (!profileData) {
+    return (
+      <div className="page centered">
+        <div className="card enhanced">
+          <div className="alert alert-error">No profile data available</div>
+          <button className="btn btn-primary" onClick={() => navigate("/home")}>
+            <ArrowLeft size={16} />
+            Back to Home
+          </button>
+        </div>
+      </div>
+    );
+  }
+
   return (
     <div className="page">
       <div className={styles.profileContainer}>
@@ -549,19 +664,8 @@ export default function GetProfilePage() {
             {getStatusLabel(profileData.status)}
           </p>
 
-          <div className={styles.connectionStatus}>
-            {isContact ? (
-              <div className={styles.contactBadge}>
-                <Users size={16} />
-                <span>Contact</span>
-              </div>
-            ) : (
-              <div className={styles.publicBadge}>
-                <Eye size={16} />
-                <span>Public Profile</span>
-              </div>
-            )}
-          </div>
+          {/* Action Buttons */}
+          {renderActionButtons()}
         </div>
 
         {/* Profile Content */}
