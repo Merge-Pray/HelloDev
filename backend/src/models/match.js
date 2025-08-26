@@ -79,6 +79,22 @@ const MatchSchema = new Schema(
       default: "pending",
     },
 
+    contactedBy: [
+      {
+        type: Schema.Types.ObjectId,
+        ref: "User",
+      },
+    ],
+
+    dismissedBy: {
+      type: Schema.Types.ObjectId,
+      ref: "User",
+    },
+
+    connectedAt: {
+      type: Date,
+    },
+
     lastCalculated: {
       type: Date,
       default: Date.now,

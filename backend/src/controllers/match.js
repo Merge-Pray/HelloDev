@@ -8,31 +8,36 @@ export const getUserMatches = async (req, res, next) => {
 
     const skip = (page - 1) * limit;
 
-    
     const matches = await MatchModel.find({
       $or: [{ user1: userId }, { user2: userId }],
-      status: "pending", 
+      status: { $in: ["pending", "contacted"] },
     })
       .populate({
         path: "user1",
         select:
-          "username nickname avatar aboutMe country city techArea programmingLanguages devExperience status isOnline lastSeen",
+          "username nickname avatar status aboutMe country programmingLanguages techStack techArea languages preferredOS createdAt",
       })
       .populate({
         path: "user2",
         select:
-          "username nickname avatar aboutMe country city techArea programmingLanguages devExperience status isOnline lastSeen",
+          "username nickname avatar status aboutMe country programmingLanguages techStack techArea languages preferredOS createdAt",
       })
       .sort({ compatibilityScore: -1, createdAt: -1 })
       .skip(skip)
       .limit(parseInt(limit))
       .lean();
 
-    
     const formattedMatches = matches.map((match) => {
       const isCurrentUserUser1 =
         match.user1._id.toString() === userId.toString();
       const otherUser = isCurrentUserUser1 ? match.user2 : match.user1;
+
+      const hasUserContacted = match.contactedBy.some(
+        (contactId) => contactId.toString() === userId.toString()
+      );
+      const hasOtherContacted = match.contactedBy.some(
+        (contactId) => contactId.toString() !== userId.toString()
+      );
 
       return {
         matchId: match._id,
@@ -41,15 +46,15 @@ export const getUserMatches = async (req, res, next) => {
           username: otherUser.username,
           nickname: otherUser.nickname,
           avatar: otherUser.avatar,
+          status: otherUser.status,
           aboutMe: otherUser.aboutMe,
           country: otherUser.country,
-          city: otherUser.city,
-          techArea: otherUser.techArea,
           programmingLanguages: otherUser.programmingLanguages,
-          devExperience: otherUser.devExperience,
-          status: otherUser.status,
-          isOnline: otherUser.isOnline,
-          lastSeen: otherUser.lastSeen,
+          techStack: otherUser.techStack,
+          techArea: otherUser.techArea,
+          languages: otherUser.languages,
+          preferredOS: otherUser.preferredOS,
+          createdAt: otherUser.createdAt,
         },
         compatibilityScore: match.compatibilityScore,
         scores: {
@@ -60,6 +65,10 @@ export const getUserMatches = async (req, res, next) => {
         badges: match.badges || [],
         matchType: match.matchType,
         quality: match.quality,
+        status: match.status,
+        hasUserContacted,
+        hasOtherContacted,
+        canContact: !hasUserContacted,
         createdAt: match.createdAt,
         lastCalculated: match.lastCalculated,
       };
@@ -67,7 +76,7 @@ export const getUserMatches = async (req, res, next) => {
 
     const totalMatches = await MatchModel.countDocuments({
       $or: [{ user1: userId }, { user2: userId }],
-      status: "pending",
+      status: { $in: ["pending", "contacted"] },
     });
 
     res.json({
@@ -82,6 +91,146 @@ export const getUserMatches = async (req, res, next) => {
     });
   } catch (error) {
     console.error("Error fetching user matches:", error);
+    next(error);
+  }
+};
+
+export const contactMatch = async (req, res, next) => {
+  try {
+    const userId = req.user._id;
+    const { matchId } = req.params;
+
+    const match = await MatchModel.findById(matchId);
+
+    if (!match) {
+      return res.status(404).json({
+        success: false,
+        message: "Match not found",
+      });
+    }
+
+    const isUserInMatch =
+      match.user1.toString() === userId.toString() ||
+      match.user2.toString() === userId.toString();
+
+    if (!isUserInMatch) {
+      return res.status(403).json({
+        success: false,
+        message: "Not authorized to contact this match",
+      });
+    }
+
+    if (match.status === "dismissed") {
+      return res.status(400).json({
+        success: false,
+        message: "This match has been dismissed",
+      });
+    }
+
+    if (match.status === "connected") {
+      return res.status(400).json({
+        success: false,
+        message: "This match is already connected",
+      });
+    }
+
+    const hasUserContacted = match.contactedBy.some(
+      (contactId) => contactId.toString() === userId.toString()
+    );
+
+    if (hasUserContacted) {
+      return res.status(400).json({
+        success: false,
+        message: "You have already contacted this match",
+      });
+    }
+
+    match.contactedBy.push(userId);
+
+    if (match.contactedBy.length === 1) {
+      match.status = "contacted";
+    } else if (match.contactedBy.length === 2) {
+      match.status = "connected";
+      match.connectedAt = new Date();
+    }
+
+    await match.save();
+
+    const isCurrentUserUser1 = match.user1.toString() === userId.toString();
+    const otherUserId = isCurrentUserUser1 ? match.user2 : match.user1;
+    const otherUser = await UserModel.findById(otherUserId).select(
+      "username nickname"
+    );
+
+    res.json({
+      success: true,
+      message:
+        match.status === "connected"
+          ? `You and ${otherUser.nickname} are now connected!`
+          : `Contact request sent to ${otherUser.nickname}`,
+      match: {
+        matchId: match._id,
+        status: match.status,
+        contactedBy: match.contactedBy,
+        connectedAt: match.connectedAt,
+      },
+    });
+  } catch (error) {
+    console.error("Error contacting match:", error);
+    next(error);
+  }
+};
+
+export const dismissMatch = async (req, res, next) => {
+  try {
+    const userId = req.user._id;
+    const { matchId } = req.params;
+
+    const match = await MatchModel.findById(matchId);
+
+    if (!match) {
+      return res.status(404).json({
+        success: false,
+        message: "Match not found",
+      });
+    }
+
+    const isUserInMatch =
+      match.user1.toString() === userId.toString() ||
+      match.user2.toString() === userId.toString();
+
+    if (!isUserInMatch) {
+      return res.status(403).json({
+        success: false,
+        message: "Not authorized to dismiss this match",
+      });
+    }
+
+    if (match.status === "dismissed") {
+      return res.status(400).json({
+        success: false,
+        message: "This match has already been dismissed",
+      });
+    }
+
+    if (match.status === "connected") {
+      return res.status(400).json({
+        success: false,
+        message: "Cannot dismiss a connected match",
+      });
+    }
+
+    match.status = "dismissed";
+    match.dismissedBy = userId;
+
+    await match.save();
+
+    res.json({
+      success: true,
+      message: "Match dismissed successfully",
+    });
+  } catch (error) {
+    console.error("Error dismissing match:", error);
     next(error);
   }
 };
