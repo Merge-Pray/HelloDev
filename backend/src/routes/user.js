@@ -11,6 +11,7 @@ import {
   getUserData,
   getUserProfile,
   updateUserProfile,
+  getUserContacts,
 } from "../controllers/user.js";
 import { registerValidationRules, validate } from "../middleware/validation.js";
 
@@ -23,5 +24,6 @@ userRouter
   .post("/refresh", refreshToken)
   .get("/auth-status", checkAuthStatus)
   .get("/user", authorizeJwt, getUserData)
+  .get("/contacts", authorizeJwt, getUserContacts)
   .get("/profile/:userId", authorizeJwt, getUserProfile)
   .patch("/update", authorizeJwt, updateUserProfile);
