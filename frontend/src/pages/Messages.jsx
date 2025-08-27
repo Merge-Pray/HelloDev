@@ -1,4 +1,4 @@
-import SidebarMessages from "../components/Sidebar/SidebarMessages";
+import Sidebar from "../components/Sidebar/Sidebar";
 import styles from "../pages/messages.module.css";
 const Messages = () => {
   return (
@@ -6,7 +6,7 @@ const Messages = () => {
       <main className={styles.center}>Messages</main>
 
       <aside className={styles.right}>
-        <SidebarMessages />
+        <Sidebar />
       </aside>
     </div>
   );

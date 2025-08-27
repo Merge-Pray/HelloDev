@@ -1,4 +1,4 @@
-import SidebarNotifications from "../components/Sidebar/SidebarNotifications";
+import Sidebar from "../components/Sidebar/Sidebar";
 import styles from "./notifications.module.css";
 
 const Notifications = () => {
@@ -7,7 +7,7 @@ const Notifications = () => {
       <main className={styles.center}>Notifications</main>
 
       <aside className={styles.right}>
-        <SidebarNotifications />
+        <Sidebar />
       </aside>
     </div>
   );

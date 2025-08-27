@@ -517,3 +517,44 @@ export const getUserProfile = async (req, res, next) => {
     return next(error);
   }
 };
+
+export const getUserContacts = async (req, res, next) => {
+  try {
+    const userId = req.user._id;
+
+    // Find user and populate contacts with specific fields
+    const user = await UserModel.findById(userId)
+      .populate({
+        path: "contacts",
+        select: "username nickname avatar isOnline lastSeen",
+        options: { sort: { lastSeen: -1 } },
+      })
+      .select("contacts");
+
+    if (!user) {
+      return res.status(404).json({
+        success: false,
+        message: "User not found",
+      });
+    }
+
+    const formattedContacts = user.contacts.map((contact) => ({
+      id: contact._id,
+      username: contact.username,
+      nickname: contact.nickname,
+      avatar: contact.avatar,
+      isOnline: contact.isOnline,
+      lastSeen: contact.lastSeen,
+    }));
+
+    return res.status(200).json({
+      success: true,
+      message: "User contacts retrieved successfully",
+      contacts: formattedContacts,
+      totalContacts: formattedContacts.length,
+    });
+  } catch (error) {
+    console.error("Error fetching user contacts:", error);
+    return next(error);
+  }
+};

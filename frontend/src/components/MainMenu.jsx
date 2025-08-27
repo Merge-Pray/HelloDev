@@ -6,7 +6,7 @@ const topItems = [
   { to: "/home", icon: "/icons/home.svg", label: "Home" },
   { to: "/match", icon: "/icons/matches.svg", label: "Matches" },
   { to: "/search", icon: "/icons/search.svg", label: "Search" },
-  { to: "/messages", icon: "/icons/messages.svg", label: "Messages" },
+  { to: "/chat", icon: "/icons/messages.svg", label: "Chat" },
   {
     to: "/notifications",
     icon: "/icons/notifications.svg",
