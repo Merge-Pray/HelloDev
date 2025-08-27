@@ -362,9 +362,3 @@
     opacity: 1;
   }
 }
-
-/* Remove old heartbeat animation */
-.heartIcon,
-.heartBeat {
-  /* Remove these classes since we're not using them anymore */
-}
