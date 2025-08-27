@@ -4,6 +4,7 @@ import KlipyGifPicker from "./KlipyGifPicker/KlipyGifPicker";
 import styles from "./PostComposer.module.css";
 import { FileImage, Smile, Send, Globe, Users, Lock } from "lucide-react";
 import useUserStore from "../hooks/userstore";
+import { getAvatarUrl } from "../utils/avatarUtils";
 import { authenticatedFetch } from "../utils/authenticatedFetch";
 
 export default function PostComposer({ onPostCreated }) {
@@ -136,7 +137,7 @@ export default function PostComposer({ onPostCreated }) {
       <header className={styles.header}>
         <img
           className={styles.avatar}
-          src={currentUser?.avatar || "/default-avatar.png"}
+          src={getAvatarUrl(currentUser)}
           alt={currentUser?.nickname || currentUser?.username || "User"}
           aria-hidden="true"
         />

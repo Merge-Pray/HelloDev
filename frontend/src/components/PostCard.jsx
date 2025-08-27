@@ -5,6 +5,7 @@ import PostActions from "./PostActions";
 import CommentSection from "./CommentSection";
 import RepostCard from "./RepostCard";
 import useUserStore from "../hooks/userstore";
+import { getAvatarUrl } from "../utils/avatarUtils";
 import styles from "./PostCard.module.css";
 
 export default function PostCard({
@@ -87,7 +88,7 @@ export default function PostCard({
     <article className={cardClass} data-post-id={post._id}>
       <header className={styles.header}>
         <img
-          src={post.author?.avatar || "/default-avatar.png"}
+          src={getAvatarUrl(post.author)}
           alt={post.author?.nickname || post.author?.username || "Unknown User"}
           className={styles.avatar}
           loading="lazy"

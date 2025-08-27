@@ -499,6 +499,7 @@ export const getUserProfile = async (req, res, next) => {
           username: targetUser.username,
           nickname: targetUser.nickname,
           avatar: targetUser.avatar,
+          avatarData: targetUser.avatarData,
           status: targetUser.status,
           aboutMe: targetUser.aboutMe,
           country: targetUser.country,
