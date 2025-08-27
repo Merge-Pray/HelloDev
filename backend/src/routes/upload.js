@@ -41,6 +41,9 @@ router.post(
       const userId = req.user._id;
       const folder = `avatars/${userId}`;
 
+      // Get avatarData from request body
+      const { avatarData } = req.body;
+
       // Upload to Cloudinary
       const result = await new Promise((resolve, reject) => {
         cloudinary.uploader
@@ -67,13 +70,19 @@ router.post(
           .end(req.file.buffer);
       });
 
-      // Update user's avatar field in database
+      // Update user's avatar field and avatarData in database
+      const updateData = {
+        avatar: result.secure_url,
+      };
+
+      // Only update avatarData if provided in request body
+      if (avatarData !== undefined) {
+        updateData.avatarData = avatarData;
+      }
+
       const updatedUser = await UserModel.findByIdAndUpdate(
         userId,
-        {
-          avatar: result.secure_url,
-          avatarData: null, // Clear any existing pixel art data when uploading new image
-        },
+        updateData,
         { new: true, select: "-hashedPassword" }
       );
 
