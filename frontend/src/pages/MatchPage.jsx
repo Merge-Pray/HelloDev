@@ -19,6 +19,7 @@ import {
 import useUserStore from "../hooks/userstore";
 import { authenticatedFetch } from "../utils/authenticatedFetch";
 import styles from "./matchpage.module.css";
+import PopUpMatch from "../components/PopUpMatch";
 
 const MatchPage = () => {
   const currentUser = useUserStore((state) => state.currentUser);
@@ -30,6 +31,8 @@ const MatchPage = () => {
   const [isLoading, setIsLoading] = useState(true);
   const [isActionLoading, setIsActionLoading] = useState(false);
   const [error, setError] = useState(null);
+  const [showConnectedPopup, setShowConnectedPopup] = useState(false);
+  const [connectedMatchData, setConnectedMatchData] = useState(null);
 
   useEffect(() => {
     if (!currentUser) {
@@ -129,11 +132,22 @@ const MatchPage = () => {
       if (response.success) {
         console.log("✅ Successfully contacted match");
 
+        // Check if this resulted in a connection (both users contacted each other)
+        if (response.match?.status === "connected") {
+          console.log("🎉 Connection established!");
+          setConnectedMatchData({
+            user: currentMatch.user,
+            matchId: currentMatch.matchId,
+            connectedAt: response.match.connectedAt,
+          });
+          setShowConnectedPopup(true);
+        } else {
+          // Show success message for contact only
+          alert(response.message || "Successfully contacted match!");
+        }
+
         // Remove from pending matches
         removeMatchFromPending(currentMatch.matchId);
-
-        // Show success message (you can replace with toast notification)
-        alert(response.message || "Successfully contacted match!");
       }
     } catch (err) {
       console.error("❌ Error contacting match:", err);
@@ -141,6 +155,16 @@ const MatchPage = () => {
     } finally {
       setIsActionLoading(false);
     }
+  };
+
+  const handleSendMessage = (userId) => {
+    // Navigate to message/chat page
+    navigate(`/messages/${userId}`);
+  };
+
+  const handleCloseConnectedPopup = () => {
+    setShowConnectedPopup(false);
+    setConnectedMatchData(null);
   };
 
   const handleCancel = async () => {
@@ -187,19 +211,6 @@ const MatchPage = () => {
   const goToPreviousMatch = () => {
     if (currentMatchIndex > 0) {
       setCurrentMatchIndex(currentMatchIndex - 1);
-    }
-  };
-
-  const getQualityBadgeClass = (quality) => {
-    switch (quality) {
-      case "excellent":
-        return styles.qualityExcellent;
-      case "good":
-        return styles.qualityGood;
-      case "fair":
-        return styles.qualityFair;
-      default:
-        return styles.qualityPoor;
     }
   };
 
@@ -338,17 +349,6 @@ const MatchPage = () => {
                 ? "You've seen all your matches! Check back later for new ones."
                 : "We couldn't find any compatible developers right now. Check back later!"}
             </p>
-            {matches.length > 0 && (
-              <p
-                className="subtitle"
-                style={{ marginTop: "10px", fontSize: "0.9rem", opacity: 0.8 }}
-              >
-                Total matches: {matches.length}(
-                {matches.filter((m) => m.hasUserContacted).length} contacted,
-                {matches.filter((m) => m.status === "dismissed").length}{" "}
-                dismissed)
-              </p>
-            )}
             <button
               className="btn btn-primary"
               onClick={() => navigate("/home")}
@@ -369,10 +369,7 @@ const MatchPage = () => {
     <div className="page">
       <div className={styles.matchContainer}>
         <div className={styles.header}>
-          <h1 className="title">New Matches</h1>
-          <p className="subtitle">
-            Match {currentMatchIndex + 1} of {pendingMatches.length}
-          </p>
+          <h1 className="title">Find Your Coding Matches</h1>
         </div>
 
         <div className={styles.matchCard}>
@@ -399,32 +396,6 @@ const MatchPage = () => {
 
           {/* Match Content */}
           <div className={styles.matchContent}>
-            {/* Compatibility Score */}
-            <div className={styles.compatibilityHeader}>
-              <div className={styles.compatibilityScore}>
-                <span className={styles.scoreNumber}>
-                  {currentMatch.compatibilityScore}%
-                </span>
-                <span className={styles.scoreLabel}>Match</span>
-              </div>
-              <div className={styles.matchBadges}>
-                <span
-                  className={`${styles.qualityBadge} ${getQualityBadgeClass(
-                    currentMatch.quality
-                  )}`}
-                >
-                  {currentMatch.quality}
-                </span>
-                <span
-                  className={`${styles.matchTypeBadge} ${getMatchTypeBadgeClass(
-                    currentMatch.matchType
-                  )}`}
-                >
-                  {currentMatch.matchType.replace("-", " ")}
-                </span>
-              </div>
-            </div>
-
             {/* Profile Header */}
             <div className={styles.profileHeader}>
               <div className={styles.avatar}>
@@ -456,7 +427,6 @@ const MatchPage = () => {
                 <p className={styles.status}>{getStatusLabel(user?.status)}</p>
               </div>
             </div>
-
             {/* Profile Details */}
             <div className={styles.profileDetails}>
               {/* About Me */}
@@ -520,7 +490,6 @@ const MatchPage = () => {
               {/* Match Badges */}
               {renderBadges(currentMatch.badges)}
             </div>
-
             {/* Action Buttons */}
             <div className={styles.actionButtons}>
               <button
@@ -552,6 +521,14 @@ const MatchPage = () => {
           </div>
         </div>
       </div>
+
+      {/* Match Connected Popup */}
+      <PopUpMatch
+        isOpen={showConnectedPopup}
+        onClose={handleCloseConnectedPopup}
+        matchData={connectedMatchData}
+        onSendMessage={handleSendMessage}
+      />
     </div>
   );
 };
