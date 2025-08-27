@@ -2,6 +2,7 @@ import express from "express";
 import multer from "multer";
 import { v2 as cloudinary } from "cloudinary";
 import { authorizeJwt } from "../middleware/auth.js";
+import UserModel from "../models/user.js";
 
 const router = express.Router();
 
@@ -26,7 +27,7 @@ const upload = multer({
 });
 
 router.post(
-  "/image",
+  "/avatar",
   authorizeJwt,
   upload.single("image"),
   async (req, res, next) => {
@@ -38,8 +39,9 @@ router.post(
       }
 
       const userId = req.user._id;
-      const folder = `polls/${userId}`;
+      const folder = `avatars/${userId}`;
 
+      // Upload to Cloudinary
       const result = await new Promise((resolve, reject) => {
         cloudinary.uploader
           .upload_stream(
@@ -48,7 +50,7 @@ router.post(
               resource_type: "image",
               allowed_formats: ["jpg", "jpeg", "png", "gif", "webp"],
               transformation: [
-                { width: 1000, height: 1000, crop: "limit" },
+                { width: 400, height: 400, crop: "fill", gravity: "face" }, // Square avatar, face-focused
                 { quality: "auto" },
                 { fetch_format: "auto" },
               ],
@@ -65,13 +67,37 @@ router.post(
           .end(req.file.buffer);
       });
 
+      // Update user's avatar field in database
+      const updatedUser = await UserModel.findByIdAndUpdate(
+        userId,
+        {
+          avatar: result.secure_url,
+          avatarData: null, // Clear any existing pixel art data when uploading new image
+        },
+        { new: true, select: "-hashedPassword" }
+      );
+
+      if (!updatedUser) {
+        const error = new Error("User not found");
+        error.statusCode = 404;
+        return next(error);
+      }
+
       res.status(200).json({
-        message: "Image uploaded successfully",
-        url: result.secure_url,
+        success: true,
+        message: "Avatar uploaded successfully",
+        avatar: result.secure_url,
         public_id: result.public_id,
+        user: {
+          id: updatedUser._id,
+          username: updatedUser.username,
+          nickname: updatedUser.nickname,
+          avatar: updatedUser.avatar,
+          avatarData: updatedUser.avatarData,
+        },
       });
     } catch (error) {
-      console.error("Image upload error:", error);
+      console.error("Avatar upload error:", error);
 
       if (error.message === "File too large") {
         error.statusCode = 400;
@@ -80,72 +106,9 @@ router.post(
         error.statusCode = 400;
       } else {
         error.statusCode = 500;
-        error.message = "Failed to upload image";
+        error.message = "Failed to upload avatar";
       }
 
-      next(error);
-    }
-  }
-);
-
-// Multiple images upload endpoint
-router.post(
-  "/images",
-  authorizeJwt,
-  upload.array("images", 10),
-  async (req, res, next) => {
-    try {
-      if (!req.files || req.files.length === 0) {
-        const error = new Error("No image files provided");
-        error.statusCode = 400;
-        return next(error);
-      }
-
-      const userId = req.user._id;
-      const folder = `polls/${userId}`;
-
-      // Upload all images in parallel
-      const uploadPromises = req.files.map(
-        (file) =>
-          new Promise((resolve, reject) => {
-            cloudinary.uploader
-              .upload_stream(
-                {
-                  folder: folder,
-                  resource_type: "image",
-                  allowed_formats: ["jpg", "jpeg", "png", "gif", "webp"],
-                  transformation: [
-                    { width: 1000, height: 1000, crop: "limit" },
-                    { quality: "auto" },
-                    { fetch_format: "auto" },
-                  ],
-                },
-                (error, result) => {
-                  if (error) {
-                    console.error("Cloudinary upload error:", error);
-                    reject(error);
-                  } else {
-                    resolve({
-                      url: result.secure_url,
-                      public_id: result.public_id,
-                    });
-                  }
-                }
-              )
-              .end(file.buffer);
-          })
-      );
-
-      const results = await Promise.all(uploadPromises);
-
-      res.status(200).json({
-        message: "Images uploaded successfully",
-        images: results,
-      });
-    } catch (error) {
-      console.error("Images upload error:", error);
-      error.statusCode = 500;
-      error.message = "Failed to upload images";
       next(error);
     }
   }
