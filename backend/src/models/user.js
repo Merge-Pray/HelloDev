@@ -62,6 +62,12 @@ const UserSchema = new Schema(
       type: String,
       default: null,
     },
+
+    avatarData: {
+      type: String,
+      default: null,
+    },
+
     aboutMe: {
       type: String,
       maxlength: 500,
