@@ -48,38 +48,22 @@ const MatchPage = () => {
       setIsLoading(true);
       setError(null);
 
-      console.log("🔄 Fetching matches...");
-
       const response = await authenticatedFetch("/api/match");
 
-      console.log("📡 Response received:", response);
-
       if (response.success && response.matches) {
-        console.log("✅ All matches found:", response.matches.length);
-
         setMatches(response.matches);
 
         // Filter nur pending Matches die noch nicht kontaktiert wurden
         const pendingOnly = response.matches.filter((match) => {
           const isPending = match.status === "pending";
-          const hasNotContacted = !match.hasUserContacted;
-
-          console.log(`Match ${match.matchId}:`, {
-            status: match.status,
-            hasUserContacted: match.hasUserContacted,
-            canContact: match.canContact,
-            willShow: isPending && hasNotContacted,
-          });
-
-          return isPending && hasNotContacted;
+          const isContacted =
+            match.status === "contacted" && !match.hasUserContacted;
+          return isPending || isContacted;
         });
-
-        console.log("📋 Pending matches to show:", pendingOnly.length);
 
         setPendingMatches(pendingOnly);
         setCurrentMatchIndex(0);
       } else {
-        console.log("❌ No matches in response");
         setMatches([]);
         setPendingMatches([]);
         if (!response.success) {

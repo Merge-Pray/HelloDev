@@ -35,8 +35,12 @@ export const getUserMatches = async (req, res, next) => {
       const hasUserContacted = contactedBy.some(
         (contactId) => contactId.toString() === userId.toString()
       );
+      const otherUserId = isCurrentUserUser1
+        ? match.user2._id
+        : match.user1._id;
+
       const hasOtherContacted = contactedBy.some(
-        (contactId) => contactId.toString() !== userId.toString()
+        (contactId) => contactId.toString() === otherUserId.toString()
       );
 
       return {

@@ -1,9 +1,11 @@
 import { useState, useEffect } from "react";
-import { X, Heart, Users, MessageCircle, UserPlus } from "lucide-react";
+import { useNavigate } from "react-router";
+import { X, Link, Users, MessageCircle, UserPlus } from "lucide-react";
 import styles from "./popupmatch.module.css";
 
-const MatchConnectedPopup = ({ isOpen, onClose, matchData, onSendMessage }) => {
+const MatchConnectedPopup = ({ isOpen, onClose, matchData }) => {
   const [isVisible, setIsVisible] = useState(false);
+  const navigate = useNavigate();
 
   useEffect(() => {
     if (isOpen) {
@@ -19,7 +21,11 @@ const MatchConnectedPopup = ({ isOpen, onClose, matchData, onSendMessage }) => {
   };
 
   const handleSendMessage = () => {
-    onSendMessage(matchData?.user?.id);
+    // Navigate to chat with the matched user
+    if (matchData?.user?.id || matchData?.user?._id) {
+      const userId = matchData.user.id || matchData.user._id;
+      navigate(`/chat/${userId}`);
+    }
     handleClose();
   };
 
@@ -38,19 +44,19 @@ const MatchConnectedPopup = ({ isOpen, onClose, matchData, onSendMessage }) => {
         {/* Header with Animation */}
         <div className={styles.header}>
           <div className={styles.iconContainer}>
-            <Heart
-              className={`${styles.heartIcon} ${styles.heartBeat}`}
+            <Link
+              className={`${styles.linkIcon} ${styles.linkPulse}`}
               size={48}
             />
             <Users className={styles.usersIcon} size={32} />
           </div>
-          <h2 className={styles.title}>🎉 It's a Match!</h2>
+          <h2 className={styles.title}>🤝 Connected!</h2>
           <p className={styles.subtitle}>
             You and{" "}
             <strong>
               {matchData?.user?.nickname || matchData?.user?.username}
             </strong>{" "}
-            both liked each other!
+            are now connected!
           </p>
         </div>
 
