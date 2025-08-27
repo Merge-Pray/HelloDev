@@ -91,7 +91,7 @@ export default function RegisterPage() {
           _id: data.user.id,
           username: data.user.username,
           nickname: data.user.nickname,
-          avatar: data.user.avatar,
+          avatar: data.user.avatar || null,
         });
         navigate("/buildprofile");
       }

@@ -151,6 +151,22 @@ export default function PostCard({
             loading="lazy"
             decoding="async"
           />
+          {/* light */}
+          <img
+            src="/Klipy/KLIPY - 200 dark text - horizontal.png"
+            alt="Powered by Klipy"
+            className={`${styles.klipyAttribution} ${styles.klipyLight}`}
+            loading="lazy"
+            decoding="async"
+          />
+          {/* dark */}
+          <img
+            src="/Klipy/KLIPY - 200 light text - horizontal.png"
+            alt="Powered by Klipy"
+            className={`${styles.klipyAttribution} ${styles.klipyDark}`}
+            loading="lazy"
+            decoding="async"
+          />
         </div>
       )}
 

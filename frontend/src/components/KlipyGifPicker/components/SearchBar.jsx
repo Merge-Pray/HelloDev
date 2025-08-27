@@ -1,8 +1,8 @@
-import React, { useState, useEffect } from 'react';
-import styles from '../KlipyGifPicker.module.css';
+import React, { useState, useEffect } from "react";
+import styles from "../KlipyGifPicker.module.css";
 
-const SearchBar = ({ onSearch, placeholder = "Search GIFs..." }) => {
-  const [query, setQuery] = useState('');
+const SearchBar = ({ onSearch, placeholder = "Search KLIPY..." }) => {
+  const [query, setQuery] = useState("");
 
   useEffect(() => {
     const timer = setTimeout(() => {
@@ -17,7 +17,7 @@ const SearchBar = ({ onSearch, placeholder = "Search GIFs..." }) => {
   };
 
   const handleKeyDown = (e) => {
-    if (e.key === 'Enter') {
+    if (e.key === "Enter") {
       e.preventDefault();
       onSearch(query.trim());
     }

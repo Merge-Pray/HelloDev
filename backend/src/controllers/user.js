@@ -36,7 +36,6 @@ export const createUser = async (req, res, next) => {
         nickname: newAccount.nickname,
         email: newAccount.email,
         isMatchable: false,
-        avatar: newAccount.avatar,
       },
     });
   } catch (error) {
@@ -51,6 +50,8 @@ export const updateUserProfile = async (req, res, next) => {
       username,
       nickname,
       email,
+      avatar,
+      avatarData,
       aboutMe,
       country,
       city,
@@ -149,6 +150,8 @@ export const updateUserProfile = async (req, res, next) => {
 
     if (aboutMe !== undefined) updateData.aboutMe = aboutMe;
     if (nickname !== undefined) updateData.nickname = nickname;
+    if (avatar !== undefined) updateData.avatar = avatar;
+    if (avatarData !== undefined) updateData.avatarData = avatarData;
     if (country !== undefined) updateData.country = country;
     if (city !== undefined) updateData.city = city;
     if (age !== undefined) updateData.age = age;
@@ -184,7 +187,6 @@ export const updateUserProfile = async (req, res, next) => {
       error.statusCode = 404;
       return next(error);
     }
-
 
     const isNowMatchable = checkIsMatchable(updatedUser);
 
@@ -296,6 +298,7 @@ export const verifyLogin = async (req, res, next) => {
         email: existingUser.email,
         isMatchable: existingUser.isMatchable,
         avatar: existingUser.avatar,
+        avatarData: existingUser.avatarData,
         aboutMe: existingUser.aboutMe,
         country: existingUser.country,
         city: existingUser.city,
@@ -354,6 +357,7 @@ export const getUserData = async (req, res, next) => {
         nickname: user.nickname,
         email: user.email,
         avatar: user.avatar,
+        avatarData: user.avatarData,
         aboutMe: user.aboutMe,
         country: user.country,
         city: user.city,
@@ -412,6 +416,7 @@ export const getUserProfile = async (req, res, next) => {
           nickname: targetUser.nickname,
           email: targetUser.email,
           avatar: targetUser.avatar,
+          avatarData: targetUser.avatarData,
           aboutMe: targetUser.aboutMe,
           country: targetUser.country,
           city: targetUser.city,

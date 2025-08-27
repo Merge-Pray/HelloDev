@@ -1,0 +1,405 @@
+.matchContainer {
+  max-width: 600px;
+  margin: 0 auto;
+  padding: 20px;
+}
+
+.header {
+  text-align: center;
+  margin-bottom: 30px;
+}
+
+.matchCard {
+  position: relative;
+  background: var(--color-card-bg, #ffffff);
+  border-radius: 16px;
+  box-shadow: var(--color-card-shadow, 0 2px 8px rgba(0, 0, 0, 0.1));
+  border: 1px solid var(--color-border, #e5e7eb);
+  overflow: visible; /* Changed from hidden to visible */
+  transition: transform 0.3s ease, box-shadow 0.3s ease;
+}
+
+.matchCard:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 8px 24px rgba(0, 0, 0, 0.12);
+}
+
+/* Navigation Buttons */
+.navButton {
+  position: absolute;
+  top: 50%;
+  transform: translateY(-50%);
+  width: 44px;
+  height: 44px;
+  border-radius: 50%;
+  background: var(--color-card-bg, #ffffff);
+  border: 1px solid var(--color-border, #e5e7eb);
+  color: var(--color-text-secondary, #6b7280);
+  cursor: pointer;
+  transition: all 0.3s ease;
+  z-index: 20; /* Increased from 10 to 20 */
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15); /* Enhanced shadow */
+}
+
+.navButton:hover:not(:disabled) {
+  background: var(--color-primary, #667eea);
+  color: white;
+  transform: translateY(-50%) scale(1.05);
+  box-shadow: 0 6px 16px rgba(102, 126, 234, 0.4); /* Enhanced hover shadow */
+}
+
+.navButton:disabled {
+  opacity: 0.4;
+  cursor: not-allowed;
+}
+
+.navLeft {
+  left: -22px; /* Keeps the original position outside the card */
+}
+
+.navRight {
+  right: -22px; /* Keeps the original position outside the card */
+}
+
+/* Match Content */
+.matchContent {
+  padding: 24px;
+}
+
+/* Profile Header */
+.profileHeader {
+  display: flex;
+  align-items: center;
+  gap: 16px;
+  margin-bottom: 24px;
+  padding-bottom: 20px;
+  border-bottom: 1px solid var(--color-border, #e5e7eb);
+}
+
+.avatar {
+  width: 72px;
+  height: 72px;
+  border-radius: 50%;
+  overflow: hidden;
+  border: 2px solid var(--color-primary, #667eea);
+  background: var(--color-bg-secondary, #f8f9fa);
+  flex-shrink: 0;
+}
+
+.avatarImage {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+}
+
+.profileInfo {
+  flex: 1;
+  min-width: 0;
+}
+
+.profileName {
+  font-size: 1.25rem;
+  font-weight: 700;
+  color: var(--color-text, #1f2937);
+  margin: 0 0 4px 0;
+  line-height: 1.3;
+}
+
+.handle {
+  font-size: 0.875rem;
+  color: var(--color-text-secondary, #6b7280);
+  display: block;
+  margin-bottom: 6px;
+}
+
+.status {
+  font-size: 0.875rem;
+  color: var(--color-primary, #667eea);
+  font-weight: 600;
+  margin: 0;
+}
+
+/* Profile Details */
+.profileDetails {
+  display: flex;
+  flex-direction: column;
+  gap: 20px;
+}
+
+.aboutSection {
+  background: var(--color-bg-secondary, #f8f9fa);
+  padding: 16px;
+  border-radius: 12px;
+  border-left: 3px solid var(--color-primary, #667eea);
+}
+
+.aboutText {
+  color: var(--color-text, #374151);
+  line-height: 1.6;
+  margin: 0;
+  font-size: 0.9rem;
+}
+
+/* Info Grid */
+.infoGrid {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 12px;
+  margin-bottom: 16px;
+}
+
+.infoItem {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  font-size: 0.875rem;
+  color: var(--color-text-secondary, #6b7280);
+  background: var(--color-bg-secondary, #f8f9fa);
+  padding: 8px 12px;
+  border-radius: 8px;
+  border: 1px solid var(--color-border, #e5e7eb);
+}
+
+.infoItem svg {
+  color: var(--color-primary, #667eea);
+  flex-shrink: 0;
+}
+
+/* Skills Section */
+.skillsSection {
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+}
+
+.skillCategory h4 {
+  font-size: 0.875rem;
+  font-weight: 600;
+  color: var(--color-text, #374151);
+  margin: 0 0 8px 0;
+  text-transform: uppercase;
+  letter-spacing: 0.025em;
+}
+
+.skillTags {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+}
+
+.skillTag {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  background: rgba(102, 126, 234, 0.08);
+  color: var(--color-primary, #667eea);
+  padding: 6px 10px;
+  border-radius: 12px;
+  font-size: 0.8rem;
+  font-weight: 500;
+  border: 1px solid rgba(102, 126, 234, 0.15);
+  transition: all 0.2s ease;
+}
+
+.skillTag:hover {
+  background: rgba(102, 126, 234, 0.12);
+  transform: translateY(-1px);
+}
+
+.skillTag svg {
+  flex-shrink: 0;
+}
+
+.skillLevel {
+  font-size: 0.75rem;
+  opacity: 0.8;
+  font-weight: 400;
+}
+
+/* Badges */
+.badges {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+  margin-top: 12px;
+}
+
+.badge {
+  background: rgba(245, 158, 11, 0.1);
+  color: #d97706;
+  padding: 4px 8px;
+  border-radius: 8px;
+  font-size: 0.75rem;
+  font-weight: 600;
+  text-transform: capitalize;
+  border: 1px solid rgba(245, 158, 11, 0.2);
+}
+
+/* Action Buttons */
+.actionButtons {
+  display: flex;
+  gap: 12px;
+  margin-top: 24px;
+  padding-top: 20px;
+  border-top: 1px solid var(--color-border, #e5e7eb);
+}
+
+.actionButton {
+  flex: 1;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  padding: 12px 16px;
+  border: none;
+  border-radius: 8px;
+  font-size: 0.875rem;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  min-height: 44px;
+}
+
+.cancelButton {
+  background: var(--color-bg-secondary, #f8f9fa);
+  color: var(--color-text-secondary, #6b7280);
+  border: 1px solid var(--color-border, #e5e7eb);
+}
+
+.cancelButton:hover:not(:disabled) {
+  background: #ef4444;
+  color: white;
+  border-color: #ef4444;
+  transform: translateY(-1px);
+  box-shadow: 0 2px 8px rgba(239, 68, 68, 0.3);
+}
+
+.gitAddButton {
+  background: var(--color-primary, #667eea);
+  color: white;
+  border: 1px solid var(--color-primary, #667eea);
+  font-family: "SFMono-Regular", "Menlo", "Monaco", "Consolas",
+    "Liberation Mono", "Courier New", monospace;
+}
+
+.gitAddButton:hover:not(:disabled) {
+  background: #5a67d8;
+  border-color: #5a67d8;
+  transform: translateY(-1px);
+  box-shadow: 0 2px 8px rgba(102, 126, 234, 0.3);
+}
+
+.actionButton:disabled {
+  opacity: 0.6;
+  cursor: not-allowed;
+  transform: none !important;
+  box-shadow: none !important;
+}
+
+/* Loading Animation */
+.spin {
+  animation: spin 1s linear infinite;
+}
+
+@keyframes spin {
+  from {
+    transform: rotate(0deg);
+  }
+  to {
+    transform: rotate(360deg);
+  }
+}
+
+/* Mobile Responsive */
+@media (max-width: 768px) {
+  .matchContainer {
+    padding: 16px;
+  }
+
+  .matchContent {
+    padding: 20px;
+  }
+
+  .navButton {
+    width: 40px;
+    height: 40px;
+    z-index: 20;
+    box-shadow: 0 3px 10px rgba(0, 0, 0, 0.15);
+  }
+
+  .navLeft {
+    left: -20px;
+  }
+
+  .navRight {
+    right: -20px;
+  }
+
+  .navButton:hover:not(:disabled) {
+    box-shadow: 0 5px 14px rgba(102, 126, 234, 0.4);
+  }
+
+  .profileHeader {
+    flex-direction: column;
+    text-align: center;
+    gap: 12px;
+    padding-bottom: 16px;
+  }
+
+  .avatar {
+    width: 64px;
+    height: 64px;
+  }
+
+  .actionButtons {
+    flex-direction: column;
+    gap: 8px;
+  }
+
+  .infoGrid {
+    justify-content: center;
+  }
+
+  .skillTags {
+    justify-content: center;
+  }
+}
+
+/* Match Type Badges - falls noch verwendet */
+.matchTypeMentor {
+  background: rgba(168, 85, 247, 0.1);
+  color: #a855f7;
+  border: 1px solid rgba(168, 85, 247, 0.2);
+}
+
+.matchTypeLearn {
+  background: rgba(16, 185, 129, 0.1);
+  color: #10b981;
+  border: 1px solid rgba(16, 185, 129, 0.2);
+}
+
+.matchTypeNetwork {
+  background: rgba(99, 102, 241, 0.1);
+  color: #6366f1;
+  border: 1px solid rgba(99, 102, 241, 0.2);
+}
+
+/* Dark mode wird von den CSS-Variablen automatisch gehandhabt */
+@media (prefers-color-scheme: dark) {
+  .matchCard {
+    border-color: var(--color-border);
+  }
+
+  .navButton {
+    background: var(--color-card-bg);
+    border-color: var(--color-border);
+    color: var(--color-text-secondary);
+  }
+
+  .navButton:hover:not(:disabled) {
+    box-shadow: 0 4px 12px rgba(102, 126, 234, 0.2);
+  }
+}
