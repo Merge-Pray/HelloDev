@@ -46,9 +46,9 @@
 .avatar {
   width: 48px;
   height: 48px;
-  
+
   object-fit: cover;
-  
+
   flex: 0 0 48px;
 }
 
@@ -177,4 +177,31 @@
   border-radius: 10px;
   color: #e60000;
   padding: 12px;
+}
+
+.klipyAttribution {
+  width: auto;
+  height: 20px;
+  margin-top: 8px;
+  opacity: 0.7;
+  align-self: flex-start;
+}
+
+.klipyLight {
+  display: block;
+}
+.klipyDark {
+  display: none;
+}
+
+[data-theme="dark"] .klipyLight {
+  display: none;
+}
+[data-theme="dark"] .klipyDark {
+  display: block;
+}
+
+* {
+  transition: background-color 0.3s ease, border-color 0.3s ease,
+    color 0.3s ease, transform 0.2s ease;
 }
