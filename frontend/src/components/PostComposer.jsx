@@ -242,7 +242,6 @@ export default function PostComposer({ onPostCreated }) {
                       onGifClick={handleGifClick}
                       width={350}
                       height={400}
-                      searchPlaceholder="Search GIFs..."
                     />
                   </div>
                 )}
