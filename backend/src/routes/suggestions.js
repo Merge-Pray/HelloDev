@@ -1,10 +1,12 @@
-import express from 'express';
-import { getPopularSuggestions, searchSuggestions, addSuggestion } from '../controllers/suggestions.js';
+import express from "express";
+import {
+  getPopularSuggestions,
+  searchSuggestions,
+  addSuggestion,
+} from "../controllers/suggestions.js";
 
-const router = express.Router();
+export const suggestionRouter = express.Router();
 
-router.get('/popular/:category', getPopularSuggestions);
-router.get('/search/:category', searchSuggestions);
-router.post('/add', addSuggestion);
-
-export default router;
+suggestionRouter.get("/popular/:category", getPopularSuggestions);
+suggestionRouter.get("/search/:category", searchSuggestions);
+suggestionRouter.post("/add", addSuggestion);

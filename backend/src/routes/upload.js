@@ -4,7 +4,7 @@ import { v2 as cloudinary } from "cloudinary";
 import { authorizeJwt } from "../middleware/auth.js";
 import UserModel from "../models/user.js";
 
-const router = express.Router();
+export const uploadRouter = express.Router();
 
 cloudinary.config({
   cloud_name: process.env.CLOUDINARY_CLOUD_NAME,
@@ -26,7 +26,7 @@ const upload = multer({
   },
 });
 
-router.post(
+uploadRouter.post(
   "/avatar",
   authorizeJwt,
   upload.single("image"),
@@ -122,5 +122,3 @@ router.post(
     }
   }
 );
-
-export default router;
