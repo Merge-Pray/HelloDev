@@ -15,7 +15,7 @@ export default function Avatar({
   initialData,
 }) {
   // Farben als #RRGGBB (ohne Alpha)
-  const [currentColor, setCurrentColor] = useState("#3b82f6"); // blau
+  const [currentColor, setCurrentColor] = useState("#5d3f94"); // blau
   const [tool, setTool] = useState("pen"); // "pen" | "eraser" | "picker"
   const [isDrawing, setIsDrawing] = useState(false);
 
