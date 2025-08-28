@@ -91,22 +91,28 @@ export default function PostComposer({ onPostCreated }) {
   const handleEmojiClick = (emojiData) => {
     const emoji = emojiData.emoji;
     const textarea = taRef.current;
-    const cursorPosition = textarea.selectionStart;
 
-    const textBefore = text.substring(0, cursorPosition);
-    const textAfter = text.substring(cursorPosition);
-    const newText = textBefore + emoji + textAfter;
+    if (!textarea) {
+      setText((prev) => prev + emoji);
+      setShowEmojiPicker(false);
+      return;
+    }
+
+    const start = textarea.selectionStart;
+    const end = textarea.selectionEnd;
+    const currentText = textarea.value;
+
+    const newText =
+      currentText.slice(0, start) + emoji + currentText.slice(end);
+    const newCursorPos = start + emoji.length;
 
     setText(newText);
     setShowEmojiPicker(false);
 
-    setTimeout(() => {
+    requestAnimationFrame(() => {
       textarea.focus();
-      textarea.setSelectionRange(
-        cursorPosition + emoji.length,
-        cursorPosition + emoji.length
-      );
-    }, 0);
+      textarea.setSelectionRange(newCursorPos, newCursorPos);
+    });
   };
 
   const toggleEmojiPicker = () => {

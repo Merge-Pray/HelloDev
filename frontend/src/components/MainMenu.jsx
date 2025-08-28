@@ -1,12 +1,18 @@
 import styles from "./MainMenu.module.css";
 import { NavLink } from "react-router";
 import DarkMode from "./DarkMode";
+import { useUnreadCount } from "../hooks/useUnreadCount";
 
 const topItems = [
   { to: "/home", icon: "/icons/home.svg", label: "Home" },
   { to: "/match", icon: "/icons/matches.svg", label: "Matches" },
   { to: "/search", icon: "/icons/search.svg", label: "Search" },
-  { to: "/chat", icon: "/icons/messages.svg", label: "Chat" },
+  {
+    to: "/chat",
+    icon: "/icons/messages.svg",
+    label: "Chat",
+    hasUnreadBadge: true,
+  },
   {
     to: "/notifications",
     icon: "/icons/notifications.svg",
@@ -20,6 +26,8 @@ const bottomItems = [
 ];
 
 export default function MainMenu() {
+  const { totalUnreadCount } = useUnreadCount();
+
   return (
     <nav className={styles.menu} aria-label="Main">
       <div className={styles.brand}>
@@ -46,16 +54,24 @@ export default function MainMenu() {
                 [styles.link, isActive ? styles.active : ""].join(" ")
               }
             >
-              <img src={item.icon} alt="" className={styles.icon} />
+              <div className={styles.iconContainer}>
+                <img src={item.icon} alt="" className={styles.icon} />
+                {item.hasUnreadBadge && totalUnreadCount > 0 && (
+                  <span className={styles.unreadBadge}>
+                    {totalUnreadCount > 99 ? "99+" : totalUnreadCount}
+                  </span>
+                )}
+              </div>
               <span className={styles.label}>{item.label}</span>
             </NavLink>
           </li>
         ))}
       </ul>
-      {/* DarkMode-Button unter Settings */}
+
       <li className={styles.darkmode}>
         <DarkMode />
       </li>
+
       <ul className={styles.listBottom}>
         {bottomItems.map((item) => (
           <li key={item.to}>

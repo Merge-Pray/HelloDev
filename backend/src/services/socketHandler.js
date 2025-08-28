@@ -29,6 +29,7 @@ export const socketHandler = (io) => {
           recipient: recipientId,
           content: content,
           contentType: "text",
+          isRead: false,
         });
         await message.populate("sender", "username avatar");
 
@@ -38,6 +39,14 @@ export const socketHandler = (io) => {
 
         io.to(`user:${userId}`).emit("receiveMessage", message);
         io.to(`user:${recipientId}`).emit("receiveMessage", message);
+
+        const unreadCount = await MessageModel.countDocuments({
+          recipient: recipientId,
+          isRead: false,
+        });
+        io.to(`user:${recipientId}`).emit("unreadCountUpdate", {
+          totalUnreadCount: unreadCount,
+        });
       } catch (error) {
         console.error("Error saving and emitting message:", error);
         socket.emit("messageError", { error: "Failed to send message" });
@@ -78,6 +87,30 @@ export const socketHandler = (io) => {
         } catch (error) {
           console.error("Failed to update user status:", error);
         }
+      }
+    });
+
+    socket.on("markAsRead", async (data) => {
+      const { chatId } = data;
+      try {
+        await MessageModel.updateMany(
+          {
+            chat: chatId,
+            recipient: userId,
+            isRead: false,
+          },
+          {
+            $set: { isRead: true },
+          }
+        );
+
+        const unreadCount = await MessageModel.countDocuments({
+          recipient: userId,
+          isRead: false,
+        });
+        socket.emit("unreadCountUpdate", { totalUnreadCount: unreadCount });
+      } catch (error) {
+        console.error("Error marking messages as read:", error);
       }
     });
   });

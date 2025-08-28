@@ -9,7 +9,22 @@ export const getChats = async (req, res) => {
     const chats = await ChatModel.find({ participants: { $in: [userId] } })
       .populate("participants", "username nickname avatar isOnline")
       .populate("lastMessage");
-    res.status(200).json(chats);
+    const chatsWithUnreadCount = await Promise.all(
+      chats.map(async (chat) => {
+        const unreadCount = await MessageModel.countDocuments({
+          chat: chat._id,
+          recipient: userId,
+          isRead: false,
+        });
+
+        return {
+          ...chat.toObject(),
+          unreadCount,
+        };
+      })
+    );
+
+    res.status(200).json(chatsWithUnreadCount);
   } catch (error) {
     console.error(error);
     res.status(500).json({ message: "Server Error" });
@@ -78,5 +93,72 @@ export const getUserChat = async (req, res, next) => {
   } catch (error) {
     console.error(error);
     res.status(500).json({ message: "Server Error" });
+  }
+};
+
+export const markMessagesAsRead = async (req, res) => {
+  try {
+    const { chatId } = req.params;
+    const userId = req.user._id;
+
+    const chat = await ChatModel.findOne({
+      _id: chatId,
+      participants: { $in: [userId] },
+    });
+
+    if (!chat) {
+      return res
+        .status(403)
+        .json({ message: "Access denied or chat not found" });
+    }
+
+    const result = await MessageModel.updateMany(
+      {
+        chat: chatId,
+        recipient: userId,
+        isRead: false,
+      },
+      {
+        $set: { isRead: true },
+      }
+    );
+
+    if (result.modifiedCount > 0) {
+      const totalUnreadCount = await MessageModel.countDocuments({
+        recipient: userId,
+        isRead: false,
+      });
+
+      const io = req.app.get("socketio");
+      if (io) {
+        io.to(`user:${userId}`).emit("unreadCountUpdate", {
+          totalUnreadCount,
+        });
+      }
+    }
+
+    res.status(200).json({
+      message: "Messages marked as read",
+      markedCount: result.modifiedCount,
+    });
+  } catch (error) {
+    console.error(error);
+    res.status(500).json({ message: "Error marking messages as read" });
+  }
+};
+
+export const getTotalUnreadCount = async (req, res) => {
+  try {
+    const userId = req.user._id;
+
+    const totalUnreadCount = await MessageModel.countDocuments({
+      recipient: userId,
+      isRead: false,
+    });
+
+    res.status(200).json({ totalUnreadCount });
+  } catch (error) {
+    console.error(error);
+    res.status(500).json({ message: "Error getting unread count" });
   }
 };
