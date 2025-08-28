@@ -1,7 +1,8 @@
 .matchContainer {
   max-width: 600px;
   margin: 0 auto;
-  padding: 20px;
+  padding-bottom: 20px;
+  position: relative;
 }
 
 .header {
@@ -15,19 +16,21 @@
   border-radius: 16px;
   box-shadow: var(--color-card-shadow, 0 2px 8px rgba(0, 0, 0, 0.1));
   border: 1px solid var(--color-border, #e5e7eb);
-  overflow: visible; /* Changed from hidden to visible */
+  overflow: visible;
   transition: transform 0.3s ease, box-shadow 0.3s ease;
+  max-height: 650px;
+  display: flex;
+  flex-direction: column;
 }
 
 .matchCard:hover {
-  transform: translateY(-2px);
   box-shadow: 0 8px 24px rgba(0, 0, 0, 0.12);
 }
 
 /* Navigation Buttons */
 .navButton {
   position: absolute;
-  top: 50%;
+  top: 200px;
   transform: translateY(-50%);
   width: 44px;
   height: 44px;
@@ -37,18 +40,18 @@
   color: var(--color-text-secondary, #6b7280);
   cursor: pointer;
   transition: all 0.3s ease;
-  z-index: 20; /* Increased from 10 to 20 */
+  z-index: 20;
   display: flex;
   align-items: center;
   justify-content: center;
-  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15); /* Enhanced shadow */
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
 }
 
 .navButton:hover:not(:disabled) {
   background: var(--color-primary, #667eea);
   color: white;
   transform: translateY(-50%) scale(1.05);
-  box-shadow: 0 6px 16px rgba(102, 126, 234, 0.4); /* Enhanced hover shadow */
+  box-shadow: 0 6px 16px rgba(102, 126, 234, 0.4);
 }
 
 .navButton:disabled {
@@ -57,16 +60,24 @@
 }
 
 .navLeft {
-  left: -22px; /* Keeps the original position outside the card */
+  left: -22px;
 }
 
 .navRight {
-  right: -22px; /* Keeps the original position outside the card */
+  right: -22px;
 }
 
 /* Match Content */
 .matchContent {
   padding: 24px;
+  overflow-y: auto;
+  flex: 1;
+  scrollbar-width: none;
+  -ms-overflow-style: none;
+}
+
+.matchContent::-webkit-scrollbar {
+  display: none;
 }
 
 /* Profile Header */
@@ -219,25 +230,6 @@
   font-weight: 400;
 }
 
-/* Badges */
-.badges {
-  display: flex;
-  flex-wrap: wrap;
-  gap: 8px;
-  margin-top: 12px;
-}
-
-.badge {
-  background: rgba(245, 158, 11, 0.1);
-  color: #d97706;
-  padding: 4px 8px;
-  border-radius: 8px;
-  font-size: 0.75rem;
-  font-weight: 600;
-  text-transform: capitalize;
-  border: 1px solid rgba(245, 158, 11, 0.2);
-}
-
 /* Action Buttons */
 .actionButtons {
   display: flex;
@@ -261,6 +253,8 @@
   cursor: pointer;
   transition: all 0.2s ease;
   min-height: 44px;
+  font-family: "SFMono-Regular", "Menlo", "Monaco", "Consolas",
+    "Liberation Mono", "Courier New", monospace;
 }
 
 .cancelButton {
@@ -281,8 +275,6 @@
   background: var(--color-primary, #667eea);
   color: white;
   border: 1px solid var(--color-primary, #667eea);
-  font-family: "SFMono-Regular", "Menlo", "Monaco", "Consolas",
-    "Liberation Mono", "Courier New", monospace;
 }
 
 .gitAddButton:hover:not(:disabled) {
@@ -295,8 +287,8 @@
 .actionButton:disabled {
   opacity: 0.6;
   cursor: not-allowed;
-  transform: none !important;
-  box-shadow: none !important;
+  transform: none;
+  box-shadow: none;
 }
 
 /* Loading Animation */
@@ -321,6 +313,12 @@
 
   .matchContent {
     padding: 20px;
+    scrollbar-width: none;
+    -ms-overflow-style: none;
+  }
+
+  .matchContent::-webkit-scrollbar {
+    display: none;
   }
 
   .navButton {
