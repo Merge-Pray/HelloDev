@@ -6,12 +6,6 @@ import UserModel from "../models/user.js";
 
 export const uploadRouter = express.Router();
 
-// Debug-Route um Auth zu testen
-router.post("/test", authorizeJwt, (req, res) => {
-  console.log("Test route reached, user:", req.user);
-  res.json({ success: true, user: req.user._id });
-});
-
 cloudinary.config({
   cloud_name: process.env.CLOUDINARY_CLOUD_NAME,
   api_key: process.env.CLOUDINARY_API_KEY,
@@ -39,9 +33,14 @@ uploadRouter.post(
   async (req, res, next) => {
     console.log("Avatar upload route reached");
     console.log("User:", req.user?._id);
-    console.log("File:", req.file ? { size: req.file.size, mimetype: req.file.mimetype } : "No file");
+    console.log(
+      "File:",
+      req.file
+        ? { size: req.file.size, mimetype: req.file.mimetype }
+        : "No file"
+    );
     console.log("Body:", req.body);
-    
+
     try {
       if (!req.file) {
         console.log("Error: No image file provided");
@@ -57,9 +56,9 @@ uploadRouter.post(
       const { avatarData } = req.body;
       console.log("Avatar data received:", avatarData ? "Yes" : "No");
 
-            // Upload to Cloudinary
+      // Upload to Cloudinary
       console.log("Starting Cloudinary upload...");
-      
+
       let result;
       try {
         result = await new Promise((resolve, reject) => {
