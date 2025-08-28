@@ -1,22 +1,74 @@
-import React, { useState } from 'react';
+import React, { useState, useRef } from 'react';
 import Avatar from '../../components/avatar';
+import { authenticatedFetch } from '../../utils/authenticatedFetch';
 import styles from './AvatarEditor.module.css';
 
 const AvatarEditor = () => {
   const [avatarData, setAvatarData] = useState(null);
+  const [isSaving, setIsSaving] = useState(false);
+  const avatarRef = useRef(null);
 
   const handleAvatarChange = (data) => {
     setAvatarData(data);
     console.log('Avatar data changed:', data);
   };
 
-  const handleSave = () => {
-    if (avatarData) {
-      console.log('Save avatar:', avatarData);
-      // Hier kannst du die Daten an dein Backend senden
-      alert('Avatar has been saved! (See console for data)');
-    } else {
+  const handleSave = async () => {
+    if (!avatarData || !avatarRef.current) {
       alert('No avatar available for saving');
+      return;
+    }
+
+    console.log('Starting avatar save process...');
+    console.log('Avatar data:', avatarData);
+    console.log('Avatar ref:', avatarRef.current);
+
+    setIsSaving(true);
+    
+    try {
+      // 1. PNG-Bild von der Avatar-Komponente generieren
+      console.log('Generating PNG...');
+      const pngDataURL = avatarRef.current.toPNGDataURL('transparent');
+      console.log('PNG DataURL generated, length:', pngDataURL.length);
+      
+      // 2. DataURL zu Blob konvertieren
+      console.log('Converting to blob...');
+      const response = await fetch(pngDataURL);
+      const blob = await response.blob();
+      console.log('Blob created, size:', blob.size, 'type:', blob.type);
+      
+      // 3. FormData mit Bild und Pixel-Daten erstellen
+      console.log('Creating FormData...');
+      const formData = new FormData();
+      formData.append('image', blob, 'avatar.png');
+      formData.append('avatarData', JSON.stringify(avatarData));
+      console.log('FormData created');
+      
+      // 4. Mit authenticatedFetch an Backend senden
+      console.log('Sending to backend...');
+      const result = await authenticatedFetch('/api/upload/avatar', {
+        method: 'POST',
+        body: formData,
+        headers: {
+          // Content-Type wird von FormData automatisch gesetzt
+          // Andere Headers (wie Authorization) bleiben erhalten
+        },
+      });
+      
+      console.log('Avatar saved successfully:', result);
+      alert('Avatar has been saved successfully! ✅');
+      
+    } catch (error) {
+      console.error('Error saving avatar:', error);
+      console.error('Error details:', {
+        message: error.message,
+        stack: error.stack,
+        avatarDataLength: avatarData?.length,
+        hasAvatarRef: !!avatarRef.current
+      });
+      alert(`Failed to save avatar: ${error.message} ❌`);
+    } finally {
+      setIsSaving(false);
     }
   };
 
@@ -36,6 +88,7 @@ const AvatarEditor = () => {
       <div className={styles.editorSection}>
         <div className={styles.avatarWrapper}>
           <Avatar 
+            ref={avatarRef}
             sizePx={512}
             gridSize={16}
             onDataChange={handleAvatarChange}
@@ -47,9 +100,9 @@ const AvatarEditor = () => {
         <button 
           onClick={handleSave}
           className={styles.saveButton}
-          disabled={!avatarData}
+          disabled={!avatarData || isSaving}
         >
-          💾 Save avatar
+          {isSaving ? '💾 Saving...' : '💾 Save avatar'}
         </button>
         
         <button 

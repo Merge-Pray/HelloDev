@@ -26,6 +26,7 @@ import styles from "./avatar.module.css";
  * - randomize(): void
  * - refreshSuggestions(): void
  */
+
 const Avatar = forwardRef(function Avatar(
   {
     sizePx = 64,
