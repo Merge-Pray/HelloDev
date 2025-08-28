@@ -10,6 +10,10 @@ import { suggestionRouter } from "./routes/suggestions.js";
 import { matchRouter } from "./routes/match.js";
 import { uploadRouter } from "./routes/upload.js";
 import { chatRouter } from "./routes/chat.js";
+import http from "http";
+import { Server } from "socket.io";
+import { socketHandler } from "./services/socketHandler.js";
+import { socketAuth } from "./services/socketAuth.js";
 
 const PORT = process.env.PORT || 3001;
 
@@ -58,6 +62,25 @@ app.get("/", (req, res) => {
 
 app.use(errorHandler);
 
-app.listen(PORT, () => {
+const httpServer = http.createServer(app);
+
+const io = new Server(httpServer, {
+  cors: {
+    origin: [
+      "http://localhost:5173",
+      "http://localhost:5174",
+      "http://localhost:3000",
+      "https://hellodev.social",
+      "https://www.hellodev.social",
+      "https://hellodev.vercel.app",
+    ],
+    credentials: true,
+  },
+});
+io.use(socketAuth);
+
+socketHandler(io);
+
+httpServer.listen(PORT, () => {
   console.log(`🫡 Server is running at: http://localhost:${PORT}`);
 });
