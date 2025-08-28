@@ -63,12 +63,8 @@ export default function Sidebar() {
     }
   };
 
-  // const handleContactClick = (contactId) => {
-  //   navigate(`/chat/${contactId}`);
-  // };
-
-  const handleContactClick = () => {
-    navigate(`/chat`);
+  const handleContactClick = (contactId) => {
+    navigate(`/chat/${contactId}`);
   };
 
   const handleSearchChange = (e) => {
@@ -200,8 +196,15 @@ export default function Sidebar() {
 
   return (
     <div className={styles.wrap}>
-      {/* Search Section */}
       <div className={styles.section}>
+        <div className={styles.title}>
+          Your Contacts
+          {!isLoading && (
+            <span className={styles.contactCount}>
+              ({searchQuery ? filteredContacts.length : contacts.length})
+            </span>
+          )}
+        </div>
         <div className={styles.searchContainer}>
           <div className={styles.searchInputWrapper}>
             <Search size={16} className={styles.searchIcon} />
@@ -222,23 +225,6 @@ export default function Sidebar() {
               </button>
             )}
           </div>
-          {searchQuery && (
-            <div className={styles.searchInfo}>
-              {filteredContacts.length} of {contacts.length} contacts
-            </div>
-          )}
-        </div>
-      </div>
-
-      {/* Contacts Section */}
-      <div className={styles.section}>
-        <div className={styles.title}>
-          Your Last Active Contacts
-          {!isLoading && (
-            <span className={styles.contactCount}>
-              ({searchQuery ? filteredContacts.length : contacts.length})
-            </span>
-          )}
         </div>
 
         <div className={styles.contactsList}>{renderSearchResults()}</div>
