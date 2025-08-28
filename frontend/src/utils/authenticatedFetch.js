@@ -11,20 +11,6 @@ export const authenticatedFetch = async (endpoint, options = {}) => {
       ? endpoint
       : `${API_URL}${endpoint}`;
 
-<<<<<<< HEAD
-    console.log('API_URL:', API_URL);
-    console.log('endpoint:', endpoint);
-    console.log('final URL:', url);
-
-    // Automatisch Content-Type erkennen und nur bei JSON setzen
-    const headers = { ...options.headers };
-    
-    // Content-Type nur bei JSON-Body setzen, nicht bei FormData
-    if (!options.body || typeof options.body === 'string' || options.body.constructor === Object) {
-      headers["Content-Type"] = "application/json";
-    }
-    // Bei FormData wird Content-Type automatisch vom Browser gesetzt
-=======
     const headers = {
       "Content-Type": "application/json",
       ...options.headers,
@@ -34,7 +20,6 @@ export const authenticatedFetch = async (endpoint, options = {}) => {
       headers["Cache-Control"] = "no-cache";
       headers["Pragma"] = "no-cache";
     }
->>>>>>> origin
 
     return await fetch(url, {
       credentials: "include",
