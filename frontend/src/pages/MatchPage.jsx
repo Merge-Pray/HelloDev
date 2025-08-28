@@ -20,6 +20,7 @@ import useUserStore from "../hooks/userstore";
 import { authenticatedFetch } from "../utils/authenticatedFetch";
 import styles from "./matchpage.module.css";
 import PopUpMatch from "../components/PopUpMatch";
+import PopUpContact from "../components/PopUpContact";
 
 const MatchPage = () => {
   const currentUser = useUserStore((state) => state.currentUser);
@@ -33,6 +34,8 @@ const MatchPage = () => {
   const [error, setError] = useState(null);
   const [showConnectedPopup, setShowConnectedPopup] = useState(false);
   const [connectedMatchData, setConnectedMatchData] = useState(null);
+  const [showContactPopup, setShowContactPopup] = useState(false);
+  const [contactedUserData, setContactedUserData] = useState(null);
 
   useEffect(() => {
     if (!currentUser) {
@@ -113,8 +116,11 @@ const MatchPage = () => {
         if (response.match?.status === "connected") {
           setShowConnectedPopup(true);
         } else {
-          // Show success message for contact only
-          alert(response.message || "Successfully contacted match!");
+          setContactedUserData({
+            user: currentMatch.user,
+            message: response.message || "Successfully contacted match!",
+          });
+          setShowContactPopup(true);
         }
 
         // Remove from pending matches
@@ -129,13 +135,17 @@ const MatchPage = () => {
   };
 
   const handleSendMessage = (userId) => {
-    // Navigate to message/chat page
-    navigate(`/messages/${userId}`);
+    navigate(`/chat/${userId}`);
   };
 
   const handleCloseConnectedPopup = () => {
     setShowConnectedPopup(false);
     setConnectedMatchData(null);
+  };
+
+  const handleCloseContactPopup = () => {
+    setShowContactPopup(false);
+    setContactedUserData(null);
   };
 
   const handleCancel = async () => {
@@ -144,8 +154,6 @@ const MatchPage = () => {
 
     try {
       setIsActionLoading(true);
-
-      console.log("❌ Dismissing match (cancel):", currentMatch.matchId);
 
       const response = await authenticatedFetch(
         `/api/match/${currentMatch.matchId}/dismiss`,
@@ -157,13 +165,8 @@ const MatchPage = () => {
       console.log("📡 Dismiss response:", response);
 
       if (response.success) {
-        console.log("✅ Successfully dismissed match");
-
         // Remove from pending matches
         removeMatchFromPending(currentMatch.matchId);
-
-        // Show success message
-        console.log("Match dismissed");
       }
     } catch (err) {
       console.error("❌ Error dismissing match:", err);
@@ -468,6 +471,11 @@ const MatchPage = () => {
         onClose={handleCloseConnectedPopup}
         matchData={connectedMatchData}
         onSendMessage={handleSendMessage}
+      />
+      <PopUpContact
+        isOpen={showContactPopup}
+        onClose={handleCloseContactPopup}
+        userData={contactedUserData}
       />
     </div>
   );
