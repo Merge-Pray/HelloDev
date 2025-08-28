@@ -1,0 +1,245 @@
+.commentSection {
+  margin-top: 16px;
+}
+
+.commentsList {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+  margin-bottom: 20px;
+}
+
+.comment {
+  display: grid;
+  grid-template-columns: 44px 1fr;
+  gap: 10px;
+  align-items: start;
+}
+
+.commentAvatar {
+  width: 44px;
+  height: 44px;
+  border-radius: 10px;
+  overflow: hidden;
+  flex-shrink: 0;
+}
+
+.commentAvatarImage {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  background: var(--color-bg);
+}
+
+.commentContent {
+  min-width: 0;
+}
+
+.commentHeader {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  margin-bottom: 4px;
+}
+
+.commentAuthor {
+  font-weight: 700;
+  font-size: 14px;
+  color: var(--color-text);
+}
+
+.commentTime {
+  font-size: 12px;
+  color: var(--color-text-secondary);
+}
+
+.commentText {
+  font-size: 14px;
+  line-height: 1.4;
+  color: var(--color-text);
+  word-wrap: break-word;
+}
+
+.commentComposer {
+  border-top: 1px solid var(--color-border);
+  padding-top: 16px;
+}
+
+.composerHeader {
+  display: grid;
+  grid-template-columns: 44px 1fr;
+  gap: 10px;
+  align-items: center;
+  margin-bottom: 8px;
+}
+
+.composerAvatar {
+  width: 44px;
+  height: 44px;
+  border-radius: 10px;
+  display: block;
+  background: var(--color-bg);
+  object-fit: cover;
+}
+
+.composerTitle {
+  margin: 0;
+  font-size: 1rem;
+  font-weight: 800;
+  color: var(--color-text);
+}
+
+.composerForm {
+  display: grid;
+  gap: 10px;
+}
+
+.composerInput {
+  width: 100%;
+  resize: none;
+  overflow: hidden;
+  border: 2px solid var(--color-input-border);
+  background: var(--color-input-bg);
+  color: var(--color-text);
+  border-radius: 10px;
+  padding: 12px 14px;
+  font-size: 15px;
+  line-height: 1.4;
+  transition: border-color 0.2s ease, box-shadow 0.2s ease, background 0.2s ease;
+}
+
+.composerInput::placeholder {
+  color: var(--color-text-secondary);
+}
+
+.composerInput:focus {
+  outline: none;
+  border-color: var(--color-input-border-focus);
+  box-shadow: 0 0 0 3px var(--color-input-shadow-focus);
+}
+
+.composerToolbar {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-top: 8px;
+}
+
+.toolsLeft,
+.toolsRight {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+
+.toolBtn {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  padding: 8px 10px;
+  border-radius: 10px;
+  background: var(--color-input-bg);
+  border: 1px solid var(--color-card-border);
+  color: var(--color-text);
+  cursor: pointer;
+  font-size: 13px;
+  font-weight: 600;
+  transition: background 0.15s ease, border-color 0.15s ease;
+}
+
+.toolBtn:hover {
+  background: var(--color-bg-secondary);
+  border-color: var(--color-primary);
+}
+
+.toolBtn.active {
+  background: var(--color-primary);
+  color: white;
+  border-color: var(--color-primary);
+}
+
+.counter {
+  font-size: 12px;
+  font-weight: 700;
+  color: var(--color-text-secondary);
+}
+
+.counterOver {
+  color: var(--color-error);
+}
+
+.submit {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  padding: 9px 14px;
+  border-radius: 10px;
+  border: 1px solid var(--color-primary);
+  background: var(--color-bg-gradient);
+  color: #fff;
+  font-weight: 700;
+  cursor: pointer;
+  transition: transform 0.05s ease, filter 0.15s ease;
+}
+
+.submit:hover:not(:disabled) {
+  transform: translateY(-1px);
+  filter: brightness(1.05);
+}
+
+.submit:disabled {
+  opacity: 0.6;
+  cursor: not-allowed;
+}
+
+.emojiContainer {
+  position: relative;
+}
+
+.emojiPicker {
+  position: absolute;
+  top: 100%;
+  left: 0;
+  z-index: 1000;
+  margin-top: 8px;
+  border-radius: 12px;
+  box-shadow: 0 8px 32px rgba(0, 0, 0, 0.15);
+  border: 1px solid var(--color-border);
+  overflow: hidden;
+  background: var(--color-card-bg);
+}
+
+.emojiPicker :global(.epr-main) {
+  background: var(--color-card-bg) !important;
+  border: none !important;
+}
+
+.emojiPicker :global(.epr-header) {
+  background: var(--color-card-bg) !important;
+  border-bottom: 1px solid var(--color-border) !important;
+}
+
+.emojiPicker :global(.epr-category-nav) {
+  background: var(--color-card-bg) !important;
+}
+
+.emojiPicker :global(.epr-emoji-category-label) {
+  background: var(--color-card-bg) !important;
+  color: var(--color-text) !important;
+}
+
+.emojiPicker :global(.epr-search-container input) {
+  background: var(--color-input-bg) !important;
+  border: 1px solid var(--color-input-border) !important;
+  color: var(--color-text) !important;
+}
+
+.commentText :global(.hashtag) {
+  color: var(--color-primary);
+  font-weight: 600;
+}
+
+.commentText :global(.mention) {
+  color: var(--color-primary);
+  font-weight: 600;
+}

@@ -58,10 +58,6 @@ const ChatPage = () => {
           await authenticatedFetch(`/api/chats/${currentChat._id}/mark-read`, {
             method: "PATCH",
           });
-          console.log(
-            "✅ Auto-marked messages as read for chat:",
-            currentChat._id
-          );
         } catch (error) {
           console.error("Error auto-marking messages as read:", error);
         }
@@ -106,6 +102,18 @@ const ChatPage = () => {
   useEffect(() => {
     scrollToBottom();
   }, [messages]);
+
+  // Ensure scroll to bottom when entering an individual chat
+  useEffect(() => {
+    if (userId && messages.length > 0 && !isLoading) {
+      // Use a longer timeout to ensure the DOM is fully rendered
+      const timeoutId = setTimeout(() => {
+        scrollToBottom();
+      }, 200);
+
+      return () => clearTimeout(timeoutId);
+    }
+  }, [userId, messages.length, isLoading]);
 
   const loadChatOverview = async () => {
     try {
@@ -156,6 +164,10 @@ const ChatPage = () => {
 
         if (messagesResponse && Array.isArray(messagesResponse)) {
           setMessages(messagesResponse);
+          // Scroll to bottom after messages are set
+          setTimeout(() => {
+            scrollToBottom();
+          }, 100);
         } else {
           setMessages([]);
         }
