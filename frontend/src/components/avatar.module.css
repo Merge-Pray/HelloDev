@@ -161,35 +161,8 @@
   overflow: hidden;
   /* Karten-Shadow */
   box-shadow: 0 10px 30px var(--color-card-shadow);
-
-  /* dezente Pixel-Gitternetz-Linien – auf Basis der Textfarbe gemischt */
-  background-image:
-    linear-gradient(
-      to right,
-      color-mix(in srgb, var(--color-text) 6%, transparent) 1px,
-      transparent 1px
-    ),
-    linear-gradient(
-      to bottom,
-      color-mix(in srgb, var(--color-text) 6%, transparent) 1px,
-      transparent 1px
-    );
-}
-
-/* Fallbacks für Browser ohne color-mix (optional) */
-@supports not (background: color-mix(in srgb, white 50%, black)) {
-  .active {
-    box-shadow: 0 0 0 2px rgba(59, 130, 246, 0.15) inset; /* nahe an var(--color-primary) */
-  }
-  .grid {
-    background-image:
-      linear-gradient(to right, rgba(15, 23, 42, 0.06) 1px, transparent 1px),
-      linear-gradient(to bottom, rgba(15, 23, 42, 0.06) 1px, transparent 1px);
-  }
-}
-
-.cell {
-  /* Jede Zelle bekommt Größe + Hintergrund inline per style-Prop */
+  /* Mittige Ausrichtung */
+  margin: 0 auto;
 }
 
 /* ==== Ergänzungen für neue UI-Teile ==== */
@@ -241,10 +214,21 @@
 }
 
 /* Leiste für Zufall/Vorschläge-Buttons */
+.suggestionsBar {
+  display: flex;
+  gap: 12px;
+  justify-content: center;
+  align-items: center;
+  flex-wrap: wrap;
+}
+
+/* Vorschläge Container */
 .suggestions {
   display: flex;
   gap: 12px;
   flex-wrap: wrap;
+  justify-content: center;
+  align-items: center;
 }
 
 

@@ -39,7 +39,7 @@ const Avatar = forwardRef(function Avatar(
   const [currentColor, setCurrentColor] = useState("#5d3f94");
   const [tool, setTool] = useState("pen"); // "pen" | "eraser" | "picker"
   const [isDrawing, setIsDrawing] = useState(false);
-  const [showGrid, setShowGrid] = useState(true);
+  const [showGrid, setShowGrid] = useState(false);
 
   // Grid/Pixel-States
   const [gridSize, setGridSize] = useState(initialGridSize);
@@ -257,17 +257,6 @@ const Avatar = forwardRef(function Avatar(
   // Cell Size
   const cellSize = useMemo(() => Math.floor(sizePx / gridSize), [sizePx, gridSize]);
 
-  // Sichtbares Grid – defensiver Default (unabhängig von CSS-Var)
-  const gridLine = "rgba(15,23,42,0.08)"; // fallback
-  const gridBackground = showGrid
-    ? {
-        backgroundImage:
-          `linear-gradient(to right, ${gridLine} 1px, transparent 1px),
-           linear-gradient(to bottom, ${gridLine} 1px, transparent 1px)`,
-        backgroundSize: `${cellSize}px ${cellSize}px`,
-      }
-    : { backgroundImage: "none" };
-
 // Mini-Renderer für Vorschlag-Previews
 const renderSuggestion = (arr) => {
   const g = Math.sqrt(arr.length) | 0;
@@ -304,7 +293,7 @@ const renderSuggestion = (arr) => {
         {/* Linke Seite: Farbe + Tools */}
         <div className={styles.leftGroup}>
           <label className={styles.colorLabel}>
-            <span>Farbe</span>
+            <span>Color</span>
             <input
               type="color"
               value={currentColor}
@@ -319,14 +308,14 @@ const renderSuggestion = (arr) => {
               onClick={() => setTool("pen")}
               title="Stift (malen)"
             >
-              ✏️ Stift
+              ✏️ Pen
             </button>
             <button
               className={`${styles.toolBtn} ${tool === "eraser" ? styles.active : ""}`}
               onClick={() => setTool("eraser")}
               title="Radierer (weiß)"
             >
-              🩹 Radierer
+              🩹 Eraser
             </button>
             <button
               className={`${styles.toolBtn} ${tool === "picker" ? styles.active : ""}`}
@@ -346,11 +335,11 @@ const renderSuggestion = (arr) => {
               checked={showGrid}
               onChange={(e) => setShowGrid(e.target.checked)}
             />
-            <span>Grid anzeigen</span>
+            <span>Show grid</span>
           </label>
 
           <label className={styles.inlineControl}>
-            <span>Auflösung</span>
+            
             <select
               className={styles.select}
               value={gridSize}
@@ -363,7 +352,7 @@ const renderSuggestion = (arr) => {
               ))}
             </select>
           </label>
-
+<span>Resolution</span>
           <div className={styles.actions}>
             <label className={styles.fileLabel}>
               <input
@@ -371,17 +360,17 @@ const renderSuggestion = (arr) => {
                 accept="image/*"
                 onChange={(e) => handleFile(e.target.files?.[0])}
               />
-              Bild laden
+              Load image as template
             </label>
 
-            <label className={styles.fileLabel}>
+            {/* <label className={styles.fileLabel}>
               <input
                 type="file"
                 accept="application/json"
                 onChange={(e) => importJSON(e.target.files?.[0])}
               />
               JSON laden
-            </label>
+            </label> */}
 
             {/* Export-Buttons entfernt – Parent nutzt imperative API */}
           </div>
@@ -396,7 +385,6 @@ const renderSuggestion = (arr) => {
           height: sizePx + "px",
           gridTemplateColumns: `repeat(${gridSize}, 1fr)`,
           gridTemplateRows: `repeat(${gridSize}, 1fr)`,
-          ...gridBackground,
         }}
         onMouseDown={handleMouseDown}
         onMouseMove={handleMouseMove}
@@ -414,6 +402,8 @@ const renderSuggestion = (arr) => {
               width: cellSize,
               height: cellSize,
               backgroundColor: col,
+              border: showGrid ? "0.5px solid #888888" : "none",
+              boxSizing: "border-box",
             }}
           />
         ))}
@@ -426,14 +416,14 @@ const renderSuggestion = (arr) => {
           onClick={() => setPixels(randomizePixels(gridSize))}
           title="Zufälligen Avatar generieren"
         >
-          🎲 Zufall
+          🎲 Random
         </button>
         <button
           className={styles.secondaryBtn}
           onClick={() => setSuggestions(makeSuggestions(gridSize, 5))}
           title="Neue Vorschläge würfeln"
         >
-          🔄 Vorschläge neu
+          🔄 New proposals
         </button>
       </div>
 
