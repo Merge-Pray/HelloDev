@@ -7,16 +7,16 @@ const AvatarEditor = () => {
 
   const handleAvatarChange = (data) => {
     setAvatarData(data);
-    console.log('Avatar-Daten geändert:', data);
+    console.log('Avatar data changed:', data);
   };
 
   const handleSave = () => {
     if (avatarData) {
-      console.log('Avatar speichern:', avatarData);
+      console.log('Save avatar:', avatarData);
       // Hier kannst du die Daten an dein Backend senden
-      alert('Avatar wurde gespeichert! (Siehe Konsole für Daten)');
+      alert('Avatar has been saved! (See console for data)');
     } else {
-      alert('Kein Avatar zum Speichern vorhanden');
+      alert('No avatar available for saving');
     }
   };
 
