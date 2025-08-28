@@ -42,8 +42,8 @@ function App() {
             }
           });
 
-          socket.on("disconnect", () => {
-            console.log("Disconnected from server");
+          socket.on("disconnect", (reason) => {
+            console.log("Disconnected from server, reason:", reason);
           });
 
           socketRef.current = socket;
@@ -61,12 +61,6 @@ function App() {
       socketRef.current = null;
       setSocket(null);
     }
-
-    return () => {
-      if (socketRef.current) {
-        socketRef.current.disconnect();
-      }
-    };
   }, [currentUser, setSocket]);
 
   return (

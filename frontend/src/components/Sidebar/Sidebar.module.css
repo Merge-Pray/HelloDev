@@ -410,6 +410,15 @@
   }
 }
 
+.onlineDot {
+  width: 8px;
+  height: 8px;
+  border-radius: 50%;
+  background: var(--color-success, #28a745);
+  display: inline-block;
+  margin-left: 8px;
+}
+
 /* Focus States for Accessibility */
 .contactItem:focus {
   outline: 2px solid var(--color-primary, #667eea);

@@ -1,4 +1,4 @@
-import { useState, useEffect, useRef } from "react";
+import { useState, useEffect, useRef, useCallback } from "react";
 import { useParams, useNavigate } from "react-router";
 import { ArrowLeft, Send, MessageCircle } from "lucide-react";
 import Sidebar from "../components/Sidebar/Sidebar";
@@ -25,6 +25,7 @@ const ChatPage = () => {
 
   const messagesEndRef = useRef(null);
   const typingTimeoutRef = useRef(null);
+  const currentChatRef = useRef(null);
 
   useEffect(() => {
     if (userId) {
@@ -33,6 +34,40 @@ const ChatPage = () => {
       loadChatOverview();
     }
   }, [userId]);
+
+  useEffect(() => {
+    currentChatRef.current = currentChat;
+  }, [currentChat]);
+
+  const handleReceiveMessage = useCallback((message) => {
+    setMessages((prev) => {
+      const shouldAdd = currentChatRef.current && message.chat === currentChatRef.current._id;
+      
+      if (shouldAdd) {
+        return [...prev, message];
+      }
+      return prev;
+    });
+  }, []);
+
+  const handleUserTyping = useCallback((data) => {
+    const { userId: typingUserId, isTyping, chatId } = data;
+
+    setTypingUsers((prev) => {
+      const shouldUpdate = currentChatRef.current && chatId === currentChatRef.current._id;
+      
+      if (shouldUpdate) {
+        const newSet = new Set(prev);
+        if (isTyping) {
+          newSet.add(typingUserId);
+        } else {
+          newSet.delete(typingUserId);
+        }
+        return newSet;
+      }
+      return prev;
+    });
+  }, []);
 
   useEffect(() => {
     if (socket) {
@@ -44,7 +79,7 @@ const ChatPage = () => {
         socket.off("userTyping", handleUserTyping);
       };
     }
-  }, [socket, currentChat]);
+  }, [socket]);
 
   useEffect(() => {
     scrollToBottom();
@@ -111,27 +146,6 @@ const ChatPage = () => {
     }
   };
 
-  const handleReceiveMessage = (message) => {
-    if (currentChat && message.chat === currentChat._id) {
-      setMessages((prev) => [...prev, message]);
-    }
-  };
-
-  const handleUserTyping = (data) => {
-    const { userId: typingUserId, isTyping, chatId } = data;
-
-    if (currentChat && chatId === currentChat._id) {
-      setTypingUsers((prev) => {
-        const newSet = new Set(prev);
-        if (isTyping) {
-          newSet.add(typingUserId);
-        } else {
-          newSet.delete(typingUserId);
-        }
-        return newSet;
-      });
-    }
-  };
 
   const handleInputChange = (e) => {
     setNewMessage(e.target.value);
@@ -277,6 +291,9 @@ const ChatPage = () => {
         >
           <div className={styles.headerName}>
             {otherUser?.nickname || otherUser?.username}
+            {otherUser?.isOnline && (
+              <span className={styles.onlineDot} aria-label="Online" />
+            )}
           </div>
           <div className={styles.headerUsername}>@{otherUser?.username}</div>
         </div>
