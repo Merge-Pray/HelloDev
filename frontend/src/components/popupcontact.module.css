@@ -13,7 +13,7 @@
 }
 
 .popup {
-  background: white;
+  background: var(--color-card-bg);
   border-radius: 16px;
   max-width: 400px;
   width: 90%;
@@ -21,14 +21,14 @@
   overflow-y: auto;
   position: relative;
   box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.25);
-  border: 1px solid rgba(255, 255, 255, 0.18);
+  border: 1px solid var(--color-border);
 }
 
 .closeButton {
   position: absolute;
   top: 16px;
   right: 16px;
-  background: rgba(0, 0, 0, 0.1);
+  background: var(--color-bg-secondary);
   border: none;
   border-radius: 50%;
   width: 32px;
@@ -39,10 +39,12 @@
   cursor: pointer;
   transition: background-color 0.2s;
   z-index: 1;
+  color: var(--color-text-secondary);
 }
 
 .closeButton:hover {
-  background: rgba(0, 0, 0, 0.2);
+  background: var(--color-primary);
+  color: var(--color-primary-hover-invert);
 }
 
 .content {
@@ -50,37 +52,127 @@
   text-align: center;
 }
 
-.successIcon {
-  width: 80px;
-  height: 80px;
-  background: linear-gradient(135deg, #10b981, #059669);
-  border-radius: 50%;
+/* Avatar Animation Container */
+.avatarAnimation {
+  width: 100%;
+  height: 120px;
   display: flex;
   align-items: center;
   justify-content: center;
   margin: 0 auto 24px;
-  color: white;
-  animation: successPulse 0.6s ease-out;
+  position: relative;
+  overflow: hidden;
 }
 
-@keyframes successPulse {
+.avatarContainer {
+  position: relative;
+  width: 200px;
+  height: 80px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.animatedAvatar {
+  width: 60px;
+  height: 60px;
+  border-radius: 50%;
+  overflow: hidden;
+  background: var(--color-bg-secondary);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  position: absolute;
+  border: 3px solid var(--color-success);
+  box-shadow: 0 4px 12px rgba(16, 185, 129, 0.3);
+}
+
+.avatarLeft {
+  animation: currentUserMeetsAndStays 3s ease-in-out forwards;
+  transform-origin: center;
+}
+
+.avatarRight {
+  animation: addedUserSpinsAndStays 3s ease-in-out forwards;
+  transform-origin: center;
+}
+
+/* Animations */
+@keyframes currentUserMeetsAndStays {
   0% {
-    transform: scale(0.8);
-    opacity: 0;
+    left: -30px;
+    transform: translateY(0) scale(0.8);
+    opacity: 0.7;
   }
-  50% {
-    transform: scale(1.1);
+  40% {
+    left: 55px;
+    transform: translateY(0) scale(1);
+    opacity: 1;
+  }
+  70% {
+    left: 55px;
+    transform: translateY(0) scale(1) rotate(360deg);
+    opacity: 1;
   }
   100% {
-    transform: scale(1);
+    left: 55px;
+    transform: translateY(0) scale(1) rotate(360deg);
     opacity: 1;
+  }
+}
+
+@keyframes addedUserSpinsAndStays {
+  0% {
+    right: -30px;
+    transform: translateY(0) scale(0.8);
+    opacity: 0.7;
+  }
+  40% {
+    right: 55px;
+    transform: translateY(0) scale(1);
+    opacity: 1;
+  }
+  70% {
+    right: 55px;
+    transform: translateY(0) scale(1) rotate(-360deg);
+    opacity: 1;
+  }
+  100% {
+    right: 55px;
+    transform: translateY(0) scale(1) rotate(-360deg);
+    opacity: 1;
+    animation: keepSpinning 2s linear infinite;
+  }
+}
+
+@keyframes expandAndStay {
+  0% {
+    width: 0;
+    opacity: 0;
+  }
+  40% {
+    width: 80px;
+    opacity: 1;
+  }
+  100% {
+    width: 80px;
+    opacity: 1;
+  }
+}
+
+@keyframes keepSpinning {
+  from {
+    transform: translateY(0) scale(1) rotate(0deg);
+  }
+  to {
+    transform: translateY(0) scale(1) rotate(360deg);
   }
 }
 
 .title {
   font-size: 24px;
   font-weight: 700;
-  color: #1f2937;
+  color: var(--color-text);
   margin: 0 0 20px;
 }
 
@@ -88,10 +180,11 @@
   display: flex;
   align-items: center;
   gap: 12px;
-  background: #f9fafb;
+  background: var(--color-bg-secondary);
   padding: 16px;
   border-radius: 12px;
   margin: 20px 0;
+  border: 1px solid var(--color-border);
 }
 
 .avatar {
@@ -99,7 +192,7 @@
   height: 48px;
   border-radius: 50%;
   overflow: hidden;
-  background: #e5e7eb;
+  background: var(--color-bg-secondary);
   display: flex;
   align-items: center;
   justify-content: center;
@@ -120,19 +213,19 @@
 .userDetails h3 {
   font-size: 16px;
   font-weight: 600;
-  color: #1f2937;
+  color: var(--color-text);
   margin: 0 0 4px;
 }
 
 .userDetails p {
   font-size: 14px;
-  color: #6b7280;
+  color: var(--color-text-secondary);
   margin: 0;
 }
 
 .message {
   font-size: 14px;
-  color: #6b7280;
+  color: var(--color-text-secondary);
   line-height: 1.5;
   margin: 16px 0 24px;
 }
@@ -144,51 +237,35 @@
 }
 
 .continueButton {
-  background: linear-gradient(135deg, #667eea, #764ba2);
-  color: white;
+  background: var(--color-bg-gradient);
+  color: var(--color-primary-hover-invert);
   border: none;
-  border-radius: 8px;
+  border-radius: 12px;
   padding: 12px 24px;
   font-weight: 600;
   cursor: pointer;
-  transition: all 0.2s;
+  transition: all 0.3s ease;
   font-size: 14px;
+  min-width: 160px;
 }
 
 .continueButton:hover {
-  transform: translateY(-1px);
-  box-shadow: 0 4px 12px rgba(102, 126, 234, 0.4);
+  background: var(--color-primary-hover);
+  transform: translateY(-2px);
+  box-shadow: 0 4px 12px rgba(var(--color-primary-rgb), 0.3);
 }
 
 .continueButton:active {
   transform: translateY(0);
 }
 
-/* Dark mode support */
+/* Dark mode wird automatisch über CSS-Variablen gehandhabt */
 @media (prefers-color-scheme: dark) {
   .popup {
-    background: #1f2937;
-    color: white;
+    box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.5);
   }
 
-  .title {
-    color: white;
-  }
-
-  .userInfo {
-    background: #374151;
-  }
-
-  .userDetails h3 {
-    color: white;
-  }
-
-  .closeButton {
-    background: rgba(255, 255, 255, 0.1);
-    color: white;
-  }
-
-  .closeButton:hover {
-    background: rgba(255, 255, 255, 0.2);
+  .animatedAvatar {
+    box-shadow: 0 4px 12px rgba(52, 211, 153, 0.4);
   }
 }
