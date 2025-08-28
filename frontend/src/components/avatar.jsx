@@ -8,11 +8,13 @@ import styles from "./avatar.module.css";
  * - sizePx?: number      // Darstellungsgröße (Pixelbreite des Editors), default 512
  * - gridSize?: number    // Rastergröße (Standard 32)
  * - initialData?: string[] // optional: Hex-Farbwerte (#RRGGBB) flach (gridSize*gridSize)
+ * - onDataChange?: function // Callback wenn sich die Pixel-Daten ändern
  */
 export default function Avatar({
   sizePx = 512,
   gridSize = 32,
   initialData,
+  onDataChange,
 }) {
   // Farben als #RRGGBB (ohne Alpha)
   const [currentColor, setCurrentColor] = useState("#5d3f94"); // blau
@@ -28,6 +30,13 @@ export default function Avatar({
     if (initialData && initialData.length === gridSize * gridSize) return initialData;
     return blank;
   });
+
+  // Callback für Datenänderungen
+  useEffect(() => {
+    if (onDataChange) {
+      onDataChange(pixels);
+    }
+  }, [pixels, onDataChange]);
 
   // Für Maus-/Touch-Events koordiniert:
   const containerRef = useRef(null);
