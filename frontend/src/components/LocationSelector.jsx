@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from "react";
+import { useState, useEffect } from "react";
 import { Country, City } from "country-state-city";
 import styles from "./locationselector.module.css";
 

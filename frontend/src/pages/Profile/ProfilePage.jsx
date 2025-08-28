@@ -22,6 +22,7 @@ import {
   Target,
   Wrench,
   Briefcase,
+  Camera, // Neue Ikone für Avatar-Editor
 } from "lucide-react";
 import useUserStore from "../../hooks/userstore";
 import { useProfile } from "../../hooks/useProfile";
@@ -60,6 +61,10 @@ export default function ProfilePage() {
 
   const handleEditSection = (section) => {
     navigate(`/editprofile?section=${section}`);
+  };
+
+  const handleEditAvatar = () => {
+    navigate("/avatar-editor");
   };
 
   if (isLoading) {
@@ -589,25 +594,35 @@ export default function ProfilePage() {
     <div className="page">
       <div className={styles.profileContainer}>
         <div className={`card enhanced ${styles.profileHeader}`}>
-          <div className={styles.avatar}>
-            {profileData?.avatar || currentUser?.avatar ? (
-              <img
-                src={profileData?.avatar || currentUser?.avatar}
-                alt={`${
-                  currentUser?.nickname || currentUser?.username
-                }'s avatar`}
-                className={styles.avatarImage}
-                onError={(e) => {
-                  e.target.src = "/default-avatar.png";
-                }}
-              />
-            ) : (
-              <img
-                src="/default-avatar.png"
-                alt="Default avatar"
-                className={styles.avatarImage}
-              />
-            )}
+          <div className={styles.avatarContainer}>
+            <div className={styles.avatar}>
+              {profileData?.avatar || currentUser?.avatar ? (
+                <img
+                  src={profileData?.avatar || currentUser?.avatar}
+                  alt={`${
+                    currentUser?.nickname || currentUser?.username
+                  }'s avatar`}
+                  className={styles.avatarImage}
+                  onError={(e) => {
+                    e.target.src = "/default-avatar.png";
+                  }}
+                />
+              ) : (
+                <img
+                  src="/default-avatar.png"
+                  alt="Default avatar"
+                  className={styles.avatarImage}
+                />
+              )}
+            </div>
+            <button
+              className={styles.avatarEditBtn}
+              onClick={handleEditAvatar}
+              title="Edit Avatar"
+              aria-label="Edit Avatar"
+            >
+              <Camera size={16} />
+            </button>
           </div>
 
           <h1 className={`title ${styles.profileName}`}>
