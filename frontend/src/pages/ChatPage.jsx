@@ -81,7 +81,7 @@ const ChatPage = () => {
         socket.off("userTyping", handleUserTyping);
       };
     }
-  }, [socket]);
+  }, [socket, handleReceiveMessage, handleUserTyping]);
 
   useEffect(() => {
     scrollToBottom();

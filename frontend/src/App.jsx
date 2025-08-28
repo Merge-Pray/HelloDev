@@ -19,10 +19,10 @@ function App() {
     if (currentUser && !socketRef.current) {
       const connectSocket = async () => {
         try {
-          const socketUrl = import.meta.env.VITE_API_URL || "http://localhost:3001";
-          
+          const socketUrl = import.meta.env.VITE_BACKENDPATH;
+
           const socket = io(socketUrl, {
-            withCredentials: true
+            withCredentials: true,
           });
 
           socket.on("connect", () => {
@@ -31,7 +31,7 @@ function App() {
 
           socket.on("connect_error", async (error) => {
             console.error("Socket connection error:", error);
-            
+
             if (error.message === "Authentication failed.") {
               try {
                 await authenticatedFetch("/api/user/refresh");
