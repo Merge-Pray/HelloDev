@@ -11,6 +11,8 @@ export const authenticatedFetch = async (endpoint, options = {}) => {
       credentials: "include",
       headers: {
         "Content-Type": "application/json",
+        "Cache-Control": "no-cache",
+        Pragma: "no-cache",
         ...options.headers,
       },
       ...options,
