@@ -162,12 +162,17 @@
 .headerInfo {
   flex: 1;
   cursor: pointer;
+  min-width: 0;
 }
 
 .headerName {
   font-weight: 600;
   color: var(--color-text);
   margin-bottom: 2px;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  overflow: visible;
 }
 
 .headerUsername {
@@ -336,6 +341,16 @@
   justify-content: center;
   padding: 48px;
   color: var(--color-text-secondary);
+}
+
+.onlineDot {
+  width: 8px;
+  height: 8px;
+  border-radius: 50%;
+  background: var(--color-success, #28a745);
+  display: inline-block;
+  flex-shrink: 0;
+  z-index: 1;
 }
 
 .error {
