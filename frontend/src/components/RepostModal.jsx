@@ -57,7 +57,7 @@ export default function RepostModal({ post, onRepost, onClose }) {
             <div className={styles.originalPostPreview}>
               <div className={styles.previewHeader}>
                 <img 
-                  src={post.author.avatar || '/default-avatar.png'} 
+                  src={post.author.avatar || '/avatars/default_avatar.png'} 
                   alt={post.author.nickname || post.author.username}
                   className={styles.previewAvatar}
                 />

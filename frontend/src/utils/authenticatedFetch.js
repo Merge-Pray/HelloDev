@@ -12,9 +12,13 @@ export const authenticatedFetch = async (endpoint, options = {}) => {
       : `${API_URL}${endpoint}`;
 
     const headers = {
-      "Content-Type": "application/json",
       ...options.headers,
     };
+
+    // Content-Type nur bei JSON setzen, nicht bei FormData
+    if (!options.body || !(options.body instanceof FormData)) {
+      headers["Content-Type"] = "application/json";
+    }
 
     if (isSamsungInternet()) {
       headers["Cache-Control"] = "no-cache";
