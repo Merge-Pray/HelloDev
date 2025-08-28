@@ -22,6 +22,7 @@ import Settings from "../pages/Settings";
 import Messages from "../pages/Messages";
 import Notifications from "../pages/Notifications";
 import GetProfilePage from "../pages/Profile/GetProfilePage";
+import AvatarEditor from "../pages/AvatarEditor/AvatarEditor";
 
 export const router = createBrowserRouter([
   {
@@ -109,6 +110,14 @@ export const router = createBrowserRouter([
         element: (
           <ProtectedRoute>
             <Searchpage />
+          </ProtectedRoute>
+        ),
+      },
+      {
+        path: "avatar-editor",
+        element: (
+          <ProtectedRoute>
+            <AvatarEditor />
           </ProtectedRoute>
         ),
       },

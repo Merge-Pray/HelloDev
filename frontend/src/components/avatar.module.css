@@ -1,12 +1,15 @@
+/* Avatar Modul – vollständig variablenbasiert */
+
 .wrapper {
   display: grid;
   gap: 16px;
   width: 100%;
   max-width: 900px;
-  font-family: ui-sans-serif, system-ui, -apple-system, "Segoe UI", Roboto, "Helvetica Neue", Arial;
-  color: #0f172a;
+  font-family: "Helvetica Neue", Helvetica, Arial, sans-serif;
+  color: var(--color-text);
 }
 
+/* Toolbar / Panel */
 .toolbar {
   display: flex;
   flex-wrap: wrap;
@@ -14,29 +17,34 @@
   align-items: center;
   justify-content: space-between;
   padding: 12px;
-  border: 1px solid #e5e7eb;
+  border: 1px solid var(--color-card-border);
   border-radius: 14px;
-  background: #f8fafc;
+  background: var(--color-card-bg);
+  /* weiches Panel-Shadow wie in Cards */
+  box-shadow: 0 2px 6px var(--color-card-shadow);
 }
 
+/* Farb-Picker Label */
 .colorLabel {
   display: inline-flex;
   gap: 8px;
   align-items: center;
   font-size: 14px;
   font-weight: 600;
-  color: #334155;
+  color: var(--color-text);
 }
 
 .colorLabel input[type="color"] {
   width: 36px;
   height: 36px;
   padding: 0;
-  border: none;
-  background: none;
+  border: 2px solid var(--color-card-border);
+  background: var(--color-input-bg);
+  border-radius: 8px;
   cursor: pointer;
 }
 
+/* Tool Buttons */
 .tools {
   display: inline-flex;
   gap: 8px;
@@ -47,20 +55,26 @@
   font-size: 14px;
   padding: 8px 10px;
   border-radius: 10px;
-  border: 1px solid #e5e7eb;
-  background: white;
+  border: 1px solid var(--color-card-border);
+  background: var(--color-input-bg);
+  color: var(--color-text);
   cursor: pointer;
+  transition: background-color 0.2s ease, box-shadow 0.2s ease, border-color 0.2s ease;
 }
 
 .toolBtn:hover {
-  background: #f1f5f9;
+  background: var(--color-bg-secondary);
 }
 
+/* aktives Tool – primärer Akzent */
 .active {
-  border-color: #3b82f6;
-  box-shadow: 0 0 0 2px rgba(59,130,246,.15) inset;
+  border-color: var(--color-primary);
+  /* subtiler Inset-Glow mit color-mix (Fallback weiter unten) */
+  box-shadow:
+    0 0 0 2px color-mix(in srgb, var(--color-primary) 15%, transparent) inset;
 }
 
+/* Actions (Upload/Export) */
 .actions {
   display: inline-flex;
   gap: 8px;
@@ -77,10 +91,17 @@
   font-size: 14px;
   padding: 8px 10px;
   border-radius: 10px;
-  border: 1px dashed #cbd5e1;
-  background: #ffffff;
+  border: 1px dashed var(--color-card-border);
+  background: var(--color-input-bg);
+  color: var(--color-text);
   cursor: pointer;
   user-select: none;
+  transition: border-color 0.2s ease, background-color 0.2s ease;
+}
+
+.fileLabel:hover {
+  border-color: var(--color-primary);
+  background: var(--color-bg-secondary);
 }
 
 .fileLabel input[type="file"] {
@@ -90,48 +111,164 @@
   cursor: pointer;
 }
 
+/* Primärer Button (Export etc.) */
 .primaryBtn {
   font-size: 14px;
   font-weight: 600;
   padding: 8px 12px;
   border-radius: 10px;
-  color: white;
-  background: #3b82f6;
-  border: 1px solid #1d4ed8;
+  color: #fff; /* kontrastreich auf Gradient */
+  background: var(--color-bg-gradient);
+  border: 1px solid color-mix(in srgb, var(--color-primary) 60%, black 10%);
   cursor: pointer;
+  transition: transform 0.15s ease, filter 0.15s ease, background 0.2s ease;
 }
 
 .primaryBtn:hover {
-  filter: brightness(1.05);
+  /* leichtes Hover – konsistent zu deiner .btn-primary */
+  transform: translateY(-1px);
+  background: linear-gradient(
+    135deg,
+    var(--color-primary-hover) 0%,
+    var(--color-accent) 100%
+  );
 }
 
+/* Neutraler Reset-Button */
 .resetBtn {
   font-size: 14px;
   padding: 8px 12px;
   border-radius: 10px;
-  color: #0f172a;
-  background: #e2e8f0;
-  border: 1px solid #cbd5e1;
+  color: var(--color-text);
+  background: var(--color-input-bg);
+  border: 1px solid var(--color-card-border);
   cursor: pointer;
+  transition: background-color 0.2s ease, border-color 0.2s ease, filter 0.15s ease;
 }
 
 .resetBtn:hover {
+  background: var(--color-bg-secondary);
+  border-color: var(--color-primary);
   filter: brightness(0.98);
 }
 
+/* Zeichenfläche / Grid */
 .grid {
   position: relative;
   display: grid;
   aspect-ratio: 1 / 1;
   border-radius: 14px;
   overflow: hidden;
-  box-shadow: 0 2px 14px rgba(2, 6, 23, .08);
-  /* dezente Pixel-Gitternetz-Linien */
-  background-image:
-    linear-gradient(to right, rgba(15,23,42,.06) 1px, transparent 1px),
-    linear-gradient(to bottom, rgba(15,23,42,.06) 1px, transparent 1px);
+  /* Karten-Shadow */
+  box-shadow: 0 10px 30px var(--color-card-shadow);
+  /* Mittige Ausrichtung */
+  margin: 0 auto;
 }
 
-.cell {
-  /* Jede Zelle füllt via inline style (width/height/backgroundColor) */
+/* ==== Ergänzungen für neue UI-Teile ==== */
+
+/* Gruppen links/rechts in der Toolbar */
+.leftGroup,
+.rightGroup {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  flex-wrap: wrap;
+}
+
+/* Inline-Control (Checkbox/Select) */
+.inlineControl {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  font-size: 14px;
+  color: var(--color-text);
+}
+
+/* Select für Auflösung */
+.select {
+  padding: 8px 10px;
+  border: 1px solid var(--color-card-border);
+  background: var(--color-input-bg);
+  color: var(--color-text);
+  border-radius: 10px;
+  outline: none;
+}
+
+/* Sekundärer Button (für "Vorschläge neu" etc.) */
+.secondaryBtn {
+  font-size: 14px;
+  font-weight: 600;
+  padding: 8px 12px;
+  border-radius: 10px;
+  color: var(--color-text);
+  background: var(--color-input-bg);
+  border: 1px solid var(--color-card-border);
+  cursor: pointer;
+  transition: background-color 0.2s ease, border-color 0.2s ease, transform 0.15s ease;
+}
+.secondaryBtn:hover {
+  background: var(--color-bg-secondary);
+  border-color: var(--color-primary);
+  transform: translateY(-1px);
+}
+
+/* Leiste für Zufall/Vorschläge-Buttons */
+.suggestionsBar {
+  display: flex;
+  gap: 12px;
+  justify-content: center;
+  align-items: center;
+  flex-wrap: wrap;
+}
+
+/* Vorschläge Container */
+.suggestions {
+  display: flex;
+  gap: 12px;
+  flex-wrap: wrap;
+  justify-content: center;
+  align-items: center;
+}
+
+
+/* Vorschlags-Kacheln */
+/* .suggestions {
+  display: grid;
+  grid-template-columns: repeat(5, 96px);
+  gap: 12px;
+} */
+
+.suggestionItem {
+  width: auto;
+  height: auto;
+  padding: 0;
+  border: 1px solid var(--color-card-border);
+  border-radius: 10px;
+  overflow: hidden;
+  background: var(--color-card-bg);
+  box-shadow: 0 2px 6px var(--color-card-shadow);
+  cursor: pointer;
+  transition: transform 0.15s ease, box-shadow 0.2s ease, border-color 0.2s ease;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.suggestionItem:hover {
+  transform: translateY(-2px);
+  border-color: var(--color-primary);
+  box-shadow: 0 8px 20px var(--color-card-shadow);
+}
+
+.suggestionItem img {
+  display: block;
+  image-rendering: pixelated;
+}
+
+/* Responsive für kleine Screens */
+@media (max-width: 640px) {
+  .suggestions {
+    grid-template-columns: repeat(3, 96px);
+  }
 }
