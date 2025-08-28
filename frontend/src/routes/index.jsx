@@ -98,6 +98,14 @@ export const router = createBrowserRouter([
         ),
       },
       {
+        path: "chat/:userId",
+        element: (
+          <ProtectedRoute>
+            <Chatpage />
+          </ProtectedRoute>
+        ),
+      },
+      {
         path: "search",
         element: (
           <ProtectedRoute>

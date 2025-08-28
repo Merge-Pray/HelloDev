@@ -1,12 +1,17 @@
 import { API_URL } from "../lib/config";
 import { handleAuthErrorAndRetry, isAuthError } from "./tokenRefresh";
 
+const isSamsungInternet = () => {
+  return /SamsungBrowser/i.test(navigator.userAgent);
+};
+
 export const authenticatedFetch = async (endpoint, options = {}) => {
   const makeRequest = async () => {
     const url = endpoint.startsWith("http")
       ? endpoint
       : `${API_URL}${endpoint}`;
 
+<<<<<<< HEAD
     console.log('API_URL:', API_URL);
     console.log('endpoint:', endpoint);
     console.log('final URL:', url);
@@ -19,6 +24,17 @@ export const authenticatedFetch = async (endpoint, options = {}) => {
       headers["Content-Type"] = "application/json";
     }
     // Bei FormData wird Content-Type automatisch vom Browser gesetzt
+=======
+    const headers = {
+      "Content-Type": "application/json",
+      ...options.headers,
+    };
+
+    if (isSamsungInternet()) {
+      headers["Cache-Control"] = "no-cache";
+      headers["Pragma"] = "no-cache";
+    }
+>>>>>>> origin
 
     return await fetch(url, {
       credentials: "include",

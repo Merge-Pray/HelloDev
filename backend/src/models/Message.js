@@ -21,6 +21,11 @@ const MessageSchema = new Schema(
       type: String,
       required: true,
     },
+    contentType: {
+      type: String,
+      enum: ["text", "code"],
+      default: "text",
+    },
     isRead: {
       type: Boolean,
       default: false,

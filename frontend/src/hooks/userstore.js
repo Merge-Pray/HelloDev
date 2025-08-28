@@ -18,6 +18,7 @@ const useUserStore = create(
   persist(
     (set, get) => ({
       currentUser: null,
+      socket: null,
 
       setCurrentUser: (user) =>
         set({
@@ -29,12 +30,15 @@ const useUserStore = create(
           },
         }),
 
-      clearUser: () => set({ currentUser: null }),
+      setSocket: (socket) => set({ socket }),
+
+      clearUser: () => set({ currentUser: null, socket: null }),
     }),
 
     {
       name: "user-storage",
       storage: zustandStorage,
+      partialize: (state) => ({ currentUser: state.currentUser }),
     }
   )
 );

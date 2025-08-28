@@ -4,7 +4,7 @@ import { v2 as cloudinary } from "cloudinary";
 import { authorizeJwt } from "../middleware/auth.js";
 import UserModel from "../models/user.js";
 
-const router = express.Router();
+export const uploadRouter = express.Router();
 
 // Debug-Route um Auth zu testen
 router.post("/test", authorizeJwt, (req, res) => {
@@ -32,7 +32,7 @@ const upload = multer({
   },
 });
 
-router.post(
+uploadRouter.post(
   "/avatar",
   authorizeJwt,
   upload.single("image"),
@@ -147,5 +147,3 @@ router.post(
     }
   }
 );
-
-export default router;
