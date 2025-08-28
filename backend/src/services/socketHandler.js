@@ -13,6 +13,7 @@ export const socketHandler = (io) => {
       await UserModel.findByIdAndUpdate(userId, {
         isOnline: true,
         socketId: socketId,
+        lastSeen: null,
       });
       connectedUsers.set(userId.toString(), socketId);
     } catch (error) {

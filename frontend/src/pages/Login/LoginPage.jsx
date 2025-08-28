@@ -54,6 +54,8 @@ export default function LoginPage() {
         username: data.user.username,
         nickname: data.user.nickname,
         avatar: data.user.avatar,
+        isOnline: data.user.isOnline,
+        lastSeen: data.user.lastSeen,
       });
       navigate("/home");
     } catch (err) {

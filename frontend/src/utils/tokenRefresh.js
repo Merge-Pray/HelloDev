@@ -30,6 +30,8 @@ export const handleAuthErrorAndRetry = async (originalRequestFn) => {
           username: refreshResult.user.username,
           nickname: refreshResult.user.nickname,
           avatar: refreshResult.user.avatar,
+          isOnline: refreshResult.user.isOnline,
+          lastSeen: refreshResult.user.lastSeen,
         });
       }
 

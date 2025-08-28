@@ -98,7 +98,10 @@ export default function PostCard({
 
         <div className={styles.authorInfo}>
           <div className={styles.nameRow}>
-            {/* Anzeigename, z. B. voller Name */}
+            {post.author?.isOnline && (
+              <span className={styles.onlineDot} aria-label="Online" />
+            )}
+
             <span
               className={styles.displayName}
               onClick={handleAuthorClick}
@@ -107,24 +110,23 @@ export default function PostCard({
               {post.author?.nickname || post.author?.username}
             </span>
 
-            {/* Username / Handle */}
             <span className={styles.handle}>
               @{post.author?.username}.HelloDev.social
             </span>
           </div>
 
           <div className={styles.meta}>
-            <time
-              className={styles.time}
-              dateTime={new Date(post.createdAt).toISOString()}
-              title={new Date(post.createdAt).toLocaleString()}
-            >
-              {formatDistanceToNow(new Date(post.createdAt), {
-                addSuffix: true,
-              })}
-            </time>
-            {post.author?.isOnline && (
-              <span className={styles.onlineDot} aria-label="Online" />
+            {/* Only show post creation time if user is NOT online */}
+            {!post.author?.isOnline && (
+              <time
+                className={styles.time}
+                dateTime={new Date(post.createdAt).toISOString()}
+                title={new Date(post.createdAt).toLocaleString()}
+              >
+                {formatDistanceToNow(new Date(post.createdAt), {
+                  addSuffix: true,
+                })}
+              </time>
             )}
           </div>
         </div>
