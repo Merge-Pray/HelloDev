@@ -1,24 +1,11 @@
-import jwt from "jsonwebtoken";
-import UserModel from "../models/user.js";
+import { extractTokenFromCookies, verifyTokenAndGetUser } from "../libs/authHelpers.js";
 
 export const socketAuth = async (socket, next) => {
   try {
-    const token = socket.handshake.auth.token;
-
-    if (!token) {
-      return next(new Error("No token provided."));
-    }
-
-    const isVerified = jwt.verify(token, process.env.JWT_SECRET);
-
-    const user = await UserModel.findById(isVerified.id);
-
-    if (!user) {
-      return next(new Error("User not found."));
-    }
-
+    const cookies = socket.handshake.headers.cookie;
+    const token = extractTokenFromCookies(cookies);
+    const user = await verifyTokenAndGetUser(token);
     socket.user = user;
-
     next();
   } catch (error) {
     console.error("Socket Authentication Error:", error.message);

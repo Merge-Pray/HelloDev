@@ -1,20 +1,29 @@
 import { API_URL } from "../lib/config";
 import { handleAuthErrorAndRetry, isAuthError } from "./tokenRefresh";
 
+const isSamsungInternet = () => {
+  return /SamsungBrowser/i.test(navigator.userAgent);
+};
+
 export const authenticatedFetch = async (endpoint, options = {}) => {
   const makeRequest = async () => {
     const url = endpoint.startsWith("http")
       ? endpoint
       : `${API_URL}${endpoint}`;
 
+    const headers = {
+      "Content-Type": "application/json",
+      ...options.headers,
+    };
+
+    if (isSamsungInternet()) {
+      headers["Cache-Control"] = "no-cache";
+      headers["Pragma"] = "no-cache";
+    }
+
     return await fetch(url, {
       credentials: "include",
-      headers: {
-        "Content-Type": "application/json",
-        "Cache-Control": "no-cache",
-        Pragma: "no-cache",
-        ...options.headers,
-      },
+      headers,
       ...options,
     });
   };

@@ -1,23 +1,13 @@
 import jwt from "jsonwebtoken";
 import UserModel from "../models/user.js";
 import { generateToken } from "../libs/jwt.js";
+import { verifyTokenAndGetUser } from "../libs/authHelpers.js";
 
 export const authorizeJwt = async (req, res, next) => {
   try {
     const token = req.cookies.jwt;
-
-    if (!token) {
-      return res.status(401).json({ message: "No token provided" });
-    }
-
-    const isVerified = jwt.verify(token, process.env.JWT_SECRET);
-
-    req.user = await UserModel.findById(isVerified.id);
-
-    if (!req.user) {
-      return res.status(401).json({ message: "User not found" });
-    }
-
+    const user = await verifyTokenAndGetUser(token);
+    req.user = user;
     next();
   } catch (error) {
     return res.status(401).json({ message: "Not authorized" });
