@@ -41,8 +41,9 @@ const ChatPage = () => {
 
   const handleReceiveMessage = useCallback((message) => {
     setMessages((prev) => {
-      const shouldAdd = currentChatRef.current && message.chat === currentChatRef.current._id;
-      
+      const shouldAdd =
+        currentChatRef.current && message.chat === currentChatRef.current._id;
+
       if (shouldAdd) {
         return [...prev, message];
       }
@@ -54,8 +55,9 @@ const ChatPage = () => {
     const { userId: typingUserId, isTyping, chatId } = data;
 
     setTypingUsers((prev) => {
-      const shouldUpdate = currentChatRef.current && chatId === currentChatRef.current._id;
-      
+      const shouldUpdate =
+        currentChatRef.current && chatId === currentChatRef.current._id;
+
       if (shouldUpdate) {
         const newSet = new Set(prev);
         if (isTyping) {
@@ -145,7 +147,6 @@ const ChatPage = () => {
       setIsLoading(false);
     }
   };
-
 
   const handleInputChange = (e) => {
     setNewMessage(e.target.value);
@@ -255,8 +256,15 @@ const ChatPage = () => {
                   </div>
                 </div>
                 <div className={styles.chatTime}>
-                  {chat.lastMessage?.createdAt &&
+                  {/* Only show last message time if user is NOT online */}
+                  {!other.isOnline &&
+                    chat.lastMessage?.createdAt &&
                     formatMessageTime(chat.lastMessage.createdAt)}
+
+                  {/* Show online dot when user is online */}
+                  {other.isOnline && (
+                    <span className={styles.onlineDot} aria-label="Online" />
+                  )}
                 </div>
               </div>
             );

@@ -70,6 +70,8 @@ export const useUpdateProfile = () => {
         username: data.user.username,
         nickname: data.user.nickname,
         avatar: data.user.avatar,
+        isOnline: data.user.isOnline,
+        lastSeen: data.user.lastSeen,
       });
     },
     onError: (error) => {

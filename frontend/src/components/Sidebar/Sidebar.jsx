@@ -1,4 +1,3 @@
-// src/components/Sidebar/Sidebar.jsx
 import { useState, useEffect } from "react";
 import { useNavigate } from "react-router";
 import { User, Search, X } from "lucide-react";
@@ -75,7 +74,10 @@ export default function Sidebar() {
     setSearchQuery("");
   };
 
-  const getLastSeenText = (lastSeen) => {
+  const getLastSeenText = (lastSeen, isOnline) => {
+    // If user is online, don't show lastSeen
+    if (isOnline) return "Online";
+
     if (!lastSeen) return "Recently";
 
     const now = new Date();
@@ -140,9 +142,14 @@ export default function Sidebar() {
           @{highlightMatch(contact.username, searchQuery)}.HelloDev.social
         </div>
         <div className={styles.contactStatus}>
-          {getLastSeenText(contact.lastSeen)}
+          {/* Only show lastSeen text if not online */}
+          {!contact.isOnline &&
+            getLastSeenText(contact.lastSeen, contact.isOnline)}
           {contact.isOnline && (
-            <span className={styles.onlineDot} aria-label="Online" />
+            <>
+              <span>Online</span>
+              <span className={styles.onlineDot} aria-label="Online" />
+            </>
           )}
         </div>
       </div>
