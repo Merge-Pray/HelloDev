@@ -41,10 +41,47 @@ const EditProfilePage = () => {
     handleSubmit,
     setValue,
     watch,
+    reset,
     formState: { errors },
-  } = useForm();
+  } = useForm({
+    mode: "onChange",
+    defaultValues: {
+      programmingLanguages: [],
+      techArea: [],
+      techStack: [],
+      languages: [],
+      otherInterests: [],
+      username: "",
+      nickname: "",
+      email: "",
+      country: "",
+      city: "",
+      age: "",
+      aboutMe: "",
+      devExperience: "",
+      status: "",
+      gaming: "",
+      preferredOS: "",
+      favoriteTimeToCode: "",
+      favoriteLineOfCode: "",
+      favoriteDrinkWhileCoding: "",
+      musicGenreWhileCoding: "",
+      favoriteShowMovie: "",
+    },
+  });
 
   const watchedValues = watch();
+
+  // Reset States beim Verlassen der Komponente
+  useEffect(() => {
+    return () => {
+      setIsDataLoaded(false);
+      setHasUnsavedChanges(false);
+      setOriginalData({});
+      setError(null);
+      setSuccess(null);
+    };
+  }, []);
 
   useEffect(() => {
     if (!currentUser) {
@@ -62,47 +99,52 @@ const EditProfilePage = () => {
   }, [currentUser, navigate, profileError]);
 
   useEffect(() => {
-    if (profileData && Object.keys(profileData).length > 0 && !isDataLoaded) {
-      const arrayFields = [
-        "programmingLanguages",
-        "techArea",
-        "techStack",
-        "languages",
-        "otherInterests",
-      ];
+    if (profileData && Object.keys(profileData).length > 0) {
+      // Reset form state when profileData changes
+      if (!isDataLoaded) {
+        const arrayFields = [
+          "programmingLanguages",
+          "techArea",
+          "techStack",
+          "languages",
+          "otherInterests",
+        ];
 
-      const initialData = {};
+        const initialData = {};
+        const formData = {};
 
-      arrayFields.forEach((field) => {
-        const value = profileData[field] || [];
-        setValue(field, value);
-        initialData[field] = Array.isArray(value) ? [...value] : [];
-      });
+        arrayFields.forEach((field) => {
+          const value = profileData[field] || [];
+          const normalizedValue = Array.isArray(value) ? value : [];
+          formData[field] = normalizedValue;
+          initialData[field] = [...normalizedValue];
+        });
 
-      Object.keys(profileData).forEach((key) => {
-        if (!arrayFields.includes(key)) {
-          const value = profileData[key];
-          if (value !== null && value !== undefined) {
-            setValue(key, value);
-            initialData[key] = value;
-          } else {
-            setValue(key, "");
-            initialData[key] = "";
+        Object.keys(profileData).forEach((key) => {
+          if (!arrayFields.includes(key)) {
+            const value = profileData[key];
+            const normalizedValue =
+              value !== null && value !== undefined ? value : "";
+            formData[key] = normalizedValue;
+            initialData[key] = normalizedValue;
           }
+        });
+
+        // Handle nickname default
+        if (!profileData.nickname || profileData.nickname.trim() === "") {
+          const defaultNickname = profileData.username || "";
+          formData.nickname = defaultNickname;
+          initialData.nickname = defaultNickname;
         }
-      });
 
-      if (!profileData.nickname || profileData.nickname.trim() === "") {
-        const defaultNickname = profileData.username || "";
-        setValue("nickname", defaultNickname);
-        initialData["nickname"] = defaultNickname;
+        // Reset the form with all data at once
+        reset(formData);
+        setOriginalData(initialData);
+        setIsDataLoaded(true);
+        setHasUnsavedChanges(false);
       }
-
-      setOriginalData(initialData);
-      setIsDataLoaded(true);
-      setHasUnsavedChanges(false);
     }
-  }, [profileData, setValue, isDataLoaded]);
+  }, [profileData, reset, isDataLoaded]);
 
   const deepEqual = (a, b) => {
     if (Array.isArray(a) && Array.isArray(b)) {
@@ -233,7 +275,17 @@ const EditProfilePage = () => {
     }
   };
 
-  const profileStats = calculateProfileCompletion(profileData);
+  // Safe calculation with fallback
+  const profileStats = profileData
+    ? calculateProfileCompletion(profileData)
+    : {
+        totalCompletion: 0,
+        isMatchable: false,
+        completedFieldsCount: 0,
+        totalFieldsCount: 0,
+        missingRequiredFields: 0,
+        missingRequiredFieldsList: [],
+      };
   const profileCompletion = profileStats.totalCompletion;
   const isMatchable = profileStats.isMatchable;
 
