@@ -1,0 +1,39 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Generate Default Avatar</title>
+</head>
+<body>
+    <canvas id="canvas" width="120" height="120" style="border: 1px solid #ccc;"></canvas>
+    <br>
+    <button onclick="downloadImage()">Download as PNG</button>
+    
+    <script>
+        // Avatar erstellen
+        const canvas = document.getElementById('canvas');
+        const ctx = canvas.getContext('2d');
+        
+        // Hintergrund
+        ctx.fillStyle = '#5d3f94';
+        ctx.fillRect(0, 0, 120, 120);
+        
+        // Kopf (Kreis)
+        ctx.fillStyle = '#ffffff';
+        ctx.beginPath();
+        ctx.arc(60, 45, 20, 0, 2 * Math.PI);
+        ctx.fill();
+        
+        // Körper (Ellipse)
+        ctx.beginPath();
+        ctx.ellipse(60, 100, 25, 35, 0, 0, 2 * Math.PI);
+        ctx.fill();
+        
+        function downloadImage() {
+            const link = document.createElement('a');
+            link.download = 'default-avatar.png';
+            link.href = canvas.toDataURL('image/png');
+            link.click();
+        }
+    </script>
+</body>
+</html>
