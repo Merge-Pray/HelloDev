@@ -1,0 +1,121 @@
+.locationSelector {
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+  margin-bottom: 1rem;
+}
+
+.formGroup {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  position: relative;
+}
+
+.formGroup label {
+  font-size: 14px;
+  font-weight: 600;
+  color: var(--color-text);
+  margin-bottom: 4px;
+}
+
+.formGroup select {
+  width: 100%;
+  padding: 12px 16px;
+  border: 2px solid var(--color-input-border);
+  background: var(--color-input-bg);
+  color: var(--color-text);
+  border-radius: 10px;
+  font-size: 16px;
+  font-family: "Helvetica Neue", Helvetica, Arial, sans-serif;
+  transition: all 0.3s ease;
+  cursor: pointer;
+  appearance: none;
+  padding-right: 40px;
+}
+
+.formGroup select:focus {
+  outline: none;
+  border-color: var(--color-primary);
+  box-shadow: 0 0 0 3px rgba(var(--color-primary-rgb), 0.1);
+  transform: translateY(-1px);
+}
+
+.formGroup select:hover:not(:disabled) {
+  border-color: var(--color-primary);
+  background: var(--color-bg-secondary);
+}
+
+.formGroup select:disabled {
+  opacity: 0.6;
+  cursor: not-allowed;
+  background: var(--color-bg-secondary);
+  color: var(--color-text-secondary);
+}
+
+.formGroup select option {
+  background: var(--color-input-bg);
+  color: var(--color-text);
+  padding: 8px 12px;
+}
+
+/* Custom dropdown arrow */
+.formGroup::after {
+  content: "";
+  position: absolute;
+  right: 12px;
+  top: 50%;
+  transform: translateY(-50%) translateY(10px);
+  width: 0;
+  height: 0;
+  border-left: 5px solid transparent;
+  border-right: 5px solid transparent;
+  border-top: 6px solid var(--color-text-secondary);
+  pointer-events: none;
+  transition: all 0.3s ease;
+}
+
+.formGroup:hover::after {
+  border-top-color: var(--color-primary);
+}
+
+/* Required field indicator */
+.formGroup label span {
+  color: var(--color-error);
+  margin-left: 2px;
+}
+
+/* Responsive Design */
+@media (max-width: 768px) {
+  .locationSelector {
+    gap: 12px;
+  }
+
+  .formGroup select {
+    padding: 10px 14px;
+    font-size: 15px;
+    padding-right: 36px;
+  }
+
+  .formGroup::after {
+    right: 10px;
+    border-left-width: 4px;
+    border-right-width: 4px;
+    border-top-width: 5px;
+  }
+}
+
+@media (max-width: 480px) {
+  .formGroup select {
+    padding: 8px 12px;
+    font-size: 14px;
+    padding-right: 32px;
+  }
+
+  .formGroup::after {
+    right: 8px;
+    border-left-width: 3px;
+    border-right-width: 3px;
+    border-top-width: 4px;
+  }
+}

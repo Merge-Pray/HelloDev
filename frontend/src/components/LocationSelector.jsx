@@ -1,23 +1,24 @@
-import React, { useState, useEffect } from 'react';
-import { Country, City } from 'country-state-city';
+import React, { useState, useEffect } from "react";
+import { Country, City } from "country-state-city";
+import styles from "./locationselector.module.css";
 
-function LocationSelector({ 
-  selectedCountry, 
-  selectedCity, 
-  onCountryChange, 
+function LocationSelector({
+  selectedCountry,
+  selectedCity,
+  onCountryChange,
   onCityChange,
-  required = false 
+  required = false,
 }) {
   const [countries, setCountries] = useState([]);
   const [cities, setCities] = useState([]);
-  const [countryCode, setCountryCode] = useState('');
+  const [countryCode, setCountryCode] = useState("");
 
   useEffect(() => {
     const allCountries = Country.getAllCountries();
     setCountries(allCountries);
-    
+
     if (selectedCountry) {
-      const country = allCountries.find(c => c.name === selectedCountry);
+      const country = allCountries.find((c) => c.name === selectedCountry);
       if (country) {
         setCountryCode(country.isoCode);
       }
@@ -35,41 +36,44 @@ function LocationSelector({
 
   const handleCountryChange = (e) => {
     const countryName = e.target.value;
-    
+
     if (countryName !== selectedCountry) {
       onCountryChange(countryName);
-      onCityChange('');
-      
-      const country = countries.find(c => c.name === countryName);
-      setCountryCode(country ? country.isoCode : '');
+      onCityChange("");
+
+      const country = countries.find((c) => c.name === countryName);
+      setCountryCode(country ? country.isoCode : "");
     }
   };
 
   return (
-    <div className="location-selector">
-      <div className="form-group">
-        <label htmlFor="country">Country {required && '*'}</label>
+    <div className={styles.locationSelector}>
+      <div className={styles.formGroup}>
+        <label htmlFor="country">Country {required && <span>*</span>}</label>
         <select
           id="country"
-          value={selectedCountry || ''}
+          value={selectedCountry || ""}
           onChange={handleCountryChange}
           required={required}
           key={`country-${selectedCountry}`}
         >
           <option value="">Select a country</option>
           {countries.map((country) => (
-            <option key={`${country.isoCode}-${country.name}`} value={country.name}>
+            <option
+              key={`${country.isoCode}-${country.name}`}
+              value={country.name}
+            >
               {country.name}
             </option>
           ))}
         </select>
       </div>
 
-      <div className="form-group">
-        <label htmlFor="city">City {required && '*'}</label>
+      <div className={styles.formGroup}>
+        <label htmlFor="city">City {required && <span>*</span>}</label>
         <select
           id="city"
-          value={selectedCity || ''}
+          value={selectedCity || ""}
           onChange={(e) => onCityChange(e.target.value)}
           disabled={!countryCode}
           required={required}
