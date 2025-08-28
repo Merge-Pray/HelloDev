@@ -120,12 +120,12 @@ export default function Sidebar() {
             alt={`${contact.nickname || contact.username}'s avatar`}
             className={styles.avatarImage}
             onError={(e) => {
-              e.target.src = "/default-avatar.png";
+              e.target.src = "/avatars/default_avatar.png";
             }}
           />
         ) : (
           <img
-            src="/default-avatar.png"
+            src="/avatars/default_avatar.png"
             alt="Default avatar"
             className={styles.avatarImage}
           />

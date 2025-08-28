@@ -29,7 +29,7 @@ export default function RepostCard({ repost, onLike, onComment, onRepost }) {
       <div className="repost-header">
         <Repeat size={16} />
         <img
-          src={repost.author?.avatar || "/default-avatar.png"}
+          src={repost.author?.avatar || "/avatars/default_avatar.png"}
           alt={repost.author?.nickname || repost.author?.username || "Unknown User"}
           className="repost-author-avatar"
         />
