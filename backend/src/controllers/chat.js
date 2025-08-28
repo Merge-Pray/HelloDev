@@ -59,7 +59,7 @@ export const getUserChat = async (req, res, next) => {
       return res.status(404).json({ message: "User not found." });
     }
 
-    const chat = await ChatModel.findOne({
+    let chat = await ChatModel.findOne({
       participants: {
         $size: 2,
         $all: [userId, recipientId],
@@ -72,7 +72,7 @@ export const getUserChat = async (req, res, next) => {
       });
     }
 
-    await chat.populate("participants", "username avatar");
+    await chat.populate("participants", "username nickname avatar");
 
     res.status(200).json(chat);
   } catch (error) {

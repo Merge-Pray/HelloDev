@@ -1,5 +1,6 @@
 import MessageModel from "../models/Message.js";
 import UserModel from "../models/user.js";
+import ChatModel from "../models/Chat.js";
 const connectedUsers = new Map();
 
 export const socketHandler = (io) => {
@@ -26,8 +27,14 @@ export const socketHandler = (io) => {
           sender: userId,
           recipient: recipientId,
           content: content,
+          contentType: "text",
         });
         await message.populate("sender", "username avatar");
+        
+        await ChatModel.findByIdAndUpdate(chatId, {
+          lastMessage: message._id,
+        });
+        
         socket.emit("receiveMessage", message);
         const recipientSocketId = connectedUsers.get(recipientId.toString());
         if (recipientSocketId) {
@@ -35,6 +42,32 @@ export const socketHandler = (io) => {
         }
       } catch (error) {
         console.error("Error saving and emitting message:", error);
+      }
+    });
+
+    socket.on("typing", (data) => {
+      const { chatId, recipientId } = data;
+      const recipientSocketId = connectedUsers.get(recipientId.toString());
+      if (recipientSocketId) {
+        io.to(recipientSocketId).emit("userTyping", {
+          chatId,
+          userId,
+          username: socket.user.username,
+          isTyping: true,
+        });
+      }
+    });
+
+    socket.on("stopTyping", (data) => {
+      const { chatId, recipientId } = data;
+      const recipientSocketId = connectedUsers.get(recipientId.toString());
+      if (recipientSocketId) {
+        io.to(recipientSocketId).emit("userTyping", {
+          chatId,
+          userId,
+          username: socket.user.username,
+          isTyping: false,
+        });
       }
     });
 
