@@ -594,6 +594,7 @@ export default function ProfilePage() {
     <div className="page">
       <div className={styles.profileContainer}>
         <div className={`card enhanced ${styles.profileHeader}`}>
+
           <div className={styles.avatarContainer}>
             <div className={styles.avatar}>
               {profileData?.avatar || currentUser?.avatar ? (
@@ -604,7 +605,7 @@ export default function ProfilePage() {
                   }'s avatar`}
                   className={styles.avatarImage}
                   onError={(e) => {
-                    e.target.src = "/default-avatar.png";
+                    e.target.src = "/avatars/default_avatar.png";
                   }}
                 />
               ) : (

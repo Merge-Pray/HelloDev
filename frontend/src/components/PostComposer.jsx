@@ -5,6 +5,7 @@ import styles from "./PostComposer.module.css";
 import { FileImage, Smile, Send, Globe, Users, Lock } from "lucide-react";
 import useUserStore from "../hooks/userstore";
 import { authenticatedFetch } from "../utils/authenticatedFetch";
+import { getAvatarProps } from "../utils/avatarUtils";
 
 export default function PostComposer({ onPostCreated }) {
   const [text, setText] = useState("");
@@ -135,9 +136,11 @@ export default function PostComposer({ onPostCreated }) {
     <section className={styles.composer} aria-label="Create post">
       <header className={styles.header}>
         <img
+          {...getAvatarProps(
+            currentUser?.avatar,
+            currentUser?.nickname || currentUser?.username || "User"
+          )}
           className={styles.avatar}
-          src={currentUser?.avatar || "/default-avatar.png"}
-          alt={currentUser?.nickname || currentUser?.username || "User"}
           aria-hidden="true"
         />
         <h3 className={styles.title}>Share something</h3>

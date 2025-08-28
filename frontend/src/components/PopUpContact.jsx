@@ -29,12 +29,12 @@ const PopUpContact = ({ isOpen, onClose, userData }) => {
                     }'s avatar`}
                     className={styles.avatarImage}
                     onError={(e) => {
-                      e.target.src = "/default-avatar.png";
+                      e.target.src = "/avatars/default_avatar.png";
                     }}
                   />
                 ) : (
                   <img
-                    src="/default-avatar.png"
+                    src="/avatars/default_avatar.png"
                     alt="Your avatar"
                     className={styles.avatarImage}
                   />
@@ -52,12 +52,12 @@ const PopUpContact = ({ isOpen, onClose, userData }) => {
                     alt={`${user.nickname || user.username}'s avatar`}
                     className={styles.avatarImage}
                     onError={(e) => {
-                      e.target.src = "/default-avatar.png";
+                      e.target.src = "/avatars/default_avatar.png";
                     }}
                   />
                 ) : (
                   <img
-                    src="/default-avatar.png"
+                    src="/avatars/default_avatar.png"
                     alt="Default avatar"
                     className={styles.avatarImage}
                   />
@@ -76,12 +76,12 @@ const PopUpContact = ({ isOpen, onClose, userData }) => {
                   alt={`${user.nickname || user.username}'s avatar`}
                   className={styles.avatarImage}
                   onError={(e) => {
-                    e.target.src = "/default-avatar.png";
+                    e.target.src = "/avatars/default_avatar.png";
                   }}
                 />
               ) : (
                 <img
-                  src="/default-avatar.png"
+                  src="/avatars/default_avatar.png"
                   alt="Default avatar"
                   className={styles.avatarImage}
                 />

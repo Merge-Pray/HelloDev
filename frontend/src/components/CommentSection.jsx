@@ -60,9 +60,12 @@ export default function CommentSection({ postId, comments, onComment }) {
           comments.map((comment) => (
             <div key={comment._id} className="comment">
               <img
-                src={comment.author.avatar || "/default-avatar.png"}
+                src={comment.author.avatar || "/avatars/default_avatar.png"}
                 alt={comment.author.nickname || comment.author.username}
                 className="comment-avatar"
+                onError={(e) => {
+                  e.target.src = "/avatars/default_avatar.png";
+                }}
               />
               <div className="comment-content">
                 <div className="comment-header">
@@ -89,9 +92,12 @@ export default function CommentSection({ postId, comments, onComment }) {
       {/* Add comment form */}
       <form onSubmit={handleSubmit} className="comment-form">
         <img
-          src={currentUser?.avatar || "/default-avatar.png"}
+          src={currentUser?.avatar || "/avatars/default_avatar.png"}
           alt="Your avatar"
           className="comment-form-avatar"
+          onError={(e) => {
+            e.target.src = "/avatars/default_avatar.png";
+          }}
         />
         <div className="comment-input-container">
           <input

@@ -238,9 +238,12 @@ const ChatPage = () => {
               >
                 <div className={styles.chatAvatar}>
                   <img
-                    src={other.avatar || "/default-avatar.png"}
+                    src={other.avatar || "/avatars/default_avatar.png"}
                     alt={`${other.nickname || other.username}'s avatar`}
                     className={styles.chatAvatarImage}
+                    onError={(e) => {
+                      e.target.src = "/avatars/default_avatar.png";
+                    }}
                   />
                 </div>
                 <div className={styles.chatInfo}>
@@ -274,9 +277,12 @@ const ChatPage = () => {
           onClick={() => navigate(`/profile/${otherUser._id}`)}
         >
           <img
-            src={otherUser?.avatar || "/default-avatar.png"}
+            src={otherUser?.avatar || "/avatars/default_avatar.png"}
             alt={`${otherUser?.nickname || otherUser?.username}'s avatar`}
             className={styles.headerAvatarImage}
+            onError={(e) => {
+              e.target.src = "/avatars/default_avatar.png";
+            }}
           />
         </div>
         <div
@@ -310,9 +316,12 @@ const ChatPage = () => {
               >
                 <div className={styles.messageAvatar}>
                   <img
-                    src={message.sender.avatar || "/default-avatar.png"}
+                    src={message.sender.avatar || "/avatars/default_avatar.png"}
                     alt={`${message.sender.username}'s avatar`}
                     className={styles.messageAvatarImage}
+                    onError={(e) => {
+                      e.target.src = "/avatars/default_avatar.png";
+                    }}
                   />
                 </div>
                 <div

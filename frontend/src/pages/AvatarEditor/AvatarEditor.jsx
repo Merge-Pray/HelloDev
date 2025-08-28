@@ -1,12 +1,14 @@
 import React, { useState, useRef } from 'react';
 import Avatar from '../../components/avatar';
 import { authenticatedFetch } from '../../utils/authenticatedFetch';
+import useUserStore from '../../hooks/userstore';
 import styles from './AvatarEditor.module.css';
 
 const AvatarEditor = () => {
   const [avatarData, setAvatarData] = useState(null);
   const [isSaving, setIsSaving] = useState(false);
   const avatarRef = useRef(null);
+  const { setCurrentUser, currentUser } = useUserStore();
 
   const handleAvatarChange = (data) => {
     setAvatarData(data);
@@ -56,6 +58,17 @@ const AvatarEditor = () => {
       });
       
       console.log('Avatar saved successfully:', result);
+      
+      // User Store mit neuer Avatar URL aktualisieren
+      if (result.user && currentUser) {
+        setCurrentUser({
+          ...currentUser,
+          avatar: result.user.avatar,
+          avatarData: result.user.avatarData
+        });
+        console.log('User store updated with new avatar:', result.user.avatar);
+      }
+      
       alert('Avatar has been saved successfully! ✅');
       
     } catch (error) {
