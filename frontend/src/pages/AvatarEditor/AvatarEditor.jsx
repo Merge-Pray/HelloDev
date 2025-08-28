@@ -29,15 +29,15 @@ const AvatarEditor = () => {
   return (
     <div className={styles.container}>
       <div className={styles.header}>
-        <h1>🎨 Avatar Editor</h1>
-        <p>Erstelle deinen eigenen 32x32 Pixel-Avatar</p>
+        <h1>Avatar Editor</h1>
+        <p>Create your own pixel avatar</p>
       </div>
 
       <div className={styles.editorSection}>
         <div className={styles.avatarWrapper}>
           <Avatar 
             sizePx={512}
-            gridSize={32}
+            gridSize={16}
             onDataChange={handleAvatarChange}
           />
         </div>
@@ -49,18 +49,18 @@ const AvatarEditor = () => {
           className={styles.saveButton}
           disabled={!avatarData}
         >
-          💾 Avatar speichern
+          💾 Save avatar
         </button>
         
         <button 
           onClick={handleReset}
           className={styles.resetButton}
         >
-          🔄 Zurücksetzen
+          🔄 Reset
         </button>
       </div>
 
-      {avatarData && (
+      {/* {avatarData && (
         <div className={styles.preview}>
           <h3>Vorschau:</h3>
           <p>Du hast {avatarData.length} Pixel erstellt</p>
@@ -71,7 +71,7 @@ const AvatarEditor = () => {
             </pre>
           </details>
         </div>
-      )}
+      )} */}
     </div>
   );
 };
