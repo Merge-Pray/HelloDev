@@ -141,6 +141,9 @@ export default function Sidebar() {
         </div>
         <div className={styles.contactStatus}>
           {getLastSeenText(contact.lastSeen)}
+          {contact.isOnline && (
+            <span className={styles.onlineDot} aria-label="Online" />
+          )}
         </div>
       </div>
     </div>

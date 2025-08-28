@@ -7,7 +7,7 @@ export const getChats = async (req, res) => {
   try {
     const userId = req.user._id;
     const chats = await ChatModel.find({ participants: { $in: [userId] } })
-      .populate("participants", "username nickname avatar")
+      .populate("participants", "username nickname avatar isOnline")
       .populate("lastMessage");
     res.status(200).json(chats);
   } catch (error) {
@@ -72,7 +72,7 @@ export const getUserChat = async (req, res, next) => {
       });
     }
 
-    await chat.populate("participants", "username nickname avatar");
+    await chat.populate("participants", "username nickname avatar isOnline");
 
     res.status(200).json(chat);
   } catch (error) {
