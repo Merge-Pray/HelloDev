@@ -102,8 +102,6 @@ const MatchPage = () => {
     try {
       setIsActionLoading(true);
 
-      console.log("🤝 Contacting match (git add):", currentMatch.matchId);
-
       const response = await authenticatedFetch(
         `/api/match/${currentMatch.matchId}/contact`,
         {
@@ -111,19 +109,8 @@ const MatchPage = () => {
         }
       );
 
-      console.log("📡 Contact response:", response);
-
       if (response.success) {
-        console.log("✅ Successfully contacted match");
-
-        // Check if this resulted in a connection (both users contacted each other)
         if (response.match?.status === "connected") {
-          console.log("🎉 Connection established!");
-          setConnectedMatchData({
-            user: currentMatch.user,
-            matchId: currentMatch.matchId,
-            connectedAt: response.match.connectedAt,
-          });
           setShowConnectedPopup(true);
         } else {
           // Show success message for contact only
@@ -198,17 +185,6 @@ const MatchPage = () => {
     }
   };
 
-  const getMatchTypeBadgeClass = (matchType) => {
-    switch (matchType) {
-      case "mentor-mentee":
-        return styles.matchTypeMentor;
-      case "learnpartner":
-        return styles.matchTypeLearn;
-      default:
-        return styles.matchTypeNetwork;
-    }
-  };
-
   const getExperienceIcon = (experience) => {
     switch (experience) {
       case "beginner":
@@ -264,23 +240,6 @@ const MatchPage = () => {
           <div className={styles.skillTag}>
             <span>+{data.length - limit} more</span>
           </div>
-        )}
-      </div>
-    );
-  };
-
-  const renderBadges = (badges) => {
-    if (!badges?.length) return null;
-
-    return (
-      <div className={styles.badges}>
-        {badges.slice(0, 2).map((badge, index) => (
-          <span key={index} className={styles.badge}>
-            {badge.replace(/-/g, " ")}
-          </span>
-        ))}
-        {badges.length > 2 && (
-          <span className={styles.badge}>+{badges.length - 2} more</span>
         )}
       </div>
     );
@@ -470,9 +429,6 @@ const MatchPage = () => {
                   </div>
                 )}
               </div>
-
-              {/* Match Badges */}
-              {renderBadges(currentMatch.badges)}
             </div>
             {/* Action Buttons */}
             <div className={styles.actionButtons}>
@@ -486,7 +442,7 @@ const MatchPage = () => {
                 ) : (
                   <X size={20} />
                 )}
-                <span>Cancel</span>
+                <span>git ignore</span>
               </button>
 
               <button
