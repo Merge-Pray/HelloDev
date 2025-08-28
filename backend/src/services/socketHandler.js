@@ -1,5 +1,5 @@
-import MessageModel from "../models/Message";
-import UserModel from "../models/user";
+import MessageModel from "../models/Message.js";
+import UserModel from "../models/user.js";
 const connectedUsers = new Map();
 
 export const socketHandler = (io) => {
