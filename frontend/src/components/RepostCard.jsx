@@ -24,10 +24,10 @@ export default function RepostCard({ repost, onLike, onComment, onRepost }) {
   }
 
   return (
-    <div className={styles.postCard}>
+    <article className={styles.postCard} data-post-id={repost._id}>
       {/* Repost header */}
       <div className="repost-header">
-        <Repeat size={16} />
+        <Repeat size={16} color="var(--color-text-secondary)" />
         <img
           src={repost.author?.avatar || "/avatars/default_avatar.png"}
           alt={repost.author?.nickname || repost.author?.username || "Unknown User"}
@@ -53,10 +53,11 @@ export default function RepostCard({ repost, onLike, onComment, onRepost }) {
         {repost.originalPost && repost.originalPost.author ? (
           <PostCard
             post={repost.originalPost}
-            onLike={onLike}
-            onComment={onComment}
-            onRepost={onRepost}
+            onLike={null}
+            onComment={null}
+            onRepost={null}
             isEmbedded={true}
+            hideInteractions={true}
           />
         ) : (
           <div className={`${styles.postCard} ${styles.error}`}>
@@ -64,6 +65,6 @@ export default function RepostCard({ repost, onLike, onComment, onRepost }) {
           </div>
         )}
       </div>
-    </div>
+    </article>
   );
 }

@@ -60,8 +60,11 @@ const PostSchema = new Schema(
         },
         content: {
           type: String,
-          required: true,
           maxlength: 500,
+          trim: true,
+        },
+        imageUrl: {
+          type: String,
           trim: true,
         },
         mentions: [

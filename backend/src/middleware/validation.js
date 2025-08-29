@@ -76,10 +76,21 @@ const postValidationRules = () => {
 const commentValidationRules = () => {
   return [
     body("content")
-      .notEmpty()
-      .withMessage("Comment content is required.")
-      .isLength({ min: 1, max: 500 })
-      .withMessage("Comment must be between 1 and 500 characters."),
+      .optional()
+      .isLength({ max: 500 })
+      .withMessage("Comment must be under 500 characters."),
+    body("imageUrl")
+      .optional()
+      .isURL()
+      .withMessage("Image URL must be a valid URL."),
+    body()
+      .custom((value, { req }) => {
+        const { content, imageUrl } = req.body;
+        if (!content?.trim() && !imageUrl?.trim()) {
+          throw new Error("Comment must have either content or an image.");
+        }
+        return true;
+      }),
   ];
 };
 
