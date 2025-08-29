@@ -564,6 +564,36 @@ export default function ProfilePage() {
     );
   };
 
+  const renderFavouriteLineOfCode = () => {
+    return (
+      <div className={`card enhanced ${styles.aboutSection}`}>
+        <div className={styles.sectionHeader}>
+          <div className={styles.sectionTitleContainer}>
+            <Code size={20} className={styles.sectionIcon} />
+            <h3 className={styles.sectionTitle}>Favorite Line of Code</h3>
+          </div>
+          <button
+            className={`btn btn-secondary ${styles.editBtn}`}
+            onClick={() => handleEditSection("preferences")}
+          >
+            <Edit3 size={16} />
+          </button>
+        </div>
+        <div className={styles.aboutContent}>
+          {profileData.favoriteLineOfCode ? (
+            <pre className={styles.codeBlock}>
+              <code>{profileData.favoriteLineOfCode}</code>
+            </pre>
+          ) : (
+            <div className={styles.emptyState}>
+              <span>No favourite line of code added yet</span>
+            </div>
+          )}
+        </div>
+      </div>
+    );
+  };
+
   if (!hasBasicInfo()) {
     return (
       <div className="page centered">
@@ -594,7 +624,6 @@ export default function ProfilePage() {
     <div className="page">
       <div className={styles.profileContainer}>
         <div className={`card enhanced ${styles.profileHeader}`}>
-
           <div className={styles.avatarContainer}>
             <div className={styles.avatar}>
               {profileData?.avatar || currentUser?.avatar ? (
@@ -717,6 +746,8 @@ export default function ProfilePage() {
 
         <div className={styles.profileContent}>
           {renderAboutMe()}
+
+          {renderFavouriteLineOfCode()}
 
           {hasPersonalInfo() && renderPersonalInfo()}
 
