@@ -13,6 +13,7 @@ export default function PostCard({
   onComment,
   onRepost,
   isEmbedded = false,
+  hideInteractions = false,
 }) {
   const [showComments, setShowComments] = useState(false);
   const currentUser = useUserStore((state) => state.currentUser);
@@ -190,20 +191,24 @@ export default function PostCard({
         </div>
       )}
 
-      <PostActions
-        post={post}
-        currentUser={currentUser}
-        onLike={onLike}
-        onRepost={onRepost}
-        onToggleComments={() => setShowComments((v) => !v)}
-      />
+      {!hideInteractions && (
+        <>
+          <PostActions
+            post={post}
+            currentUser={currentUser}
+            onLike={onLike}
+            onRepost={onRepost}
+            onToggleComments={() => setShowComments((v) => !v)}
+          />
 
-      {showComments && (
-        <CommentSection
-          postId={post._id}
-          comments={post.comments}
-          onComment={onComment}
-        />
+          {showComments && (
+            <CommentSection
+              postId={post._id}
+              comments={post.comments}
+              onComment={onComment}
+            />
+          )}
+        </>
       )}
     </article>
   );

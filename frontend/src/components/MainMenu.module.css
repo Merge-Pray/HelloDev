@@ -99,6 +99,8 @@
   cursor: pointer;
   background: none;
   font: inherit;
+  width: 100%;
+  text-align: left;
 
   /* Neu */
   min-width: 0;

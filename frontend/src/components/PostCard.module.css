@@ -7,6 +7,50 @@
   transition: box-shadow 0.2s ease, transform 0.2s ease;
 }
 
+.postCard:first-child {
+  border-top: none;
+}
+
+/* Repost Styling */
+:global(.repost-header) {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  margin-bottom: 12px;
+  color: var(--color-text-secondary);
+  font-size: 0.9rem;
+}
+
+:global(.repost-author-avatar) {
+  width: 24px;
+  height: 24px;
+  border-radius: 6px;
+  object-fit: cover;
+}
+
+:global(.repost-info) {
+  color: var(--color-text-secondary);
+}
+
+:global(.repost-time) {
+  margin-left: auto;
+  color: var(--color-text-muted);
+  font-size: 0.85rem;
+}
+
+:global(.repost-comment) {
+  margin-bottom: 12px;
+  color: var(--color-text);
+  font-size: 1rem;
+  line-height: 1.5;
+}
+
+:global(.original-post) {
+  border: 1px solid var(--color-border);
+  border-radius: 8px;
+  overflow: hidden;
+}
+
 /* .postCard:hover {
   box-shadow: 0 4px 12px rgba(0,0,0,0.08);
   transform: translateY(-2px);
@@ -46,9 +90,8 @@
 .avatar {
   width: 48px;
   height: 48px;
-
+  border-radius: 10px;
   object-fit: cover;
-
   flex: 0 0 48px;
 }
 

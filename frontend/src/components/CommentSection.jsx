@@ -1,7 +1,8 @@
 import React, { useState, useRef, useEffect } from "react";
 import { formatDistanceToNow } from "date-fns";
 import EmojiPicker from "emoji-picker-react";
-import { Smile, Send } from "lucide-react";
+import KlipyGifPicker from "./KlipyGifPicker/KlipyGifPicker";
+import { Smile, Send, FileImage } from "lucide-react";
 import useUserStore from "../hooks/userstore";
 import { authenticatedFetch } from "../utils/authenticatedFetch";
 import { getAvatarProps } from "../utils/avatarUtils";
@@ -11,9 +12,12 @@ export default function CommentSection({ postId, comments, onComment }) {
   const [newComment, setNewComment] = useState("");
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [showEmojiPicker, setShowEmojiPicker] = useState(false);
+  const [showGifPicker, setShowGifPicker] = useState(false);
+  const [selectedGif, setSelectedGif] = useState(null);
   const currentUser = useUserStore((state) => state.currentUser);
   const textareaRef = useRef(null);
   const emojiPickerRef = useRef(null);
+  const gifPickerRef = useRef(null);
   const MAX = 500;
 
   useEffect(() => {
@@ -31,31 +35,43 @@ export default function CommentSection({ postId, comments, onComment }) {
       ) {
         setShowEmojiPicker(false);
       }
+      if (
+        gifPickerRef.current &&
+        !gifPickerRef.current.contains(event.target)
+      ) {
+        setShowGifPicker(false);
+      }
     };
 
-    if (showEmojiPicker) {
+    if (showEmojiPicker || showGifPicker) {
       document.addEventListener("mousedown", handleClickOutside);
     }
 
     return () => {
       document.removeEventListener("mousedown", handleClickOutside);
     };
-  }, [showEmojiPicker]);
+  }, [showEmojiPicker, showGifPicker]);
 
   const handleSubmit = async (e) => {
     e.preventDefault();
     const content = newComment.trim();
-    if (!content || isSubmitting) return;
+    if ((!content && !selectedGif) || isSubmitting) return;
 
     setIsSubmitting(true);
     try {
+      const requestBody = {
+        content: content || "",
+        imageUrl: selectedGif || null,
+      };
+
       const data = await authenticatedFetch(`/api/posts/${postId}/comments`, {
         method: "POST",
-        body: JSON.stringify({ content }),
+        body: JSON.stringify(requestBody),
       });
 
       if (data.success) {
         setNewComment("");
+        setSelectedGif(null);
         onComment(postId, data.comment);
       } else {
         console.error("Error adding comment:", data.message);
@@ -96,6 +112,21 @@ export default function CommentSection({ postId, comments, onComment }) {
 
   const toggleEmojiPicker = () => {
     setShowEmojiPicker(!showEmojiPicker);
+    if (showGifPicker) setShowGifPicker(false);
+  };
+
+  const handleGifClick = (gif) => {
+    setSelectedGif(gif.url);
+    setShowGifPicker(false);
+  };
+
+  const toggleGifPicker = () => {
+    setShowGifPicker(!showGifPicker);
+    if (showEmojiPicker) setShowEmojiPicker(false);
+  };
+
+  const removeSelectedGif = () => {
+    setSelectedGif(null);
   };
 
   const renderCommentContent = (content) => {
@@ -114,11 +145,12 @@ export default function CommentSection({ postId, comments, onComment }) {
 
   const remaining = MAX - newComment.length;
   const overLimit = remaining < 0;
-  const hasContent = newComment.trim();
+  const hasContent = newComment.trim() || selectedGif;
 
   return (
-    <div className={styles.commentSection}>
-      <div className={styles.commentsList}>
+    <div className={styles.commentSectionContainer}>
+      <div className={styles.commentSection}>
+        <div className={styles.commentsList}>
         {comments &&
           comments.map((comment) => (
             <div key={comment._id} className={styles.comment}>
@@ -148,6 +180,15 @@ export default function CommentSection({ postId, comments, onComment }) {
                     comment.content
                   )}
                 />
+                {comment.imageUrl && (
+                  <div className={styles.commentImage}>
+                    <img
+                      src={comment.imageUrl}
+                      alt="Comment GIF"
+                      className={styles.commentGif}
+                    />
+                  </div>
+                )}
               </div>
             </div>
           ))}
@@ -179,8 +220,50 @@ export default function CommentSection({ postId, comments, onComment }) {
             disabled={isSubmitting}
           />
 
+          {selectedGif && (
+            <div className={styles.gifPreview}>
+              <img
+                src={selectedGif}
+                alt="Selected GIF"
+                className={styles.gifImage}
+              />
+              <button
+                type="button"
+                className={styles.removeGif}
+                onClick={removeSelectedGif}
+                aria-label="Remove GIF"
+              >
+                ×
+              </button>
+            </div>
+          )}
+
           <div className={styles.composerToolbar}>
             <div className={styles.toolsLeft}>
+              <div className={styles.gifContainer} ref={gifPickerRef}>
+                <button
+                  type="button"
+                  className={`${styles.toolBtn} ${
+                    showGifPicker ? styles.active : ""
+                  }`}
+                  onClick={toggleGifPicker}
+                  disabled={isSubmitting}
+                  aria-label="Add GIF"
+                >
+                  <FileImage size={18} aria-hidden="true" />
+                  <span className={styles.toolLabel}>GIF</span>
+                </button>
+                <div
+                  className={styles.gifPicker}
+                  style={{ display: showGifPicker ? "block" : "none" }}
+                >
+                  <KlipyGifPicker
+                    onGifClick={handleGifClick}
+                    width={300}
+                    height={350}
+                  />
+                </div>
+              </div>
               <div className={styles.emojiContainer} ref={emojiPickerRef}>
                 <button
                   type="button"
@@ -253,6 +336,7 @@ export default function CommentSection({ postId, comments, onComment }) {
           </div>
         </form>
       </section>
+      </div>
     </div>
   );
 }

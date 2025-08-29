@@ -25,6 +25,7 @@
   /* Karten / Posts */
   --color-card-bg: #ffffff;
   --color-card-shadow: rgba(0, 0, 0, 0.05);
+  --color-comment-bg: #f8f9fa;
 
   /* ERGÄNZUNGEN: Form Elements */
   --color-input-bg: #ffffff;
@@ -70,6 +71,7 @@
 
   --color-card-bg: #241632;
   --color-card-shadow: rgba(0, 0, 0, 0.25);
+  --color-comment-bg: #1a0f26;
 
   /* ERGÄNZUNGEN: Dark Mode Form Elements */
   --color-input-bg: #2a1f3c;

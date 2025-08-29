@@ -58,13 +58,19 @@ const removeLike = (post, userId) => {
   return false;
 };
 
-const addComment = (post, authorId, content, mentions = []) => {
-  post.comments.push({
+const addComment = (post, authorId, content, mentions = [], imageUrl = null) => {
+  const commentData = {
     author: authorId,
-    content: content.trim(),
+    content: content ? content.trim() : "",
     mentions: mentions,
     createdAt: new Date(),
-  });
+  };
+  
+  if (imageUrl) {
+    commentData.imageUrl = imageUrl.trim();
+  }
+  
+  post.comments.push(commentData);
   post.engagementScore = calculateEngagementScore(post);
 };
 
@@ -394,7 +400,14 @@ export const addCommentToPost = async (req, res, next) => {
   try {
     const { postId } = req.params;
     const userId = req.user._id;
-    const { content } = req.body;
+    const { content, imageUrl } = req.body;
+
+    if (!content?.trim() && !imageUrl?.trim()) {
+      return res.status(400).json({
+        success: false,
+        message: "Comment must have either content or an image",
+      });
+    }
 
     const post = await PostModel.findById(postId);
 
@@ -405,7 +418,7 @@ export const addCommentToPost = async (req, res, next) => {
       });
     }
 
-    const mentionMatches = content.match(/@(\w+)/g) || [];
+    const mentionMatches = (content || "").match(/@(\w+)/g) || [];
     const mentionUsernames = mentionMatches.map((match) => match.slice(1));
 
     const mentionedUsers = await UserModel.find({
@@ -414,7 +427,7 @@ export const addCommentToPost = async (req, res, next) => {
 
     const mentions = mentionedUsers.map((user) => user._id);
 
-    addComment(post, userId, content, mentions);
+    addComment(post, userId, content, mentions, imageUrl);
     await post.save();
 
     await post.populate("comments.author", "username nickname avatar");
