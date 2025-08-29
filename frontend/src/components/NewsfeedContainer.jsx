@@ -67,6 +67,7 @@ export default function NewsfeedContainer() {
     fetchPosts(true);
   }, [feedType, algorithm, isSearchActive, searchQuery]);
 
+
   const handleSearch = (query) => {
     setSearchQuery(query);
     setIsSearchActive(!!query.trim());
