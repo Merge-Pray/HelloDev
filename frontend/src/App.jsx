@@ -15,6 +15,7 @@ function App() {
   const socketRef = useRef(null);
 
   const isRegisterPage = location.pathname === "/register";
+  const isLoginPage = location.pathname === "/login";
 
   useEffect(() => {
     if (currentUser && !socketRef.current) {
@@ -70,7 +71,7 @@ function App() {
     <div
       className={`${styles.appLayout} ${!currentUser ? styles.noUser : ""} ${
         isRegisterPage && !currentUser ? styles.allowScroll : ""
-      }`}
+      } ${isLoginPage && !currentUser ? styles.allowScroll : ""}`}
     >
       {currentUser ? (
         <>
@@ -84,7 +85,7 @@ function App() {
       ) : (
         <main
           className={`${styles.fullWidth} ${
-            isRegisterPage ? styles.allowScroll : ""
+            isRegisterPage || isLoginPage ? styles.allowScroll : ""
           }`}
         >
           <Outlet />

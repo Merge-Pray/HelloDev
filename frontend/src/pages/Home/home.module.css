@@ -51,9 +51,7 @@
   }
 
   .right {
-    position: static; /*  Sticky auf mobil deaktivieren */
-    height: auto;
-    overflow-y: visible;
+    display: none;
   }
 }
 
