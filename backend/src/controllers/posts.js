@@ -413,7 +413,10 @@ export const addCommentToPost = async (req, res, next) => {
     const userId = req.user._id;
     const { content, imageUrl } = req.body;
 
-    if (!content?.trim() && !imageUrl?.trim()) {
+    const hasContent = content && content.trim().length > 0;
+    const hasImage = imageUrl && imageUrl.trim().length > 0;
+
+    if (!hasContent && !hasImage) {
       return res.status(400).json({
         success: false,
         message: "Comment must have either content or an image",
@@ -429,7 +432,10 @@ export const addCommentToPost = async (req, res, next) => {
       });
     }
 
-    const mentionMatches = (content || "").match(/@(\w+)/g) || [];
+    const finalContent = hasContent ? content.trim() : null;
+    const finalImageUrl = hasImage ? imageUrl.trim() : null;
+
+    const mentionMatches = (finalContent || "").match(/@(\w+)/g) || [];
     const mentionUsernames = mentionMatches.map((match) => match.slice(1));
 
     const mentionedUsers = await UserModel.find({
@@ -438,7 +444,7 @@ export const addCommentToPost = async (req, res, next) => {
 
     const mentions = mentionedUsers.map((user) => user._id);
 
-    addComment(post, userId, content, mentions, imageUrl);
+    addComment(post, userId, finalContent, mentions, finalImageUrl);
     await post.save();
 
     await post.populate("comments.author", "username nickname avatar");
@@ -724,7 +730,6 @@ export const getPostReposts = async (req, res, next) => {
   }
 };
 
-// Add endpoint to get posts with images only
 export const getImagePosts = async (req, res, next) => {
   try {
     const userId = req.user._id;
@@ -736,7 +741,7 @@ export const getImagePosts = async (req, res, next) => {
     const userContacts = currentUser.contacts || [];
 
     const matchCriteria = {
-      imageUrl: { $ne: null }, // Only posts with images
+      imageUrl: { $ne: null },
       isHidden: false,
       $or: [
         { visibility: "public" },

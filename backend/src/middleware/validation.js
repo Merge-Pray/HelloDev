@@ -83,14 +83,16 @@ const commentValidationRules = () => {
       .optional()
       .isURL()
       .withMessage("Image URL must be a valid URL."),
-    body()
-      .custom((value, { req }) => {
-        const { content, imageUrl } = req.body;
-        if (!content?.trim() && !imageUrl?.trim()) {
-          throw new Error("Comment must have either content or an image.");
-        }
-        return true;
-      }),
+    body().custom((value, { req }) => {
+      const { content, imageUrl } = req.body;
+      const hasContent = content && content.trim().length > 0;
+      const hasImage = imageUrl && imageUrl.trim().length > 0;
+
+      if (!hasContent && !hasImage) {
+        throw new Error("Comment must have either content or an image.");
+      }
+      return true;
+    }),
   ];
 };
 
