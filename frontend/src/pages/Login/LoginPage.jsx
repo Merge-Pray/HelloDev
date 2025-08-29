@@ -6,6 +6,11 @@ import useUserStore from "../../hooks/userstore";
 import styles from "./loginpage.module.css";
 import { API_URL } from "../../lib/config";
 import DarkMode from "../../components/DarkMode";
+import { debugLoginIssue } from "../../utils/samsungBrowserDebug";
+
+const isSamsungInternet = () => {
+  return /SamsungBrowser/i.test(navigator.userAgent);
+};
 
 export default function LoginPage() {
   const currentUser = useUserStore((state) => state.currentUser);
@@ -27,7 +32,6 @@ export default function LoginPage() {
     },
   });
 
-  // Weiterleitung zur Home-Seite wenn bereits eingeloggt
   useEffect(() => {
     if (currentUser) {
       navigate("/home", { replace: true });
@@ -39,9 +43,18 @@ export default function LoginPage() {
     setError(null);
 
     try {
+      const headers = {
+        "Content-Type": "application/json",
+      };
+
+      if (isSamsungInternet()) {
+        headers["Cache-Control"] = "no-cache";
+        headers["Pragma"] = "no-cache";
+      }
+
       const res = await fetch(`${API_URL}/api/user/login`, {
         method: "POST",
-        headers: { "Content-Type": "application/json" },
+        headers,
         credentials: "include",
         body: JSON.stringify(values),
       });
@@ -49,7 +62,35 @@ export default function LoginPage() {
       const data = await res.json();
       if (!res.ok) throw new Error(data.message || "Login failed");
 
+      if (isSamsungInternet()) {
+        console.log("🔍 Samsung Browser login - data received:", !!data.user);
+        debugLoginIssue(data.user);
+      }
+
+      if (isSamsungInternet()) {
+        await new Promise((resolve) => setTimeout(resolve, 100));
+      }
+
       setCurrentUser(data.user);
+
+      if (isSamsungInternet()) {
+        await new Promise((resolve) => setTimeout(resolve, 50));
+        const stored = localStorage.getItem("user-storage");
+        if (!stored) {
+          console.warn(
+            "Samsung Browser: localStorage write may have failed, retrying..."
+          );
+
+          setCurrentUser(data.user);
+
+          setTimeout(() => {
+            debugLoginIssue(data.user);
+          }, 100);
+        } else {
+          console.log("✅ Samsung Browser: localStorage write successful");
+        }
+      }
+
       navigate("/home");
     } catch (err) {
       console.error("Login error:", err);
@@ -59,7 +100,6 @@ export default function LoginPage() {
     }
   }
 
-  // Wenn User eingeloggt ist, zeige nichts an (wird eh weitergeleitet)
   if (currentUser) {
     return null;
   }
