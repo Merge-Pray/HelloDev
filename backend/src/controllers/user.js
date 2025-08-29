@@ -31,7 +31,7 @@ export const createUser = async (req, res, next) => {
     return res.status(201).json({
       message: "User created successfully",
       user: {
-        id: newAccount._id,
+        _id: newAccount._id,
         username: newAccount.username,
         nickname: newAccount.nickname,
         email: newAccount.email,
@@ -292,7 +292,7 @@ export const verifyLogin = async (req, res, next) => {
     return res.status(200).json({
       message: "Login successful",
       user: {
-        id: existingUser._id,
+        _id: existingUser._id,
         username: existingUser.username,
         nickname: existingUser.nickname,
         email: existingUser.email,
@@ -352,7 +352,7 @@ export const getUserData = async (req, res, next) => {
     res.status(200).json({
       message: "User data retrieved successfully",
       user: {
-        id: user._id,
+        _id: user._id,
         username: user.username,
         nickname: user.nickname,
         email: user.email,
@@ -411,7 +411,7 @@ export const getUserProfile = async (req, res, next) => {
         success: true,
         message: "Own profile data retrieved successfully",
         user: {
-          id: targetUser._id,
+          _id: targetUser._id,
           username: targetUser.username,
           nickname: targetUser.nickname,
           email: targetUser.email,
@@ -457,7 +457,7 @@ export const getUserProfile = async (req, res, next) => {
         success: true,
         message: "Contact profile data retrieved successfully",
         user: {
-          id: targetUser._id,
+          _id: targetUser._id,
           username: targetUser.username,
           nickname: targetUser.nickname,
           avatar: targetUser.avatar,
@@ -495,7 +495,7 @@ export const getUserProfile = async (req, res, next) => {
         success: true,
         message: "Public profile data retrieved successfully",
         user: {
-          id: targetUser._id,
+          _id: targetUser._id,
           username: targetUser.username,
           nickname: targetUser.nickname,
           avatar: targetUser.avatar,
@@ -539,7 +539,7 @@ export const getUserContacts = async (req, res, next) => {
     }
 
     const formattedContacts = user.contacts.map((contact) => ({
-      id: contact._id,
+      _id: contact._id,
       username: contact.username,
       nickname: contact.nickname,
       avatar: contact.avatar,

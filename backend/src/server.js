@@ -25,16 +25,18 @@ app.use(express.json());
 
 app.use(cookieParser());
 
+const allowedOrigins = [
+  "http://localhost:5173",
+  "http://localhost:5174",
+  "http://localhost:3000",
+  "https://hellodev.social",
+  "https://www.hellodev.social",
+  "https://hellodev.vercel.app",
+];
+
 app.use(
   cors({
-    origin: [
-      "http://localhost:5173",
-      "http://localhost:5174",
-      "http://localhost:3000",
-      "https://hellodev.social",
-      "https://www.hellodev.social",
-      "https://hellodev.vercel.app",
-    ],
+    origin: allowedOrigins,
     credentials: true,
     methods: ["GET", "POST", "PUT", "DELETE", "OPTIONS", "PATCH"],
     allowedHeaders: [
@@ -48,6 +50,7 @@ app.use(
     optionsSuccessStatus: 200,
   })
 );
+
 app.options("*", cors());
 
 app.use("/api/user", userRouter);
@@ -66,17 +69,13 @@ const httpServer = http.createServer(app);
 
 const io = new Server(httpServer, {
   cors: {
-    origin: [
-      "http://localhost:5173",
-      "http://localhost:5174",
-      "http://localhost:3000",
-      "https://hellodev.social",
-      "https://www.hellodev.social",
-      "https://hellodev.vercel.app",
-    ],
+    origin: allowedOrigins,
     credentials: true,
   },
 });
+
+app.set("socketio", io);
+
 io.use(socketAuth);
 
 socketHandler(io);

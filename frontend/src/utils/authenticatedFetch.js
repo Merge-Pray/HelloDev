@@ -39,6 +39,12 @@ export const authenticatedFetch = async (endpoint, options = {}) => {
   }
 
   if (!response.ok) {
+    if (response.status === 403) {
+      throw new Error('Access forbidden');
+    }
+    if (response.status >= 500) {
+      throw new Error('Server error - please try again later');
+    }
     throw new Error(`Request failed: ${response.status}`);
   }
 

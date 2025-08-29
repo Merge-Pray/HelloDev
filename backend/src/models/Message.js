@@ -36,5 +36,8 @@ const MessageSchema = new Schema(
   }
 );
 
+MessageSchema.index({ recipient: 1, isRead: 1 });
+MessageSchema.index({ chat: 1, recipient: 1, isRead: 1 });
+
 const MessageModel = model("Message", MessageSchema);
 export default MessageModel;

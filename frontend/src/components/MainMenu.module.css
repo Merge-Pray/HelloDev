@@ -41,11 +41,15 @@
 .logoLight {
   display: none;
   height: 50px;
-  max-width: 140px;  /* bleibt als Obergrenze ok */
+  max-width: 140px; /* bleibt als Obergrenze ok */
 }
 
-:root[data-theme="dark"] .logoDark { display: block; }
-:root[data-theme="light"] .logoLight { display: block; }
+:root[data-theme="dark"] .logoDark {
+  display: block;
+}
+:root[data-theme="light"] .logoLight {
+  display: block;
+}
 
 .darkmode {
   display: flex;
@@ -54,7 +58,11 @@
   padding: 10px;
 }
 
-.brandText { line-height: 1.05; font-weight: 800; letter-spacing: 0.4px; }
+.brandText {
+  line-height: 1.05;
+  font-weight: 800;
+  letter-spacing: 0.4px;
+}
 
 /* ───────── Listen ───────── */
 .listTop,
@@ -71,7 +79,10 @@
   min-width: 0;
 }
 
-.listBottom { padding-top: 0; padding-bottom: 6px; }
+.listBottom {
+  padding-top: 0;
+  padding-bottom: 6px;
+}
 
 /* ───────── Links ───────── */
 .link {
@@ -97,11 +108,23 @@
 }
 
 /* ───────── Icons ───────── */
-.icon { width: 25px; height: 25px; transition: filter 0.2s ease; }
-:root[data-theme="light"] .icon { filter: brightness(0) saturate(100%); }
-:root[data-theme="dark"] .icon { filter: invert(1) brightness(100%); }
-.link:hover .icon { filter: invert(1) brightness(120%); }
-.active .icon { filter: inherit; }
+.icon {
+  width: 25px;
+  height: 25px;
+  transition: filter 0.2s ease;
+}
+:root[data-theme="light"] .icon {
+  filter: brightness(0) saturate(100%);
+}
+:root[data-theme="dark"] .icon {
+  filter: invert(1) brightness(100%);
+}
+.link:hover .icon {
+  filter: invert(1) brightness(120%);
+}
+.active .icon {
+  filter: inherit;
+}
 
 /* ───────── Labels ───────── */
 .label {
@@ -113,37 +136,65 @@
   text-overflow: ellipsis;
 }
 
+.iconContainer {
+  position: relative;
+  display: inline-block;
+}
+
+.unreadBadge {
+  position: absolute;
+  top: -8px;
+  right: -8px;
+  background: #ef4444;
+  color: white;
+  font-size: 10px;
+  font-weight: 600;
+  padding: 2px 6px;
+  border-radius: 10px;
+  min-width: 16px;
+  height: 16px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  line-height: 1;
+  z-index: 10;
+}
+
 /* ───────── Responsive (<1200px) ───────── */
 @media (max-width: 1200px) {
   .brand {
-    justify-content: center;      /* zentriert Logo */
+    justify-content: center; /* zentriert Logo */
   }
 
-  .brandText { display: none; }
+  .brandText {
+    display: none;
+  }
 
   .link {
-    grid-template-columns: 1fr;   /* Icon alleine */
+    grid-template-columns: 1fr; /* Icon alleine */
     justify-items: center;
     padding: 10px;
   }
 
-  .logo { 
-    max-width: 50px; 
-    height: 40px; 
-    font-size: 20px; 
+  .logo {
+    max-width: 50px;
+    height: 40px;
+    font-size: 20px;
   }
 
-  .label { display: none; }       /* Labels aus */
+  .label {
+    display: none;
+  } /* Labels aus */
 
   .listTop,
-  .listBottom { 
-    padding: 4px; 
-    gap: 4px; 
+  .listBottom {
+    padding: 4px;
+    gap: 4px;
   }
 
-  .icon { 
-    width: 28px; 
-    height: 28px; 
+  .icon {
+    width: 28px;
+    height: 28px;
   }
 
   .darkmode {
@@ -159,17 +210,17 @@
     justify-content: center;
   }
 
-  .logo { 
-    max-width: 50px; 
-    height: 40px; 
-    font-size: 20px; 
+  .logo {
+    max-width: 50px;
+    height: 40px;
+    font-size: 20px;
   }
 
-  .icon { 
-    width: 28px; 
-    height: 28px; 
-    object-fit: contain; 
-    text-align: center; 
+  .icon {
+    width: 28px;
+    height: 28px;
+    object-fit: contain;
+    text-align: center;
   }
 
   .link {
@@ -178,12 +229,14 @@
     padding: 10px;
   }
 
-  .label { display: none; }
+  .label {
+    display: none;
+  }
 
   .listTop,
-  .listBottom { 
-    padding: 4px; 
-    gap: 4px; 
+  .listBottom {
+    padding: 4px;
+    gap: 4px;
   }
 
   .darkmode {
@@ -196,33 +249,35 @@
 @media (max-width: 520px) {
   .brand {
     justify-content: center;
-    padding: 6px 8px; 
+    padding: 6px 8px;
   }
 
-  .logo { 
-    max-width: 45px; 
-    height: 35px; 
-    font-size: 18px; 
+  .logo {
+    max-width: 45px;
+    height: 35px;
+    font-size: 18px;
   }
 
-  .icon { 
-    width: 26px; 
-    height: 26px; 
-    object-fit: contain; 
+  .icon {
+    width: 26px;
+    height: 26px;
+    object-fit: contain;
   }
 
   .link {
     grid-template-columns: 1fr;
     justify-items: center;
-    padding: 8px; 
+    padding: 8px;
   }
 
-  .label { display: none; }
+  .label {
+    display: none;
+  }
 
   .listTop,
-  .listBottom { 
-    padding: 3px; 
-    gap: 3px; 
+  .listBottom {
+    padding: 3px;
+    gap: 3px;
   }
 
   .darkmode {

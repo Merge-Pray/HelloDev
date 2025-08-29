@@ -14,6 +14,17 @@ export const extractTokenFromCookies = (cookieString) => {
   return null;
 };
 
+export const isTokenExpiringSoon = (token) => {
+  try {
+    const decoded = jwt.decode(token);
+    const now = Date.now() / 1000;
+    const timeUntilExpiry = decoded.exp - now;
+    return timeUntilExpiry < 300;
+  } catch {
+    return true;
+  }
+};
+
 export const verifyTokenAndGetUser = async (token) => {
   if (!token) {
     throw new Error("No token provided");

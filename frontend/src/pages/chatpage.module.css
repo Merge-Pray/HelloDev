@@ -275,7 +275,9 @@
 }
 
 @keyframes typingPulse {
-  0%, 80%, 100% {
+  0%,
+  80%,
+  100% {
     transform: scale(0.8);
     opacity: 0.5;
   }
@@ -360,6 +362,40 @@
   text-align: center;
   padding: 48px 24px;
   color: var(--color-error);
+}
+
+.chatItemUnread {
+  background-color: rgba(59, 130, 246, 0.05);
+  border-left: 3px solid #3b82f6;
+}
+
+.unreadDot {
+  display: inline-block;
+  width: 8px;
+  height: 8px;
+  background-color: #ef4444;
+  border-radius: 50%;
+  margin-left: 8px;
+}
+
+.chatLastMessageUnread {
+  font-weight: 600;
+  color: var(--text-primary);
+}
+
+.unreadCount {
+  background: #ef4444;
+  color: white;
+  font-size: 11px;
+  font-weight: 600;
+  padding: 2px 6px;
+  border-radius: 10px;
+  min-width: 16px;
+  height: 16px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  line-height: 1;
 }
 
 @media (max-width: 1200px) {

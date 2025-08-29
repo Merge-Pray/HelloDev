@@ -6,13 +6,14 @@ import useUserStore from "../hooks/userstore";
 import { authenticatedFetch } from "../utils/authenticatedFetch";
 import { format } from "date-fns";
 import styles from "./chatpage.module.css";
+import { useUnreadCount } from "../hooks/useUnreadCount";
 
 const ChatPage = () => {
   const { userId } = useParams();
   const navigate = useNavigate();
   const currentUser = useUserStore((state) => state.currentUser);
   const socket = useUserStore((state) => state.socket);
-
+  const { refreshUnreadCount } = useUnreadCount();
   const [chats, setChats] = useState([]);
   const [currentChat, setCurrentChat] = useState(null);
   const [messages, setMessages] = useState([]);
@@ -50,6 +51,21 @@ const ChatPage = () => {
       return prev;
     });
   }, []);
+  useEffect(() => {
+    if (currentChat) {
+      const markAsRead = async () => {
+        try {
+          await authenticatedFetch(`/api/chats/${currentChat._id}/mark-read`, {
+            method: "PATCH",
+          });
+        } catch (error) {
+          console.error("Error auto-marking messages as read:", error);
+        }
+      };
+
+      markAsRead();
+    }
+  }, [currentChat]);
 
   const handleUserTyping = useCallback((data) => {
     const { userId: typingUserId, isTyping, chatId } = data;
@@ -81,11 +97,23 @@ const ChatPage = () => {
         socket.off("userTyping", handleUserTyping);
       };
     }
-  }, [socket]);
+  }, [socket, handleReceiveMessage, handleUserTyping]);
 
   useEffect(() => {
     scrollToBottom();
   }, [messages]);
+
+  // Ensure scroll to bottom when entering an individual chat
+  useEffect(() => {
+    if (userId && messages.length > 0 && !isLoading) {
+      // Use a longer timeout to ensure the DOM is fully rendered
+      const timeoutId = setTimeout(() => {
+        scrollToBottom();
+      }, 200);
+
+      return () => clearTimeout(timeoutId);
+    }
+  }, [userId, messages.length, isLoading]);
 
   const loadChatOverview = async () => {
     try {
@@ -136,8 +164,22 @@ const ChatPage = () => {
 
         if (messagesResponse && Array.isArray(messagesResponse)) {
           setMessages(messagesResponse);
+          // Scroll to bottom after messages are set
+          setTimeout(() => {
+            scrollToBottom();
+          }, 100);
         } else {
           setMessages([]);
+        }
+
+        try {
+          await authenticatedFetch(`/api/chats/${chatResponse._id}/mark-read`, {
+            method: "PATCH",
+          });
+
+          refreshUnreadCount();
+        } catch (error) {
+          console.error("Error marking messages as read:", error);
         }
       }
     } catch (err) {
@@ -231,10 +273,14 @@ const ChatPage = () => {
         <div className={styles.chatList}>
           {chats.map((chat) => {
             const other = getOtherUser(chat);
+            const hasUnreadMessages = chat.unreadCount > 0;
+
             return (
               <div
                 key={chat._id}
-                className={styles.chatItem}
+                className={`${styles.chatItem} ${
+                  hasUnreadMessages ? styles.chatItemUnread : ""
+                }`}
                 onClick={() => navigate(`/chat/${other._id}`)}
               >
                 <div className={styles.chatAvatar}>
@@ -250,18 +296,26 @@ const ChatPage = () => {
                 <div className={styles.chatInfo}>
                   <div className={styles.chatName}>
                     {other.nickname || other.username}
+                    {hasUnreadMessages && <span className={styles.unreadDot} />}
                   </div>
-                  <div className={styles.chatLastMessage}>
+                  <div
+                    className={`${styles.chatLastMessage} ${
+                      hasUnreadMessages ? styles.chatLastMessageUnread : ""
+                    }`}
+                  >
                     {chat.lastMessage?.content || "No messages yet"}
                   </div>
                 </div>
                 <div className={styles.chatTime}>
-                  {/* Only show last message time if user is NOT online */}
-                  {!other.isOnline &&
+                  {hasUnreadMessages && (
+                    <span className={styles.unreadCount}>
+                      {chat.unreadCount > 99 ? "99+" : chat.unreadCount}
+                    </span>
+                  )}
+                  {!hasUnreadMessages &&
+                    !other.isOnline &&
                     chat.lastMessage?.createdAt &&
                     formatMessageTime(chat.lastMessage.createdAt)}
-
-                  {/* Show online dot when user is online */}
                   {other.isOnline && (
                     <span className={styles.onlineDot} aria-label="Online" />
                   )}
