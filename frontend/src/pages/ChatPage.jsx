@@ -1,6 +1,7 @@
 import { useState, useEffect, useRef, useCallback } from "react";
 import { useParams, useNavigate } from "react-router";
-import { ArrowLeft, Send, MessageCircle } from "lucide-react";
+import { ArrowLeft, Send, MessageCircle, Smile } from "lucide-react";
+import EmojiPicker from "emoji-picker-react";
 import Sidebar from "../components/Sidebar/Sidebar";
 import useUserStore from "../hooks/userstore";
 import { authenticatedFetch } from "../utils/authenticatedFetch";
@@ -23,10 +24,13 @@ const ChatPage = () => {
   const [error, setError] = useState(null);
   const [typingUsers, setTypingUsers] = useState(new Set());
   const [isCurrentUserTyping, setIsCurrentUserTyping] = useState(false);
+  const [showEmojiPicker, setShowEmojiPicker] = useState(false);
 
   const messagesEndRef = useRef(null);
   const typingTimeoutRef = useRef(null);
   const currentChatRef = useRef(null);
+  const emojiPickerRef = useRef(null);
+  const messageInputRef = useRef(null);
 
   useEffect(() => {
     if (userId) {
@@ -214,6 +218,56 @@ const ChatPage = () => {
         });
       }
     }, 1000);
+  };
+
+  useEffect(() => {
+    const handleClickOutside = (event) => {
+      if (
+        emojiPickerRef.current &&
+        !emojiPickerRef.current.contains(event.target)
+      ) {
+        setShowEmojiPicker(false);
+      }
+    };
+
+    if (showEmojiPicker) {
+      document.addEventListener("mousedown", handleClickOutside);
+    }
+
+    return () => {
+      document.removeEventListener("mousedown", handleClickOutside);
+    };
+  }, [showEmojiPicker]);
+
+  const handleEmojiClick = (emojiData) => {
+    const emoji = emojiData.emoji;
+    const textarea = messageInputRef.current;
+
+    if (!textarea) {
+      setNewMessage((prev) => prev + emoji);
+      setShowEmojiPicker(false);
+      return;
+    }
+
+    const start = textarea.selectionStart;
+    const end = textarea.selectionEnd;
+    const currentText = textarea.value;
+
+    const newText =
+      currentText.slice(0, start) + emoji + currentText.slice(end);
+    const newCursorPos = start + emoji.length;
+
+    setNewMessage(newText);
+    setShowEmojiPicker(false);
+
+    requestAnimationFrame(() => {
+      textarea.focus();
+      textarea.setSelectionRange(newCursorPos, newCursorPos);
+    });
+  };
+
+  const toggleEmojiPicker = () => {
+    setShowEmojiPicker(!showEmojiPicker);
   };
 
   const handleSendMessage = () => {
@@ -421,7 +475,54 @@ const ChatPage = () => {
 
       <div className={styles.messageInput}>
         <div className={styles.inputContainer}>
+          <div className={styles.emojiContainer} ref={emojiPickerRef}>
+            <button
+              type="button"
+              className={`${styles.toolBtn} ${
+                showEmojiPicker ? styles.active : ""
+              }`}
+              onClick={toggleEmojiPicker}
+            >
+              <Smile size={20} />
+            </button>
+            <div
+              className={styles.emojiPicker}
+              style={{ display: showEmojiPicker ? "block" : "none" }}
+            >
+              <EmojiPicker
+                onEmojiClick={handleEmojiClick}
+                width={300}
+                height={400}
+                previewConfig={{
+                  showPreview: false,
+                }}
+                skinTonesDisabled
+                searchDisabled={false}
+                lazyLoadEmojis={true}
+                categoriesConfig={[
+                  {
+                    category: "suggested",
+                    name: "Recently Used",
+                  },
+                  {
+                    category: "smileys_people",
+                    name: "Smileys & People",
+                  },
+                  {
+                    category: "animals_nature",
+                    name: "Animals & Nature",
+                  },
+                  {
+                    category: "food_drink",
+                    name: "Food & Drink",
+                  },
+                ]}
+                emojiStyle="native"
+              />
+            </div>
+          </div>
           <textarea
+            ref={messageInputRef}
             className={styles.textInput}
             placeholder="Type a message..."
             value={newMessage}
