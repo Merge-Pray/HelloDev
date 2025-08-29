@@ -457,7 +457,8 @@ export const getUserProfile = async (req, res, next) => {
           linkedinProfile: targetUser.linkedinProfile,
           githubProfile: targetUser.githubProfile,
           personalWebsites: targetUser.personalWebsites,
-          profileLinksVisibleToContacts: targetUser.profileLinksVisibleToContacts,
+          profileLinksVisibleToContacts:
+            targetUser.profileLinksVisibleToContacts,
           isMatchable: targetUser.isMatchable,
           rating: targetUser.rating,
           points: targetUser.points,
@@ -522,24 +523,33 @@ export const getUserProfile = async (req, res, next) => {
         isContact: true,
       });
     } else {
+      const publicProfile = {
+        _id: targetUser._id,
+        username: targetUser.username,
+        nickname: targetUser.nickname,
+        avatar: targetUser.avatar,
+        status: targetUser.status,
+        aboutMe: targetUser.aboutMe,
+        country: targetUser.country,
+        programmingLanguages: targetUser.programmingLanguages,
+        techStack: targetUser.techStack,
+        techArea: targetUser.techArea,
+        languages: targetUser.languages,
+        preferredOS: targetUser.preferredOS,
+        createdAt: targetUser.createdAt,
+        profileLinksVisibleToContacts: targetUser.profileLinksVisibleToContacts,
+      };
+
+      if (targetUser.profileLinksVisibleToContacts) {
+        publicProfile.linkedinProfile = targetUser.linkedinProfile;
+        publicProfile.githubProfile = targetUser.githubProfile;
+        publicProfile.personalWebsites = targetUser.personalWebsites;
+      }
+
       return res.status(200).json({
         success: true,
         message: "Public profile data retrieved successfully",
-        user: {
-          _id: targetUser._id,
-          username: targetUser.username,
-          nickname: targetUser.nickname,
-          avatar: targetUser.avatar,
-          status: targetUser.status,
-          aboutMe: targetUser.aboutMe,
-          country: targetUser.country,
-          programmingLanguages: targetUser.programmingLanguages,
-          techStack: targetUser.techStack,
-          techArea: targetUser.techArea,
-          languages: targetUser.languages,
-          preferredOS: targetUser.preferredOS,
-          createdAt: targetUser.createdAt,
-        },
+        user: publicProfile,
         isOwnProfile: false,
         isContact: false,
       });
@@ -553,7 +563,6 @@ export const getUserContacts = async (req, res, next) => {
   try {
     const userId = req.user._id;
 
-    // Find user and populate contacts with specific fields
     const user = await UserModel.findById(userId)
       .populate({
         path: "contacts",
