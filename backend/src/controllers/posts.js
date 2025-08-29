@@ -58,18 +58,24 @@ const removeLike = (post, userId) => {
   return false;
 };
 
-const addComment = (post, authorId, content, mentions = [], imageUrl = null) => {
+const addComment = (
+  post,
+  authorId,
+  content,
+  mentions = [],
+  imageUrl = null
+) => {
   const commentData = {
     author: authorId,
     content: content ? content.trim() : "",
     mentions: mentions,
     createdAt: new Date(),
   };
-  
+
   if (imageUrl) {
     commentData.imageUrl = imageUrl.trim();
   }
-  
+
   post.comments.push(commentData);
   post.engagementScore = calculateEngagementScore(post);
 };
@@ -154,9 +160,9 @@ export const getNewsfeed = async (req, res, next) => {
       };
     } else {
       const authorsWithUserInContacts = await UserModel.find({
-        contacts: userId
+        contacts: userId,
       }).select("_id");
-      const authorIds = authorsWithUserInContacts.map(user => user._id);
+      const authorIds = authorsWithUserInContacts.map((user) => user._id);
 
       matchCriteria = {
         isHidden: false,
@@ -164,7 +170,7 @@ export const getNewsfeed = async (req, res, next) => {
           { visibility: "public" },
           {
             visibility: "contacts_only",
-            author: { $in: authorIds }
+            author: { $in: authorIds },
           },
           { visibility: "private", author: userId },
         ],
@@ -186,8 +192,13 @@ export const getNewsfeed = async (req, res, next) => {
       .populate("mentions", "username nickname")
       .populate("likes.user", "username nickname")
       .populate("comments.author", "username nickname avatar")
-      .populate("originalPost")
-      .populate("originalPost.author", "username nickname avatar")
+      .populate({
+        path: "originalPost",
+        populate: {
+          path: "author",
+          select: "username nickname avatar isOnline lastSeen",
+        },
+      })
       .lean();
 
     const totalPosts = await PostModel.countDocuments(matchCriteria);
@@ -459,23 +470,20 @@ export const searchPosts = async (req, res, next) => {
     const skip = (page - 1) * limit;
 
     const authorsWithUserInContacts = await UserModel.find({
-      contacts: userId
+      contacts: userId,
     }).select("_id");
-    const authorIds = authorsWithUserInContacts.map(user => user._id);
+    const authorIds = authorsWithUserInContacts.map((user) => user._id);
 
     const searchUsers = await UserModel.find({
       $or: [
         { username: { $regex: q, $options: "i" } },
-        { nickname: { $regex: q, $options: "i" } }
-      ]
+        { nickname: { $regex: q, $options: "i" } },
+      ],
     }).select("_id");
-    const userIds = searchUsers.map(user => user._id);
+    const userIds = searchUsers.map((user) => user._id);
 
     let matchCriteria = {
-      $or: [
-        { $text: { $search: q } },
-        { author: { $in: userIds } }
-      ],
+      $or: [{ $text: { $search: q } }, { author: { $in: userIds } }],
       isHidden: false,
       $and: [
         {
@@ -483,12 +491,12 @@ export const searchPosts = async (req, res, next) => {
             { visibility: "public" },
             {
               visibility: "contacts_only",
-              author: { $in: authorIds }
+              author: { $in: authorIds },
             },
             { visibility: "private", author: userId },
-          ]
-        }
-      ]
+          ],
+        },
+      ],
     };
 
     const posts = await PostModel.find(matchCriteria)
@@ -525,9 +533,9 @@ export const getPostsByHashtag = async (req, res, next) => {
     const cleanHashtag = hashtag.toLowerCase().replace(/^#/, "");
 
     const authorsWithUserInContacts = await UserModel.find({
-      contacts: userId
+      contacts: userId,
     }).select("_id");
-    const authorIds = authorsWithUserInContacts.map(user => user._id);
+    const authorIds = authorsWithUserInContacts.map((user) => user._id);
 
     const matchCriteria = {
       hashtags: cleanHashtag,
@@ -536,7 +544,7 @@ export const getPostsByHashtag = async (req, res, next) => {
         { visibility: "public" },
         {
           visibility: "contacts_only",
-          author: { $in: authorIds }
+          author: { $in: authorIds },
         },
         { visibility: "private", author: userId },
       ],
