@@ -61,6 +61,7 @@ export default function LoginPage() {
 
       const data = await res.json();
       if (!res.ok) throw new Error(data.message || "Login failed");
+       localStorage.removeItem("user-storage")
 
       if (isSamsungInternet()) {
         console.log("🔍 Samsung Browser login - data received:", !!data.user);
