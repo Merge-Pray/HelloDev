@@ -32,6 +32,8 @@ export const handleAuthErrorAndRetry = async (originalRequestFn) => {
       return retryResponse;
     } else {
       clearUser();
+      // Clear any remaining localStorage data
+      localStorage.removeItem("user-storage");
       if (typeof window !== "undefined") {
         window.location.href = "/login";
       }
@@ -39,6 +41,8 @@ export const handleAuthErrorAndRetry = async (originalRequestFn) => {
     }
   } catch (error) {
     clearUser();
+    // Clear any remaining localStorage data
+    localStorage.removeItem("user-storage");
     if (typeof window !== "undefined") {
       window.location.href = "/login";
     }
