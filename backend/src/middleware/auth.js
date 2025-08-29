@@ -61,7 +61,7 @@ export const refreshToken = async (req, res, next) => {
       success: true,
       message: "Token refreshed successfully",
       user: {
-        id: user._id,
+        _id: user._id,
         username: user.username,
         nickname: user.nickname,
         email: user.email,
@@ -121,7 +121,7 @@ export const checkAuthStatus = async (req, res, next) => {
       success: true,
       message: "Authenticated",
       user: {
-        id: user._id,
+        _id: user._id,
         username: user.username,
         nickname: user.nickname,
         email: user.email,

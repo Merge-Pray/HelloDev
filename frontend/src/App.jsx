@@ -10,6 +10,7 @@ import styles from "./app.layout.module.css";
 function App() {
   const currentUser = useUserStore((state) => state.currentUser);
   const setSocket = useUserStore((state) => state.setSocket);
+  const clearUser = useUserStore((state) => state.clearUser);
   const location = useLocation();
   const socketRef = useRef(null);
 
@@ -32,12 +33,14 @@ function App() {
           socket.on("connect_error", async (error) => {
             console.error("Socket connection error:", error);
 
-            if (error.message === "Authentication failed.") {
+            if (error.message === "Authentication failed") {
               try {
                 await authenticatedFetch("/api/user/refresh");
-                socket.connect();
+                setTimeout(() => socket.connect(), 1000);
               } catch (refreshError) {
                 console.error("Token refresh failed:", refreshError);
+                clearUser();
+                window.location.href = "/login";
               }
             }
           });
@@ -61,7 +64,7 @@ function App() {
       socketRef.current = null;
       setSocket(null);
     }
-  }, [currentUser, setSocket]);
+  }, [currentUser, setSocket, clearUser]);
 
   return (
     <div

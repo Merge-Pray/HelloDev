@@ -25,14 +25,7 @@ export const handleAuthErrorAndRetry = async (originalRequestFn) => {
 
     if (refreshResult.success) {
       if (refreshResult.user) {
-        setCurrentUser({
-          _id: refreshResult.user.id,
-          username: refreshResult.user.username,
-          nickname: refreshResult.user.nickname,
-          avatar: refreshResult.user.avatar,
-          isOnline: refreshResult.user.isOnline,
-          lastSeen: refreshResult.user.lastSeen,
-        });
+        setCurrentUser(refreshResult.user);
       }
 
       const retryResponse = await originalRequestFn();
@@ -58,10 +51,16 @@ export const handleAuthErrorAndRetry = async (originalRequestFn) => {
 
 const performTokenRefresh = async () => {
   try {
+    const controller = new AbortController();
+    const timeoutId = setTimeout(() => controller.abort(), 10000);
+    
     const refreshResponse = await fetch(`${API_URL}/api/user/refresh`, {
       method: "POST",
       credentials: "include",
+      signal: controller.signal
     });
+    
+    clearTimeout(timeoutId);
 
     if (refreshResponse.ok) {
       const refreshData = await refreshResponse.json();
@@ -70,6 +69,9 @@ const performTokenRefresh = async () => {
       return { success: false, error: "Refresh token expired" };
     }
   } catch (error) {
+    if (error.name === 'AbortError') {
+      return { success: false, error: 'Request timeout' };
+    }
     return { success: false, error: error.message };
   }
 };

@@ -34,7 +34,30 @@ const useUserStore = create(
 
       setSocket: (socket) => set({ socket }),
 
-      clearUser: () => set({ currentUser: null, socket: null }),
+      clearUser: () => {
+        const currentSocket = get().socket;
+        if (currentSocket) {
+          currentSocket.disconnect();
+        }
+        set({ currentUser: null, socket: null });
+      },
+
+      logout: async () => {
+        try {
+          await fetch(`${import.meta.env.VITE_BACKENDPATH}/api/user/logout`, {
+            method: 'POST',
+            credentials: 'include'
+          });
+        } catch (error) {
+          console.error('Logout error:', error);
+        } finally {
+          const currentSocket = get().socket;
+          if (currentSocket) {
+            currentSocket.disconnect();
+          }
+          set({ currentUser: null, socket: null });
+        }
+      },
     }),
 
     {

@@ -1,4 +1,7 @@
-import { extractTokenFromCookies, verifyTokenAndGetUser } from "../libs/authHelpers.js";
+import {
+  extractTokenFromCookies,
+  verifyTokenAndGetUser,
+} from "../libs/authHelpers.js";
 
 export const socketAuth = async (socket, next) => {
   try {
@@ -9,6 +12,8 @@ export const socketAuth = async (socket, next) => {
     next();
   } catch (error) {
     console.error("Socket Authentication Error:", error.message);
-    next(new Error("Authentication failed."));
+    const authError = new Error("Authentication failed");
+    authError.data = { status: 401 };
+    next(authError);
   }
 };

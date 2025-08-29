@@ -46,7 +46,7 @@ export const getUserMatches = async (req, res, next) => {
       return {
         matchId: match._id,
         user: {
-          id: otherUser._id,
+          _id: otherUser._id,
           username: otherUser.username,
           nickname: otherUser.nickname,
           avatar: otherUser.avatar,
