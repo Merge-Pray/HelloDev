@@ -25,6 +25,7 @@ import {
   Loader,
   ChevronDown,
   UserCheck,
+  X, // Für das Schließen des Modals
 } from "lucide-react";
 import useUserStore from "../../hooks/userstore";
 import { authenticatedFetch } from "../../utils/authenticatedFetch";
@@ -40,6 +41,7 @@ export default function GetProfilePage() {
   const [isContact, setIsContact] = useState(false);
   const [contactActionLoading, setContactActionLoading] = useState(false);
   const [showDropdown, setShowDropdown] = useState(false);
+  const [showAvatarModal, setShowAvatarModal] = useState(false);
   const dropdownRef = useRef(null);
 
   useEffect(() => {
@@ -54,7 +56,6 @@ export default function GetProfilePage() {
     }
 
     if (userId === currentUser._id) {
-      console.log("Own profile detected, redirecting to /profile");
       navigate("/profile");
       return;
     }
@@ -75,14 +76,30 @@ export default function GetProfilePage() {
     };
   }, []);
 
+  useEffect(() => {
+    const handleEscapeKey = (event) => {
+      if (event.key === "Escape") {
+        setShowAvatarModal(false);
+      }
+    };
+
+    if (showAvatarModal) {
+      document.addEventListener("keydown", handleEscapeKey);
+      document.body.style.overflow = "hidden";
+    }
+
+    return () => {
+      document.removeEventListener("keydown", handleEscapeKey);
+      document.body.style.overflow = "auto";
+    };
+  }, [showAvatarModal]);
+
   const fetchProfile = async () => {
     try {
       setIsLoading(true);
       setError(null);
 
       const data = await authenticatedFetch(`/api/user/profile/${userId}`);
-
-      console.log("API Response:", data);
 
       if (data.isOwnProfile) {
         console.log("Backend says it's own profile, redirecting...");
@@ -156,6 +173,14 @@ export default function GetProfilePage() {
 
   const toggleDropdown = () => {
     setShowDropdown(!showDropdown);
+  };
+
+  const handleAvatarClick = () => {
+    setShowAvatarModal(true);
+  };
+
+  const handleCloseAvatarModal = () => {
+    setShowAvatarModal(false);
   };
 
   const renderActionButtons = () => {
@@ -293,6 +318,30 @@ export default function GetProfilePage() {
           ) : (
             <div className={styles.emptyState}>
               <span>No description available</span>
+            </div>
+          )}
+        </div>
+      </div>
+    );
+  };
+
+  const renderFavouriteLineOfCode = () => {
+    return (
+      <div className={`card enhanced ${styles.aboutSection}`}>
+        <div className={styles.sectionHeader}>
+          <div className={styles.sectionTitleContainer}>
+            <Code size={20} className={styles.sectionIcon} />
+            <h3 className={styles.sectionTitle}>Favourite Line of Code</h3>
+          </div>
+        </div>
+        <div className={styles.aboutContent}>
+          {profileData.favoriteLineOfCode ? (
+            <pre className={styles.codeBlock}>
+              <code>{profileData.favoriteLineOfCode}</code>
+            </pre>
+          ) : (
+            <div className={styles.emptyState}>
+              <span>No favourite line of code available</span>
             </div>
           )}
         </div>
@@ -634,7 +683,12 @@ export default function GetProfilePage() {
 
         {/* Profile Header */}
         <div className={`card enhanced ${styles.profileHeader}`}>
-          <div className={styles.avatar}>
+          <div
+            className={styles.avatar}
+            onClick={handleAvatarClick}
+            style={{ cursor: "pointer" }}
+            title="Click to view full size"
+          >
             {profileData?.avatar ? (
               <img
                 src={profileData.avatar}
@@ -672,6 +726,9 @@ export default function GetProfilePage() {
         <div className={styles.profileContent}>
           {/* About Me - Always visible */}
           {renderAboutMe()}
+
+          {/* Favourite Line of Code - Always visible */}
+          {renderFavouriteLineOfCode()}
 
           {/* Personal Info - Only for contacts */}
           {renderPersonalInfo()}
@@ -729,6 +786,39 @@ export default function GetProfilePage() {
           )}
         </div>
       </div>
+
+      {/* Avatar Modal */}
+      {showAvatarModal && (
+        <div className={styles.avatarModal} onClick={handleCloseAvatarModal}>
+          <div
+            className={styles.avatarModalContent}
+            onClick={(e) => e.stopPropagation()}
+          >
+            <button
+              className={styles.avatarModalClose}
+              onClick={handleCloseAvatarModal}
+              aria-label="Close"
+            >
+              <X size={24} />
+            </button>
+            <div className={styles.avatarModalImage}>
+              <img
+                src={profileData?.avatar || "/avatars/default_avatar.png"}
+                alt={`${
+                  profileData?.nickname || profileData?.username
+                }'s avatar`}
+                onError={(e) => {
+                  e.target.src = "/avatars/default_avatar.png";
+                }}
+              />
+            </div>
+            <div className={styles.avatarModalInfo}>
+              <h3>{profileData?.nickname || profileData?.username}</h3>
+              <p>@{profileData?.username}.HelloDev.social</p>
+            </div>
+          </div>
+        </div>
+      )}
     </div>
   );
 }
