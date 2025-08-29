@@ -22,7 +22,12 @@ import {
   Target,
   Wrench,
   Briefcase,
-  Camera, // Neue Ikone für Avatar-Editor
+  Camera,
+  ExternalLink,
+  Eye,
+  EyeOff,
+  Linkedin,
+  Github,
 } from "lucide-react";
 import useUserStore from "../../hooks/userstore";
 import { useProfile } from "../../hooks/useProfile";
@@ -594,6 +599,112 @@ export default function ProfilePage() {
     );
   };
 
+  const renderProfessionalLinks = () => {
+    const hasLinkedIn = profileData.linkedinProfile && profileData.linkedinProfile.trim() !== "";
+    const hasGitHub = profileData.githubProfile && profileData.githubProfile.trim() !== "";
+    const hasWebsites = profileData.personalWebsites && profileData.personalWebsites.length > 0;
+    const hasAnyLinks = hasLinkedIn || hasGitHub || hasWebsites;
+
+    if (!hasAnyLinks) return null;
+
+    return (
+      <div className="card enhanced">
+        <div className={styles.sectionHeader}>
+          <div className={styles.sectionTitleContainer}>
+            <Briefcase size={20} className={styles.sectionIcon} />
+            <h3 className={styles.sectionTitle}>Professional Links</h3>
+          </div>
+          <button
+            className={`btn btn-secondary ${styles.editBtn}`}
+            onClick={() => handleEditSection("professional")}
+          >
+            <Edit3 size={16} />
+          </button>
+        </div>
+        
+        <div className={styles.professionalLinksContent}>
+          <div className={styles.visibilityStatus}>
+            <div style={{ display: 'flex', alignItems: 'center', gap: '8px', fontSize: '14px', color: 'var(--color-text-secondary)' }}>
+              {profileData.profileLinksVisibleToContacts ? (
+                <>
+                  <Eye size={14} />
+                  <span>Visible to your contacts</span>
+                </>
+              ) : (
+                <>
+                  <EyeOff size={14} />
+                  <span>Private (only visible to you)</span>
+                </>
+              )}
+            </div>
+          </div>
+
+          <div className={styles.linksGrid}>
+            {hasLinkedIn && (
+              <div className={styles.linkItem}>
+                <div className={styles.linkIcon}>
+                  <Linkedin size={18} />
+                </div>
+                <div className={styles.linkContent}>
+                  <div className={styles.linkLabel}>LinkedIn</div>
+                  <a 
+                    href={profileData.linkedinProfile} 
+                    target="_blank" 
+                    rel="noopener noreferrer"
+                    className={styles.linkUrl}
+                  >
+                    {profileData.linkedinProfile}
+                    <ExternalLink size={12} />
+                  </a>
+                </div>
+              </div>
+            )}
+            
+            {hasGitHub && (
+              <div className={styles.linkItem}>
+                <div className={styles.linkIcon}>
+                  <Github size={18} />
+                </div>
+                <div className={styles.linkContent}>
+                  <div className={styles.linkLabel}>GitHub</div>
+                  <a 
+                    href={profileData.githubProfile} 
+                    target="_blank" 
+                    rel="noopener noreferrer"
+                    className={styles.linkUrl}
+                  >
+                    {profileData.githubProfile}
+                    <ExternalLink size={12} />
+                  </a>
+                </div>
+              </div>
+            )}
+            
+            {hasWebsites && profileData.personalWebsites.filter(url => url && url.trim() !== "").map((website, index) => (
+              <div key={index} className={styles.linkItem}>
+                <div className={styles.linkIcon}>
+                  <Globe size={18} />
+                </div>
+                <div className={styles.linkContent}>
+                  <div className={styles.linkLabel}>Personal Website {profileData.personalWebsites.filter(url => url && url.trim() !== "").length > 1 ? `#${index + 1}` : ""}</div>
+                  <a 
+                    href={website} 
+                    target="_blank" 
+                    rel="noopener noreferrer"
+                    className={styles.linkUrl}
+                  >
+                    {website}
+                    <ExternalLink size={12} />
+                  </a>
+                </div>
+              </div>
+            ))}
+          </div>
+        </div>
+      </div>
+    );
+  };
+
   if (!hasBasicInfo()) {
     return (
       <div className="page centered">
@@ -797,6 +908,8 @@ export default function ProfilePage() {
             )}
 
           {hasCodingPreferences() && renderCodingPreferences()}
+
+          {renderProfessionalLinks()}
 
           {(() => {
             const profileStats = calculateProfileCompletion(profileData);

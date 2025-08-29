@@ -56,7 +56,6 @@ const MatchPage = () => {
       if (response.success && response.matches) {
         setMatches(response.matches);
 
-        // Filter nur pending Matches die noch nicht kontaktiert wurden
         const pendingOnly = response.matches.filter((match) => {
           const isPending = match.status === "pending";
           const isContacted =
@@ -87,7 +86,6 @@ const MatchPage = () => {
     );
     setPendingMatches(updatedPending);
 
-    // Adjust index if necessary
     if (
       currentMatchIndex >= updatedPending.length &&
       updatedPending.length > 0
@@ -123,7 +121,6 @@ const MatchPage = () => {
           setShowContactPopup(true);
         }
 
-        // Remove from pending matches
         removeMatchFromPending(currentMatch.matchId);
       }
     } catch (err) {
@@ -162,10 +159,7 @@ const MatchPage = () => {
         }
       );
 
-      console.log("📡 Dismiss response:", response);
-
       if (response.success) {
-        // Remove from pending matches
         removeMatchFromPending(currentMatch.matchId);
       }
     } catch (err) {
@@ -223,7 +217,6 @@ const MatchPage = () => {
           let displayName = item;
           let skillLevel = null;
 
-          // Handle programming languages with skill levels
           if (Array.isArray(item)) {
             displayName = item[0];
             skillLevel = item[1];

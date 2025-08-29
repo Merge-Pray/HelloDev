@@ -25,7 +25,11 @@ import {
   Loader,
   ChevronDown,
   UserCheck,
-  X, // Für das Schließen des Modals
+  X,
+  Briefcase,
+  ExternalLink,
+  Linkedin,
+  Github,
 } from "lucide-react";
 import useUserStore from "../../hooks/userstore";
 import { authenticatedFetch } from "../../utils/authenticatedFetch";
@@ -583,6 +587,68 @@ export default function GetProfilePage() {
     );
   };
 
+  const renderProfessionalLinks = () => {
+    if (!profileData.profileLinksVisibleToContacts) return null;
+
+    const hasLinks = (
+      profileData.linkedinProfile ||
+      profileData.githubProfile ||
+      (profileData.personalWebsites && profileData.personalWebsites.length > 0)
+    );
+
+    if (!hasLinks) return null;
+
+    return (
+      <div className="card enhanced">
+        <div className={styles.sectionHeader}>
+          <div className={styles.sectionTitleContainer}>
+            <Briefcase size={20} className={styles.sectionIcon} />
+            <h3 className={styles.sectionTitle}>Professional Links</h3>
+          </div>
+        </div>
+        <div className={styles.linksGrid}>
+          {profileData.linkedinProfile && (
+            <a
+              href={profileData.linkedinProfile}
+              target="_blank"
+              rel="noopener noreferrer"
+              className={styles.linkItem}
+            >
+              <Linkedin size={18} className={styles.linkIcon} style={{ color: "#0077B5" }} />
+              <span>LinkedIn</span>
+              <ExternalLink size={14} className={styles.externalIcon} />
+            </a>
+          )}
+          {profileData.githubProfile && (
+            <a
+              href={profileData.githubProfile}
+              target="_blank"
+              rel="noopener noreferrer"
+              className={styles.linkItem}
+            >
+              <Github size={18} className={styles.linkIcon} />
+              <span>GitHub</span>
+              <ExternalLink size={14} className={styles.externalIcon} />
+            </a>
+          )}
+          {profileData.personalWebsites?.map((website, index) => (
+            <a
+              key={index}
+              href={website}
+              target="_blank"
+              rel="noopener noreferrer"
+              className={styles.linkItem}
+            >
+              <Globe size={18} className={styles.linkIcon} />
+              <span>Personal Website</span>
+              <ExternalLink size={14} className={styles.externalIcon} />
+            </a>
+          ))}
+        </div>
+      </div>
+    );
+  };
+
   const renderGamingPreferences = () => {
     if (!isContact || !profileData.gaming || profileData.gaming === "none")
       return null;
@@ -771,6 +837,9 @@ export default function GetProfilePage() {
               profileData.otherInterests,
               "No other interests listed"
             )}
+
+          {/* Professional Links - Visible to all if enabled */}
+          {renderProfessionalLinks()}
 
           {/* Coding Preferences - Only for contacts */}
           {renderCodingPreferences()}
