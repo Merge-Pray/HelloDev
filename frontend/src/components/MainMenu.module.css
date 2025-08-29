@@ -96,9 +96,19 @@
   color: var(--color-text);
   border: 1px solid transparent;
   transition: background 0.2s ease, border-color 0.2s ease;
+  cursor: pointer;
+  background: none;
+  font: inherit;
 
   /* Neu */
   min-width: 0;
+}
+
+.logoLink {
+  background: none;
+  border: none;
+  cursor: pointer;
+  padding: 0;
 }
 
 .link:hover {

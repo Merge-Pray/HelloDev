@@ -1,5 +1,5 @@
 import styles from "./MainMenu.module.css";
-import { NavLink } from "react-router";
+import { NavLink, useNavigate, useLocation } from "react-router";
 import DarkMode from "./DarkMode";
 import { useUnreadCount } from "../hooks/useUnreadCount";
 
@@ -27,11 +27,24 @@ const bottomItems = [
 
 export default function MainMenu() {
   const { totalUnreadCount } = useUnreadCount();
+  const navigate = useNavigate();
+  const location = useLocation();
+
+  const handleHomeClick = (e) => {
+    e.preventDefault();
+    if (location.pathname === '/home') {
+      if (window.reloadNewsfeed) {
+        window.reloadNewsfeed();
+      }
+    } else {
+      navigate('/home');
+    }
+  };
 
   return (
     <nav className={styles.menu} aria-label="Main">
       <div className={styles.brand}>
-        <NavLink to="/home" className={styles.logoLink}>
+        <button onClick={handleHomeClick} className={styles.logoLink}>
           <img
             src="/logo/HelloDev_Logo_White.svg"
             alt="Hello Dev Logo"
@@ -42,28 +55,45 @@ export default function MainMenu() {
             alt="Hello Dev Logo"
             className={`${styles.logo} ${styles.logoLight}`}
           />
-        </NavLink>
+        </button>
       </div>
 
       <ul className={styles.listTop}>
         {topItems.map((item) => (
           <li key={item.to}>
-            <NavLink
-              to={item.to}
-              className={({ isActive }) =>
-                [styles.link, isActive ? styles.active : ""].join(" ")
-              }
-            >
-              <div className={styles.iconContainer}>
-                <img src={item.icon} alt="" className={styles.icon} />
-                {item.hasUnreadBadge && totalUnreadCount > 0 && (
-                  <span className={styles.unreadBadge}>
-                    {totalUnreadCount > 99 ? "99+" : totalUnreadCount}
-                  </span>
-                )}
-              </div>
-              <span className={styles.label}>{item.label}</span>
-            </NavLink>
+            {item.to === "/home" ? (
+              <button
+                onClick={handleHomeClick}
+                className={[styles.link, location.pathname === "/home" ? styles.active : ""].join(" ")}
+              >
+                <div className={styles.iconContainer}>
+                  <img src={item.icon} alt="" className={styles.icon} />
+                  {item.hasUnreadBadge && totalUnreadCount > 0 && (
+                    <span className={styles.unreadBadge}>
+                      {totalUnreadCount > 99 ? "99+" : totalUnreadCount}
+                    </span>
+                  )}
+                </div>
+                <span className={styles.label}>{item.label}</span>
+              </button>
+            ) : (
+              <NavLink
+                to={item.to}
+                className={({ isActive }) =>
+                  [styles.link, isActive ? styles.active : ""].join(" ")
+                }
+              >
+                <div className={styles.iconContainer}>
+                  <img src={item.icon} alt="" className={styles.icon} />
+                  {item.hasUnreadBadge && totalUnreadCount > 0 && (
+                    <span className={styles.unreadBadge}>
+                      {totalUnreadCount > 99 ? "99+" : totalUnreadCount}
+                    </span>
+                  )}
+                </div>
+                <span className={styles.label}>{item.label}</span>
+              </NavLink>
+            )}
           </li>
         ))}
       </ul>

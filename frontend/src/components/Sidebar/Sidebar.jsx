@@ -111,9 +111,9 @@ export default function Sidebar() {
 
   const renderContact = (contact) => (
     <div
-      key={contact.id}
+      key={contact._id}
       className={styles.contactItem}
-      onClick={() => handleContactClick(contact.id)}
+      onClick={() => handleContactClick(contact._id)}
     >
       <div className={styles.contactAvatar}>
         {contact?.avatar ? (

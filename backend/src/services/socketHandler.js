@@ -46,6 +46,7 @@ export const socketHandler = (io) => {
         });
         io.to(`user:${recipientId}`).emit("unreadCountUpdate", {
           totalUnreadCount: unreadCount,
+          fromUserId: userId,
         });
       } catch (error) {
         console.error("Error saving and emitting message:", error);
