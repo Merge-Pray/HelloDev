@@ -170,6 +170,24 @@ const UserSchema = new Schema(
       type: String,
       default: "",
     },
+
+    linkedinProfile: {
+      type: String,
+      default: "",
+    },
+    githubProfile: {
+      type: String,
+      default: "",
+    },
+    personalWebsites: [
+      {
+        type: String,
+      },
+    ],
+    profileLinksVisibleToContacts: {
+      type: Boolean,
+      default: false,
+    },
   },
   {
     timestamps: true,

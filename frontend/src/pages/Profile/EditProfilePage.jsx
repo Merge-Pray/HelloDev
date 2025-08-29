@@ -8,6 +8,11 @@ import {
   Check,
   AlertCircle,
   AlertTriangle,
+  Plus,
+  Trash2,
+  ExternalLink,
+  Eye,
+  EyeOff,
 } from "lucide-react";
 import useUserStore from "../../hooks/userstore";
 import { useProfile, useUpdateProfile } from "../../hooks/useProfile";
@@ -51,6 +56,7 @@ const EditProfilePage = () => {
       techStack: [],
       languages: [],
       otherInterests: [],
+      personalWebsites: [],
       username: "",
       nickname: "",
       email: "",
@@ -67,6 +73,9 @@ const EditProfilePage = () => {
       favoriteDrinkWhileCoding: "",
       musicGenreWhileCoding: "",
       favoriteShowMovie: "",
+      linkedinProfile: "",
+      githubProfile: "",
+      profileLinksVisibleToContacts: false,
     },
   });
 
@@ -108,6 +117,7 @@ const EditProfilePage = () => {
           "techStack",
           "languages",
           "otherInterests",
+          "personalWebsites",
         ];
 
         const initialData = {};
@@ -220,8 +230,6 @@ const EditProfilePage = () => {
           processedData.username || profileData?.username || "";
       }
 
-      console.log("Saving profile data:", processedData);
-
       await updateProfile.mutateAsync(processedData);
       setSuccess("Profile updated successfully!");
 
@@ -300,6 +308,7 @@ const EditProfilePage = () => {
     { id: "gaming", title: "Gaming" },
     { id: "other", title: "Other Interests" },
     { id: "preferences", title: "Coding Preferences" },
+    { id: "professional", title: "Professional Links" },
   ];
 
   const renderSectionHeader = (title) => (
@@ -641,6 +650,169 @@ const EditProfilePage = () => {
     </div>
   );
 
+  const renderProfessionalLinksSection = () => {
+    const personalWebsites = watch("personalWebsites") || [];
+    const profileLinksVisible = watch("profileLinksVisibleToContacts");
+
+    const addPersonalWebsite = () => {
+      const currentWebsites = watch("personalWebsites") || [];
+      setValue("personalWebsites", [...currentWebsites, ""]);
+    };
+
+    const removePersonalWebsite = (index) => {
+      const currentWebsites = watch("personalWebsites") || [];
+      const newWebsites = currentWebsites.filter((_, i) => i !== index);
+      setValue("personalWebsites", newWebsites);
+    };
+
+    const updatePersonalWebsite = (index, value) => {
+      const currentWebsites = watch("personalWebsites") || [];
+      const newWebsites = [...currentWebsites];
+      newWebsites[index] = value;
+      setValue("personalWebsites", newWebsites);
+    };
+
+    return (
+      <div className={styles.formSection}>
+        {renderSectionHeader("Professional Links")}
+
+        <div className={styles.visibilityInfo}>
+          <p
+            style={{
+              fontSize: "14px",
+              color: "var(--color-text-secondary)",
+              marginBottom: "16px",
+            }}
+          >
+            Your professional links are private and will only be visible to your
+            contacts if you enable the option below. Links may contain real
+            names, so they're hidden by default for privacy.
+          </p>
+        </div>
+
+        <div className={styles.formGrid}>
+          <div className={styles.formField}>
+            <label>LinkedIn Profile</label>
+            <input
+              type="url"
+              {...register("linkedinProfile", {
+                pattern: {
+                  value: /^https?:\/\/(www\.)?linkedin\.com\/.+/i,
+                  message: "Please enter a valid LinkedIn URL",
+                },
+              })}
+              placeholder="https://linkedin.com/in/yourprofile"
+            />
+            {errors.linkedinProfile && (
+              <span className={styles.error}>
+                {errors.linkedinProfile.message}
+              </span>
+            )}
+          </div>
+
+          <div className={styles.formField}>
+            <label>GitHub Profile</label>
+            <input
+              type="url"
+              {...register("githubProfile", {
+                pattern: {
+                  value: /^https?:\/\/(www\.)?github\.com\/.+/i,
+                  message: "Please enter a valid GitHub URL",
+                },
+              })}
+              placeholder="https://github.com/yourusername"
+            />
+            {errors.githubProfile && (
+              <span className={styles.error}>
+                {errors.githubProfile.message}
+              </span>
+            )}
+          </div>
+        </div>
+
+        <div className={styles.formField}>
+          <div
+            style={{
+              display: "flex",
+              alignItems: "center",
+              justifyContent: "space-between",
+              marginBottom: "8px",
+            }}
+          >
+            <label>Personal Websites/Portfolios</label>
+            <button
+              type="button"
+              className={`${styles.btn} ${styles.btnSecondary}`}
+              style={{ fontSize: "12px", padding: "4px 8px" }}
+              onClick={addPersonalWebsite}
+            >
+              <Plus size={14} />
+              Add Website
+            </button>
+          </div>
+          {personalWebsites.map((website, index) => (
+            <div
+              key={index}
+              style={{ display: "flex", gap: "8px", marginBottom: "8px" }}
+            >
+              <input
+                type="url"
+                value={website}
+                onChange={(e) => updatePersonalWebsite(index, e.target.value)}
+                placeholder="https://yourwebsite.com"
+                style={{ flex: 1 }}
+              />
+              <button
+                type="button"
+                className={`${styles.btn} ${styles.btnSecondary}`}
+                style={{ padding: "8px" }}
+                onClick={() => removePersonalWebsite(index)}
+              >
+                <Trash2 size={14} />
+              </button>
+            </div>
+          ))}
+          {personalWebsites.length === 0 && (
+            <p
+              style={{
+                fontSize: "14px",
+                color: "var(--color-text-secondary)",
+                fontStyle: "italic",
+              }}
+            >
+              No personal websites added yet
+            </p>
+          )}
+        </div>
+
+        <div className={styles.formField} style={{ marginTop: "24px" }}>
+          <label className={styles.checkboxLabel} style={{ color: "var(--color-text)" }}>
+            <input
+              type="checkbox"
+              {...register("profileLinksVisibleToContacts")}
+              style={{ marginRight: "8px" }}
+            />
+            <span style={{ display: "flex", alignItems: "center", gap: "4px", color: "var(--color-text)" }}>
+              {profileLinksVisible ? <Eye size={16} /> : <EyeOff size={16} />}
+              Make my professional links visible to contacts
+            </span>
+          </label>
+          <div
+            style={{
+              fontSize: "12px",
+              color: "var(--color-text-secondary)",
+              marginTop: "4px",
+              marginLeft: "24px",
+            }}
+          >
+            When enabled, your contacts will be able to see all your
+            professional links. When disabled, all links remain private.
+          </div>
+        </div>
+      </div>
+    );
+  };
+
   const renderCurrentSection = () => {
     const sectionContent = (() => {
       switch (activeSection) {
@@ -686,6 +858,8 @@ const EditProfilePage = () => {
           );
         case "preferences":
           return renderPreferencesSection();
+        case "professional":
+          return renderProfessionalLinksSection();
         default:
           return renderPersonalSection();
       }

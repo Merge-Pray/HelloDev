@@ -70,6 +70,10 @@ export const updateUserProfile = async (req, res, next) => {
       favoriteDrinkWhileCoding,
       musicGenreWhileCoding,
       favoriteShowMovie,
+      linkedinProfile,
+      githubProfile,
+      personalWebsites,
+      profileLinksVisibleToContacts,
       password,
       currentPassword,
     } = req.body;
@@ -176,6 +180,13 @@ export const updateUserProfile = async (req, res, next) => {
       updateData.musicGenreWhileCoding = musicGenreWhileCoding;
     if (favoriteShowMovie !== undefined)
       updateData.favoriteShowMovie = favoriteShowMovie;
+    if (linkedinProfile !== undefined)
+      updateData.linkedinProfile = linkedinProfile;
+    if (githubProfile !== undefined) updateData.githubProfile = githubProfile;
+    if (personalWebsites !== undefined)
+      updateData.personalWebsites = personalWebsites;
+    if (profileLinksVisibleToContacts !== undefined)
+      updateData.profileLinksVisibleToContacts = profileLinksVisibleToContacts;
 
     const updatedUser = await UserModel.findByIdAndUpdate(userId, updateData, {
       new: true,
@@ -380,6 +391,10 @@ export const getUserData = async (req, res, next) => {
         favoriteDrinkWhileCoding: user.favoriteDrinkWhileCoding,
         musicGenreWhileCoding: user.musicGenreWhileCoding,
         favoriteShowMovie: user.favoriteShowMovie,
+        linkedinProfile: user.linkedinProfile,
+        githubProfile: user.githubProfile,
+        personalWebsites: user.personalWebsites,
+        profileLinksVisibleToContacts: user.profileLinksVisibleToContacts,
         isMatchable: user.isMatchable,
         rating: user.rating,
         points: user.points,
@@ -439,6 +454,10 @@ export const getUserProfile = async (req, res, next) => {
           favoriteDrinkWhileCoding: targetUser.favoriteDrinkWhileCoding,
           musicGenreWhileCoding: targetUser.musicGenreWhileCoding,
           favoriteShowMovie: targetUser.favoriteShowMovie,
+          linkedinProfile: targetUser.linkedinProfile,
+          githubProfile: targetUser.githubProfile,
+          personalWebsites: targetUser.personalWebsites,
+          profileLinksVisibleToContacts: targetUser.profileLinksVisibleToContacts,
           isMatchable: targetUser.isMatchable,
           rating: targetUser.rating,
           points: targetUser.points,
@@ -457,40 +476,48 @@ export const getUserProfile = async (req, res, next) => {
     );
 
     if (isContact) {
+      const contactProfile = {
+        _id: targetUser._id,
+        username: targetUser.username,
+        nickname: targetUser.nickname,
+        avatar: targetUser.avatar,
+        aboutMe: targetUser.aboutMe,
+        country: targetUser.country,
+        city: targetUser.city,
+        age: targetUser.age,
+        status: targetUser.status,
+        devExperience: targetUser.devExperience,
+        techArea: targetUser.techArea,
+        favoriteTimeToCode: targetUser.favoriteTimeToCode,
+        favoriteLineOfCode: targetUser.favoriteLineOfCode,
+        programmingLanguages: targetUser.programmingLanguages,
+        techStack: targetUser.techStack,
+        preferredOS: targetUser.preferredOS,
+        languages: targetUser.languages,
+        gaming: targetUser.gaming,
+        otherInterests: targetUser.otherInterests,
+        favoriteDrinkWhileCoding: targetUser.favoriteDrinkWhileCoding,
+        musicGenreWhileCoding: targetUser.musicGenreWhileCoding,
+        favoriteShowMovie: targetUser.favoriteShowMovie,
+        isMatchable: targetUser.isMatchable,
+        rating: targetUser.rating,
+        points: targetUser.points,
+        isOnline: targetUser.isOnline,
+        lastSeen: targetUser.lastSeen,
+        createdAt: targetUser.createdAt,
+        updatedAt: targetUser.updatedAt,
+      };
+
+      if (targetUser.profileLinksVisibleToContacts) {
+        contactProfile.linkedinProfile = targetUser.linkedinProfile;
+        contactProfile.githubProfile = targetUser.githubProfile;
+        contactProfile.personalWebsites = targetUser.personalWebsites;
+      }
+
       return res.status(200).json({
         success: true,
         message: "Contact profile data retrieved successfully",
-        user: {
-          _id: targetUser._id,
-          username: targetUser.username,
-          nickname: targetUser.nickname,
-          avatar: targetUser.avatar,
-          aboutMe: targetUser.aboutMe,
-          country: targetUser.country,
-          city: targetUser.city,
-          age: targetUser.age,
-          status: targetUser.status,
-          devExperience: targetUser.devExperience,
-          techArea: targetUser.techArea,
-          favoriteTimeToCode: targetUser.favoriteTimeToCode,
-          favoriteLineOfCode: targetUser.favoriteLineOfCode,
-          programmingLanguages: targetUser.programmingLanguages,
-          techStack: targetUser.techStack,
-          preferredOS: targetUser.preferredOS,
-          languages: targetUser.languages,
-          gaming: targetUser.gaming,
-          otherInterests: targetUser.otherInterests,
-          favoriteDrinkWhileCoding: targetUser.favoriteDrinkWhileCoding,
-          musicGenreWhileCoding: targetUser.musicGenreWhileCoding,
-          favoriteShowMovie: targetUser.favoriteShowMovie,
-          isMatchable: targetUser.isMatchable,
-          rating: targetUser.rating,
-          points: targetUser.points,
-          isOnline: targetUser.isOnline,
-          lastSeen: targetUser.lastSeen,
-          createdAt: targetUser.createdAt,
-          updatedAt: targetUser.updatedAt,
-        },
+        user: contactProfile,
         isOwnProfile: false,
         isContact: true,
       });
