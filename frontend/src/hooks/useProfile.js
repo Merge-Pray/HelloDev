@@ -66,7 +66,7 @@ export const useUpdateProfile = () => {
 
       const { setCurrentUser } = useUserStore.getState();
       setCurrentUser({
-        _id: data.user.id,
+        _id: data.user._id,
         username: data.user.username,
         nickname: data.user.nickname,
         avatar: data.user.avatar,
