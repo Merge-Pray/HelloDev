@@ -2,6 +2,7 @@ import checkIsMatchable from "../../utils/profileValidator.js";
 import { generateToken } from "../libs/jwt.js";
 import { hashPassword, comparePassword } from "../libs/pw.js";
 import UserModel from "../models/user.js";
+import { getSamsungCompatibleCookieOptions } from "../utils/browserDetection.js";
 
 
 export const createUser = async (req, res, next) => {
@@ -22,12 +23,12 @@ export const createUser = async (req, res, next) => {
 
     const token = generateToken(username, newAccount._id);
 
-    res.cookie("jwt", token, {
+    const cookieOptions = getSamsungCompatibleCookieOptions(req.get('User-Agent'), {
       httpOnly: true,
-      secure: true,
-      sameSite: "none",
       maxAge: 24 * 60 * 60 * 1000,
     });
+    
+    res.cookie("jwt", token, cookieOptions);
 
     return res.status(201).json({
       message: "User created successfully",
@@ -211,12 +212,12 @@ export const updateUserProfile = async (req, res, next) => {
     if (password !== undefined) {
       newToken = generateToken(updatedUser.username, updatedUser._id);
 
-      res.cookie("jwt", newToken, {
+      const cookieOptions = getSamsungCompatibleCookieOptions(req.get('User-Agent'), {
         httpOnly: true,
-        secure: true,
-        sameSite: "none",
         maxAge: 24 * 60 * 60 * 1000,
       });
+      
+      res.cookie("jwt", newToken, cookieOptions);
     }
 
     return res.status(200).json({
@@ -294,12 +295,12 @@ export const verifyLogin = async (req, res, next) => {
 
     const token = generateToken(existingUser.username, existingUser._id);
 
-    res.cookie("jwt", token, {
+    const cookieOptions = getSamsungCompatibleCookieOptions(req.get('User-Agent'), {
       httpOnly: true,
-      secure: true,
-      sameSite: "none",
       maxAge: 24 * 60 * 60 * 1000,
     });
+    
+    res.cookie("jwt", token, cookieOptions);
 
     return res.status(200).json({
       message: "Login successful",

@@ -2,6 +2,7 @@ import jwt from "jsonwebtoken";
 import UserModel from "../models/user.js";
 import { generateToken } from "../libs/jwt.js";
 import { verifyTokenAndGetUser } from "../libs/authHelpers.js";
+import { getSamsungCompatibleCookieOptions } from "../utils/browserDetection.js";
 
 export const authorizeJwt = async (req, res, next) => {
   try {
@@ -50,12 +51,12 @@ export const refreshToken = async (req, res, next) => {
 
     const newToken = generateToken(user.username, user._id);
 
-    res.cookie("jwt", newToken, {
+    const cookieOptions = getSamsungCompatibleCookieOptions(req.get('User-Agent'), {
       httpOnly: true,
-      secure: true,
-      sameSite: "none",
       maxAge: 24 * 60 * 60 * 1000,
     });
+    
+    res.cookie("jwt", newToken, cookieOptions);
 
     return res.status(200).json({
       success: true,
