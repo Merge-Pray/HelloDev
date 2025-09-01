@@ -4,14 +4,17 @@
   top: 16px;
   height: calc(100dvh - 32px);
   display: grid;
-  grid-template-rows: auto 1fr auto; /* Brand | Top-Liste (scrollt) | Bottom fix */
+  grid-template-rows: auto 1fr auto;
   gap: 12px;
-
-  /* optional, falls du später Container Queries nutzen willst */
+  overflow-y: auto;
+  scrollbar-width: none;
+  -ms-overflow-style: none;
   container-type: inline-size;
-
-  /* Neu: verhindert Aufdrücken */
   min-width: 0;
+}
+
+.menu::-webkit-scrollbar {
+  display: none;
 }
 
 .brand {
@@ -20,8 +23,6 @@
   justify-content: space-between;
   padding: 8px 10px;
   gap: 8px;
-
-  /* Neu: verhindert Aufdrücken */
   min-width: 0;
 }
 
@@ -31,17 +32,15 @@
   font-size: 33px;
   height: 55px;
   transition: all 0.25s ease;
-
-  /* Neu: begrenzt Logo in schmaler Spur */
   max-width: 100%;
 }
 
-/* Zwei Logos – abhängig vom Theme */
+/* Logo Theme Switching */
 .logoDark,
 .logoLight {
   display: none;
   height: 50px;
-  max-width: 140px; /* bleibt als Obergrenze ok */
+  max-width: 140px;
 }
 
 :root[data-theme="dark"] .logoDark {
@@ -74,8 +73,6 @@
   display: grid;
   gap: 5px;
   align-content: start;
-
-  /* Neu */
   min-width: 0;
 }
 
@@ -101,8 +98,6 @@
   font: inherit;
   width: 100%;
   text-align: left;
-
-  /* Neu */
   min-width: 0;
 }
 
@@ -119,21 +114,30 @@
   border-color: var(--color-border);
 }
 
+.active {
+  background: var(--color-primary);
+  color: var(--color-primary-hover-invert);
+}
+
 /* ───────── Icons ───────── */
 .icon {
   width: 25px;
   height: 25px;
   transition: filter 0.2s ease;
 }
+
 :root[data-theme="light"] .icon {
   filter: brightness(0) saturate(100%);
 }
+
 :root[data-theme="dark"] .icon {
   filter: invert(1) brightness(100%);
 }
+
 .link:hover .icon {
   filter: invert(1) brightness(120%);
 }
+
 .active .icon {
   filter: inherit;
 }
@@ -142,8 +146,6 @@
 .label {
   white-space: nowrap;
   font-size: 1.2rem;
-
-  /* falls sie irgendwo noch sichtbar sind: sauber kappen */
   overflow: hidden;
   text-overflow: ellipsis;
 }
@@ -172,10 +174,277 @@
   z-index: 10;
 }
 
-/* ───────── Responsive (<1200px) ───────── */
-@media (max-width: 1200px) {
+/* ═══════════ MOBILE COMPONENTS ═══════════ */
+
+/* Mobile Top Bar */
+.mobileTopBar {
+  display: none;
+}
+
+/* Mobile Bottom Navigation */
+.bottomNav {
+  display: none;
+}
+
+/* Burger Menu */
+.burgerMenu,
+.overlay {
+  display: none;
+}
+
+/* ═══════════ MOBILE RESPONSIVE ═══════════ */
+
+/* Mobile Layout (< 768px) */
+@media (max-width: 768px) {
+  /* Hide desktop menu */
+  .menu {
+    display: none;
+  }
+
+  /* Show mobile top bar */
+  .mobileTopBar {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    position: fixed;
+    top: 0;
+    left: 0;
+    right: 0;
+    height: 60px;
+    background: var(--color-card-bg);
+    border-bottom: 1px solid var(--color-border);
+    padding: 0 16px;
+    z-index: 1000;
+    box-shadow: 0 2px 4px var(--color-card-shadow);
+  }
+
+  /* Burger Button */
+  .burgerButton {
+    display: flex;
+    flex-direction: column;
+    justify-content: space-around;
+    width: 24px;
+    height: 20px;
+    background: none;
+    border: none;
+    cursor: pointer;
+    padding: 0;
+  }
+
+  .burgerLine {
+    width: 100%;
+    height: 2px;
+    background: var(--color-text);
+    border-radius: 1px;
+    transition: all 0.3s ease;
+  }
+
+  .burgerButton:hover .burgerLine {
+    background: var(--color-primary);
+  }
+
+  /* Mobile Top Logo */
+  .mobileTopLogo {
+    height: 32px;
+    max-width: 120px;
+  }
+
+  .mobileTopRight {
+    display: flex;
+    align-items: center;
+  }
+
+  /* Overlay */
+  .overlay {
+    display: block;
+    position: fixed;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background: rgba(0, 0, 0, 0.5);
+    z-index: 1001;
+  }
+
+  /* Burger Menu */
+  .burgerMenu {
+    display: block;
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 280px;
+    height: 100vh;
+    background: var(--color-card-bg);
+    border-right: 1px solid var(--color-border);
+    z-index: 1002;
+    overflow-y: auto;
+    box-shadow: 2px 0 8px var(--color-card-shadow);
+  }
+
+  .burgerHeader {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 16px;
+    border-bottom: 1px solid var(--color-border);
+  }
+
+  .closeButton {
+    background: none;
+    border: none;
+    font-size: 24px;
+    color: var(--color-text);
+    cursor: pointer;
+    padding: 4px;
+    border-radius: 4px;
+    transition: background 0.2s ease;
+  }
+
+  .closeButton:hover {
+    background: var(--color-bg-secondary);
+  }
+
+  /* Burger Menu Lists */
+  .burgerListTop,
+  .burgerListBottom {
+    list-style: none;
+    margin: 0;
+    padding: 16px;
+    display: grid;
+    gap: 8px;
+  }
+
+  .burgerListBottom {
+    padding-top: 0;
+  }
+
+  .burgerDivider {
+    height: 1px;
+    background: var(--color-border);
+    margin: 16px;
+  }
+
+  /* Burger Links */
+  .burgerLink {
+    display: grid;
+    grid-template-columns: 28px 1fr;
+    align-items: center;
+    gap: 12px;
+    padding: 12px;
+    border-radius: 8px;
+    text-decoration: none;
+    color: var(--color-text);
+    border: 1px solid transparent;
+    transition: background 0.2s ease, border-color 0.2s ease;
+    cursor: pointer;
+    background: none;
+    font: inherit;
+    width: 100%;
+    text-align: left;
+  }
+
+  .burgerLink:hover {
+    background: var(--color-primary-hover);
+    color: var(--color-primary-hover-invert);
+    border-color: var(--color-border);
+  }
+
+  .burgerLink.active {
+    background: var(--color-primary);
+    color: var(--color-primary-hover-invert);
+  }
+
+  .burgerLink .label {
+    font-size: 1rem;
+  }
+
+  /* Show mobile bottom navigation */
+  .bottomNav {
+    display: block;
+    position: fixed;
+    bottom: 0;
+    left: 0;
+    right: 0;
+    height: 70px;
+    background: var(--color-card-bg);
+    border-top: 1px solid var(--color-border);
+    z-index: 1000;
+    box-shadow: 0 -2px 4px var(--color-card-shadow);
+  }
+
+  .bottomNavList {
+    display: flex;
+    justify-content: space-around;
+    align-items: center;
+    height: 100%;
+    margin: 0;
+    padding: 0;
+    list-style: none;
+  }
+
+  .bottomNavLink {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    padding: 8px 4px;
+    gap: 4px;
+    text-decoration: none;
+    color: var(--color-text);
+    background: none;
+    border: none;
+    cursor: pointer;
+    min-width: 60px;
+    transition: color 0.2s ease;
+  }
+
+  .bottomNavLink:hover {
+    color: var(--color-primary);
+  }
+
+  .bottomNavLink.active {
+    color: var(--color-primary);
+  }
+
+  .bottomNavLink .icon {
+    width: 24px;
+    height: 24px;
+    filter: none;
+  }
+
+  :root[data-theme="light"] .bottomNavLink .icon {
+    filter: brightness(0) saturate(100%);
+  }
+
+  :root[data-theme="dark"] .bottomNavLink .icon {
+    filter: invert(1) brightness(100%);
+  }
+
+  .bottomNavLink:hover .icon,
+  .bottomNavLink.active .icon {
+    filter: none;
+  }
+
+  .bottomNavLink .label {
+    font-size: 0.7rem;
+    text-align: center;
+    line-height: 1;
+  }
+
+  .bottomNavLink .unreadBadge {
+    top: -4px;
+    right: 8px;
+    font-size: 8px;
+    padding: 1px 4px;
+    min-width: 12px;
+    height: 12px;
+  }
+}
+
+/* ───────── Responsive Desktop/Tablet ───────── */
+@media (max-width: 1200px) and (min-width: 769px) {
   .brand {
-    justify-content: center; /* zentriert Logo */
+    justify-content: center;
   }
 
   .brandText {
@@ -183,7 +452,7 @@
   }
 
   .link {
-    grid-template-columns: 1fr; /* Icon alleine */
+    grid-template-columns: 1fr;
     justify-items: center;
     padding: 10px;
   }
@@ -196,7 +465,7 @@
 
   .label {
     display: none;
-  } /* Labels aus */
+  }
 
   .listTop,
   .listBottom {
@@ -215,9 +484,7 @@
   }
 }
 
-/* ───────── Responsive (<900px) ───────── */
-@media (max-width: 900px) {
-  /* Hier keine weiteren Änderungen - Layout bleibt wie bei 1200px */
+@media (max-width: 900px) and (min-width: 769px) {
   .brand {
     justify-content: center;
   }
@@ -257,44 +524,26 @@
   }
 }
 
-/* ───────── Responsive (<520px) ───────── */
 @media (max-width: 520px) {
-  .brand {
-    justify-content: center;
-    padding: 6px 8px;
+  .mobileTopBar {
+    padding: 0 12px;
   }
 
-  .logo {
-    max-width: 45px;
-    height: 35px;
-    font-size: 18px;
+  .burgerMenu {
+    width: 260px;
   }
 
-  .icon {
-    width: 26px;
-    height: 26px;
-    object-fit: contain;
+  .bottomNavLink {
+    min-width: 50px;
+    padding: 6px 2px;
   }
 
-  .link {
-    grid-template-columns: 1fr;
-    justify-items: center;
-    padding: 8px;
+  .bottomNavLink .icon {
+    width: 22px;
+    height: 22px;
   }
 
-  .label {
-    display: none;
-  }
-
-  .listTop,
-  .listBottom {
-    padding: 3px;
-    gap: 3px;
-  }
-
-  .darkmode {
-    justify-content: center;
-    align-items: center;
-    padding: 8px;
+  .bottomNavLink .label {
+    font-size: 0.65rem;
   }
 }

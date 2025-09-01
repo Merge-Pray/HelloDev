@@ -76,9 +76,26 @@
 }
 
 /* RESPONSIVE RULES für eingeloggte User */
-@media (max-width: 1200px) {
+@media (max-width: 1200px) and (min-width: 769px) {
   .appLayout:not(.noUser) {
     grid-template-columns: 76px 1fr; /* schmales menu */
+  }
+}
+
+/* Mobile Layout - Bottom Navigation */
+@media (max-width: 768px) {
+  .appLayout:not(.noUser) {
+    grid-template-columns: 1fr;
+    padding-top: 60px; /* Platz für Top Navigation */
+    padding-bottom: 70px; /* Platz für Bottom Navigation */
+  }
+
+  .navigation {
+    display: contents; /* MainMenu wird über fixed positioning angezeigt */
+  }
+
+  .content {
+    grid-column: 1;
   }
 }
 
