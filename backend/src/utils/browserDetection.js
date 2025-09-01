@@ -12,22 +12,18 @@ export const isSamsungBrowser = (userAgent) => {
   return samsungPatterns.some(pattern => pattern.test(userAgent));
 };
 
-export const getSamsungCompatibleCookieOptions = (userAgent, baseOptions = {}) => {
-  const isSamsung = isSamsungBrowser(userAgent);
-  
-  if (isSamsung) {
-    // Samsung browser compatible settings
-    return {
-      ...baseOptions,
-      secure: false,  // Samsung has issues with secure cookies in some cases
-      sameSite: 'lax' // Samsung doesn't handle 'none' well
-    };
-  }
-  
-  // Default production settings
+export const isIOSBrowser = (userAgent) => {
+  if (!userAgent) return false;
+  return /iPhone|iPad|iPod/i.test(userAgent);
+};
+
+export const getUniversalCookieOptions = (baseOptions = {}) => {
+  // Use Pollio's proven working configuration for ALL browsers
   return {
     ...baseOptions,
-    secure: process.env.NODE_ENV === 'production',
-    sameSite: process.env.NODE_ENV === 'production' ? 'none' : 'lax'
+    httpOnly: true,
+    secure: true,
+    sameSite: "none",
+    maxAge: 24 * 60 * 60 * 1000,
   };
 };

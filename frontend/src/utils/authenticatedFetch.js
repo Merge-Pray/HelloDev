@@ -11,7 +11,6 @@ export const authenticatedFetch = async (endpoint, options = {}) => {
       ...options.headers,
     };
 
-    // Content-Type nur bei JSON setzen, nicht bei FormData
     if (!options.body || !(options.body instanceof FormData)) {
       headers["Content-Type"] = "application/json";
     }
@@ -31,10 +30,10 @@ export const authenticatedFetch = async (endpoint, options = {}) => {
 
   if (!response.ok) {
     if (response.status === 403) {
-      throw new Error('Access forbidden');
+      throw new Error("Access forbidden");
     }
     if (response.status >= 500) {
-      throw new Error('Server error - please try again later');
+      throw new Error("Server error - please try again later");
     }
     throw new Error(`Request failed: ${response.status}`);
   }
