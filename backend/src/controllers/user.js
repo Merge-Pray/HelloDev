@@ -49,18 +49,24 @@ export const createUser = async (req, res, next) => {
 
 export const googleAuth = async (req, res, next) => {
   try {
+    console.log('Google Auth endpoint called');
     const { credential } = req.body;
+    console.log('Credential received:', credential ? 'Present' : 'Missing');
 
     if (!credential) {
+      console.log('No credential provided');
       return res.status(400).json({
         success: false,
         message: "Google credential is required",
       });
     }
 
+    console.log('Verifying Google token...');
     const verificationResult = await verifyGoogleToken(credential);
+    console.log('Verification result:', verificationResult);
 
     if (!verificationResult.success) {
+      console.log('Token verification failed:', verificationResult.error);
       return res.status(401).json({
         success: false,
         message: "Invalid Google token",
@@ -69,11 +75,13 @@ export const googleAuth = async (req, res, next) => {
     }
 
     const { googleId, email, name, picture } = verificationResult.data;
+    console.log('Google user data:', { googleId, email, name, picture: picture ? 'Present' : 'Missing' });
 
     // Check if user already exists with this Google ID
     let existingUser = await UserModel.findOne({ googleId });
 
     if (existingUser) {
+      console.log('Existing Google user found, logging in');
       // User exists, log them in
       const isNowMatchable = checkIsMatchable(existingUser);
       if (isNowMatchable !== existingUser.isMatchable) {
@@ -107,6 +115,7 @@ export const googleAuth = async (req, res, next) => {
     // Check if user exists with this email but different auth provider
     const existingEmailUser = await UserModel.findOne({ email });
     if (existingEmailUser && existingEmailUser.authProvider === "local") {
+      console.log('Email already exists with local auth');
       return res.status(409).json({
         success: false,
         message: "An account with this email already exists. Please sign in with your password.",
@@ -114,6 +123,7 @@ export const googleAuth = async (req, res, next) => {
     }
 
     // Create new user
+    console.log('Creating new Google user');
     const username = email.split('@')[0] + '_' + Date.now(); // Generate unique username
     const nickname = name || username;
 
@@ -128,6 +138,7 @@ export const googleAuth = async (req, res, next) => {
     });
 
     await newUser.save();
+    console.log('New Google user created:', newUser._id);
 
     const token = generateToken(newUser.username, newUser._id);
 
