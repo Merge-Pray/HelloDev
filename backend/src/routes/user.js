@@ -1,9 +1,9 @@
 import express from "express";
 import {
-  authorizeJwtEnhanced as authorizeJwt,
-  refreshTokenEnhanced as refreshToken,
-  checkAuthStatusEnhanced as checkAuthStatus,
-} from "../middleware/authEnhanced.js";
+  authorizeJwt,
+  refreshToken,
+  checkAuthStatus,
+} from "../middleware/auth.js";
 import {
   createUser,
   verifyLogin,
