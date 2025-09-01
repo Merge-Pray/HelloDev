@@ -41,7 +41,7 @@ const PopUpMatch = ({ isOpen, onClose, matchData }) => {
   if (!isOpen) return null;
 
   // Debug logging
-  console.log('PopUpMatch received matchData:', matchData);
+  console.log("PopUpMatch received matchData:", matchData);
 
   // Fallback für fehlende User-Daten
   const user = matchData?.user || {};
@@ -69,11 +69,9 @@ const PopUpMatch = ({ isOpen, onClose, matchData }) => {
             />
             <Users className={styles.usersIcon} size={32} />
           </div>
-          <h2 className={styles.title}>🤝 Connected!</h2>
+          <h2 className={styles.title}>Connected!</h2>
           <p className={styles.subtitle}>
-            You and{" "}
-            <strong>{displayName}</strong>{" "}
-            are now connected!
+            You and <strong>{displayName}</strong> are now connected!
           </p>
         </div>
 
@@ -113,12 +111,12 @@ const PopUpMatch = ({ isOpen, onClose, matchData }) => {
             <MessageCircle size={18} />
             <span>Send Message</span>
           </button>
-          
+
           <button className={styles.profileButton} onClick={handleViewProfile}>
             <User size={18} />
             <span>View Profile</span>
           </button>
-          
+
           <button className={styles.continueButton} onClick={handleClose}>
             <span>Continue Matching</span>
           </button>

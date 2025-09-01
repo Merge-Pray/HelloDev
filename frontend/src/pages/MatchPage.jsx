@@ -112,9 +112,8 @@ const MatchPage = () => {
 
       if (response.success) {
         if (response.match?.status === "connected") {
-          // ✅ Setze die Match-Daten für das Connected Popup
           setConnectedMatchData({
-            user: currentMatch.user, // User-Daten aus dem aktuellen Match
+            user: currentMatch.user,
             match: response.match,
             message: response.message,
           });
@@ -318,7 +317,6 @@ const MatchPage = () => {
         </div>
 
         <div className={styles.matchCard}>
-          {/* Navigation Arrows */}
           {pendingMatches.length > 1 && (
             <>
               <button
@@ -339,9 +337,7 @@ const MatchPage = () => {
             </>
           )}
 
-          {/* Match Content */}
           <div className={styles.matchContent}>
-            {/* Profile Header */}
             <div className={styles.profileHeader}>
               <div className={styles.avatar}>
                 {user?.avatar ? (
@@ -372,16 +368,14 @@ const MatchPage = () => {
                 <p className={styles.status}>{getStatusLabel(user?.status)}</p>
               </div>
             </div>
-            {/* Profile Details */}
+
             <div className={styles.profileDetails}>
-              {/* About Me */}
               {user?.aboutMe && (
                 <div className={styles.aboutSection}>
                   <p className={styles.aboutText}>{user.aboutMe}</p>
                 </div>
               )}
 
-              {/* Basic Info */}
               <div className={styles.infoGrid}>
                 {user?.country && (
                   <div className={styles.infoItem}>
@@ -405,7 +399,6 @@ const MatchPage = () => {
                 )}
               </div>
 
-              {/* Skills Sections */}
               <div className={styles.skillsSection}>
                 {user?.programmingLanguages?.length > 0 && (
                   <div className={styles.skillCategory}>
@@ -432,7 +425,7 @@ const MatchPage = () => {
                 )}
               </div>
             </div>
-            {/* Action Buttons */}
+
             <div className={styles.actionButtons}>
               <button
                 className={`${styles.actionButton} ${styles.cancelButton}`}
@@ -464,7 +457,6 @@ const MatchPage = () => {
         </div>
       </div>
 
-      {/* Match Connected Popup */}
       <PopUpMatch
         isOpen={showConnectedPopup}
         onClose={handleCloseConnectedPopup}
