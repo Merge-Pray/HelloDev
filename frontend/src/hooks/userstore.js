@@ -97,14 +97,6 @@ const useUserStore = create(
     {
       name: "user-storage",
       storage: zustandStorage,
-      partialize: (state) => {
-        // Only persist if currentUser exists and is not null
-        if (state.currentUser) {
-          return { currentUser: state.currentUser };
-        }
-        // Return empty object when currentUser is null - this will remove the localStorage entry
-        return {};
-      },
     }
   )
 );
