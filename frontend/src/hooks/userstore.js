@@ -1,6 +1,10 @@
 import { create } from "zustand";
 import { persist } from "zustand/middleware";
 
+const isSamsungInternet = () => {
+  return /SamsungBrowser/i.test(navigator.userAgent);
+};
+
 const zustandStorage = {
   getItem: (name) => {
     const item = localStorage.getItem(name);
@@ -44,9 +48,11 @@ const useUserStore = create(
 
       logout: async () => {
         try {
+          const credentials = isSamsungInternet() ? "same-origin" : "include";
+          
           await fetch(`${import.meta.env.VITE_BACKENDPATH}/api/user/logout`, {
             method: 'POST',
-            credentials: 'include'
+            credentials
           });
         } catch (error) {
           console.error('Logout error:', error);

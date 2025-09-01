@@ -7,6 +7,10 @@ import styles from "./loginpage.module.css";
 import { API_URL } from "../../lib/config";
 import DarkMode from "../../components/DarkMode";
 
+const isSamsungInternet = () => {
+  return /SamsungBrowser/i.test(navigator.userAgent);
+};
+
 export default function LoginPage() {
   const currentUser = useUserStore((state) => state.currentUser);
   const setCurrentUser = useUserStore((s) => s.setCurrentUser);
@@ -39,10 +43,12 @@ export default function LoginPage() {
     setError(null);
 
     try {
+      const credentials = isSamsungInternet() ? "same-origin" : "include";
+      
       const res = await fetch(`${API_URL}/api/user/login`, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        credentials: "include",
+        credentials,
         body: JSON.stringify(values),
       });
 
