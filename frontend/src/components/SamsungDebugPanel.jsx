@@ -28,6 +28,13 @@ const SamsungDebugPanel = ({ isVisible = false }) => {
             message: `${test.name}: ${test.success ? '✅ ' + test.status : '❌ ' + test.error}`,
             timestamp
           }]);
+          
+          // Also log the URL being tested
+          setLogs(prev => [...prev, {
+            type: 'log',
+            message: `  URL: ${test.url}`,
+            timestamp
+          }]);
         });
       }
     } catch (error) {
