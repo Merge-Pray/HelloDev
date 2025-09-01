@@ -23,7 +23,7 @@ const useUserStore = create(
       setCurrentUser: (user) =>
         set({
           currentUser: {
-            _id: user._id || user.id,
+            _id: user._id,
             username: user.username,
             nickname: user.nickname,
             email: user.email,
@@ -69,7 +69,7 @@ const useUserStore = create(
           currentSocket.disconnect();
         }
         set({ currentUser: null, socket: null });
-        // Also remove from localStorage when clearing user
+
         localStorage.removeItem("user-storage");
       },
 
@@ -87,10 +87,8 @@ const useUserStore = create(
             currentSocket.disconnect();
           }
 
-          // Clear the state
           set({ currentUser: null, socket: null });
 
-          // Directly remove from localStorage - most reliable method
           localStorage.removeItem("user-storage");
         }
       },

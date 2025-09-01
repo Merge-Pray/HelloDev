@@ -10,10 +10,9 @@ const ProtectedRoute = ({ children }) => {
     let timeout;
 
     if (!currentUser) {
-      // Give a brief moment for the user to load from localStorage
       timeout = setTimeout(() => {
         setRedirect(true);
-      }, 1000); // Shorter timeout than Pollio since we have better state management
+      }, 1000);
     }
 
     return () => {
@@ -21,7 +20,6 @@ const ProtectedRoute = ({ children }) => {
     };
   }, [currentUser]);
 
-  // Show loading state briefly to allow localStorage to load
   if (!currentUser && !redirect) {
     return (
       <div className="flex items-center justify-center min-h-screen">
@@ -33,7 +31,6 @@ const ProtectedRoute = ({ children }) => {
     );
   }
 
-  // Redirect to login if no user after timeout
   if (!currentUser && redirect) {
     return <Navigate to="/login" replace />;
   }
