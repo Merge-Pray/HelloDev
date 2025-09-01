@@ -217,50 +217,71 @@
 /* Action Buttons */
 .actionButtons {
   display: flex;
+  flex-direction: column;
   gap: 12px;
   padding: 24px 32px 32px;
 }
 
 .messageButton,
+.profileButton,
 .continueButton {
-  flex: 1;
   display: flex;
   align-items: center;
   justify-content: center;
   gap: 8px;
-  padding: 12px 16px;
+  padding: 14px 24px;
   border: none;
   border-radius: 12px;
-  font-size: 0.875rem;
+  font-size: 14px;
   font-weight: 600;
   cursor: pointer;
   transition: all 0.2s ease;
+  text-decoration: none;
+  font-family: "Helvetica Neue", Helvetica, Arial, sans-serif;
   min-height: 48px;
 }
 
 .messageButton {
-  background: var(--color-primary, #667eea);
+  background: var(--color-bg-gradient);
   color: white;
-  border: 1px solid var(--color-primary, #667eea);
+  border: 1px solid transparent;
 }
 
 .messageButton:hover {
-  background: #5a67d8;
-  border-color: #5a67d8;
+  background: linear-gradient(
+    135deg,
+    var(--color-primary-hover) 0%,
+    var(--color-accent) 100%
+  );
+  transform: translateY(-2px);
+  box-shadow: 0 4px 12px rgba(var(--color-primary-rgb), 0.3);
+}
+
+.profileButton {
+  background: var(--color-bg-secondary);
+  color: var(--color-text);
+  border: 2px solid var(--color-card-border);
+}
+
+.profileButton:hover {
+  background: var(--color-bg);
+  border-color: var(--color-primary);
+  color: var(--color-primary);
   transform: translateY(-1px);
-  box-shadow: 0 4px 12px rgba(102, 126, 234, 0.3);
 }
 
 .continueButton {
-  background: var(--color-bg-secondary, #f8f9fa);
-  color: var(--color-text, #374151);
-  border: 1px solid var(--color-border, #e5e7eb);
+  background: var(--color-input-bg);
+  color: var(--color-text);
+  border: 2px solid var(--color-input-border);
 }
 
 .continueButton:hover {
-  background: var(--color-border, #e5e7eb);
-  transform: translateY(-1px);
-  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+  background: var(--color-primary);
+  color: var(--color-primary-hover-invert);
+  border-color: var(--color-primary);
+  transform: translateY(-2px);
+  box-shadow: 0 4px 12px rgba(var(--color-primary-rgb), 0.3);
 }
 
 /* Mobile Responsive */
@@ -306,6 +327,20 @@
     flex-direction: column;
     padding: 20px 24px 24px;
     gap: 8px;
+  }
+}
+
+@media (max-width: 520px) {
+  .actionButtons {
+    padding: 20px;
+    gap: 8px;
+  }
+
+  .messageButton,
+  .profileButton,
+  .continueButton {
+    padding: 12px 20px;
+    font-size: 13px;
   }
 }
 

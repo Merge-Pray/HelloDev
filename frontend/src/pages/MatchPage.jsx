@@ -112,6 +112,12 @@ const MatchPage = () => {
 
       if (response.success) {
         if (response.match?.status === "connected") {
+          // ✅ Setze die Match-Daten für das Connected Popup
+          setConnectedMatchData({
+            user: currentMatch.user, // User-Daten aus dem aktuellen Match
+            match: response.match,
+            message: response.message,
+          });
           setShowConnectedPopup(true);
         } else {
           setContactedUserData({

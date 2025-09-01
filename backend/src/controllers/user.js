@@ -500,6 +500,7 @@ export const getUserProfile = async (req, res, next) => {
         favoriteDrinkWhileCoding: targetUser.favoriteDrinkWhileCoding,
         musicGenreWhileCoding: targetUser.musicGenreWhileCoding,
         favoriteShowMovie: targetUser.favoriteShowMovie,
+        profileLinksVisibleToContacts: targetUser.profileLinksVisibleToContacts,
         isMatchable: targetUser.isMatchable,
         rating: targetUser.rating,
         points: targetUser.points,

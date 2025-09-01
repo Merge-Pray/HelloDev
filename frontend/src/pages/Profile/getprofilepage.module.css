@@ -857,3 +857,242 @@
   border-color: var(--color-primary);
   background: rgba(var(--color-primary-rgb), 0.05);
 }
+
+/* Professional Links Design Update */
+.professionalLinksContent {
+  margin-top: 16px;
+}
+
+.visibilityStatus {
+  margin-bottom: 16px;
+  padding: 12px 16px;
+  background: rgba(var(--color-primary-rgb), 0.05);
+  border: 2px solid rgba(var(--color-primary-rgb), 0.2);
+  border-radius: 12px;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  font-size: 14px;
+  color: var(--color-text-secondary);
+  transition: all 0.3s ease;
+}
+
+.visibilityStatus:hover {
+  border-color: var(--color-primary);
+  background: rgba(var(--color-primary-rgb), 0.08);
+}
+
+.linksGrid {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+
+.linkItem {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 16px;
+  background: var(--color-bg-secondary);
+  border: 2px solid var(--color-input-border);
+  border-radius: 12px;
+  transition: all 0.3s ease;
+  text-decoration: none;
+  color: var(--color-text);
+  position: relative;
+}
+
+.linkItem:hover {
+  border-color: var(--color-primary);
+  background: rgba(var(--color-primary-rgb), 0.05);
+  transform: translateY(-2px);
+  box-shadow: 0 4px 12px rgba(var(--color-primary-rgb), 0.15);
+  text-decoration: none;
+  color: var(--color-text);
+}
+
+.linkIcon {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 40px;
+  height: 40px;
+  background: rgba(var(--color-primary-rgb), 0.1);
+  border-radius: 10px;
+  flex-shrink: 0;
+  transition: all 0.3s ease;
+}
+
+.linkItem:hover .linkIcon {
+  background: rgba(var(--color-primary-rgb), 0.15);
+  transform: scale(1.05);
+}
+
+.linkContent {
+  flex: 1;
+  min-width: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+
+.linkLabel {
+  font-size: 12px;
+  color: var(--color-text-secondary);
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+  margin: 0;
+}
+
+.linkUrl {
+  font-size: 14px;
+  color: var(--color-primary);
+  font-weight: 500;
+  text-decoration: none;
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  word-break: break-all;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  transition: color 0.3s ease;
+}
+
+.linkItem:hover .linkUrl {
+  color: var(--color-primary);
+}
+
+.externalIcon {
+  flex-shrink: 0;
+  opacity: 0.7;
+  transition: all 0.3s ease;
+}
+
+.linkItem:hover .externalIcon {
+  opacity: 1;
+  transform: scale(1.1);
+}
+
+/* Spezielle Farben für verschiedene Plattformen */
+.linkItem[href*="linkedin"] .linkIcon {
+  color: #0077b5;
+  background: rgba(0, 119, 181, 0.1);
+}
+
+.linkItem[href*="linkedin"]:hover .linkIcon {
+  background: rgba(0, 119, 181, 0.15);
+}
+
+.linkItem[href*="github"] .linkIcon {
+  color: var(--color-text);
+  background: rgba(var(--color-text-rgb, 0, 0, 0), 0.1);
+}
+
+.linkItem[href*="github"]:hover .linkIcon {
+  background: rgba(var(--color-text-rgb, 0, 0, 0), 0.15);
+}
+
+/* Mobile Responsive für Professional Links */
+@media (max-width: 768px) {
+  .professionalLinksContent {
+    margin-top: 12px;
+  }
+
+  .visibilityStatus {
+    padding: 10px 12px;
+    font-size: 13px;
+    margin-bottom: 12px;
+  }
+
+  .linksGrid {
+    gap: 10px;
+  }
+
+  .linkItem {
+    padding: 12px;
+    gap: 10px;
+  }
+
+  .linkIcon {
+    width: 36px;
+    height: 36px;
+    border-radius: 8px;
+  }
+
+  .linkLabel {
+    font-size: 11px;
+  }
+
+  .linkUrl {
+    font-size: 13px;
+    gap: 4px;
+  }
+
+  .externalIcon {
+    width: 10px;
+    height: 10px;
+  }
+}
+
+@media (max-width: 480px) {
+  .linkItem {
+    padding: 10px;
+    gap: 8px;
+    flex-direction: column;
+    align-items: flex-start;
+    text-align: left;
+  }
+
+  .linkIcon {
+    width: 32px;
+    height: 32px;
+    align-self: flex-start;
+  }
+
+  .linkContent {
+    width: 100%;
+  }
+
+  .linkUrl {
+    font-size: 12px;
+    white-space: normal;
+    word-break: break-all;
+    line-height: 1.3;
+  }
+}
+
+/* Zusätzliche Styles für bessere Integration */
+.restrictedLinksNotice {
+  margin-top: 16px;
+}
+
+.restrictedLinksNotice > div {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 16px;
+  background: rgba(249, 115, 22, 0.05);
+  border: 2px solid rgba(249, 115, 22, 0.2);
+  border-radius: 12px;
+  color: #f97316;
+  font-weight: 500;
+  font-size: 14px;
+  transition: all 0.3s ease;
+}
+
+.restrictedLinksNotice > div:hover {
+  border-color: #f97316;
+  background: rgba(249, 115, 22, 0.08);
+}
+
+/* Dark Theme Anpassungen */
+:root[data-theme="dark"] .linkItem[href*="github"] .linkIcon {
+  color: #ffffff;
+  background: rgba(255, 255, 255, 0.1);
+}
+
+:root[data-theme="dark"] .linkItem[href*="github"]:hover .linkIcon {
+  background: rgba(255, 255, 255, 0.15);
+}

@@ -588,15 +588,22 @@ export default function GetProfilePage() {
   };
 
   const renderProfessionalLinks = () => {
-    if (!profileData.profileLinksVisibleToContacts) return null;
+    // Einfache Logik: Links nur anzeigen wenn Links sichtbar UND befreundet
+    const canSeeLinks = profileData.profileLinksVisibleToContacts && isContact;
 
-    const hasLinks = (
-      profileData.linkedinProfile ||
-      profileData.githubProfile ||
-      (profileData.personalWebsites && profileData.personalWebsites.length > 0)
-    );
+    const hasLinkedIn =
+      profileData.linkedinProfile && profileData.linkedinProfile.trim() !== "";
+    const hasGitHub =
+      profileData.githubProfile && profileData.githubProfile.trim() !== "";
+    const hasWebsites =
+      profileData.personalWebsites &&
+      profileData.personalWebsites.length > 0 &&
+      profileData.personalWebsites.some((url) => url && url.trim() !== "");
 
-    if (!hasLinks) return null;
+    const hasAnyLinks = hasLinkedIn || hasGitHub || hasWebsites;
+
+    // Wenn Links nicht sichtbar sein sollen oder keine Links vorhanden sind, nichts anzeigen
+    if (!canSeeLinks || !hasAnyLinks) return null;
 
     return (
       <div className="card enhanced">
@@ -606,44 +613,100 @@ export default function GetProfilePage() {
             <h3 className={styles.sectionTitle}>Professional Links</h3>
           </div>
         </div>
-        <div className={styles.linksGrid}>
-          {profileData.linkedinProfile && (
-            <a
-              href={profileData.linkedinProfile}
-              target="_blank"
-              rel="noopener noreferrer"
-              className={styles.linkItem}
+
+        <div className={styles.professionalLinksContent}>
+          <div className={styles.visibilityStatus}>
+            <div
+              style={{
+                display: "flex",
+                alignItems: "center",
+                gap: "8px",
+                fontSize: "14px",
+                color: "var(--color-text-secondary)",
+              }}
             >
-              <Linkedin size={18} className={styles.linkIcon} style={{ color: "#0077B5" }} />
-              <span>LinkedIn</span>
-              <ExternalLink size={14} className={styles.externalIcon} />
-            </a>
-          )}
-          {profileData.githubProfile && (
-            <a
-              href={profileData.githubProfile}
-              target="_blank"
-              rel="noopener noreferrer"
-              className={styles.linkItem}
-            >
-              <Github size={18} className={styles.linkIcon} />
-              <span>GitHub</span>
-              <ExternalLink size={14} className={styles.externalIcon} />
-            </a>
-          )}
-          {profileData.personalWebsites?.map((website, index) => (
-            <a
-              key={index}
-              href={website}
-              target="_blank"
-              rel="noopener noreferrer"
-              className={styles.linkItem}
-            >
-              <Globe size={18} className={styles.linkIcon} />
-              <span>Personal Website</span>
-              <ExternalLink size={14} className={styles.externalIcon} />
-            </a>
-          ))}
+              <Globe size={14} />
+              <span>
+                Shared by {profileData.nickname || profileData.username}
+              </span>
+            </div>
+          </div>
+
+          <div className={styles.linksGrid}>
+            {hasLinkedIn && (
+              <a
+                href={profileData.linkedinProfile}
+                target="_blank"
+                rel="noopener noreferrer"
+                className={styles.linkItem}
+              >
+                <div className={styles.linkIcon}>
+                  <Linkedin size={18} style={{ color: "#0077B5" }} />
+                </div>
+                <div className={styles.linkContent}>
+                  <div className={styles.linkLabel}>LinkedIn</div>
+                  <div className={styles.linkUrl}>
+                    {profileData.linkedinProfile}
+                    <ExternalLink size={12} className={styles.externalIcon} />
+                  </div>
+                </div>
+              </a>
+            )}
+
+            {hasGitHub && (
+              <a
+                href={profileData.githubProfile}
+                target="_blank"
+                rel="noopener noreferrer"
+                className={styles.linkItem}
+              >
+                <div className={styles.linkIcon}>
+                  <Github size={18} />
+                </div>
+                <div className={styles.linkContent}>
+                  <div className={styles.linkLabel}>GitHub</div>
+                  <div className={styles.linkUrl}>
+                    {profileData.githubProfile}
+                    <ExternalLink size={12} className={styles.externalIcon} />
+                  </div>
+                </div>
+              </a>
+            )}
+
+            {hasWebsites &&
+              profileData.personalWebsites
+                .filter((url) => url && url.trim() !== "")
+                .map((website, index) => (
+                  <a
+                    key={index}
+                    href={website}
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    className={styles.linkItem}
+                  >
+                    <div className={styles.linkIcon}>
+                      <Globe size={18} />
+                    </div>
+                    <div className={styles.linkContent}>
+                      <div className={styles.linkLabel}>
+                        Personal Website{" "}
+                        {profileData.personalWebsites.filter(
+                          (url) => url && url.trim() !== ""
+                        ).length > 1
+                          ? `#${index + 1}`
+                          : ""}
+                      </div>
+                      <div className={styles.linkUrl}>
+                        {website}
+                        <ExternalLink
+                          size={12}
+                          className={styles.externalIcon}
+                        />
+                      </div>
+                    </div>
+                  </a>
+                ))}
+          </div>
         </div>
       </div>
     );
