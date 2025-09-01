@@ -1,10 +1,6 @@
 import { API_URL } from "../lib/config";
 import useUserStore from "../hooks/userstore";
 
-const isSamsungInternet = () => {
-  return /SamsungBrowser/i.test(navigator.userAgent);
-};
-
 let isRefreshing = false;
 let refreshPromise = null;
 
@@ -62,11 +58,9 @@ const performTokenRefresh = async () => {
     const controller = new AbortController();
     const timeoutId = setTimeout(() => controller.abort(), 10000);
     
-    const credentials = isSamsungInternet() ? "same-origin" : "include";
-    
     const refreshResponse = await fetch(`${API_URL}/api/user/refresh`, {
       method: "POST",
-      credentials,
+      credentials: "include",
       signal: controller.signal
     });
     

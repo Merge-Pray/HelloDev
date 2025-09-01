@@ -3,34 +3,6 @@ import { generateToken } from "../libs/jwt.js";
 import { hashPassword, comparePassword } from "../libs/pw.js";
 import UserModel from "../models/user.js";
 
-// Samsung Internet Browser detection
-const isSamsungInternet = (userAgent) => {
-  return userAgent && /SamsungBrowser/i.test(userAgent);
-};
-
-// Get appropriate cookie settings based on browser
-const getCookieSettings = (userAgent) => {
-  const baseSettings = {
-    httpOnly: true,
-    maxAge: 24 * 60 * 60 * 1000,
-  };
-  
-  if (isSamsungInternet(userAgent)) {
-    // Samsung Internet: Use 'lax' sameSite and potentially different secure setting
-    return {
-      ...baseSettings,
-      secure: true,
-      sameSite: "lax",
-    };
-  } else {
-    // Other browsers: Use existing settings
-    return {
-      ...baseSettings,
-      secure: true,
-      sameSite: "none",
-    };
-  }
-};
 
 export const createUser = async (req, res, next) => {
   try {
@@ -50,11 +22,12 @@ export const createUser = async (req, res, next) => {
 
     const token = generateToken(username, newAccount._id);
 
-    // Use browser-specific cookie settings
-    const userAgent = req.get('user-agent');
-    const cookieSettings = getCookieSettings(userAgent);
-    
-    res.cookie("jwt", token, cookieSettings);
+    res.cookie("jwt", token, {
+      httpOnly: true,
+      secure: true,
+      sameSite: "none",
+      maxAge: 24 * 60 * 60 * 1000,
+    });
 
     return res.status(201).json({
       message: "User created successfully",
@@ -321,11 +294,12 @@ export const verifyLogin = async (req, res, next) => {
 
     const token = generateToken(existingUser.username, existingUser._id);
 
-    // Use browser-specific cookie settings
-    const userAgent = req.get('user-agent');
-    const cookieSettings = getCookieSettings(userAgent);
-    
-    res.cookie("jwt", token, cookieSettings);
+    res.cookie("jwt", token, {
+      httpOnly: true,
+      secure: true,
+      sameSite: "none",
+      maxAge: 24 * 60 * 60 * 1000,
+    });
 
     return res.status(200).json({
       message: "Login successful",
