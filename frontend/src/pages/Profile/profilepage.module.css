@@ -957,3 +957,139 @@
   border-color: var(--color-primary);
   background: rgba(var(--color-primary-rgb), 0.05);
 }
+
+/* Professional Links Styles - angepasst an bestehendes Design */
+.professionalLinksContent {
+  margin-top: 16px;
+}
+
+.visibilityStatus {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  margin-bottom: 16px;
+  padding: 12px 16px;
+  background: var(--color-bg-secondary);
+  border: 2px solid var(--color-input-border);
+  border-radius: 12px;
+  font-size: 14px;
+  color: var(--color-text-secondary);
+  font-weight: 500;
+  transition: all 0.3s ease;
+}
+
+.visibilityStatus:hover {
+  border-color: var(--color-primary);
+  background: rgba(var(--color-primary-rgb), 0.05);
+}
+
+.linksGrid {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+
+.linkItem {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 12px 16px;
+  background: var(--color-bg-secondary);
+  border: 2px solid var(--color-input-border);
+  border-radius: 10px;
+  transition: all 0.3s ease;
+  font-size: 14px;
+}
+
+.linkItem:hover {
+  border-color: var(--color-primary);
+  background: rgba(var(--color-primary-rgb), 0.05);
+  transform: translateY(-1px);
+}
+
+.linkIcon {
+  color: var(--color-primary);
+  flex-shrink: 0;
+}
+
+.linkContent {
+  flex: 1;
+  min-width: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+}
+
+.linkLabel {
+  font-size: 12px;
+  color: var(--color-text-secondary);
+  font-weight: 500;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+  margin: 0;
+}
+
+.linkUrl {
+  font-size: 14px;
+  color: var(--color-primary);
+  font-weight: 500;
+  text-decoration: none;
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  word-break: break-all;
+  transition: color 0.3s ease;
+}
+
+.linkUrl:hover {
+  text-decoration: underline;
+}
+
+/* Mobile Responsive */
+@media (max-width: 768px) {
+  .professionalLinksContent {
+    margin-top: 12px;
+  }
+
+  .visibilityStatus {
+    padding: 10px 12px;
+    font-size: 13px;
+    margin-bottom: 12px;
+  }
+
+  .linksGrid {
+    gap: 10px;
+  }
+
+  .linkItem {
+    padding: 12px;
+    gap: 10px;
+  }
+
+  .linkLabel {
+    font-size: 11px;
+  }
+
+  .linkUrl {
+    font-size: 13px;
+    gap: 4px;
+  }
+}
+
+@media (max-width: 480px) {
+  .linkItem {
+    padding: 10px;
+    gap: 8px;
+  }
+
+  .linkUrl {
+    font-size: 12px;
+    word-break: break-all;
+    line-height: 1.3;
+  }
+
+  .visibilityStatus {
+    padding: 8px 10px;
+    font-size: 12px;
+  }
+}

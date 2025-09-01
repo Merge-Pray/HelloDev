@@ -1,9 +1,9 @@
 import { useState, useEffect } from "react";
 import { useNavigate } from "react-router";
-import { X, Link, Users, MessageCircle, UserPlus } from "lucide-react";
+import { X, Link, Users, MessageCircle, UserPlus, User } from "lucide-react";
 import styles from "./popupmatch.module.css";
 
-const MatchConnectedPopup = ({ isOpen, onClose, matchData }) => {
+const PopUpMatch = ({ isOpen, onClose, matchData }) => {
   const [isVisible, setIsVisible] = useState(false);
   const navigate = useNavigate();
 
@@ -29,7 +29,26 @@ const MatchConnectedPopup = ({ isOpen, onClose, matchData }) => {
     handleClose();
   };
 
+  const handleViewProfile = () => {
+    // Navigate to the matched user's profile
+    if (matchData?.user?.id || matchData?.user?._id) {
+      const userId = matchData.user.id || matchData.user._id;
+      navigate(`/profile/${userId}`);
+    }
+    handleClose();
+  };
+
   if (!isOpen) return null;
+
+  // Debug logging
+  console.log("PopUpMatch received matchData:", matchData);
+
+  // Fallback für fehlende User-Daten
+  const user = matchData?.user || {};
+  const displayName = user.nickname || user.username || "Unknown User";
+  const userName = user.username || "unknown";
+  const avatar = user.avatar || "/avatars/default_avatar.png";
+  const status = user.status || "Developer";
 
   return (
     <div className={`${styles.overlay} ${isVisible ? styles.visible : ""}`}>
@@ -50,48 +69,28 @@ const MatchConnectedPopup = ({ isOpen, onClose, matchData }) => {
             />
             <Users className={styles.usersIcon} size={32} />
           </div>
-          <h2 className={styles.title}>🤝 Connected!</h2>
+          <h2 className={styles.title}>Connected!</h2>
           <p className={styles.subtitle}>
-            You and{" "}
-            <strong>
-              {matchData?.user?.nickname || matchData?.user?.username}
-            </strong>{" "}
-            are now connected!
+            You and <strong>{displayName}</strong> are now connected!
           </p>
         </div>
 
         {/* User Info */}
         <div className={styles.userInfo}>
           <div className={styles.avatar}>
-            {matchData?.user?.avatar ? (
-              <img
-                src={matchData.user.avatar}
-                alt={`${
-                  matchData.user.nickname || matchData.user.username
-                }'s avatar`}
-                className={styles.avatarImage}
-                onError={(e) => {
-                  e.target.src = "/avatars/default_avatar.png";
-                }}
-              />
-            ) : (
-              <img
-                src="/avatars/default_avatar.png"
-                alt="Default avatar"
-                className={styles.avatarImage}
-              />
-            )}
+            <img
+              src={avatar}
+              alt={`${displayName}'s avatar`}
+              className={styles.avatarImage}
+              onError={(e) => {
+                e.target.src = "/avatars/default_avatar.png";
+              }}
+            />
           </div>
           <div className={styles.userDetails}>
-            <h3 className={styles.userName}>
-              {matchData?.user?.nickname || matchData?.user?.username}
-            </h3>
-            <p className={styles.userHandle}>
-              @{matchData?.user?.username}.HelloDev.social
-            </p>
-            <p className={styles.userStatus}>
-              {matchData?.user?.status || "Developer"}
-            </p>
+            <h3 className={styles.userName}>{displayName}</h3>
+            <p className={styles.userHandle}>@{userName}.HelloDev.social</p>
+            <p className={styles.userStatus}>{status}</p>
           </div>
         </div>
 
@@ -112,6 +111,12 @@ const MatchConnectedPopup = ({ isOpen, onClose, matchData }) => {
             <MessageCircle size={18} />
             <span>Send Message</span>
           </button>
+
+          <button className={styles.profileButton} onClick={handleViewProfile}>
+            <User size={18} />
+            <span>View Profile</span>
+          </button>
+
           <button className={styles.continueButton} onClick={handleClose}>
             <span>Continue Matching</span>
           </button>
@@ -121,4 +126,4 @@ const MatchConnectedPopup = ({ isOpen, onClose, matchData }) => {
   );
 };
 
-export default MatchConnectedPopup;
+export default PopUpMatch;

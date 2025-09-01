@@ -257,7 +257,6 @@
 .formField {
   display: flex;
   flex-direction: column;
-  position: relative;
 }
 
 .formField.fullWidth {
@@ -278,13 +277,13 @@
 .formField select {
   padding: 12px 16px;
   border: 2px solid var(--color-input-border);
-  border-radius: 10px; /* ✅ Konsistent mit restlicher Website */
+  border-radius: 10px;
   font-size: 16px;
   transition: all 0.3s ease;
   font-family: "Helvetica Neue", Helvetica, Arial, sans-serif;
   background: var(--color-input-bg);
   color: var(--color-text);
-  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.05); /* ✅ Subtle shadow */
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.05);
 }
 
 .formField input:disabled,
@@ -302,7 +301,7 @@
   outline: none;
   border-color: var(--color-primary);
   box-shadow: 0 0 0 3px rgba(var(--color-primary-rgb), 0.1);
-  transform: translateY(-1px); /* ✅ Subtle lift effect */
+  transform: translateY(-1px);
 }
 
 .formField input::placeholder,
@@ -377,9 +376,9 @@
 }
 
 .btn {
-  padding: 12px 24px; /* ✅ Größeres Padding */
+  padding: 12px 24px;
   border: none;
-  border-radius: 10px; /* ✅ Konsistent mit Website */
+  border-radius: 10px;
   font-size: 14px;
   font-weight: 600;
   cursor: pointer;
@@ -388,7 +387,7 @@
   align-items: center;
   gap: 8px;
   font-family: "Helvetica Neue", Helvetica, Arial, sans-serif;
-  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1); /* ✅ Subtle shadow */
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
 }
 
 .btn:disabled {
@@ -397,7 +396,7 @@
 }
 
 .btnPrimary {
-  background: var(--color-bg-gradient); /* ✅ Gradient wie auf der Website */
+  background: var(--color-bg-gradient);
   color: white;
 }
 
@@ -450,7 +449,6 @@
   color: white;
 }
 
-/* ✅ NEU: Programming Languages Slider Styles */
 .programmingLanguagesGrid {
   display: grid;
   grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
@@ -563,18 +561,6 @@
   position: relative;
 }
 
-/* .btn:disabled::after {
-  content: "";
-  position: absolute;
-  width: 16px;
-  height: 16px;
-  margin: auto;
-  border: 2px solid transparent;
-  border-top-color: currentColor;
-  border-radius: 50%;
-  animation: spin 1s linear infinite;
-} */
-
 @keyframes spin {
   0% {
     transform: rotate(0deg);
@@ -617,8 +603,6 @@
   .btn {
     justify-content: center;
   }
-
-  /* ✅ NEU: Programming Languages Editor Styles */
 
   .programmingLanguagesGrid {
     grid-template-columns: 1fr;
@@ -770,7 +754,6 @@ html {
   }
 }
 
-/* ✅ NEU: Missing Fields Info */
 .missingFieldsInfo {
   margin-top: 8px;
 }
@@ -816,7 +799,6 @@ html {
   color: var(--color-primary-hover);
 }
 
-/* ✅ NEU: Default Values Info Box */
 .defaultValuesInfo {
   margin-bottom: 20px;
   padding: 12px;
@@ -841,7 +823,6 @@ html {
   line-height: 1.4;
 }
 
-/* ✅ NEU: Section Navigation mit Required Fields */
 .sectionNav button.hasRequiredFields {
   position: relative;
   border-left: 3px solid var(--color-warning);
@@ -876,30 +857,12 @@ html {
   }
 }
 
-/* ✅ Verbesserte Feld-Styles */
-.formField {
-  display: flex;
-  flex-direction: column;
-  position: relative;
-}
-
-.formField label {
-  margin-bottom: 8px;
-  font-weight: 600;
-  color: var(--color-text);
-  display: flex;
-  align-items: center;
-  gap: 4px;
-}
-
-/* ✅ Required Field Indicator */
 .formField label.required::after {
   content: "*";
   color: var(--color-error);
   font-weight: bold;
 }
 
-/* ✅ Default Value Indicator */
 .formField.hasDefaultValue {
   position: relative;
 }
@@ -917,19 +880,18 @@ html {
   z-index: 1;
 }
 
-/* ✅ Verbesserte Form Input Styles */
 .formField input,
 .formField textarea,
 .formField select {
   padding: 12px 16px;
   border: 2px solid var(--color-input-border);
-  border-radius: 10px; /* ✅ Konsistent mit restlicher Website */
+  border-radius: 10px;
   font-size: 16px;
   transition: all 0.3s ease;
   font-family: "Helvetica Neue", Helvetica, Arial, sans-serif;
   background: var(--color-input-bg);
   color: var(--color-text);
-  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.05); /* ✅ Subtle shadow */
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.05);
 }
 
 .formField input:focus,
@@ -938,28 +900,25 @@ html {
   outline: none;
   border-color: var(--color-primary);
   box-shadow: 0 0 0 3px rgba(var(--color-primary-rgb), 0.1);
-  transform: translateY(-1px); /* ✅ Subtle lift effect */
+  transform: translateY(-1px);
 }
 
-/* ✅ Warning für fehlende Required Fields */
 .formField.required.empty {
   border-left: 4px solid var(--color-warning);
   padding-left: 12px;
   background: rgba(245, 158, 11, 0.02);
 }
 
-/* ✅ Success für ausgefüllte Required Fields */
 .formField.required.filled {
   border-left: 4px solid var(--color-success);
   padding-left: 12px;
   background: rgba(16, 185, 129, 0.02);
 }
 
-/* ✅ Konsistente Button Styles */
 .btn {
-  padding: 12px 24px; /* ✅ Größeres Padding */
+  padding: 12px 24px;
   border: none;
-  border-radius: 10px; /* ✅ Konsistent mit Website */
+  border-radius: 10px;
   font-size: 14px;
   font-weight: 600;
   cursor: pointer;
@@ -968,7 +927,7 @@ html {
   align-items: center;
   gap: 8px;
   font-family: "Helvetica Neue", Helvetica, Arial, sans-serif;
-  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1); /* ✅ Subtle shadow */
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
 }
 
 .btn:hover:not(:disabled) {
@@ -977,7 +936,7 @@ html {
 }
 
 .btnPrimary {
-  background: var(--color-bg-gradient); /* ✅ Gradient wie auf der Website */
+  background: var(--color-bg-gradient);
   color: white;
 }
 
@@ -1002,7 +961,6 @@ html {
   background: rgba(59, 130, 246, 0.8);
 }
 
-/* ✅ Enhanced form field styling for nickname */
 .formField input[name="nickname"] {
   font-weight: 600;
   color: var(--color-primary);
@@ -1014,7 +972,6 @@ html {
   box-shadow: 0 0 0 3px rgba(var(--color-primary-rgb), 0.15);
 }
 
-/* ✅ Special styling for required nickname field */
 .formField.required.empty input[name="nickname"] {
   border-color: var(--color-warning);
   background: rgba(245, 158, 11, 0.05);
@@ -1025,23 +982,20 @@ html {
   background: rgba(16, 185, 129, 0.05);
 }
 
-/* ✅ Add visual indicator for nickname importance */
 .formField input[name="nickname"]::placeholder {
   color: var(--color-text-secondary);
   font-style: italic;
 }
 
-/* ✅ Default Indicator für Nickname */
 .defaultIndicator {
   color: var(--color-text-secondary);
   font-weight: 400;
   font-size: 0.875rem;
 }
 
-/* ✅ Enhanced Radio Group Styling (consistent across all sections) */
 .radioGroup {
   display: grid;
-  grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+  grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
   gap: 12px;
   margin-top: 16px;
 }
@@ -1050,27 +1004,28 @@ html {
   display: flex;
   align-items: center;
   padding: 16px 20px;
-  background: var(--color-input-bg);
+  background: var(--color-bg-secondary);
   border: 2px solid var(--color-input-border);
   border-radius: 12px;
   cursor: pointer;
   transition: all 0.3s ease;
-  font-weight: 500;
   position: relative;
   min-height: 60px;
+
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.05);
 }
 
 .radioLabel:hover {
   border-color: var(--color-primary);
-  background: var(--color-primary-light);
+  background: rgba(var(--color-primary-rgb), 0.05);
   transform: translateY(-2px);
   box-shadow: 0 4px 12px rgba(var(--color-primary-rgb), 0.15);
 }
 
 .radioLabel:has(input:checked) {
-  background: var(--color-primary);
+  background: var(--color-bg-gradient);
   border-color: var(--color-primary);
-  color: white;
+  color: var(--color-primary-hover-invert);
   box-shadow: 0 4px 16px rgba(var(--color-primary-rgb), 0.3);
 }
 
@@ -1089,11 +1044,12 @@ html {
 
 .radioText {
   flex: 1;
-  font-size: 14px;
-  font-weight: 500;
+  font-size: 15px;
+  font-weight: 600;
+  letter-spacing: 0.02em;
 }
 
-/* ✅ Custom radio button indicator */
+/* Custom Radio Button Indicator */
 .radioLabel::before {
   content: "";
   width: 20px;
@@ -1103,152 +1059,111 @@ html {
   margin-right: 12px;
   transition: all 0.3s ease;
   background: var(--color-input-bg);
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
 }
 
 .radioLabel:hover::before {
   border-color: var(--color-primary);
+  box-shadow: 0 2px 6px rgba(var(--color-primary-rgb), 0.2);
 }
 
 .radioLabel:has(input:checked)::before {
-  background: white;
-  border-color: white;
+  background: var(--color-primary-hover-invert);
+  border-color: var(--color-primary-hover-invert);
   box-shadow: inset 0 0 0 4px var(--color-primary);
 }
 
-/* ✅ HybridSelector Container Styling */
-.hybridSelectorContainer {
-  margin-top: 16px;
-  background: var(--color-input-bg);
-  border: 2px solid var(--color-input-border);
-  border-radius: 12px;
-  padding: 20px;
-  transition: all 0.3s ease;
+/* Spezielle Styles für verschiedene Optionen */
+.radioLabel[data-value="none"] {
+  border-color: var(--color-text-secondary);
 }
 
-.hybridSelectorContainer:hover {
-  border-color: var(--color-primary-light);
-  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.05);
+.radioLabel[data-value="none"]:hover {
+  border-color: var(--color-text);
+  background: rgba(var(--color-text-rgb), 0.05);
 }
 
-.hybridSelectorContainer:focus-within {
-  border-color: var(--color-primary);
-  box-shadow: 0 0 0 3px rgba(var(--color-primary-rgb), 0.1);
+.radioLabel[data-value="pc"] {
+  border-color: rgba(59, 130, 246, 0.3);
 }
 
-/* ✅ Enhanced Checkbox Grid (für HybridSelector wenn nötig) */
-.checkboxGrid {
-  display: grid;
-  grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
-  gap: 12px;
-  margin-top: 16px;
+.radioLabel[data-value="pc"]:hover {
+  border-color: #3b82f6;
+  background: rgba(59, 130, 246, 0.05);
 }
 
-.checkboxLabel {
-  display: flex;
-  align-items: center;
-  padding: 14px 18px;
-  background: var(--color-input-bg);
-  border: 2px solid var(--color-input-border);
-  border-radius: 10px;
-  cursor: pointer;
-  transition: all 0.3s ease;
-  font-weight: 500;
-  position: relative;
-  min-height: 56px;
+.radioLabel[data-value="console"] {
+  border-color: rgba(34, 197, 94, 0.3);
 }
 
-.checkboxLabel:hover {
-  border-color: var(--color-primary);
-  background: var(--color-primary-light);
-  transform: translateY(-1px);
-  box-shadow: 0 3px 10px rgba(var(--color-primary-rgb), 0.12);
+.radioLabel[data-value="console"]:hover {
+  border-color: #22c55e;
+  background: rgba(34, 197, 94, 0.05);
 }
 
-.checkboxLabel:has(input:checked) {
-  background: linear-gradient(
-    135deg,
-    var(--color-primary),
-    var(--color-primary-dark)
-  );
-  border-color: var(--color-primary);
-  color: white;
-  box-shadow: 0 4px 14px rgba(var(--color-primary-rgb), 0.25);
+.radioLabel[data-value="mobile"] {
+  border-color: rgba(249, 115, 22, 0.3);
 }
 
-.checkboxLabel:has(input:disabled) {
-  opacity: 0.5;
-  cursor: not-allowed;
-  transform: none;
+.radioLabel[data-value="mobile"]:hover {
+  border-color: #f97316;
+  background: rgba(249, 115, 22, 0.05);
 }
 
-.checkboxLabel input {
-  position: absolute;
-  opacity: 0;
-  width: 0;
-  height: 0;
+.radioLabel[data-value="board"] {
+  border-color: rgba(168, 85, 247, 0.3);
 }
 
-/* ✅ Custom checkbox indicator */
-.checkboxLabel::before {
-  content: "";
-  width: 18px;
-  height: 18px;
-  border: 2px solid var(--color-input-border);
-  border-radius: 4px;
-  margin-right: 10px;
-  transition: all 0.3s ease;
-  background: var(--color-input-bg);
+.radioLabel[data-value="board"]:hover {
+  border-color: #a855f7;
+  background: rgba(168, 85, 247, 0.05);
 }
 
-.checkboxLabel:hover::before {
-  border-color: var(--color-primary);
+/* OS Specific Colors */
+.radioLabel[data-value="Windows"] {
+  border-color: rgba(59, 130, 246, 0.3);
 }
 
-.checkboxLabel:has(input:checked)::before {
-  background: white;
-  border-color: white;
-  background-image: url("data:image/svg+xml,%3csvg viewBox='0 0 16 16' fill='%23000' xmlns='http://www.w3.org/2000/svg'%3e%3cpath d='m13.854 3.646-7.5 7.5a.5.5 0 0 1-.708 0l-3.5-3.5a.5.5 0 1 1 .708-.708L6 10.293l7.146-7.147a.5.5 0 0 1 .708.708z'/%3e%3c/svg%3e");
+.radioLabel[data-value="Windows"]:hover {
+  border-color: #3b82f6;
+  background: rgba(59, 130, 246, 0.05);
 }
 
-/* ✅ Responsive Design für alle Radio/Checkbox Groups */
-@media (max-width: 768px) {
-  .radioGroup,
-  .checkboxGrid {
-    grid-template-columns: 1fr;
-    gap: 8px;
-  }
-
-  .radioLabel,
-  .checkboxLabel {
-    padding: 12px 16px;
-    min-height: 50px;
-  }
-
-  .hybridSelectorContainer {
-    padding: 16px;
-  }
+.radioLabel[data-value="macOS"] {
+  border-color: rgba(107, 114, 128, 0.3);
 }
 
-/* ✅ Dark Mode Anpassungen */
-[data-theme="dark"] .radioLabel,
-[data-theme="dark"] .checkboxLabel {
-  background: var(--color-bg-secondary);
-  border-color: var(--color-border-dark);
+.radioLabel[data-value="macOS"]:hover {
+  border-color: #6b7280;
+  background: rgba(107, 114, 128, 0.05);
 }
 
-[data-theme="dark"] .radioLabel:hover,
-[data-theme="dark"] .checkboxLabel:hover {
-  background: rgba(var(--color-primary-rgb), 0.1);
+.radioLabel[data-value="Linux"] {
+  border-color: rgba(234, 179, 8, 0.3);
 }
 
-[data-theme="dark"] .hybridSelectorContainer {
-  background: var(--color-bg-secondary);
-  border-color: var(--color-border-dark);
+.radioLabel[data-value="Linux"]:hover {
+  border-color: #eab308;
+  background: rgba(234, 179, 8, 0.05);
 }
 
-/* ✅ Animation für checked states */
-.radioLabel:has(input:checked),
-.checkboxLabel:has(input:checked) {
+.radioLabel[data-value="Other"] {
+  border-color: rgba(156, 163, 175, 0.3);
+}
+
+.radioLabel[data-value="Other"]:hover {
+  border-color: #9ca3af;
+  background: rgba(156, 163, 175, 0.05);
+}
+
+/* Focus States für Accessibility */
+.radioLabel:focus-within {
+  outline: 2px solid var(--color-primary);
+  outline-offset: 2px;
+}
+
+/* Animation für Selection */
+.radioLabel:has(input:checked) {
   animation: selectPulse 0.3s ease-out;
 }
 
@@ -1264,9 +1179,75 @@ html {
   }
 }
 
-/* ✅ Focus styles für accessibility */
-.radioLabel:focus-within,
-.checkboxLabel:focus-within {
-  outline: 2px solid var(--color-primary);
-  outline-offset: 2px;
+/* Mobile Responsive */
+@media (max-width: 768px) {
+  .radioGroup {
+    grid-template-columns: 1fr;
+    gap: 10px;
+  }
+
+  .radioLabel {
+    padding: 14px 16px;
+    min-height: 56px;
+  }
+
+  .radioText {
+    font-size: 14px;
+  }
+
+  .radioLabel::before {
+    width: 18px;
+    height: 18px;
+    margin-right: 10px;
+  }
+}
+
+@media (max-width: 480px) {
+  .radioLabel {
+    padding: 12px 14px;
+    min-height: 52px;
+  }
+
+  .radioText {
+    font-size: 13px;
+  }
+}
+
+/* Dark Mode Adjustments */
+[data-theme="dark"] .radioLabel {
+  background: var(--color-bg-secondary);
+  border-color: var(--color-border);
+}
+
+[data-theme="dark"] .radioLabel:hover {
+  background: rgba(var(--color-primary-rgb), 0.1);
+  border-color: var(--color-primary);
+}
+
+[data-theme="dark"] .radioLabel::before {
+  background: var(--color-bg);
+  border-color: var(--color-border);
+}
+
+[data-theme="dark"] .radioLabel:has(input:checked) {
+  background: var(--color-bg-gradient);
+  color: var(--color-primary-hover-invert);
+}
+
+.locationFieldContainer {
+  grid-column: 1 / -1;
+  display: flex;
+  flex-direction: column;
+}
+
+@media (max-width: 1200px) {
+  .locationFieldContainer {
+    grid-column: 1 / -1;
+  }
+}
+
+@media (max-width: 768px) {
+  .locationFieldContainer {
+    grid-column: 1;
+  }
 }
