@@ -68,6 +68,7 @@
 /* === Buttons === */
 .createAccountBtn {
   background-color: var(--color-primary);
+  width: 100%;
   max-width: 20rem;
   color: #fff;
   border: none;
@@ -77,26 +78,33 @@
   font-weight: 700;
   cursor: pointer;
   transition: background 0.2s ease;
+  box-sizing: border-box;
 }
 
 .createAccountBtn:hover {
   background-color: var(--color-primary-hover);
 }
 
-/* Google Button on Landing Page - specific styling */
-.right :global(.googleButton) {
+/* Google Button Container on Landing Page */
+.googleButtonContainer {
+  width: 100%;
   max-width: 20rem;
   margin: 0.5rem 0;
+  box-sizing: border-box;
 }
 
 .loginBox {
   display: flex;
   flex-direction: column;
   gap: 1rem;
+  width: 100%;
+  max-width: 20rem;
+  box-sizing: border-box;
 }
 
 .loginBtn {
   background-color: transparent;
+  width: 100%;
   max-width: 20rem;
   color: var(--color-primary);
   border: 1px solid var(--color-primary);
@@ -106,6 +114,7 @@
   font-weight: 700;
   cursor: pointer;
   transition: all 0.2s ease;
+  box-sizing: border-box;
 }
 
 .loginBtn:hover {
@@ -143,6 +152,13 @@
   .logo {
     max-width: 300px;
   }
+
+  /* Button-Größen für Tablet */
+  .createAccountBtn,
+  .googleButtonContainer,
+  .loginBox {
+    max-width: 18rem;
+  }
 }
 
 /* === Mobile Optimierung === */
@@ -155,5 +171,36 @@
     font-size: 1.1rem;
   }
 
+  /* Button-Größen für Mobile */
+  .createAccountBtn {
+    max-width: 16rem;
+    font-size: 1rem;
+  }
 
+  .googleButtonContainer,
+  .loginBox {
+    max-width: 16rem;
+  }
+
+  .loginBtn {
+    font-size: 0.9rem;
+  }
+}
+
+/* === Extra schmale Bildschirme === */
+@media (max-width: 480px) {
+  .createAccountBtn,
+  .googleButtonContainer,
+  .loginBox {
+    max-width: 14rem;
+  }
+}
+
+/* === Sehr schmale Bildschirme === */
+@media (max-width: 320px) {
+  .createAccountBtn,
+  .googleButtonContainer,
+  .loginBox {
+    max-width: 12rem;
+  }
 }

@@ -37,7 +37,10 @@ export const useUpdateProfile = () => {
 
   return useMutation({
     mutationFn: async (profileData) => {
+      console.log('useUpdateProfile: Starting profile update with data:', profileData);
+      
       const makeRequest = async () => {
+        console.log('useUpdateProfile: Making request to /api/user/update');
         return await fetch(`${API_URL}/api/user/update`, {
           method: "PATCH",
           headers: {
@@ -49,17 +52,31 @@ export const useUpdateProfile = () => {
       };
 
       let response = await makeRequest();
+      console.log('useUpdateProfile: Response status:', response.status);
+      console.log('useUpdateProfile: Response ok:', response.ok);
 
       if (isAuthError(response)) {
+        console.log('useUpdateProfile: Auth error detected, retrying...');
         response = await handleAuthErrorAndRetry(makeRequest);
+        console.log('useUpdateProfile: Retry response status:', response.status);
       }
 
       if (!response.ok) {
-        const errorData = await response.json();
+        console.error('useUpdateProfile: Request failed with status:', response.status);
+        let errorData;
+        try {
+          errorData = await response.json();
+          console.error('useUpdateProfile: Error data:', errorData);
+        } catch (e) {
+          console.error('useUpdateProfile: Could not parse error response:', e);
+          errorData = { message: `HTTP ${response.status}` };
+        }
         throw new Error(errorData.message || "Failed to update profile");
       }
 
-      return response.json();
+      const result = await response.json();
+      console.log('useUpdateProfile: Success response:', result);
+      return result;
     },
     onSuccess: (data) => {
       queryClient.setQueryData(["user-profile"], data.user);

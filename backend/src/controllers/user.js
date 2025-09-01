@@ -124,12 +124,46 @@ export const googleAuth = async (req, res, next) => {
 
     // Create new user
     console.log('Creating new Google user');
-    const username = email.split('@')[0] + '_' + Date.now(); // Generate unique username
-    const nickname = name || username;
+    
+    // Bessere Username-Generierung mit 20-Zeichen-Limit
+    let username;
+    const emailPrefix = email.split('@')[0];
+    const cleanName = name ? name.replace(/[^a-zA-Z0-9]/g, '').toLowerCase() : '';
+    
+    if (cleanName && cleanName.length >= 3) {
+      // Verwende den Namen wenn verfügbar und lang genug
+      username = cleanName.substring(0, 18); // Maximal 18 Zeichen für Suffix-Platz
+    } else {
+      // Fallback auf Email-Prefix
+      username = emailPrefix.replace(/[^a-zA-Z0-9]/g, '').toLowerCase().substring(0, 18);
+    }
+    
+    // Mindestlänge sicherstellen
+    if (username.length < 3) {
+      username = 'user' + Math.random().toString(36).substring(2, 8); // user + 6 zufällige Zeichen
+    }
+    
+    // Stelle sicher, dass der Username eindeutig ist und unter 20 Zeichen bleibt
+    let finalUsername = username;
+    let counter = 1;
+    while (await UserModel.findOne({ username: finalUsername })) {
+      const suffix = counter.toString();
+      const maxBaseLength = 20 - suffix.length;
+      finalUsername = username.substring(0, maxBaseLength) + suffix;
+      counter++;
+      
+      // Sicherheitscheck für sehr lange Zähler
+      if (finalUsername.length > 20) {
+        username = username.substring(0, 15);
+        finalUsername = username + suffix;
+      }
+    }
+    
+    const nickname = name || finalUsername;
 
     const newUser = new UserModel({
       email,
-      username,
+      username: finalUsername,
       nickname,
       googleId,
       authProvider: "google",
@@ -170,6 +204,9 @@ export const googleAuth = async (req, res, next) => {
 
 export const updateUserProfile = async (req, res, next) => {
   try {
+    console.log('updateUserProfile called for user:', req.user._id);
+    console.log('updateUserProfile request body keys:', Object.keys(req.body));
+    
     const userId = req.user._id;
     const {
       username,
@@ -222,6 +259,16 @@ export const updateUserProfile = async (req, res, next) => {
     }
 
     if (email !== undefined) {
+      // Überprüfe den aktuellen Benutzer um festzustellen, ob es ein Google-Benutzer ist
+      const currentUser = await UserModel.findById(userId);
+      
+      if (currentUser && currentUser.authProvider === "google") {
+        return res.status(400).json({
+          success: false,
+          message: "Google users cannot change their email address here. Please use your Google account settings.",
+        });
+      }
+
       const existingEmail = await UserModel.findOne({
         email: email,
         _id: { $ne: userId },
@@ -238,19 +285,27 @@ export const updateUserProfile = async (req, res, next) => {
     }
 
     if (password !== undefined) {
-      if (!currentPassword) {
-        return res.status(400).json({
-          success: false,
-          message: "Current password is required to update password",
-        });
-      }
-
       const currentUser = await UserModel.findById(userId);
 
       if (!currentUser) {
         return res.status(404).json({
           success: false,
           message: "User not found",
+        });
+      }
+
+      // Google users können ihr Passwort nicht über diese Route ändern
+      if (currentUser.authProvider === "google") {
+        return res.status(400).json({
+          success: false,
+          message: "Google users cannot change password here. Please use Google account settings.",
+        });
+      }
+
+      if (!currentPassword) {
+        return res.status(400).json({
+          success: false,
+          message: "Current password is required to update password",
         });
       }
 
@@ -313,10 +368,14 @@ export const updateUserProfile = async (req, res, next) => {
     if (profileLinksVisibleToContacts !== undefined)
       updateData.profileLinksVisibleToContacts = profileLinksVisibleToContacts;
 
+    console.log('updateData to be applied:', updateData);
+
     const updatedUser = await UserModel.findByIdAndUpdate(userId, updateData, {
       new: true,
       runValidators: true,
     }).select("-hashedPassword");
+
+    console.log('User updated successfully:', updatedUser ? 'Yes' : 'No');
 
     if (!updatedUser) {
       const error = new Error("User not found");
@@ -343,6 +402,7 @@ export const updateUserProfile = async (req, res, next) => {
       res.cookie("jwt", newToken, cookieOptions);
     }
 
+    console.log('Sending successful response');
     return res.status(200).json({
       success: true,
       message: password
@@ -353,6 +413,8 @@ export const updateUserProfile = async (req, res, next) => {
       passwordUpdated: password !== undefined,
     });
   } catch (error) {
+    console.error('updateUserProfile error:', error);
+    console.error('Error stack:', error.stack);
     if (error.name === "ValidationError") {
       const validationErrors = Object.values(error.errors).map(
         (err) => err.message

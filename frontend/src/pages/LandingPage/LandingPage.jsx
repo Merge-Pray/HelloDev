@@ -22,8 +22,13 @@ export default function LandingPage() {
     return null;
   }
 
-  const handleGoogleSuccess = () => {
-    // User is already set in GoogleAuthButton, just let useEffect handle navigation
+  const handleGoogleSuccess = (data, isNewUser) => {
+    // Navigate based on whether user is new or existing
+    if (isNewUser) {
+      navigate("/buildprofile");
+    } else {
+      navigate("/home");
+    }
   };
 
   const handleGoogleError = (errorMessage) => {
@@ -69,11 +74,13 @@ export default function LandingPage() {
           Create account
         </button>
 
-        <GoogleAuthButton 
-          text="Continue with Google"
-          onSuccess={handleGoogleSuccess}
-          onError={handleGoogleError}
-        />
+        <div className={styles.googleButtonContainer}>
+          <GoogleAuthButton 
+            text="Continue with Google"
+            onSuccess={handleGoogleSuccess}
+            onError={handleGoogleError}
+          />
+        </div>
 
         <div className={styles.loginBox}>
           <span>Already have an account?</span>

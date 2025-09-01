@@ -64,9 +64,13 @@ export default function LoginPage() {
     }
   }
 
-  const handleGoogleSuccess = (data) => {
-    // User is already set in GoogleAuthButton, just navigate
-    navigate("/home");
+  const handleGoogleSuccess = (data, isNewUser) => {
+    // Navigate based on whether user is new or existing
+    if (isNewUser) {
+      navigate("/buildprofile");
+    } else {
+      navigate("/home");
+    }
   };
 
   const handleGoogleError = (errorMessage) => {
@@ -162,7 +166,7 @@ export default function LoginPage() {
             onError={handleGoogleError}
           />
 
-          <div className="text-center">
+          <div className={`text-center ${styles.signupLinkContainer}`}>
             <button
               type="button"
               onClick={() => navigate("/register")}

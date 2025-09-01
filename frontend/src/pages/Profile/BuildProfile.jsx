@@ -175,6 +175,7 @@ export default function BuildProfile() {
         setIsLoading(true);
         try {
           console.log("Sending profile data:", newProfileData);
+          console.log("Current user:", currentUser);
 
           await updateProfile.mutateAsync(newProfileData);
 
@@ -182,6 +183,11 @@ export default function BuildProfile() {
           navigate("/profile");
         } catch (error) {
           console.error("Profile creation error:", error);
+          console.error("Error details:", {
+            message: error.message,
+            cause: error.cause,
+            stack: error.stack
+          });
           setError(
             error.message || "Failed to save profile. Please try again."
           );

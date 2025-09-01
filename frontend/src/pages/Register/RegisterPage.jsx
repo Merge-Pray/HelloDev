@@ -110,7 +110,7 @@ export default function RegisterPage() {
   }
 
   const handleGoogleSuccess = () => {
-    // User is already set in GoogleAuthButton, navigate to profile building
+    // Always go to buildprofile for registration (both new and existing users should build profile)
     navigate("/buildprofile");
   };
 

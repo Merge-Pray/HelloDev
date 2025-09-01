@@ -135,6 +135,10 @@
   transform: translateY(-1px);
 }
 
+.signupLinkContainer {
+  margin-top: 1.5rem;
+}
+
 .linkBtn {
   font-size: 14px;
   text-decoration: underline;

@@ -1,0 +1,67 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <title>Google Auth Callback</title>
+</head>
+<body>
+  <div style="text-align: center; padding: 50px; font-family: Arial, sans-serif;">
+    <h2>Processing Google Authentication...</h2>
+    <p>Please wait while we complete your sign-in.</p>
+  </div>
+
+  <script>
+    // Extract code and state from URL
+    const urlParams = new URLSearchParams(window.location.search);
+    const code = urlParams.get('code');
+    const state = urlParams.get('state');
+    const error = urlParams.get('error');
+
+    console.log('Google Auth callback received:', { code: code ? 'Present' : 'Missing', state, error });
+
+    if (error) {
+      console.error('Google Auth error:', error);
+      // Send error back to parent window
+      if (window.opener && !window.opener.closed) {
+        window.opener.postMessage({
+          type: 'GOOGLE_AUTH_ERROR',
+          error: error === 'access_denied' ? 'Access denied by user' : error
+        }, window.location.origin);
+      }
+      window.close();
+    } else if (code && state) {
+      // Verify state matches what we stored
+      const storedState = sessionStorage.getItem('google_auth_state');
+      if (state !== storedState) {
+        console.error('State mismatch - possible CSRF attack');
+        if (window.opener && !window.opener.closed) {
+          window.opener.postMessage({
+            type: 'GOOGLE_AUTH_ERROR',
+            error: 'Security error - state mismatch'
+          }, window.location.origin);
+        }
+        window.close();
+        return;
+      }
+
+      console.log('Sending authorization code to parent window');
+      // Send code back to parent window
+      if (window.opener && !window.opener.closed) {
+        window.opener.postMessage({
+          type: 'GOOGLE_AUTH_SUCCESS',
+          code: code
+        }, window.location.origin);
+      }
+      window.close();
+    } else {
+      console.error('No code or error received');
+      if (window.opener && !window.opener.closed) {
+        window.opener.postMessage({
+          type: 'GOOGLE_AUTH_ERROR',
+          error: 'No authorization code received'
+        }, window.location.origin);
+      }
+      window.close();
+    }
+  </script>
+</body>
+</html>

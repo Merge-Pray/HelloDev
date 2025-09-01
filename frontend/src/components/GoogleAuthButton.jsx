@@ -1,19 +1,23 @@
-import { useState, useEffect, useCallback } from 'react';
+import { useState, useEffect, useCallback, useRef } from 'react';
 import { useNavigate } from 'react-router';
 import useUserStore from '../hooks/userstore';
 import { initializeGoogleAuth, handleGoogleSignIn } from '../lib/googleAuth';
 import styles from './GoogleAuthButton.module.css';
 
-export default function GoogleAuthButton({ text = "Sign in with Google", onSuccess, onError }) {
+export default function GoogleAuthButton({ text = "Sign in with Google", onSuccess, onError, width }) {
   const [isLoading, setIsLoading] = useState(false);
   const [googleReady, setGoogleReady] = useState(false);
+  const [useNativeButton, setUseNativeButton] = useState(false);
+  const buttonRef = useRef(null);
   const navigate = useNavigate();
   const setCurrentUser = useUserStore((state) => state.setCurrentUser);
 
   useEffect(() => {
     const loadGoogle = async () => {
       try {
+        console.log('Loading Google Auth...');
         await initializeGoogleAuth();
+        console.log('Google Auth loaded successfully');
         setGoogleReady(true);
       } catch (error) {
         console.error('Failed to load Google Auth:', error);
@@ -38,9 +42,10 @@ export default function GoogleAuthButton({ text = "Sign in with Google", onSucce
         });
         
         if (onSuccess) {
-          onSuccess(result.data);
+          onSuccess(result.data, result.isNewUser);
         } else {
-          navigate('/home');
+          // Default behavior: new users go to buildprofile, existing users go to home
+          navigate(result.isNewUser ? '/buildprofile' : '/home');
         }
       } else {
         if (onError) onError(result.error);
@@ -57,27 +62,119 @@ export default function GoogleAuthButton({ text = "Sign in with Google", onSucce
     if (!googleReady || !window.google?.accounts?.id) return;
 
     const clientId = import.meta.env.VITE_GOOGLE_CLIENT_ID;
+    console.log('Google Client ID:', clientId ? 'Present' : 'Missing');
+    
     if (!clientId) {
       console.error('Google Client ID not found in environment variables');
       if (onError) onError('Google authentication not configured');
       return;
     }
 
+    console.log('Initializing Google Auth with client ID...');
     window.google.accounts.id.initialize({
       client_id: clientId,
       callback: handleCredentialResponse,
       auto_select: false,
       cancel_on_tap_outside: true,
+      context: 'signin', // Kontext für bessere UX
+      ux_mode: 'popup', // Popup-Modus für bessere Kontrolle
     });
+
+    // Versuche One Tap anzuzeigen - zeigt personalisierte Buttons für eingeloggte Benutzer
+    window.google.accounts.id.prompt((notification) => {
+      console.log('One Tap notification:', notification);
+      
+      if (notification.isDisplayed()) {
+        console.log('One Tap is displayed - user likely logged in to Google');
+        setUseNativeButton(true);
+      } else if (notification.isNotDisplayed()) {
+        console.log('One Tap not displayed:', notification.getNotDisplayedReason());
+        setUseNativeButton(false);
+      } else if (notification.isSkippedMoment()) {
+        console.log('One Tap skipped:', notification.getSkippedReason());
+        setUseNativeButton(false);
+      }
+    });
+
+    console.log('Google Auth initialized');
   }, [googleReady, onError, handleCredentialResponse]);
 
-  const handleGoogleButtonClick = () => {
-    if (!googleReady || !window.google?.accounts?.id) {
-      if (onError) onError('Google authentication not ready');
-      return;
-    }
+  // Effekt für das Rendern des nativen Google-Buttons
+  useEffect(() => {
+    if (!useNativeButton || !googleReady || !buttonRef.current) return;
 
-    window.google.accounts.id.prompt();
+    try {
+      // Leere den Container
+      buttonRef.current.innerHTML = '';
+      
+      // Rendere den nativen Google-Button
+      window.google.accounts.id.renderButton(buttonRef.current, {
+        type: 'standard',
+        size: 'large',
+        text: 'continue_with',
+        shape: 'rectangular',
+        logo_alignment: 'left',
+        width: width || 250,
+        locale: 'de', // Deutsche Lokalisierung
+      });
+
+      console.log('Native Google button rendered');
+    } catch (error) {
+      console.error('Failed to render native Google button:', error);
+      setUseNativeButton(false); // Fallback zum custom Button
+    }
+  }, [useNativeButton, googleReady, width]);
+
+  const handleGoogleButtonClick = async () => {
+    console.log('Google button clicked');
+    setIsLoading(true);
+    
+    try {
+      // Use the GSI renderButton method which is more reliable for localhost
+      if (!googleReady || !window.google?.accounts?.id) {
+        throw new Error('Google Auth not ready');
+      }
+      
+      console.log('Creating temporary Google Sign-In button...');
+      
+      // Create a temporary container for the Google button
+      const tempContainer = document.createElement('div');
+      tempContainer.style.position = 'fixed';
+      tempContainer.style.top = '-1000px';
+      tempContainer.style.left = '-1000px';
+      document.body.appendChild(tempContainer);
+      
+      // Render the Google Sign-In button
+      window.google.accounts.id.renderButton(tempContainer, {
+        type: 'standard',
+        size: 'large',
+        text: 'continue_with',
+        shape: 'rectangular',
+        logo_alignment: 'left',
+        width: 250,
+      });
+      
+      // Programmatically click the button
+      setTimeout(() => {
+        const googleBtn = tempContainer.querySelector('div[role="button"]');
+        if (googleBtn) {
+          console.log('Triggering Google Sign-In button click');
+          googleBtn.click();
+        } else {
+          console.error('Google button not found in container');
+          if (onError) onError('Google Sign-In button not available');
+        }
+        
+        // Clean up
+        document.body.removeChild(tempContainer);
+      }, 100);
+      
+    } catch (error) {
+      console.error('Google Auth error:', error);
+      if (onError) onError(error.message || 'Google authentication failed');
+    } finally {
+      setIsLoading(false);
+    }
   };
 
   if (!googleReady) {
@@ -91,12 +188,25 @@ export default function GoogleAuthButton({ text = "Sign in with Google", onSucce
     );
   }
 
+  // Zeige nativen Google-Button wenn verfügbar und personalisiert
+  if (useNativeButton) {
+    return (
+      <div 
+        ref={buttonRef}
+        className={styles.nativeButtonContainer}
+        style={width ? { width, maxWidth: width } : {}}
+      />
+    );
+  }
+
+  // Fallback: Custom Button
   return (
     <button
       onClick={handleGoogleButtonClick}
       disabled={isLoading}
       className={`${styles.googleButton} ${isLoading ? styles.loading : ''}`}
       type="button"
+      style={width ? { width, maxWidth: width, minWidth: width } : {}}
     >
       <div className={styles.googleIcon}>
         {isLoading ? (
