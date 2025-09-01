@@ -12,7 +12,7 @@ const ProtectedRoute = ({ children }) => {
     if (!currentUser) {
       timeout = setTimeout(() => {
         setRedirect(true);
-      }, 1000);
+      }, 3000);
     }
 
     return () => {
