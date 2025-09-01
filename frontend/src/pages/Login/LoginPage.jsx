@@ -6,11 +6,6 @@ import useUserStore from "../../hooks/userstore";
 import styles from "./loginpage.module.css";
 import { API_URL } from "../../lib/config";
 import DarkMode from "../../components/DarkMode";
-import { debugLoginIssue } from "../../utils/samsungBrowserDebug";
-
-const isSamsungInternet = () => {
-  return /SamsungBrowser/i.test(navigator.userAgent);
-};
 
 export default function LoginPage() {
   const currentUser = useUserStore((state) => state.currentUser);
@@ -47,12 +42,6 @@ export default function LoginPage() {
         "Content-Type": "application/json",
       };
 
-      if (isSamsungInternet()) {
-        headers["Cache-Control"] = "no-cache";
-        headers["Pragma"] = "no-cache";
-        // Samsung Internet specific headers
-        headers["X-Requested-With"] = "XMLHttpRequest";
-      }
 
       const res = await fetch(`${API_URL}/api/user/login`, {
         method: "POST",
@@ -63,36 +52,7 @@ export default function LoginPage() {
 
       const data = await res.json();
       if (!res.ok) throw new Error(data.message || "Login failed");
-       localStorage.removeItem("user-storage")
-
-      if (isSamsungInternet()) {
-        console.log("🔍 Samsung Browser login - data received:", !!data.user);
-        debugLoginIssue(data.user);
-      }
-
-      if (isSamsungInternet()) {
-        await new Promise((resolve) => setTimeout(resolve, 100));
-      }
-
       setCurrentUser(data.user);
-
-      if (isSamsungInternet()) {
-        await new Promise((resolve) => setTimeout(resolve, 50));
-        const stored = localStorage.getItem("user-storage");
-        if (!stored) {
-          console.warn(
-            "Samsung Browser: localStorage write may have failed, retrying..."
-          );
-
-          setCurrentUser(data.user);
-
-          setTimeout(() => {
-            debugLoginIssue(data.user);
-          }, 100);
-        } else {
-          console.log("✅ Samsung Browser: localStorage write successful");
-        }
-      }
 
       navigate("/home");
     } catch (err) {

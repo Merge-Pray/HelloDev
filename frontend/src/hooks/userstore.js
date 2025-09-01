@@ -1,66 +1,16 @@
 import { create } from "zustand";
 import { persist } from "zustand/middleware";
 
-// Samsung Internet Browser detection
-const isSamsungInternet = () => {
-  return typeof navigator !== 'undefined' && /SamsungBrowser/i.test(navigator.userAgent);
-};
-
 const zustandStorage = {
   getItem: (name) => {
-    try {
-      const item = localStorage.getItem(name);
-      return item ? JSON.parse(item) : null;
-    } catch (error) {
-      console.error('localStorage getItem error:', error);
-      return null;
-    }
+    const item = localStorage.getItem(name);
+    return item ? JSON.parse(item) : null;
   },
   setItem: (name, value) => {
-    try {
-      const stringValue = JSON.stringify(value);
-      localStorage.setItem(name, stringValue);
-      
-      // Samsung Browser sometimes needs extra verification
-      if (isSamsungInternet()) {
-        setTimeout(() => {
-          const verification = localStorage.getItem(name);
-          if (verification !== stringValue) {
-            console.warn('Samsung Browser: localStorage write verification failed, retrying...');
-            localStorage.setItem(name, stringValue);
-          }
-        }, 10);
-      }
-    } catch (error) {
-      console.error('localStorage setItem error:', error);
-      // Try again after a brief delay for Samsung Browser
-      if (isSamsungInternet()) {
-        setTimeout(() => {
-          try {
-            localStorage.setItem(name, JSON.stringify(value));
-          } catch (retryError) {
-            console.error('localStorage retry failed:', retryError);
-          }
-        }, 50);
-      }
-    }
+    localStorage.setItem(name, JSON.stringify(value));
   },
   removeItem: (name) => {
-    try {
-      localStorage.removeItem(name);
-      
-      // Samsung Browser verification for removal
-      if (isSamsungInternet()) {
-        setTimeout(() => {
-          if (localStorage.getItem(name) !== null) {
-            console.warn('Samsung Browser: localStorage removal verification failed, retrying...');
-            localStorage.removeItem(name);
-          }
-        }, 10);
-      }
-    } catch (error) {
-      console.error('localStorage removeItem error:', error);
-    }
+    localStorage.removeItem(name);
   },
 };
 
@@ -125,11 +75,9 @@ const useUserStore = create(
 
       logout: async () => {
         try {
-          const credentials = isSamsungInternet() ? "same-origin" : "include";
-          
           await fetch(`${import.meta.env.VITE_BACKENDPATH}/api/user/logout`, {
             method: 'Post',
-            credentials
+            credentials: 'include'
           });
         } catch (error) {
           console.error('Logout error:', error);

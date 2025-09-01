@@ -7,10 +7,6 @@ import styles from "./registerpage.module.css";
 import { API_URL } from "../../lib/config";
 import DarkMode from "../../components/DarkMode";
 
-const isSamsungInternet = () => {
-  return /SamsungBrowser/i.test(navigator.userAgent);
-};
-
 export default function RegisterPage() {
   const currentUser = useUserStore((state) => state.currentUser);
   const setCurrentUser = useUserStore((state) => state.setCurrentUser);
@@ -46,14 +42,12 @@ export default function RegisterPage() {
     try {
       const { confirmPassword, ...submitData } = values;
 
-      const credentials = isSamsungInternet() ? "same-origin" : "include";
-      
       const response = await fetch(`${API_URL}/api/user/register`, {
         method: "POST",
         headers: {
           "Content-Type": "application/json",
         },
-        credentials,
+        credentials: "include",
         body: JSON.stringify(submitData),
       });
 

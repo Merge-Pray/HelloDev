@@ -1,10 +1,6 @@
 import { API_URL } from "../lib/config";
 import { handleAuthErrorAndRetry, isAuthError } from "./tokenRefresh";
 
-const isSamsungInternet = () => {
-  return /SamsungBrowser/i.test(navigator.userAgent);
-};
-
 export const authenticatedFetch = async (endpoint, options = {}) => {
   const makeRequest = async () => {
     const url = endpoint.startsWith("http")
@@ -20,16 +16,8 @@ export const authenticatedFetch = async (endpoint, options = {}) => {
       headers["Content-Type"] = "application/json";
     }
 
-    if (isSamsungInternet()) {
-      headers["Cache-Control"] = "no-cache";
-      headers["Pragma"] = "no-cache";
-    }
-
-    // Use 'same-origin' credentials for Samsung Internet browser
-    const credentials = isSamsungInternet() ? "same-origin" : "include";
-    
     return await fetch(url, {
-      credentials,
+      credentials: "include",
       headers,
       ...options,
     });
