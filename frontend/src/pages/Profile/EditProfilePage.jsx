@@ -428,7 +428,6 @@ const EditProfilePage = () => {
                 value: 20,
                 message: "Username must be less than 20 characters",
               },
-
               onChange: (e) => {
                 const newUsername = e.target.value;
                 const currentNickname = watch("nickname");
@@ -446,13 +445,7 @@ const EditProfilePage = () => {
         </div>
 
         <div className={styles.formField}>
-          <label>
-            Nickname *
-            <span className={styles.defaultIndicator}>
-              {" "}
-              (Default: {profileData?.username})
-            </span>
-          </label>
+          <label>Nickname *</label>
           <input
             type="text"
             {...register("nickname", {
@@ -465,7 +458,6 @@ const EditProfilePage = () => {
                 value: 25,
                 message: "Nickname must be less than 25 characters",
               },
-
               validate: (value) => {
                 const trimmedValue = value?.trim();
                 if (!trimmedValue) {
@@ -487,7 +479,7 @@ const EditProfilePage = () => {
           )}
         </div>
 
-        <div className={styles.formField}>
+        <div className={`${styles.formField} ${styles.fullWidth}`}>
           <label>Email *</label>
           <input
             type="email"
@@ -505,8 +497,7 @@ const EditProfilePage = () => {
           )}
         </div>
 
-        <div className={styles.formField}>
-          <label>Location *</label>
+        <div className={styles.locationFieldContainer}>
           <LocationSelector
             selectedCountry={watch("country") || ""}
             selectedCity={watch("city") || ""}
@@ -514,6 +505,11 @@ const EditProfilePage = () => {
             onCityChange={(city) => setValue("city", city)}
             required={true}
           />
+          {(errors.country || errors.city) && (
+            <span className={styles.error}>
+              {errors.country?.message || errors.city?.message}
+            </span>
+          )}
         </div>
 
         <div className={styles.formField}>
@@ -786,13 +782,23 @@ const EditProfilePage = () => {
         </div>
 
         <div className={styles.formField} style={{ marginTop: "24px" }}>
-          <label className={styles.checkboxLabel} style={{ color: "var(--color-text)" }}>
+          <label
+            className={styles.checkboxLabel}
+            style={{ color: "var(--color-text)" }}
+          >
             <input
               type="checkbox"
               {...register("profileLinksVisibleToContacts")}
               style={{ marginRight: "8px" }}
             />
-            <span style={{ display: "flex", alignItems: "center", gap: "4px", color: "var(--color-text)" }}>
+            <span
+              style={{
+                display: "flex",
+                alignItems: "center",
+                gap: "4px",
+                color: "var(--color-text)",
+              }}
+            >
               {profileLinksVisible ? <Eye size={16} /> : <EyeOff size={16} />}
               Make my professional links visible to contacts
             </span>
