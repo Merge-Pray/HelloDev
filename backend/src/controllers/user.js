@@ -340,11 +340,7 @@ export const verifyLogin = async (req, res, next) => {
 
 export const logout = async (req, res, next) => {
   try {
-    res.clearCookie("jwt", {
-      httpOnly: true,
-      secure: true,
-      sameSite: "none",
-    });
+    res.clearCookie("jwt");
     return res.status(200).json({
       message: "Logout successful",
     });
