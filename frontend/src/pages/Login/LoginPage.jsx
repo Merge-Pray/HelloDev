@@ -50,14 +50,14 @@ export default function LoginPage() {
       if (isSamsungInternet()) {
         headers["Cache-Control"] = "no-cache";
         headers["Pragma"] = "no-cache";
+        // Samsung Internet specific headers
+        headers["X-Requested-With"] = "XMLHttpRequest";
       }
 
-      const credentials = isSamsungInternet() ? "same-origin" : "include";
-      
       const res = await fetch(`${API_URL}/api/user/login`, {
         method: "POST",
         headers,
-        credentials,
+        credentials: "include",
         body: JSON.stringify(values),
       });
 
