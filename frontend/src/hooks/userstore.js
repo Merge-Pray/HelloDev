@@ -23,7 +23,7 @@ const useUserStore = create(
       setCurrentUser: (user) =>
         set({
           currentUser: {
-            _id: user._id,
+            _id: user._id || user.id,
             username: user.username,
             nickname: user.nickname,
             email: user.email,
@@ -70,28 +70,28 @@ const useUserStore = create(
         }
         set({ currentUser: null, socket: null });
         // Also remove from localStorage when clearing user
-        localStorage.removeItem('user-storage');
+        localStorage.removeItem("user-storage");
       },
 
       logout: async () => {
         try {
           await fetch(`${import.meta.env.VITE_BACKENDPATH}/api/user/logout`, {
-            method: 'Post',
-            credentials: 'include'
+            method: "Post",
+            credentials: "include",
           });
         } catch (error) {
-          console.error('Logout error:', error);
+          console.error("Logout error:", error);
         } finally {
           const currentSocket = get().socket;
           if (currentSocket) {
             currentSocket.disconnect();
           }
-          
+
           // Clear the state
           set({ currentUser: null, socket: null });
-          
+
           // Directly remove from localStorage - most reliable method
-          localStorage.removeItem('user-storage');
+          localStorage.removeItem("user-storage");
         }
       },
     }),

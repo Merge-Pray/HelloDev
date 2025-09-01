@@ -305,7 +305,7 @@ export const verifyLogin = async (req, res, next) => {
     return res.status(200).json({
       message: "Login successful",
       user: {
-        _id: existingUser._id,
+        id: existingUser._id,
         username: existingUser.username,
         nickname: existingUser.nickname,
         email: existingUser.email,
