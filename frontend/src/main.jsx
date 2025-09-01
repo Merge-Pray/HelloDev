@@ -4,7 +4,6 @@ import "./index.css";
 import { RouterProvider } from "react-router";
 import { router } from "./routes";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
-import { routerEnhanced } from "./routes/indexEnhanced";
 
 const queryClient = new QueryClient({
   defaultOptions: {
