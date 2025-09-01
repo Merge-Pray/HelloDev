@@ -4,7 +4,6 @@ import { hashPassword, comparePassword } from "../libs/pw.js";
 import UserModel from "../models/user.js";
 import { getSamsungCompatibleCookieOptions } from "../utils/browserDetection.js";
 
-
 export const createUser = async (req, res, next) => {
   try {
     const { email, password, username } = req.body;
@@ -23,11 +22,14 @@ export const createUser = async (req, res, next) => {
 
     const token = generateToken(username, newAccount._id);
 
-    const cookieOptions = getSamsungCompatibleCookieOptions(req.get('User-Agent'), {
-      httpOnly: true,
-      maxAge: 24 * 60 * 60 * 1000,
-    });
-    
+    const cookieOptions = getSamsungCompatibleCookieOptions(
+      req.get("User-Agent"),
+      {
+        httpOnly: true,
+        maxAge: 24 * 60 * 60 * 1000,
+      }
+    );
+
     res.cookie("jwt", token, cookieOptions);
 
     return res.status(201).json({
@@ -212,11 +214,14 @@ export const updateUserProfile = async (req, res, next) => {
     if (password !== undefined) {
       newToken = generateToken(updatedUser.username, updatedUser._id);
 
-      const cookieOptions = getSamsungCompatibleCookieOptions(req.get('User-Agent'), {
-        httpOnly: true,
-        maxAge: 24 * 60 * 60 * 1000,
-      });
-      
+      const cookieOptions = getSamsungCompatibleCookieOptions(
+        req.get("User-Agent"),
+        {
+          httpOnly: true,
+          maxAge: 24 * 60 * 60 * 1000,
+        }
+      );
+
       res.cookie("jwt", newToken, cookieOptions);
     }
 
@@ -295,17 +300,20 @@ export const verifyLogin = async (req, res, next) => {
 
     const token = generateToken(existingUser.username, existingUser._id);
 
-    const cookieOptions = getSamsungCompatibleCookieOptions(req.get('User-Agent'), {
-      httpOnly: true,
-      maxAge: 24 * 60 * 60 * 1000,
-    });
-    
+    const cookieOptions = getSamsungCompatibleCookieOptions(
+      req.get("User-Agent"),
+      {
+        httpOnly: true,
+        maxAge: 24 * 60 * 60 * 1000,
+      }
+    );
+
     res.cookie("jwt", token, cookieOptions);
 
     return res.status(200).json({
       message: "Login successful",
       user: {
-        id: existingUser._id,
+        _id: existingUser._id,
         username: existingUser.username,
         nickname: existingUser.nickname,
         email: existingUser.email,
