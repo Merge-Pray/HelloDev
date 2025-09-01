@@ -32,7 +32,7 @@ export const handleAuthErrorAndRetry = async (originalRequestFn) => {
       return retryResponse;
     } else {
       clearUser();
-      // Clear any remaining localStorage data
+
       localStorage.removeItem("user-storage");
       if (typeof window !== "undefined") {
         window.location.href = "/login";
@@ -57,13 +57,13 @@ const performTokenRefresh = async () => {
   try {
     const controller = new AbortController();
     const timeoutId = setTimeout(() => controller.abort(), 10000);
-    
+
     const refreshResponse = await fetch(`${API_URL}/api/user/refresh`, {
       method: "POST",
       credentials: "include",
-      signal: controller.signal
+      signal: controller.signal,
     });
-    
+
     clearTimeout(timeoutId);
 
     if (refreshResponse.ok) {
@@ -73,8 +73,8 @@ const performTokenRefresh = async () => {
       return { success: false, error: "Refresh token expired" };
     }
   } catch (error) {
-    if (error.name === 'AbortError') {
-      return { success: false, error: 'Request timeout' };
+    if (error.name === "AbortError") {
+      return { success: false, error: "Request timeout" };
     }
     return { success: false, error: error.message };
   }
