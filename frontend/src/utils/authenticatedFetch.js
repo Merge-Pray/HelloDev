@@ -25,8 +25,11 @@ export const authenticatedFetch = async (endpoint, options = {}) => {
       headers["Pragma"] = "no-cache";
     }
 
+    // Use 'same-origin' credentials for Samsung Internet browser
+    const credentials = isSamsungInternet() ? "same-origin" : "include";
+    
     return await fetch(url, {
-      credentials: "include",
+      credentials,
       headers,
       ...options,
     });
