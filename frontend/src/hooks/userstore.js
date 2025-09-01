@@ -22,43 +22,17 @@ const useUserStore = create(
 
       setCurrentUser: (user) =>
         set({
-          currentUser: {
+          currentUser: user ? {
             _id: user._id,
             username: user.username,
-            nickname: user.nickname,
             email: user.email,
             avatar: user.avatar,
-            avatarData: user.avatarData,
-            aboutMe: user.aboutMe,
-            country: user.country,
-            city: user.city,
-            age: user.age,
-            status: user.status,
-            devExperience: user.devExperience,
-            techArea: user.techArea,
-            favoriteTimeToCode: user.favoriteTimeToCode,
-            favoriteLineOfCode: user.favoriteLineOfCode,
-            programmingLanguages: user.programmingLanguages,
-            techStack: user.techStack,
-            preferredOS: user.preferredOS,
-            languages: user.languages,
-            gaming: user.gaming,
-            otherInterests: user.otherInterests,
-            favoriteDrinkWhileCoding: user.favoriteDrinkWhileCoding,
-            musicGenreWhileCoding: user.musicGenreWhileCoding,
-            favoriteShowMovie: user.favoriteShowMovie,
-            linkedinProfile: user.linkedinProfile,
-            githubProfile: user.githubProfile,
-            personalWebsites: user.personalWebsites,
-            profileLinksVisibleToContacts: user.profileLinksVisibleToContacts,
-            isMatchable: user.isMatchable,
-            rating: user.rating,
-            points: user.points,
+            nickname: user.nickname,
             isOnline: user.isOnline,
             lastSeen: user.lastSeen,
-            createdAt: user.createdAt,
-            updatedAt: user.updatedAt,
-          },
+            // Essential auth + frequently used UI fields only
+            // All other profile data handled by React Query
+          } : null,
         }),
 
       setSocket: (socket) => set({ socket }),
