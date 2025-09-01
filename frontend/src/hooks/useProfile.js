@@ -68,8 +68,9 @@ export const useUpdateProfile = () => {
       setCurrentUser({
         _id: data.user._id,
         username: data.user.username,
-        nickname: data.user.nickname,
+        email: data.user.email,
         avatar: data.user.avatar,
+        nickname: data.user.nickname,
         isOnline: data.user.isOnline,
         lastSeen: data.user.lastSeen,
       });

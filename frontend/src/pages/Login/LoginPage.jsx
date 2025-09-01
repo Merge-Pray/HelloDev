@@ -2,6 +2,7 @@ import { useState, useEffect } from "react";
 import { useNavigate } from "react-router";
 import { useForm } from "react-hook-form";
 import { Eye, EyeOff } from "lucide-react";
+import { useQueryClient } from "@tanstack/react-query";
 import useUserStore from "../../hooks/userstore";
 import styles from "./loginpage.module.css";
 import { API_URL } from "../../lib/config";
@@ -10,6 +11,7 @@ import DarkMode from "../../components/DarkMode";
 export default function LoginPage() {
   const currentUser = useUserStore((state) => state.currentUser);
   const setCurrentUser = useUserStore((s) => s.setCurrentUser);
+  const queryClient = useQueryClient();
   const [error, setError] = useState(null);
   const [isLoading, setIsLoading] = useState(false);
   const [showPassword, setShowPassword] = useState(false);
@@ -52,7 +54,12 @@ export default function LoginPage() {
 
       const data = await res.json();
       if (!res.ok) throw new Error(data.message || "Login failed");
+      
+      // Update Zustand with essential + UI fields
       setCurrentUser(data.user);
+      
+      // Update React Query cache with full user data
+      queryClient.setQueryData(["user-profile"], data.user);
 
       navigate("/home");
     } catch (err) {
