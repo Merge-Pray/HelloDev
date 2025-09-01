@@ -3,6 +3,7 @@ import { useNavigate } from "react-router";
 import { useForm } from "react-hook-form";
 import { Eye, EyeOff } from "lucide-react";
 import useUserStore from "../../hooks/userstore";
+import GoogleAuthButton from "../../components/GoogleAuthButton";
 import styles from "./loginpage.module.css";
 import { API_URL } from "../../lib/config";
 import DarkMode from "../../components/DarkMode";
@@ -62,6 +63,15 @@ export default function LoginPage() {
       setIsLoading(false);
     }
   }
+
+  const handleGoogleSuccess = (data) => {
+    // User is already set in GoogleAuthButton, just navigate
+    navigate("/home");
+  };
+
+  const handleGoogleError = (errorMessage) => {
+    setError(errorMessage);
+  };
 
   if (currentUser) {
     return null;
@@ -145,6 +155,12 @@ export default function LoginPage() {
           <div className={styles.divider}>
             <span>or</span>
           </div>
+
+          <GoogleAuthButton 
+            text="Sign in with Google"
+            onSuccess={handleGoogleSuccess}
+            onError={handleGoogleError}
+          />
 
           <div className="text-center">
             <button

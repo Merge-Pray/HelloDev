@@ -3,6 +3,7 @@ import { useNavigate } from "react-router";
 import { useForm } from "react-hook-form";
 import { Eye, EyeOff } from "lucide-react";
 import useUserStore from "../../hooks/userstore";
+import GoogleAuthButton from "../../components/GoogleAuthButton";
 import styles from "./registerpage.module.css";
 import { API_URL } from "../../lib/config";
 import DarkMode from "../../components/DarkMode";
@@ -107,6 +108,15 @@ export default function RegisterPage() {
       setIsLoading(false);
     }
   }
+
+  const handleGoogleSuccess = () => {
+    // User is already set in GoogleAuthButton, navigate to profile building
+    navigate("/buildprofile");
+  };
+
+  const handleGoogleError = (errorMessage) => {
+    setError(errorMessage);
+  };
 
   // Wenn User eingeloggt ist, zeige nichts an
   if (currentUser) {
@@ -273,16 +283,24 @@ export default function RegisterPage() {
             </button>
           </form>
 
-          <div className={styles.googleLoginContainer}>
-            <div className="text-center">
-              <button
-                type="button"
-                onClick={() => navigate("/login")}
-                className={styles.linkBtn}
-              >
-                Already have an account? Sign in
-              </button>
-            </div>
+          <div className={styles.divider}>
+            <span>or</span>
+          </div>
+
+          <GoogleAuthButton 
+            text="Sign up with Google"
+            onSuccess={handleGoogleSuccess}
+            onError={handleGoogleError}
+          />
+
+          <div className="text-center">
+            <button
+              type="button"
+              onClick={() => navigate("/login")}
+              className={styles.linkBtn}
+            >
+              Already have an account? Sign in
+            </button>
           </div>
         </div>
       </main>

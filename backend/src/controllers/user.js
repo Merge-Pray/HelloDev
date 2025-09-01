@@ -1,6 +1,7 @@
 import checkIsMatchable from "../../utils/profileValidator.js";
 import { generateToken } from "../libs/jwt.js";
 import { hashPassword, comparePassword } from "../libs/pw.js";
+import { verifyGoogleToken } from "../libs/googleAuth.js";
 import UserModel from "../models/user.js";
 import { getSamsungCompatibleCookieOptions } from "../utils/browserDetection.js";
 
@@ -17,6 +18,7 @@ export const createUser = async (req, res, next) => {
       username,
       nickname: username,
       isMatchable: false,
+      authProvider: "local",
     });
 
     await newAccount.save();
@@ -41,6 +43,116 @@ export const createUser = async (req, res, next) => {
       },
     });
   } catch (error) {
+    return next(error);
+  }
+};
+
+export const googleAuth = async (req, res, next) => {
+  try {
+    const { credential } = req.body;
+
+    if (!credential) {
+      return res.status(400).json({
+        success: false,
+        message: "Google credential is required",
+      });
+    }
+
+    const verificationResult = await verifyGoogleToken(credential);
+
+    if (!verificationResult.success) {
+      return res.status(401).json({
+        success: false,
+        message: "Invalid Google token",
+        error: verificationResult.error,
+      });
+    }
+
+    const { googleId, email, name, picture } = verificationResult.data;
+
+    // Check if user already exists with this Google ID
+    let existingUser = await UserModel.findOne({ googleId });
+
+    if (existingUser) {
+      // User exists, log them in
+      const isNowMatchable = checkIsMatchable(existingUser);
+      if (isNowMatchable !== existingUser.isMatchable) {
+        existingUser.isMatchable = isNowMatchable;
+        await existingUser.save();
+      }
+
+      const token = generateToken(existingUser.username, existingUser._id);
+
+      const cookieOptions = getSamsungCompatibleCookieOptions(req.get('User-Agent'), {
+        httpOnly: true,
+        maxAge: 24 * 60 * 60 * 1000,
+      });
+      
+      res.cookie("jwt", token, cookieOptions);
+
+      return res.status(200).json({
+        message: "Google login successful",
+        user: {
+          _id: existingUser._id,
+          username: existingUser.username,
+          nickname: existingUser.nickname,
+          email: existingUser.email,
+          isMatchable: existingUser.isMatchable,
+          avatar: existingUser.avatar || picture,
+          authProvider: existingUser.authProvider,
+        },
+      });
+    }
+
+    // Check if user exists with this email but different auth provider
+    const existingEmailUser = await UserModel.findOne({ email });
+    if (existingEmailUser && existingEmailUser.authProvider === "local") {
+      return res.status(409).json({
+        success: false,
+        message: "An account with this email already exists. Please sign in with your password.",
+      });
+    }
+
+    // Create new user
+    const username = email.split('@')[0] + '_' + Date.now(); // Generate unique username
+    const nickname = name || username;
+
+    const newUser = new UserModel({
+      email,
+      username,
+      nickname,
+      googleId,
+      authProvider: "google",
+      avatar: picture,
+      isMatchable: false,
+    });
+
+    await newUser.save();
+
+    const token = generateToken(newUser.username, newUser._id);
+
+    const cookieOptions = getSamsungCompatibleCookieOptions(req.get('User-Agent'), {
+      httpOnly: true,
+      maxAge: 24 * 60 * 60 * 1000,
+    });
+    
+    res.cookie("jwt", token, cookieOptions);
+
+    return res.status(201).json({
+      message: "Google account created successfully",
+      user: {
+        _id: newUser._id,
+        username: newUser.username,
+        nickname: newUser.nickname,
+        email: newUser.email,
+        isMatchable: false,
+        avatar: newUser.avatar,
+        authProvider: newUser.authProvider,
+      },
+    });
+
+  } catch (error) {
+    console.error("Google Auth error:", error);
     return next(error);
   }
 };

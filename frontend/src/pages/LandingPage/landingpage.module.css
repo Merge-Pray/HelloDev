@@ -83,6 +83,12 @@
   background-color: var(--color-primary-hover);
 }
 
+/* Google Button on Landing Page - specific styling */
+.right :global(.googleButton) {
+  max-width: 20rem;
+  margin: 0.5rem 0;
+}
+
 .loginBox {
   display: flex;
   flex-direction: column;

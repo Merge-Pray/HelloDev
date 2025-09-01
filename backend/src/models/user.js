@@ -22,6 +22,18 @@ const UserSchema = new Schema(
       required: false,
     },
 
+    // Google Auth fields
+    googleId: {
+      type: String,
+      unique: true,
+      sparse: true, // Allows null/undefined values while keeping uniqueness for non-null values
+    },
+    authProvider: {
+      type: String,
+      enum: ["local", "google"],
+      default: "local",
+    },
+
     contacts: [
       {
         type: Schema.Types.ObjectId,

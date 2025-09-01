@@ -1,12 +1,14 @@
 import { useNavigate } from "react-router";
-import { useEffect } from "react";
+import { useEffect, useState } from "react";
 import useUserStore from "../../hooks/userstore";
+import GoogleAuthButton from "../../components/GoogleAuthButton";
 import styles from "./landingpage.module.css";
 import DarkMode from "../../components/DarkMode";
 
 export default function LandingPage() {
   const navigate = useNavigate();
   const currentUser = useUserStore((state) => state.currentUser);
+  const [error, setError] = useState(null);
 
   // Weiterleitung zur Home-Seite wenn bereits eingeloggt
   useEffect(() => {
@@ -19,6 +21,15 @@ export default function LandingPage() {
   if (currentUser) {
     return null;
   }
+
+  const handleGoogleSuccess = () => {
+    // User is already set in GoogleAuthButton, just let useEffect handle navigation
+  };
+
+  const handleGoogleError = (errorMessage) => {
+    console.error('Google Auth error on landing page:', errorMessage);
+    // Could show error toast here if you have a toast system
+  };
 
   return (
     <div className={styles.container}>
@@ -57,6 +68,12 @@ export default function LandingPage() {
         >
           Create account
         </button>
+
+        <GoogleAuthButton 
+          text="Continue with Google"
+          onSuccess={handleGoogleSuccess}
+          onError={handleGoogleError}
+        />
 
         <div className={styles.loginBox}>
           <span>Already have an account?</span>
