@@ -44,7 +44,6 @@ export default function LoginPage() {
         "Content-Type": "application/json",
       };
 
-
       const res = await fetch(`${API_URL}/api/user/login`, {
         method: "POST",
         headers,
@@ -54,14 +53,14 @@ export default function LoginPage() {
 
       const data = await res.json();
       if (!res.ok) throw new Error(data.message || "Login failed");
-      
-      // Update Zustand with essential + UI fields
+
       setCurrentUser(data.user);
-      
-      // Update React Query cache with full user data
+
       queryClient.setQueryData(["user-profile"], data.user);
 
-      navigate("/home");
+      setTimeout(() => {
+        navigate("/home", { replace: true });
+      }, 100);
     } catch (err) {
       console.error("Login error:", err);
       setError("Login failed. Please try again.");
