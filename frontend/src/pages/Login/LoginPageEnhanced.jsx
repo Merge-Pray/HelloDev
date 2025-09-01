@@ -5,9 +5,11 @@ import { Eye, EyeOff } from "lucide-react";
 import useUserStore from "../../hooks/userstore";
 import { handleLoginSuccess } from "../../utils/sessionManager";
 import { isSamsungInternet, debugLoginIssue, getSamsungBrowserInfo } from "../../utils/samsungBrowserDebug";
+import { samsungCompatibleLogin, testSamsungConnectivity } from "../../utils/samsungNetworkFix";
 import styles from "./loginpage.module.css";
 import { API_URL } from "../../lib/config";
 import DarkMode from "../../components/DarkMode";
+import SamsungDebugPanel from "../../components/SamsungDebugPanel";
 
 export default function LoginPageEnhanced() {
   const currentUser = useUserStore((state) => state.currentUser);
@@ -50,27 +52,37 @@ export default function LoginPageEnhanced() {
       if (isSamsungInternet()) {
         console.log('🔍 Samsung Browser - Starting login process');
         console.log('Browser info:', getSamsungBrowserInfo());
+        
+        // Test connectivity first for Samsung browsers
+        const connectivityTest = await testSamsungConnectivity(API_URL);
+        console.log('🔍 Samsung Browser - Connectivity test:', connectivityTest);
+        
+        if (!connectivityTest.success) {
+          throw new Error('Samsung Browser connectivity issue. Please try the troubleshooting steps below.');
+        }
       }
 
-      const headers = {
-        "Content-Type": "application/json",
-      };
-
-      // Add Samsung browser identification for backend
+      let data;
+      
       if (isSamsungInternet()) {
-        headers["X-Browser-Type"] = "Samsung";
-        headers["X-User-Agent"] = navigator.userAgent;
+        // Use Samsung-compatible login
+        data = await samsungCompatibleLogin(values, API_URL);
+      } else {
+        // Use normal fetch for other browsers
+        const headers = {
+          "Content-Type": "application/json",
+        };
+
+        const res = await fetch(`${API_URL}/api/user/login`, {
+          method: "POST",
+          headers,
+          credentials: "include",
+          body: JSON.stringify(values),
+        });
+
+        data = await res.json();
+        if (!res.ok) throw new Error(data.message || "Login failed");
       }
-
-      const res = await fetch(`${API_URL}/api/user/login`, {
-        method: "POST",
-        headers,
-        credentials: "include",
-        body: JSON.stringify(values),
-      });
-
-      const data = await res.json();
-      if (!res.ok) throw new Error(data.message || "Login failed");
 
       if (isSamsungInternet()) {
         console.log('🔍 Samsung Browser - Login response received');
@@ -116,12 +128,17 @@ export default function LoginPageEnhanced() {
         console.error('🔍 Samsung Browser - Login failed:', err);
       }
       
-      let errorMessage = "Login failed. Please try again.";
+      let errorMessage = err.message;
       
-      if (err.message.includes('network') || err.message.includes('fetch')) {
-        errorMessage = "Network error. Please check your connection and try again.";
-      } else if (err.message.includes('timeout')) {
-        errorMessage = "Request timed out. Please try again.";
+      // Use the specific Samsung error message if provided
+      if (!errorMessage.includes('Samsung Browser') && isSamsungInternet()) {
+        if (err.message.includes('network') || err.message.includes('fetch') || err.message.includes('Failed to fetch')) {
+          errorMessage = "Samsung Browser network issue. Please try the troubleshooting steps below.";
+        } else if (err.message.includes('timeout')) {
+          errorMessage = "Request timed out. Please try again or use troubleshooting steps below.";
+        } else {
+          errorMessage = "Login failed. Please try again.";
+        }
       }
       
       setError(errorMessage);
@@ -252,6 +269,9 @@ export default function LoginPageEnhanced() {
           )}
         </div>
       </main>
+      
+      {/* Samsung Browser Debug Panel */}
+      <SamsungDebugPanel isVisible={true} />
     </div>
   );
 }

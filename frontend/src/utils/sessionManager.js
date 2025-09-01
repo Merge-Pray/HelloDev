@@ -2,6 +2,7 @@
 import { API_URL } from "../lib/config";
 import useUserStore from "../hooks/userstore";
 import { isSamsungInternet, debugLoginIssue } from "./samsungBrowserDebug";
+import { samsungCompatibleFetch } from "./samsungNetworkFix";
 
 class SessionManager {
   constructor() {
@@ -152,10 +153,12 @@ class SessionManager {
 
   async _makeAuthRequest() {
     const controller = new AbortController();
-    const timeoutId = setTimeout(() => controller.abort(), 10000);
+    const timeoutId = setTimeout(() => controller.abort(), 15000); // Longer timeout for Samsung
     
     try {
-      const response = await fetch(`${API_URL}/api/user/auth-status`, {
+      const fetchFunction = isSamsungInternet() ? samsungCompatibleFetch : fetch;
+      
+      const response = await fetchFunction(`${API_URL}/api/user/auth-status`, {
         method: 'GET',
         credentials: 'include',
         signal: controller.signal
@@ -165,6 +168,11 @@ class SessionManager {
       return response;
     } catch (error) {
       clearTimeout(timeoutId);
+      
+      if (isSamsungInternet()) {
+        console.error('🔍 Samsung Browser - Auth request failed:', error);
+      }
+      
       throw error;
     }
   }
