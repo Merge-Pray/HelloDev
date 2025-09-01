@@ -78,6 +78,8 @@ export const samsungCompatibleLogin = async (loginData, apiUrl) => {
   const url = `${apiUrl}/api/user/login`;
   
   console.log('🔍 Samsung Browser - Starting compatible login to:', url);
+  console.log('🔍 Samsung Browser - API_URL value:', apiUrl);
+  console.log('🔍 Samsung Browser - Full login URL:', url);
   
   try {
     // First, try a simple connectivity test
@@ -134,13 +136,17 @@ export const testSamsungConnectivity = async (apiUrl) => {
   
   console.log('🔍 Samsung Browser - Testing connectivity...');
   
+  console.log('🔍 Samsung Browser - Testing with API_URL:', apiUrl);
+  
   const tests = [
     {
       name: 'Basic GET',
+      url: `${apiUrl}/`,
       test: () => samsungCompatibleFetch(`${apiUrl}/`)
     },
     {
       name: 'CORS preflight',
+      url: `${apiUrl}/api/user/auth-status`,
       test: () => samsungCompatibleFetch(`${apiUrl}/api/user/auth-status`, {
         method: 'GET',
         credentials: 'include'
@@ -148,10 +154,11 @@ export const testSamsungConnectivity = async (apiUrl) => {
     },
     {
       name: 'POST with JSON',
-      test: () => samsungCompatibleFetch(`${apiUrl}/api/user/auth-status`, {
+      url: `${apiUrl}/api/user/login`,
+      test: () => samsungCompatibleFetch(`${apiUrl}/api/user/login`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ test: true }),
+        body: JSON.stringify({ identifier: 'test', password: 'test' }),
         credentials: 'include'
       })
     }
@@ -161,9 +168,11 @@ export const testSamsungConnectivity = async (apiUrl) => {
   
   for (const test of tests) {
     try {
+      console.log(`🔍 Samsung Browser - Testing ${test.name} at: ${test.url}`);
       const response = await test.test();
       results.push({
         name: test.name,
+        url: test.url,
         success: true,
         status: response.status
       });
@@ -171,6 +180,7 @@ export const testSamsungConnectivity = async (apiUrl) => {
     } catch (error) {
       results.push({
         name: test.name,
+        url: test.url,
         success: false,
         error: error.message
       });
