@@ -3,13 +3,19 @@ import { API_URL } from "../lib/config";
 import { handleAuthErrorAndRetry, isAuthError } from "../utils/tokenRefresh";
 import useUserStore from "./userstore";
 
+const isSamsungInternet = () => {
+  return /SamsungBrowser/i.test(navigator.userAgent);
+};
+
 export const useProfile = () => {
   return useQuery({
     queryKey: ["user-profile"],
     queryFn: async () => {
       const makeRequest = async () => {
+        const credentials = isSamsungInternet() ? "same-origin" : "include";
+        
         return await fetch(`${API_URL}/api/user/user`, {
-          credentials: "include",
+          credentials,
         });
       };
 
@@ -38,12 +44,14 @@ export const useUpdateProfile = () => {
   return useMutation({
     mutationFn: async (profileData) => {
       const makeRequest = async () => {
+        const credentials = isSamsungInternet() ? "same-origin" : "include";
+        
         return await fetch(`${API_URL}/api/user/update`, {
           method: "PATCH",
           headers: {
             "Content-Type": "application/json",
           },
-          credentials: "include",
+          credentials,
           body: JSON.stringify(profileData),
         });
       };
@@ -85,8 +93,10 @@ export const useOtherUserProfile = (userId) => {
     queryKey: ["user-profile", userId],
     queryFn: async () => {
       const makeRequest = async () => {
+        const credentials = isSamsungInternet() ? "same-origin" : "include";
+        
         return await fetch(`${API_URL}/api/user/profile/${userId}`, {
-          credentials: "include",
+          credentials,
         });
       };
 
@@ -118,8 +128,10 @@ export const usePrefetchProfile = () => {
       queryKey: ["user-profile"],
       queryFn: async () => {
         const makeRequest = async () => {
+          const credentials = isSamsungInternet() ? "same-origin" : "include";
+          
           return await fetch(`${API_URL}/api/user/user`, {
-            credentials: "include",
+            credentials,
           });
         };
 

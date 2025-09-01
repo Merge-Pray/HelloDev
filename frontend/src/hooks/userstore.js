@@ -125,9 +125,11 @@ const useUserStore = create(
 
       logout: async () => {
         try {
+          const credentials = isSamsungInternet() ? "same-origin" : "include";
+          
           await fetch(`${import.meta.env.VITE_BACKENDPATH}/api/user/logout`, {
-            method: 'POST',
-            credentials: 'include'
+            method: 'Post',
+            credentials
           });
         } catch (error) {
           console.error('Logout error:', error);

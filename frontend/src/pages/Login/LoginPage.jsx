@@ -52,10 +52,12 @@ export default function LoginPage() {
         headers["Pragma"] = "no-cache";
       }
 
+      const credentials = isSamsungInternet() ? "same-origin" : "include";
+      
       const res = await fetch(`${API_URL}/api/user/login`, {
         method: "POST",
         headers,
-        credentials: "include",
+        credentials,
         body: JSON.stringify(values),
       });
 
