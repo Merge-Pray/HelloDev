@@ -24,6 +24,17 @@
   margin: 0;
 }
 
+.loadedNotice {
+  background: var(--color-success);
+  color: white;
+  padding: 8px 16px;
+  border-radius: 6px;
+  font-size: 0.9rem;
+  margin-top: 12px;
+  display: inline-block;
+  font-weight: 500;
+}
+
 .editorSection {
   background: var(--color-bg-secondary);
   border-radius: 16px;

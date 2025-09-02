@@ -55,6 +55,29 @@ uploadRouter.post(
       // Get avatarData from request body
       const { avatarData } = req.body;
       console.log("Avatar data received:", avatarData ? "Yes" : "No");
+      console.log("Avatar data type:", typeof avatarData);
+      console.log("Avatar data content:", avatarData);
+      
+      // Validate and process avatarData
+      let processedAvatarData = null;
+      if (avatarData) {
+        try {
+          // If it's already a string, use it directly
+          if (typeof avatarData === 'string') {
+            // Validate it's valid JSON
+            JSON.parse(avatarData);
+            processedAvatarData = avatarData;
+            console.log("✅ Avatar data is valid JSON string");
+          } else {
+            // If it's an object/array, stringify it
+            processedAvatarData = JSON.stringify(avatarData);
+            console.log("✅ Avatar data converted to JSON string");
+          }
+        } catch (error) {
+          console.error("❌ Invalid avatar data:", error);
+          processedAvatarData = null;
+        }
+      }
 
       // Upload to Cloudinary
       console.log("Starting Cloudinary upload...");
@@ -99,9 +122,12 @@ uploadRouter.post(
         avatar: result.secure_url,
       };
 
-      // Only update avatarData if provided in request body
-      if (avatarData !== undefined) {
-        updateData.avatarData = avatarData;
+      // Only update avatarData if processed successfully
+      if (processedAvatarData !== null) {
+        updateData.avatarData = processedAvatarData;
+        console.log("💾 Saving avatar data to database");
+      } else {
+        console.log("⚠️ No valid avatar data to save");
       }
 
       const updatedUser = await UserModel.findByIdAndUpdate(
@@ -115,6 +141,10 @@ uploadRouter.post(
         error.statusCode = 404;
         return next(error);
       }
+
+      console.log("✅ User updated successfully");
+      console.log("📊 Updated user avatarData:", updatedUser.avatarData ? "Present" : "Not present");
+      console.log("📊 AvatarData type in DB:", typeof updatedUser.avatarData);
 
       res.status(200).json({
         success: true,

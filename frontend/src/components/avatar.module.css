@@ -134,6 +134,24 @@
   );
 }
 
+/* Clear Button (zwischen Neutral und Primary) */
+.clearBtn {
+  font-size: 14px;
+  font-weight: 600;
+  padding: 8px 12px;
+  border-radius: 10px;
+  color: #fff;
+  background: var(--color-error);
+  border: 1px solid color-mix(in srgb, var(--color-error) 70%, black 10%);
+  cursor: pointer;
+  transition: background-color 0.2s ease, transform 0.15s ease;
+}
+
+.clearBtn:hover {
+  background: color-mix(in srgb, var(--color-error) 85%, black 15%);
+  transform: translateY(-1px);
+}
+
 /* Neutraler Reset-Button */
 .resetBtn {
   font-size: 14px;
