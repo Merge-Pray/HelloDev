@@ -121,13 +121,7 @@ uploadRouter.post(
         message: "Avatar uploaded successfully",
         avatar: result.secure_url,
         public_id: result.public_id,
-        user: {
-          id: updatedUser._id,
-          username: updatedUser.username,
-          nickname: updatedUser.nickname,
-          avatar: updatedUser.avatar,
-          avatarData: updatedUser.avatarData,
-        },
+        user: updatedUser, // Return complete user data instead of partial
       });
     } catch (error) {
       console.error("Avatar upload error:", error);
