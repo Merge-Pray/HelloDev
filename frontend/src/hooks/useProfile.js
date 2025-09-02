@@ -62,7 +62,7 @@ export const useUpdateProfile = () => {
       return response.json();
     },
     onSuccess: (data) => {
-      queryClient.setQueryData(["user-profile"], data.user);
+      // queryClient.setQueryData(["user-profile"], data.user);
       const { setCurrentUser } = useUserStore.getState();
       setCurrentUser(data.user);
     },

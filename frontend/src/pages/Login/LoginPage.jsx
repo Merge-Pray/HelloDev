@@ -56,7 +56,7 @@ export default function LoginPage() {
       if (!res.ok) throw new Error(data.message || "Login failed");
 
       setCurrentUser(data.user);
-      queryClient.setQueryData(["user-profile"], data.user);
+      // queryClient.setQueryData(["user-profile"], data.user);
       navigate("/home", { replace: true });
     } catch (err) {
       setError("Login failed. Please try again.");
