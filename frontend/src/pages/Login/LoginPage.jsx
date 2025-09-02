@@ -31,10 +31,12 @@ export default function LoginPage() {
 
 
   async function onSubmit(values) {
+    console.log("🔐 LOGIN: Starting login process");
     setIsLoading(true);
     setError(null);
 
     try {
+      console.log("🔐 LOGIN: Sending request to backend");
       const res = await fetch(`${API_URL}/api/user/login`, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
@@ -43,13 +45,25 @@ export default function LoginPage() {
       });
 
       const data = await res.json();
+      console.log("🔐 LOGIN: Backend response:", { 
+        ok: res.ok, 
+        status: res.status,
+        hasUser: !!data.user,
+        userId: data.user?._id 
+      });
+
       if (!res.ok) throw new Error(data.message || "Login failed");
 
+      console.log("🔐 LOGIN: Updating Zustand store");
       setCurrentUser(data.user);
+      
+      console.log("🔐 LOGIN: Updating React Query cache");
       queryClient.setQueryData(["user-profile"], data.user);
-
+      
+      console.log("🔐 LOGIN: Navigating to /home");
       navigate("/home", { replace: true });
     } catch (err) {
+      console.error("🔐 LOGIN ERROR:", err);
       setError("Login failed. Please try again.");
     } finally {
       setIsLoading(false);

@@ -20,7 +20,14 @@ const useUserStore = create(
       currentUser: null,
       socket: null,
 
-      setCurrentUser: (user) =>
+      setCurrentUser: (user) => {
+        console.log("🗄️ ZUSTAND: setCurrentUser called", {
+          hasUser: !!user,
+          userId: user?._id,
+          username: user?.username,
+          timestamp: new Date().toISOString()
+        });
+        
         set({
           currentUser: user
             ? {
@@ -33,7 +40,10 @@ const useUserStore = create(
                 lastSeen: user.lastSeen,
               }
             : null,
-        }),
+        });
+        
+        console.log("🗄️ ZUSTAND: currentUser updated");
+      },
 
       setSocket: (socket) => set({ socket }),
 
