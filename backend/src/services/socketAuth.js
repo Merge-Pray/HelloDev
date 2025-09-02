@@ -7,13 +7,20 @@ export const socketAuth = async (socket, next) => {
   try {
     const cookies = socket.handshake.headers.cookie;
     const token = extractTokenFromCookies(cookies);
-    const user = await verifyTokenAndGetUser(token);
-    socket.user = user;
-    next();
+    
+    if (token) {
+      const user = await verifyTokenAndGetUser(token);
+      socket.user = user;
+      socket.authenticated = true;
+    } else {
+      console.log("Socket connection without token - allowing but marking as unauthenticated");
+      socket.authenticated = false;
+    }
+    
+    next(); // Always allow connection, just mark auth status
   } catch (error) {
     console.error("Socket Authentication Error:", error.message);
-    const authError = new Error("Authentication failed");
-    authError.data = { status: 401 };
-    next(authError);
+    socket.authenticated = false;
+    next(); // Allow connection but without auth
   }
 };
