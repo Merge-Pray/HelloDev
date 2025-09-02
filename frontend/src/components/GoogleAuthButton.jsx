@@ -79,13 +79,17 @@ const GoogleAuthButton = ({ text = "Continue with Google", onSuccess, onError, c
         onSuccess(data);
       }
       
-      // Navigation basierend auf User-Status
+      // Navigation basierend auf User-Status mit kleiner Verzögerung für State-Update
       console.log('🧭 Navigating user...', { isNewUser: data.isNewUser });
-      if (data.isNewUser) {
-        navigate('/buildprofile');
-      } else {
-        navigate('/home');
-      }
+      
+      // Kleine Verzögerung um sicherzustellen dass der User-State aktualisiert wurde
+      setTimeout(() => {
+        if (data.isNewUser) {
+          navigate('/buildprofile');
+        } else {
+          navigate('/home');
+        }
+      }, 100);
       
     } catch (error) {
       console.error('❌ Google Auth Error:', error);
