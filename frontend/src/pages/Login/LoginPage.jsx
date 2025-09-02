@@ -17,6 +17,40 @@ export default function LoginPage() {
   const [showPassword, setShowPassword] = useState(false);
   const navigate = useNavigate();
 
+  // Global error handler for Samsung browser
+  useEffect(() => {
+    const handleError = (event) => {
+      console.error("🚨 GLOBAL ERROR:", event.error);
+      const errorInfo = {
+        message: event.error?.message || 'Unknown error',
+        stack: event.error?.stack || 'No stack trace',
+        filename: event.filename || 'Unknown file',
+        lineno: event.lineno || 'Unknown line',
+        timestamp: new Date().toISOString()
+      };
+      sessionStorage.setItem('samsung_global_error', JSON.stringify(errorInfo));
+      alert("Global error caught: " + errorInfo.message);
+    };
+
+    const handleUnhandledRejection = (event) => {
+      console.error("🚨 UNHANDLED PROMISE REJECTION:", event.reason);
+      const errorInfo = {
+        reason: event.reason?.message || event.reason || 'Unknown rejection',
+        timestamp: new Date().toISOString()
+      };
+      sessionStorage.setItem('samsung_promise_error', JSON.stringify(errorInfo));
+      alert("Promise rejection: " + errorInfo.reason);
+    };
+
+    window.addEventListener('error', handleError);
+    window.addEventListener('unhandledrejection', handleUnhandledRejection);
+
+    return () => {
+      window.removeEventListener('error', handleError);
+      window.removeEventListener('unhandledrejection', handleUnhandledRejection);
+    };
+  }, []);
+
   const {
     register,
     handleSubmit,
@@ -35,13 +69,18 @@ export default function LoginPage() {
       console.log("🔐 LOGIN: Starting login process");
       
       // Store in sessionStorage for Samsung debugging
-      sessionStorage.setItem('samsung_login_start', new Date().toISOString());
+      let loginLog = sessionStorage.getItem('samsung_login_log') || '';
+      loginLog += `\n${new Date().toISOString()}: Login process started`;
+      sessionStorage.setItem('samsung_login_log', loginLog);
       
       setIsLoading(true);
       setError(null);
 
       try {
         console.log("🔐 LOGIN: Sending request to backend");
+        loginLog += `\n${new Date().toISOString()}: Sending request to backend`;
+        sessionStorage.setItem('samsung_login_log', loginLog);
+        
         const res = await fetch(`${API_URL}/api/user/login`, {
           method: "POST",
           headers: { "Content-Type": "application/json" },
@@ -49,7 +88,13 @@ export default function LoginPage() {
           body: JSON.stringify(values),
         });
 
+        loginLog += `\n${new Date().toISOString()}: Received response, status: ${res.status}`;
+        sessionStorage.setItem('samsung_login_log', loginLog);
+
         const data = await res.json();
+        loginLog += `\n${new Date().toISOString()}: Parsed JSON response`;
+        sessionStorage.setItem('samsung_login_log', loginLog);
+        
         console.log("🔐 LOGIN: Backend response:", { 
           ok: res.ok, 
           status: res.status,
@@ -60,10 +105,19 @@ export default function LoginPage() {
         if (!res.ok) throw new Error(data.message || "Login failed");
 
         console.log("🔐 LOGIN: Updating Zustand store");
+        loginLog += `\n${new Date().toISOString()}: About to update Zustand`;
+        sessionStorage.setItem('samsung_login_log', loginLog);
+        
         setCurrentUser(data.user);
+        
+        loginLog += `\n${new Date().toISOString()}: Zustand updated, updating React Query`;
+        sessionStorage.setItem('samsung_login_log', loginLog);
         
         console.log("🔐 LOGIN: Updating React Query cache");
         queryClient.setQueryData(["user-profile"], data.user);
+        
+        loginLog += `\n${new Date().toISOString()}: React Query updated, navigating`;
+        sessionStorage.setItem('samsung_login_log', loginLog);
         
         console.log("🔐 LOGIN: Navigating to /home");
         navigate("/home", { replace: true });
