@@ -106,6 +106,8 @@ export default function LoginPage() {
           <form onSubmit={(e) => {
             console.log("🔐 FORM: Form submit event triggered");
             console.log("🔐 FORM: Event details:", { type: e.type, target: e.target });
+            e.preventDefault();
+            console.log("🔐 FORM: Default prevented, calling handleSubmit");
             handleSubmit(onSubmit)(e);
           }}>
             <div className="form-field">
