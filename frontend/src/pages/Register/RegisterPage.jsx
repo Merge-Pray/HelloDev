@@ -6,6 +6,7 @@ import useUserStore from "../../hooks/userstore";
 import styles from "./registerpage.module.css";
 import { API_URL } from "../../lib/config";
 import DarkMode from "../../components/DarkMode";
+import GoogleAuthButton from "../../components/GoogleAuthButton";
 
 export default function RegisterPage() {
   const currentUser = useUserStore((state) => state.currentUser);
@@ -33,6 +34,15 @@ export default function RegisterPage() {
       confirmPassword: "",
     },
   });
+
+  const handleGoogleSuccess = (data) => {
+    console.log('🔐 GOOGLE REGISTER: Success', data);
+  };
+
+  const handleGoogleError = (error) => {
+    console.error('🔐 GOOGLE REGISTER: Error', error);
+    setError(error);
+  };
 
   async function onSubmit(values) {
     setIsLoading(true);
@@ -267,6 +277,17 @@ export default function RegisterPage() {
               {isLoading ? "Registering..." : "Register"}
             </button>
           </form>
+
+          <div className={styles.divider}>
+            <span>or</span>
+          </div>
+
+          {/* Google Auth Button */}
+          <GoogleAuthButton 
+            text="Sign up with Google"
+            onSuccess={handleGoogleSuccess}
+            onError={handleGoogleError}
+          />
 
           <div className={styles.googleLoginContainer}>
             <div className="text-center">
