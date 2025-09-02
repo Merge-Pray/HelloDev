@@ -134,12 +134,20 @@
   filter: invert(1) brightness(100%);
 }
 
-.link:hover .icon {
+:root[data-theme="light"] .link:hover .icon {
   filter: invert(1) brightness(120%);
 }
 
-.active .icon {
-  filter: inherit;
+:root[data-theme="dark"] .link:hover .icon {
+  filter: brightness(0) saturate(100%);
+}
+
+:root[data-theme="light"] .active .icon {
+  filter: invert(1) brightness(100%);
+}
+
+:root[data-theme="dark"] .active .icon {
+  filter: brightness(0) saturate(100%);
 }
 
 /* ───────── Labels ───────── */
@@ -420,9 +428,20 @@
     filter: invert(1) brightness(100%);
   }
 
-  .bottomNavLink:hover .icon,
-  .bottomNavLink.active .icon {
-    filter: none;
+  :root[data-theme="light"] .bottomNavLink:hover .icon {
+    filter: invert(1) brightness(100%);
+  }
+
+  :root[data-theme="dark"] .bottomNavLink:hover .icon {
+    filter: brightness(0) saturate(100%);
+  }
+  
+  :root[data-theme="light"] .bottomNavLink.active .icon {
+    filter: invert(1) brightness(100%);
+  }
+
+  :root[data-theme="dark"] .bottomNavLink.active .icon {
+    filter: brightness(0) saturate(100%);
   }
 
   .bottomNavLink .label {

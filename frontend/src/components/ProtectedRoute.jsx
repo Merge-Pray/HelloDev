@@ -13,9 +13,13 @@ const ProtectedRoute = ({ children }) => {
   useEffect(() => {
     const validateUser = async () => {
       if (!currentUser) {
+        setIsValidating(false);
         const timeout = setTimeout(() => setRedirect(true), 1500);
         return () => clearTimeout(timeout);
       }
+
+      // Small delay to ensure cookie is set after login
+      await new Promise(resolve => setTimeout(resolve, 100));
 
       // Validate token with server
       try {
@@ -25,6 +29,7 @@ const ProtectedRoute = ({ children }) => {
         // Token invalid - clear user and redirect
         clearUser();
         setRedirect(true);
+        setIsValidating(false);
       }
     };
 

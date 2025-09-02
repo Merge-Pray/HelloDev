@@ -30,13 +30,16 @@ function App() {
           });
 
           socket.on("connect_error", async (error) => {
+            console.log("Socket connection error:", error.message);
             if (error.message === "Authentication failed") {
               try {
                 await authenticatedFetch("/api/user/refresh");
                 setTimeout(() => socket.connect(), 1000);
-              } catch (refreshError) {
-                clearUser();
-                window.location.href = "/login";
+              } catch {
+                console.log("Socket auth failed, but not forcing logout");
+                // Don't force logout - let ProtectedRoute handle it
+                // clearUser();
+                // window.location.href = "/login";
               }
             }
           });
