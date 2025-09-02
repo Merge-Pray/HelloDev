@@ -2,30 +2,8 @@ import MessageModel from "../models/Message.js";
 import UserModel from "../models/user.js";
 import ChatModel from "../models/Chat.js";
 
-// Security helper to ensure socket is authenticated for sensitive operations
-const requireAuth = (socket, eventName) => {
-  if (!socket.authenticated || !socket.user) {
-    console.warn(`Unauthorized ${eventName} attempt from socket ${socket.id}`);
-    socket.emit("authError", { message: "Authentication required" });
-    return false;
-  }
-  return true;
-};
-
 export const socketHandler = (io) => {
   io.on("connection", async (socket) => {
-    // Check if socket is authenticated
-    if (!socket.authenticated || !socket.user) {
-      console.log(`Unauthenticated socket ${socket.id} connected - limited functionality`);
-      
-      // Optionally handle unauthenticated connections here
-      socket.on("disconnect", () => {
-        console.log(`Unauthenticated socket ${socket.id} disconnected`);
-      });
-      
-      return; // Don't process further for unauthenticated sockets
-    }
-
     const userId = socket.user._id.toString();
     const socketId = socket.id;
 
@@ -43,8 +21,6 @@ export const socketHandler = (io) => {
     }
 
     socket.on("sendMessage", async (data) => {
-      if (!requireAuth(socket, "sendMessage")) return;
-      
       const { content, chatId, recipientId } = data;
       try {
         const message = await MessageModel.create({
@@ -79,8 +55,6 @@ export const socketHandler = (io) => {
     });
 
     socket.on("typing", (data) => {
-      if (!requireAuth(socket, "typing")) return;
-      
       const { chatId, recipientId } = data;
       io.to(`user:${recipientId}`).emit("userTyping", {
         chatId,
@@ -91,8 +65,6 @@ export const socketHandler = (io) => {
     });
 
     socket.on("stopTyping", (data) => {
-      if (!requireAuth(socket, "stopTyping")) return;
-      
       const { chatId, recipientId } = data;
       io.to(`user:${recipientId}`).emit("userTyping", {
         chatId,
