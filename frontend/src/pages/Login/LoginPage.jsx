@@ -103,7 +103,11 @@ export default function LoginPage() {
 
           {error && <div className="alert alert-error">{error}</div>}
 
-          <form onSubmit={handleSubmit(onSubmit)}>
+          <form onSubmit={(e) => {
+            console.log("🔐 FORM: Form submit event triggered");
+            console.log("🔐 FORM: Event details:", { type: e.type, target: e.target });
+            handleSubmit(onSubmit)(e);
+          }}>
             <div className="form-field">
               <label>Email or Username</label>
               <input
@@ -113,6 +117,9 @@ export default function LoginPage() {
                   required: "Email or username is required.",
                 })}
                 placeholder="Enter your email or username"
+                onChange={(e) => {
+                  console.log("🔐 FORM: Identifier changed:", e.target.value);
+                }}
               />
               <div className="form-hint">{errors.identifier?.message}</div>
             </div>
@@ -128,11 +135,17 @@ export default function LoginPage() {
                     required: "Password is required.",
                   })}
                   placeholder="Enter your password"
+                  onChange={(e) => {
+                    console.log("🔐 FORM: Password changed:", e.target.value.length + " chars");
+                  }}
                 />
                 <button
                   type="button"
                   className={styles.passwordToggle}
-                  onClick={() => setShowPassword(!showPassword)}
+                  onClick={() => {
+                    console.log("🔐 FORM: Password toggle clicked");
+                    setShowPassword(!showPassword);
+                  }}
                 >
                   {showPassword ? <EyeOff size={20} /> : <Eye size={20} />}
                 </button>
@@ -144,6 +157,11 @@ export default function LoginPage() {
               type="submit"
               className="btn btn-primary full-width"
               disabled={isLoading}
+              onClick={(e) => {
+                console.log("🔐 FORM: Submit button clicked");
+                console.log("🔐 FORM: Button disabled:", isLoading);
+                console.log("🔐 FORM: Form errors:", errors);
+              }}
             >
               {isLoading ? "Signing in..." : "Sign In"}
             </button>
