@@ -63,17 +63,8 @@ export const useUpdateProfile = () => {
     },
     onSuccess: (data) => {
       queryClient.setQueryData(["user-profile"], data.user);
-
       const { setCurrentUser } = useUserStore.getState();
-      setCurrentUser({
-        _id: data.user._id,
-        username: data.user.username,
-        email: data.user.email,
-        avatar: data.user.avatar,
-        nickname: data.user.nickname,
-        isOnline: data.user.isOnline,
-        lastSeen: data.user.lastSeen,
-      });
+      setCurrentUser(data.user);
     },
     onError: (error) => {
       console.error("Profile update failed:", error);

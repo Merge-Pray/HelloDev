@@ -22,17 +22,17 @@ const useUserStore = create(
 
       setCurrentUser: (user) =>
         set({
-          currentUser: user ? {
-            _id: user._id,
-            username: user.username,
-            email: user.email,
-            avatar: user.avatar,
-            nickname: user.nickname,
-            isOnline: user.isOnline,
-            lastSeen: user.lastSeen,
-            // Essential auth + frequently used UI fields only
-            // All other profile data handled by React Query
-          } : null,
+          currentUser: user
+            ? {
+                _id: user._id,
+                username: user.username,
+                email: user.email,
+                avatar: user.avatar,
+                nickname: user.nickname,
+                isOnline: user.isOnline,
+                lastSeen: user.lastSeen,
+              }
+            : null,
         }),
 
       setSocket: (socket) => set({ socket }),
@@ -43,14 +43,13 @@ const useUserStore = create(
           currentSocket.disconnect();
         }
         set({ currentUser: null, socket: null });
-
         localStorage.removeItem("user-storage");
       },
 
       logout: async () => {
         try {
           await fetch(`${import.meta.env.VITE_BACKENDPATH}/api/user/logout`, {
-            method: "Post",
+            method: "POST",
             credentials: "include",
           });
         } catch (error) {
@@ -60,9 +59,7 @@ const useUserStore = create(
           if (currentSocket) {
             currentSocket.disconnect();
           }
-
           set({ currentUser: null, socket: null });
-
           localStorage.removeItem("user-storage");
         }
       },
@@ -72,7 +69,7 @@ const useUserStore = create(
       name: "user-storage",
       storage: zustandStorage,
       partialize: (state) => ({
-        currentUser: state.currentUser
+        currentUser: state.currentUser,
       }),
     }
   )

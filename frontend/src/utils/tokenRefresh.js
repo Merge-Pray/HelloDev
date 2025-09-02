@@ -1,8 +1,17 @@
 import { API_URL } from "../lib/config";
 import useUserStore from "../hooks/userstore";
+import { QueryClient } from "@tanstack/react-query";
 
 let isRefreshing = false;
 let refreshPromise = null;
+let queryClient = null;
+
+const getQueryClient = () => {
+  if (!queryClient) {
+    queryClient = new QueryClient();
+  }
+  return queryClient;
+};
 
 export const handleAuthErrorAndRetry = async (originalRequestFn) => {
   const { setCurrentUser, clearUser } = useUserStore.getState();
@@ -10,7 +19,6 @@ export const handleAuthErrorAndRetry = async (originalRequestFn) => {
   if (isRefreshing && refreshPromise) {
     try {
       await refreshPromise;
-
       return await originalRequestFn();
     } catch (error) {
       throw error;
@@ -26,13 +34,13 @@ export const handleAuthErrorAndRetry = async (originalRequestFn) => {
     if (refreshResult.success) {
       if (refreshResult.user) {
         setCurrentUser(refreshResult.user);
+        getQueryClient().setQueryData(["user-profile"], refreshResult.user);
       }
 
       const retryResponse = await originalRequestFn();
       return retryResponse;
     } else {
       clearUser();
-
       localStorage.removeItem("user-storage");
       if (typeof window !== "undefined") {
         window.location.href = "/login";
@@ -41,7 +49,6 @@ export const handleAuthErrorAndRetry = async (originalRequestFn) => {
     }
   } catch (error) {
     clearUser();
-    // Clear any remaining localStorage data
     localStorage.removeItem("user-storage");
     if (typeof window !== "undefined") {
       window.location.href = "/login";
