@@ -34,7 +34,7 @@ export const handleAuthErrorAndRetry = async (originalRequestFn) => {
     if (refreshResult.success) {
       if (refreshResult.user) {
         setCurrentUser(refreshResult.user);
-        // getQueryClient().setQueryData(["user-profile"], refreshResult.user);
+        getQueryClient().setQueryData(["user-profile"], refreshResult.user);
       }
 
       const retryResponse = await originalRequestFn();

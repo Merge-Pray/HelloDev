@@ -53,7 +53,7 @@ const AvatarEditor = () => {
 
       if (result.user) {
         setCurrentUser(result.user);
-        // queryClient.setQueryData(["user-profile"], result.user);
+        queryClient.setQueryData(["user-profile"], result.user);
       }
 
       alert("Avatar has been saved successfully! ✅");
