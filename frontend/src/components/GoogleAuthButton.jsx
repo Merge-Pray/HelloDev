@@ -48,6 +48,7 @@ export default function GoogleAuthButton({ text = "Sign in with Google", onSucce
           navigate(result.isNewUser ? '/buildprofile' : '/home');
         }
       } else {
+        console.error('Google Sign-In failed:', result.error);
         if (onError) onError(result.error);
       }
     } catch (error) {
@@ -71,32 +72,46 @@ export default function GoogleAuthButton({ text = "Sign in with Google", onSucce
     }
 
     console.log('Initializing Google Auth with client ID...');
-    window.google.accounts.id.initialize({
-      client_id: clientId,
-      callback: handleCredentialResponse,
-      auto_select: false,
-      cancel_on_tap_outside: true,
-      context: 'signin', // Kontext für bessere UX
-      ux_mode: 'popup', // Popup-Modus für bessere Kontrolle
-    });
+    
+    try {
+      window.google.accounts.id.initialize({
+        client_id: clientId,
+        callback: handleCredentialResponse,
+        auto_select: false,
+        cancel_on_tap_outside: true,
+        context: 'signin',
+        ux_mode: 'popup',
+      });
 
-    // Versuche One Tap anzuzeigen - zeigt personalisierte Buttons für eingeloggte Benutzer
-    window.google.accounts.id.prompt((notification) => {
-      console.log('One Tap notification:', notification);
-      
-      if (notification.isDisplayed()) {
-        console.log('One Tap is displayed - user likely logged in to Google');
-        setUseNativeButton(true);
-      } else if (notification.isNotDisplayed()) {
-        console.log('One Tap not displayed:', notification.getNotDisplayedReason());
-        setUseNativeButton(false);
-      } else if (notification.isSkippedMoment()) {
-        console.log('One Tap skipped:', notification.getSkippedReason());
-        setUseNativeButton(false);
-      }
-    });
+      // Versuche One Tap anzuzeigen - zeigt personalisierte Buttons für eingeloggte Benutzer
+      window.google.accounts.id.prompt((notification) => {
+        console.log('One Tap notification:', notification);
+        
+        if (notification.isDisplayed()) {
+          console.log('One Tap is displayed - user likely logged in to Google');
+          setUseNativeButton(true);
+        } else if (notification.isNotDisplayed()) {
+          const reason = notification.getNotDisplayedReason();
+          console.log('One Tap not displayed:', reason);
+          
+          if (reason === 'unregistered_origin') {
+            console.warn('⚠️ Google OAuth: Origin not registered. Please add http://localhost:5173 to your Google Console OAuth settings.');
+            if (onError) {
+              onError('Google authentication not configured for this domain. Please check console for details.');
+            }
+          }
+          setUseNativeButton(false);
+        } else if (notification.isSkippedMoment()) {
+          console.log('One Tap skipped:', notification.getSkippedReason());
+          setUseNativeButton(false);
+        }
+      });
 
-    console.log('Google Auth initialized');
+      console.log('Google Auth initialized');
+    } catch (error) {
+      console.error('Google Auth initialization failed:', error);
+      if (onError) onError('Failed to initialize Google authentication');
+    }
   }, [googleReady, onError, handleCredentialResponse]);
 
   // Effekt für das Rendern des nativen Google-Buttons
@@ -115,7 +130,7 @@ export default function GoogleAuthButton({ text = "Sign in with Google", onSucce
         shape: 'rectangular',
         logo_alignment: 'left',
         width: width || 250,
-        locale: 'de', // Deutsche Lokalisierung
+        locale: 'de',
       });
 
       console.log('Native Google button rendered');

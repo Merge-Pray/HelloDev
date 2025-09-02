@@ -6,6 +6,7 @@ const UserSchema = new Schema(
       type: String,
       unique: true,
       required: false,
+      maxlength: 100, // Erweitert für E-Mail-Adressen als Usernames
     },
     nickname: {
       type: String,

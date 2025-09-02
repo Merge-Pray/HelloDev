@@ -425,8 +425,8 @@ const EditProfilePage = () => {
                 message: "Username must be at least 3 characters",
               },
               maxLength: {
-                value: 20,
-                message: "Username must be less than 20 characters",
+                value: 50, // Erhöht für E-Mail-Adressen von Google-Accounts
+                message: "Username must be less than 50 characters",
               },
 
               onChange: (e) => {

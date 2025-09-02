@@ -100,6 +100,7 @@ export const googleAuth = async (req, res, next) => {
 
       return res.status(200).json({
         message: "Google login successful",
+        isNewUser: false,
         user: {
           _id: existingUser._id,
           username: existingUser.username,
@@ -125,45 +126,25 @@ export const googleAuth = async (req, res, next) => {
     // Create new user
     console.log('Creating new Google user');
     
-    // Bessere Username-Generierung mit 20-Zeichen-Limit
-    let username;
-    const emailPrefix = email.split('@')[0];
-    const cleanName = name ? name.replace(/[^a-zA-Z0-9]/g, '').toLowerCase() : '';
+    // Für Google-Accounts verwenden wir die komplette E-Mail-Adresse als Username
+    // Der Username kann später im Profil geändert werden
+    const username = email;
     
-    if (cleanName && cleanName.length >= 3) {
-      // Verwende den Namen wenn verfügbar und lang genug
-      username = cleanName.substring(0, 18); // Maximal 18 Zeichen für Suffix-Platz
-    } else {
-      // Fallback auf Email-Prefix
-      username = emailPrefix.replace(/[^a-zA-Z0-9]/g, '').toLowerCase().substring(0, 18);
+    // Prüfe, ob der Username bereits existiert (sollte bei E-Mail-Adressen nicht passieren)
+    const existingUsername = await UserModel.findOne({ username });
+    if (existingUsername) {
+      console.log('Username (email) already exists - this should not happen');
+      return res.status(409).json({
+        success: false,
+        message: "An account with this email already exists.",
+      });
     }
     
-    // Mindestlänge sicherstellen
-    if (username.length < 3) {
-      username = 'user' + Math.random().toString(36).substring(2, 8); // user + 6 zufällige Zeichen
-    }
-    
-    // Stelle sicher, dass der Username eindeutig ist und unter 20 Zeichen bleibt
-    let finalUsername = username;
-    let counter = 1;
-    while (await UserModel.findOne({ username: finalUsername })) {
-      const suffix = counter.toString();
-      const maxBaseLength = 20 - suffix.length;
-      finalUsername = username.substring(0, maxBaseLength) + suffix;
-      counter++;
-      
-      // Sicherheitscheck für sehr lange Zähler
-      if (finalUsername.length > 20) {
-        username = username.substring(0, 15);
-        finalUsername = username + suffix;
-      }
-    }
-    
-    const nickname = name || finalUsername;
+    const nickname = name || email.split('@')[0];
 
     const newUser = new UserModel({
       email,
-      username: finalUsername,
+      username,
       nickname,
       googleId,
       authProvider: "google",
@@ -185,6 +166,7 @@ export const googleAuth = async (req, res, next) => {
 
     return res.status(201).json({
       message: "Google account created successfully",
+      isNewUser: true,
       user: {
         _id: newUser._id,
         username: newUser.username,
