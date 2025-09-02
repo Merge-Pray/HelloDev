@@ -1,16 +1,58 @@
 import { create } from "zustand";
 import { persist } from "zustand/middleware";
 
+// Detect Samsung browser
+const isSamsungBrowser = () => {
+  return /SamsungBrowser/i.test(navigator.userAgent);
+};
+
 const zustandStorage = {
   getItem: (name) => {
-    const item = localStorage.getItem(name);
-    return item ? JSON.parse(item) : null;
+    try {
+      if (isSamsungBrowser()) {
+        // For Samsung browser, also try sessionStorage as fallback
+        const item = localStorage.getItem(name) || sessionStorage.getItem(name + '_samsung');
+        return item ? JSON.parse(item) : null;
+      }
+      const item = localStorage.getItem(name);
+      return item ? JSON.parse(item) : null;
+    } catch (error) {
+      console.error("Zustand getItem error:", error);
+      return null;
+    }
   },
   setItem: (name, value) => {
-    localStorage.setItem(name, JSON.stringify(value));
+    try {
+      const jsonValue = JSON.stringify(value);
+      localStorage.setItem(name, jsonValue);
+      
+      if (isSamsungBrowser()) {
+        // For Samsung browser, also store in sessionStorage as backup
+        sessionStorage.setItem(name + '_samsung', jsonValue);
+        console.log("🗄️ SAMSUNG: Stored in both localStorage and sessionStorage");
+      }
+    } catch (error) {
+      console.error("Zustand setItem error:", error);
+      if (isSamsungBrowser()) {
+        // Fallback to sessionStorage only for Samsung
+        try {
+          sessionStorage.setItem(name + '_samsung', JSON.stringify(value));
+          console.log("🗄️ SAMSUNG: Fallback to sessionStorage only");
+        } catch (sessionError) {
+          console.error("Samsung sessionStorage fallback failed:", sessionError);
+        }
+      }
+    }
   },
   removeItem: (name) => {
-    localStorage.removeItem(name);
+    try {
+      localStorage.removeItem(name);
+      if (isSamsungBrowser()) {
+        sessionStorage.removeItem(name + '_samsung');
+      }
+    } catch (error) {
+      console.error("Zustand removeItem error:", error);
+    }
   },
 };
 
