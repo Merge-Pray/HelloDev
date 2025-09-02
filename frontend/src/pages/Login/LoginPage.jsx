@@ -108,12 +108,28 @@ export default function LoginPage() {
             console.log("🔐 FORM: Event details:", { type: e.type, target: e.target });
             e.preventDefault();
             console.log("🔐 FORM: Default prevented, calling handleSubmit");
-            handleSubmit(onSubmit)(e);
+            
+            // Get form data directly for Samsung browser compatibility
+            const formData = new FormData(e.target);
+            const identifier = formData.get('identifier');
+            const password = formData.get('password');
+            
+            console.log("🔐 FORM: Form data extracted:", { identifier, passwordLength: password?.length });
+            
+            if (!identifier || !password) {
+              console.log("🔐 FORM: Missing required fields");
+              setError("Email/username and password are required");
+              return;
+            }
+            
+            console.log("🔐 FORM: Calling onSubmit directly");
+            onSubmit({ identifier, password });
           }}>
             <div className="form-field">
               <label>Email or Username</label>
               <input
                 type="text"
+                name="identifier"
                 className="form-input"
                 {...register("identifier", {
                   required: "Email or username is required.",
@@ -131,6 +147,7 @@ export default function LoginPage() {
               <div className={styles.passwordField}>
                 <input
                   type={showPassword ? "text" : "password"}
+                  name="password"
                   className="form-input"
                   style={{ paddingRight: "50px" }}
                   {...register("password", {
