@@ -8,7 +8,8 @@ import { authenticatedFetch } from "./utils/authenticatedFetch";
 import styles from "./app.layout.module.css";
 
 function App() {
-  const currentUser = useUserStore((state) => state.currentUser);
+  const hasHydrated = useUserStore((state) => state._hasHydrated);
+  const currentUser = useUserStore((state) => hasHydrated ? state.currentUser : null);
   const setSocket = useUserStore((state) => state.setSocket);
   const clearUser = useUserStore((state) => state.clearUser);
   const location = useLocation();
