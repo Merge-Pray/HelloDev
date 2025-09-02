@@ -18,10 +18,7 @@ function App() {
   const isLoginPage = location.pathname === "/login";
 
   useEffect(() => {
-    // SOCKET CONNECTIONS DISABLED FOR MOBILE BROWSER TESTING
-    // This will disable real-time chat features but keep authentication working
-    
-    if (false && currentUser && !socketRef.current) {
+    if (currentUser && !socketRef.current) {
       const connectSocket = async () => {
         try {
           const socket = io(import.meta.env.VITE_BACKENDPATH, {
