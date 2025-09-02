@@ -10,6 +10,7 @@ import { suggestionRouter } from "./routes/suggestions.js";
 import { matchRouter } from "./routes/match.js";
 import { uploadRouter } from "./routes/upload.js";
 import { chatRouter } from "./routes/chat.js";
+import { searchRouter } from "./routes/search.js";
 import http from "http";
 import { Server } from "socket.io";
 import { socketHandler } from "./services/socketHandler.js";
@@ -41,7 +42,7 @@ app.use(
     methods: ["GET", "POST", "PUT", "PATCH", "DELETE", "OPTIONS"],
     allowedHeaders: ["Content-Type", "Authorization"],
     exposedHeaders: ["Set-Cookie"],
-    optionsSuccessStatus: 200
+    optionsSuccessStatus: 200,
   })
 );
 
@@ -51,6 +52,7 @@ app.use("/api/suggestions", suggestionRouter);
 app.use("/api/match", matchRouter);
 app.use("/api/upload", uploadRouter);
 app.use("/api/chats", chatRouter);
+app.use("/api/search", searchRouter);
 app.get("/", (req, res) => {
   res.send("hello");
 });
