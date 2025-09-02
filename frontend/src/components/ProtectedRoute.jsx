@@ -7,6 +7,7 @@ const ProtectedRoute = ({ children }) => {
   const currentUser = useUserStore((state) => state.currentUser);
   const clearUser = useUserStore((state) => state.clearUser);
   const [redirect, setRedirect] = useState(false);
+
   const [isValidating, setIsValidating] = useState(true);
 
   useEffect(() => {
@@ -29,6 +30,7 @@ const ProtectedRoute = ({ children }) => {
 
     validateUser();
   }, [currentUser, clearUser]);
+
 
   if ((!currentUser || isValidating) && !redirect) {
     return (
