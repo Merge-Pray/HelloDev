@@ -19,6 +19,7 @@ const useUserStore = create(
     (set, get) => ({
       currentUser: null,
       socket: null,
+      _hasHydrated: false,
 
       setCurrentUser: (user) =>
         set({
@@ -68,6 +69,11 @@ const useUserStore = create(
       partialize: (state) => ({
         currentUser: state.currentUser,
       }),
+      onRehydrateStorage: () => (state) => {
+        if (state) {
+          state._hasHydrated = true;
+        }
+      },
     }
   )
 );
