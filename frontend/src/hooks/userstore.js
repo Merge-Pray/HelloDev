@@ -26,11 +26,8 @@ const useUserStore = create(
             ? {
                 _id: user._id,
                 username: user.username,
-                email: user.email,
-                avatar: user.avatar,
                 nickname: user.nickname,
-                isOnline: user.isOnline,
-                lastSeen: user.lastSeen,
+                avatar: user.avatar,
               }
             : null,
         }),
