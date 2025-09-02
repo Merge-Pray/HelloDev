@@ -52,21 +52,21 @@ export default function LandingPage() {
 
         <h2 className={styles.subheadline}>Welcome. Sign up today.</h2>
 
-        <GoogleAuthButton 
-          text="Sign up with Google"
-          className={styles.googleSignUpBtn}
-        />
-
-        <div className={styles.divider}>
-          <span>or</span>
-        </div>
-
         <button
           className={styles.createAccountBtn}
           onClick={() => navigate("/register")}
         >
           Create account
         </button>
+
+        <div className={styles.divider}>
+          <span>or</span>
+        </div>
+
+        <GoogleAuthButton 
+          text="Sign up with Google"
+          className={styles.googleSignUpBtn}
+        />
 
         <div className={styles.loginBox}>
           <span>Already have an account?</span>
