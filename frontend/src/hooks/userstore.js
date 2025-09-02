@@ -18,7 +18,7 @@ const useUserStore = create(
   persist(
     (set, get) => ({
       currentUser: null,
-      socket: null,
+      // socket: null,
 
       setCurrentUser: (user) =>
         set({
@@ -32,14 +32,14 @@ const useUserStore = create(
             : null,
         }),
 
-      setSocket: (socket) => set({ socket }),
+      // setSocket: (socket) => set({ socket }),
 
       clearUser: () => {
-        const currentSocket = get().socket;
-        if (currentSocket) {
-          currentSocket.disconnect();
-        }
-        set({ currentUser: null, socket: null });
+        // const currentSocket = get().socket;
+        // if (currentSocket) {
+        //   currentSocket.disconnect();
+        // }
+        set({ currentUser: null });
         localStorage.removeItem("user-storage");
       },
 
@@ -52,11 +52,11 @@ const useUserStore = create(
         } catch (error) {
           console.error("Logout error:", error);
         } finally {
-          const currentSocket = get().socket;
-          if (currentSocket) {
-            currentSocket.disconnect();
-          }
-          set({ currentUser: null, socket: null });
+          // const currentSocket = get().socket;
+          // if (currentSocket) {
+          //   currentSocket.disconnect();
+          // }
+          set({ currentUser: null });
           localStorage.removeItem("user-storage");
         }
       },
