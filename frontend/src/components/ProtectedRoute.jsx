@@ -6,10 +6,9 @@ const ProtectedRoute = ({ children }) => {
   const currentUser = useUserStore((state) => state.currentUser);
   const [redirect, setRedirect] = useState(false);
 
-
   useEffect(() => {
     if (!currentUser) {
-      const timeout = setTimeout(() => setRedirect(true), 1500);
+      const timeout = setTimeout(() => setRedirect(true), 3000);
       return () => clearTimeout(timeout);
     }
   }, [currentUser]);
