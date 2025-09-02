@@ -3,6 +3,153 @@ import { generateToken } from "../libs/jwt.js";
 import { hashPassword, comparePassword } from "../libs/pw.js";
 import UserModel from "../models/user.js";
 import { getUniversalCookieOptions } from "../utils/browserDetection.js";
+import { OAuth2Client } from 'google-auth-library';
+
+const client = new OAuth2Client(process.env.GOOGLE_CLIENT_ID);
+
+// Hilfsfunktion zum Generieren eines eindeutigen Usernamens
+const generateUniqueUsername = async (email) => {
+  // Extrahiere den Teil vor dem ersten Punkt oder @
+  const emailPrefix = email.split('@')[0];
+  let baseUsername = emailPrefix.split('.')[0].toLowerCase();
+  
+  // Entferne ungültige Zeichen und stelle sicher, dass es mindestens 3 Zeichen hat
+  baseUsername = baseUsername.replace(/[^a-z0-9]/g, '');
+  if (baseUsername.length < 3) {
+    baseUsername = 'user' + baseUsername;
+  }
+  
+  let username = baseUsername;
+  let attempts = 0;
+  const maxAttempts = 100;
+  
+  // Prüfe ob Username bereits existiert
+  while (attempts < maxAttempts) {
+    const existingUser = await UserModel.findOne({ username });
+    
+    if (!existingUser) {
+      return username;
+    }
+    
+    // Füge 2-stellige Zufallszahl hinzu
+    const randomNumber = Math.floor(Math.random() * 90) + 10; // 10-99
+    username = `${baseUsername}${randomNumber}`;
+    attempts++;
+  }
+  
+  // Fallback wenn alle Versuche fehlschlagen
+  const timestamp = Date.now().toString().slice(-4);
+  return `${baseUsername}${timestamp}`;
+};
+
+export const googleAuth = async (req, res, next) => {
+  try {
+    const { credential } = req.body;
+    
+    if (!credential) {
+      return res.status(400).json({
+        success: false,
+        message: 'Google credential is required'
+      });
+    }
+
+    // Verifiziere das Google Token
+    const ticket = await client.verifyIdToken({
+      idToken: credential,
+      audience: process.env.GOOGLE_CLIENT_ID,
+    });
+    
+    const payload = ticket.getPayload();
+    const { email, name, picture, sub: googleId } = payload;
+    
+    if (!email) {
+      return res.status(400).json({
+        success: false,
+        message: 'Email not provided by Google'
+      });
+    }
+
+    // Prüfe ob User bereits existiert (per Email oder Google ID)
+    let existingUser = await UserModel.findOne({
+      $or: [{ email }, { googleId }]
+    });
+
+    if (existingUser) {
+      // User existiert bereits - Anmeldung
+      
+      // Update Google ID falls noch nicht gesetzt
+      if (!existingUser.googleId) {
+        existingUser.googleId = googleId;
+        await existingUser.save();
+      }
+      
+      const token = generateToken(existingUser.username, existingUser._id);
+      const cookieOptions = getUniversalCookieOptions();
+      res.cookie('jwt', token, cookieOptions);
+      
+      return res.status(200).json({
+        success: true,
+        message: 'Login successful',
+        user: {
+          _id: existingUser._id,
+          username: existingUser.username,
+          nickname: existingUser.nickname,
+          email: existingUser.email,
+          avatar: existingUser.avatar,
+          isMatchable: existingUser.isMatchable,
+        },
+        isNewUser: false
+      });
+    } else {
+      // Neuer User - Registrierung
+      
+      const username = await generateUniqueUsername(email);
+      
+      const newUser = new UserModel({
+        email,
+        username,
+        nickname: name || username,
+        googleId,
+        avatar: picture,
+        isMatchable: false,
+      });
+
+      await newUser.save();
+      
+      const token = generateToken(username, newUser._id);
+      const cookieOptions = getUniversalCookieOptions();
+      res.cookie('jwt', token, cookieOptions);
+      
+      return res.status(201).json({
+        success: true,
+        message: 'Registration successful',
+        user: {
+          _id: newUser._id,
+          username: newUser.username,
+          nickname: newUser.nickname,
+          email: newUser.email,
+          avatar: newUser.avatar,
+          isMatchable: false,
+        },
+        isNewUser: true
+      });
+    }
+  } catch (error) {
+    console.error('Google Auth Error:', error);
+    
+    if (error.message.includes('Token used too late')) {
+      return res.status(400).json({
+        success: false,
+        message: 'Google token has expired. Please try again.'
+      });
+    }
+    
+    return res.status(500).json({
+      success: false,
+      message: 'Google authentication failed'
+    });
+  }
+};
 
 export const createUser = async (req, res, next) => {
   try {

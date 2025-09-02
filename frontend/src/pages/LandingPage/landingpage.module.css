@@ -83,10 +83,38 @@
   background-color: var(--color-primary-hover);
 }
 
+/* === Divider === */
+.divider {
+  display: flex;
+  align-items: center;
+  text-align: center;
+  margin: 0rem 0;
+  max-width: 20rem;
+}
+
+.divider::before,
+.divider::after {
+  content: '';
+  flex: 1;
+  border-bottom: 1px solid var(--color-border);
+}
+
+.divider span {
+  padding: 0 1rem;
+  color: var(--color-text-secondary);
+  font-weight: 500;
+}
+
+/* === Google Sign Up Button === */
+.googleSignUpBtn {
+  max-width: 20rem;
+}
+
 .loginBox {
   display: flex;
   flex-direction: column;
   gap: 1rem;
+  margin-top: 1.5rem;
 }
 
 .loginBtn {

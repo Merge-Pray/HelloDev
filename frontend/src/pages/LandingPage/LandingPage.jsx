@@ -3,6 +3,7 @@ import { useEffect } from "react";
 import useUserStore from "../../hooks/userstore";
 import styles from "./landingpage.module.css";
 import DarkMode from "../../components/DarkMode";
+import GoogleAuthButton from "../../components/GoogleAuthButton";
 
 export default function LandingPage() {
   const navigate = useNavigate();
@@ -57,6 +58,15 @@ export default function LandingPage() {
         >
           Create account
         </button>
+
+        <div className={styles.divider}>
+          <span>or</span>
+        </div>
+
+        <GoogleAuthButton 
+          text="Sign up with Google"
+          className={styles.googleSignUpBtn}
+        />
 
         <div className={styles.loginBox}>
           <span>Already have an account?</span>
