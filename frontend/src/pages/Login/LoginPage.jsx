@@ -31,42 +31,60 @@ export default function LoginPage() {
 
 
   async function onSubmit(values) {
-    console.log("🔐 LOGIN: Starting login process");
-    setIsLoading(true);
-    setError(null);
-
     try {
-      console.log("🔐 LOGIN: Sending request to backend");
-      const res = await fetch(`${API_URL}/api/user/login`, {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        credentials: "include",
-        body: JSON.stringify(values),
-      });
-
-      const data = await res.json();
-      console.log("🔐 LOGIN: Backend response:", { 
-        ok: res.ok, 
-        status: res.status,
-        hasUser: !!data.user,
-        userId: data.user?._id 
-      });
-
-      if (!res.ok) throw new Error(data.message || "Login failed");
-
-      console.log("🔐 LOGIN: Updating Zustand store");
-      setCurrentUser(data.user);
+      console.log("🔐 LOGIN: Starting login process");
       
-      console.log("🔐 LOGIN: Updating React Query cache");
-      queryClient.setQueryData(["user-profile"], data.user);
+      // Store in sessionStorage for Samsung debugging
+      sessionStorage.setItem('samsung_login_start', new Date().toISOString());
       
-      console.log("🔐 LOGIN: Navigating to /home");
-      navigate("/home", { replace: true });
-    } catch (err) {
-      console.error("🔐 LOGIN ERROR:", err);
-      setError("Login failed. Please try again.");
-    } finally {
-      setIsLoading(false);
+      setIsLoading(true);
+      setError(null);
+
+      try {
+        console.log("🔐 LOGIN: Sending request to backend");
+        const res = await fetch(`${API_URL}/api/user/login`, {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          credentials: "include",
+          body: JSON.stringify(values),
+        });
+
+        const data = await res.json();
+        console.log("🔐 LOGIN: Backend response:", { 
+          ok: res.ok, 
+          status: res.status,
+          hasUser: !!data.user,
+          userId: data.user?._id 
+        });
+
+        if (!res.ok) throw new Error(data.message || "Login failed");
+
+        console.log("🔐 LOGIN: Updating Zustand store");
+        setCurrentUser(data.user);
+        
+        console.log("🔐 LOGIN: Updating React Query cache");
+        queryClient.setQueryData(["user-profile"], data.user);
+        
+        console.log("🔐 LOGIN: Navigating to /home");
+        navigate("/home", { replace: true });
+        
+      } catch (err) {
+        console.error("🔐 LOGIN ERROR:", err);
+        setError("Login failed. Please try again.");
+        
+        // Store error for Samsung debugging
+        sessionStorage.setItem('samsung_login_error', JSON.stringify({
+          message: err.message,
+          stack: err.stack,
+          timestamp: new Date().toISOString()
+        }));
+      } finally {
+        setIsLoading(false);
+      }
+      
+    } catch (criticalError) {
+      console.error("🔐 LOGIN CRITICAL ERROR:", criticalError);
+      alert("Critical login error: " + criticalError.message);
     }
   }
 
@@ -177,28 +195,58 @@ export default function LoginPage() {
               className="btn btn-primary full-width"
               disabled={isLoading}
               onClick={(e) => {
-                console.log("🔐 BUTTON: Submit button clicked directly");
-                console.log("🔐 BUTTON: Button disabled:", isLoading);
-                console.log("🔐 BUTTON: Form errors:", errors);
-                e.preventDefault();
-                e.stopPropagation();
-                
-                // Get form data directly
-                const form = e.target.closest('form');
-                const formData = new FormData(form);
-                const identifier = formData.get('identifier');
-                const password = formData.get('password');
-                
-                console.log("🔐 BUTTON: Form data extracted:", { identifier, passwordLength: password?.length });
-                
-                if (!identifier || !password) {
-                  console.log("🔐 BUTTON: Missing required fields");
-                  setError("Email/username and password are required");
-                  return;
+                try {
+                  console.log("🔐 BUTTON: Submit button clicked directly");
+                  console.log("🔐 BUTTON: Button disabled:", isLoading);
+                  console.log("🔐 BUTTON: Form errors:", errors);
+                  
+                  // Store logs in sessionStorage for persistence
+                  const logEntry = `${new Date().toISOString()}: Button clicked`;
+                  sessionStorage.setItem('samsung_debug', sessionStorage.getItem('samsung_debug') + '\n' + logEntry);
+                  
+                  e.preventDefault();
+                  e.stopPropagation();
+                  
+                  // Get form data directly
+                  const form = e.target.closest('form');
+                  if (!form) {
+                    console.error("🔐 BUTTON ERROR: No form found");
+                    alert("Form not found - Samsung browser issue");
+                    return;
+                  }
+                  
+                  const formData = new FormData(form);
+                  const identifier = formData.get('identifier');
+                  const password = formData.get('password');
+                  
+                  console.log("🔐 BUTTON: Form data extracted:", { identifier, passwordLength: password?.length });
+                  
+                  if (!identifier || !password) {
+                    console.log("🔐 BUTTON: Missing required fields");
+                    setError("Email/username and password are required");
+                    return;
+                  }
+                  
+                  console.log("🔐 BUTTON: Calling onSubmit directly from button");
+                  
+                  // Add try-catch around onSubmit call
+                  try {
+                    onSubmit({ identifier, password });
+                  } catch (submitError) {
+                    console.error("🔐 BUTTON ERROR: onSubmit failed:", submitError);
+                    alert("Login failed: " + submitError.message);
+                  }
+                  
+                } catch (error) {
+                  console.error("🔐 BUTTON CRITICAL ERROR:", error);
+                  alert("Critical error: " + error.message);
+                  // Store error in sessionStorage
+                  sessionStorage.setItem('samsung_error', JSON.stringify({
+                    message: error.message,
+                    stack: error.stack,
+                    timestamp: new Date().toISOString()
+                  }));
                 }
-                
-                console.log("🔐 BUTTON: Calling onSubmit directly from button");
-                onSubmit({ identifier, password });
               }}
             >
               {isLoading ? "Signing in..." : "Sign In"}
