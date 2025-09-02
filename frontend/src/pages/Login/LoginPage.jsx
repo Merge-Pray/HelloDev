@@ -173,13 +173,32 @@ export default function LoginPage() {
             </div>
 
             <button
-              type="submit"
+              type="button"
               className="btn btn-primary full-width"
               disabled={isLoading}
               onClick={(e) => {
-                console.log("🔐 FORM: Submit button clicked");
-                console.log("🔐 FORM: Button disabled:", isLoading);
-                console.log("🔐 FORM: Form errors:", errors);
+                console.log("🔐 BUTTON: Submit button clicked directly");
+                console.log("🔐 BUTTON: Button disabled:", isLoading);
+                console.log("🔐 BUTTON: Form errors:", errors);
+                e.preventDefault();
+                e.stopPropagation();
+                
+                // Get form data directly
+                const form = e.target.closest('form');
+                const formData = new FormData(form);
+                const identifier = formData.get('identifier');
+                const password = formData.get('password');
+                
+                console.log("🔐 BUTTON: Form data extracted:", { identifier, passwordLength: password?.length });
+                
+                if (!identifier || !password) {
+                  console.log("🔐 BUTTON: Missing required fields");
+                  setError("Email/username and password are required");
+                  return;
+                }
+                
+                console.log("🔐 BUTTON: Calling onSubmit directly from button");
+                onSubmit({ identifier, password });
               }}
             >
               {isLoading ? "Signing in..." : "Sign In"}
