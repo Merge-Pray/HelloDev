@@ -93,7 +93,7 @@ export const googleAuth = async (req, res, next) => {
       }
       
       const token = generateToken(existingUser.username, existingUser._id);
-      const cookieOptions = getUniversalCookieOptions({}, req);
+      const cookieOptions = getUniversalCookieOptions();
       res.cookie('jwt', token, cookieOptions);
       
       return res.status(200).json({
@@ -179,7 +179,7 @@ export const googleAuth = async (req, res, next) => {
       await newUser.save();
       
       const token = generateToken(username, newUser._id);
-      const cookieOptions = getUniversalCookieOptions({}, req);
+      const cookieOptions = getUniversalCookieOptions();
       res.cookie('jwt', token, cookieOptions);
       
       return res.status(201).json({
@@ -256,7 +256,7 @@ export const createUser = async (req, res, next) => {
     }
 
     const token = generateToken(username, newAccount._id);
-    const cookieOptions = getUniversalCookieOptions({}, req);
+    const cookieOptions = getUniversalCookieOptions();
     res.cookie("jwt", token, cookieOptions);
 
     return res.status(201).json({
@@ -443,7 +443,7 @@ export const updateUserProfile = async (req, res, next) => {
     if (password !== undefined) {
       newToken = generateToken(updatedUser.username, updatedUser._id);
 
-      const cookieOptions = getUniversalCookieOptions({}, req);
+      const cookieOptions = getUniversalCookieOptions();
 
       res.cookie("jwt", newToken, cookieOptions);
     }
@@ -523,7 +523,7 @@ export const verifyLogin = async (req, res, next) => {
 
     const token = generateToken(existingUser.username, existingUser._id);
 
-    const cookieOptions = getUniversalCookieOptions({}, req);
+    const cookieOptions = getUniversalCookieOptions();
 
     res.cookie("jwt", token, cookieOptions);
 

@@ -51,7 +51,7 @@ export const refreshToken = async (req, res, next) => {
 
     const newToken = generateToken(user.username, user._id);
 
-    const cookieOptions = getUniversalCookieOptions({}, req);
+    const cookieOptions = getUniversalCookieOptions();
     
     res.cookie("jwt", newToken, cookieOptions);
 
