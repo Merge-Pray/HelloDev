@@ -197,18 +197,30 @@ export default function LoginPage() {
               onClick={(e) => {
                 try {
                   console.log("🔐 BUTTON: Submit button clicked directly");
-                  console.log("🔐 BUTTON: Button disabled:", isLoading);
-                  console.log("🔐 BUTTON: Form errors:", errors);
                   
-                  // Store logs in sessionStorage for persistence
-                  const logEntry = `${new Date().toISOString()}: Button clicked`;
-                  sessionStorage.setItem('samsung_debug', sessionStorage.getItem('samsung_debug') + '\n' + logEntry);
+                  // Store each step in sessionStorage
+                  let debugLog = sessionStorage.getItem('samsung_debug') || '';
+                  debugLog += `\n${new Date().toISOString()}: Button clicked`;
+                  sessionStorage.setItem('samsung_debug', debugLog);
+                  
+                  console.log("🔐 BUTTON: Button disabled:", isLoading);
+                  debugLog += `\n${new Date().toISOString()}: Checked button state`;
+                  sessionStorage.setItem('samsung_debug', debugLog);
+                  
+                  console.log("🔐 BUTTON: Form errors:", errors);
+                  debugLog += `\n${new Date().toISOString()}: Checked form errors`;
+                  sessionStorage.setItem('samsung_debug', debugLog);
                   
                   e.preventDefault();
                   e.stopPropagation();
+                  debugLog += `\n${new Date().toISOString()}: Prevented default`;
+                  sessionStorage.setItem('samsung_debug', debugLog);
                   
                   // Get form data directly
                   const form = e.target.closest('form');
+                  debugLog += `\n${new Date().toISOString()}: Found form: ${!!form}`;
+                  sessionStorage.setItem('samsung_debug', debugLog);
+                  
                   if (!form) {
                     console.error("🔐 BUTTON ERROR: No form found");
                     alert("Form not found - Samsung browser issue");
@@ -216,25 +228,38 @@ export default function LoginPage() {
                   }
                   
                   const formData = new FormData(form);
+                  debugLog += `\n${new Date().toISOString()}: Created FormData`;
+                  sessionStorage.setItem('samsung_debug', debugLog);
+                  
                   const identifier = formData.get('identifier');
                   const password = formData.get('password');
+                  debugLog += `\n${new Date().toISOString()}: Extracted data - ID: ${!!identifier}, PW: ${!!password}`;
+                  sessionStorage.setItem('samsung_debug', debugLog);
                   
                   console.log("🔐 BUTTON: Form data extracted:", { identifier, passwordLength: password?.length });
                   
                   if (!identifier || !password) {
                     console.log("🔐 BUTTON: Missing required fields");
                     setError("Email/username and password are required");
+                    debugLog += `\n${new Date().toISOString()}: Missing fields error`;
+                    sessionStorage.setItem('samsung_debug', debugLog);
                     return;
                   }
                   
                   console.log("🔐 BUTTON: Calling onSubmit directly from button");
+                  debugLog += `\n${new Date().toISOString()}: About to call onSubmit`;
+                  sessionStorage.setItem('samsung_debug', debugLog);
                   
                   // Add try-catch around onSubmit call
                   try {
                     onSubmit({ identifier, password });
+                    debugLog += `\n${new Date().toISOString()}: onSubmit called successfully`;
+                    sessionStorage.setItem('samsung_debug', debugLog);
                   } catch (submitError) {
                     console.error("🔐 BUTTON ERROR: onSubmit failed:", submitError);
                     alert("Login failed: " + submitError.message);
+                    debugLog += `\n${new Date().toISOString()}: onSubmit error: ${submitError.message}`;
+                    sessionStorage.setItem('samsung_debug', debugLog);
                   }
                   
                 } catch (error) {
