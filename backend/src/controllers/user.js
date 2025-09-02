@@ -323,7 +323,8 @@ export const verifyLogin = async (req, res, next) => {
         linkedinProfile: existingUser.linkedinProfile,
         githubProfile: existingUser.githubProfile,
         personalWebsites: existingUser.personalWebsites,
-        profileLinksVisibleToContacts: existingUser.profileLinksVisibleToContacts,
+        profileLinksVisibleToContacts:
+          existingUser.profileLinksVisibleToContacts,
         isOnline: existingUser.isOnline,
         lastSeen: existingUser.lastSeen,
         points: existingUser.points,
@@ -563,7 +564,12 @@ export const getUserContacts = async (req, res, next) => {
       .populate({
         path: "contacts",
         select: "username nickname avatar isOnline lastSeen",
-        options: { sort: { lastSeen: -1 } },
+        options: {
+          sort: {
+            isOnline: -1,
+            lastSeen: -1,
+          },
+        },
       })
       .select("contacts");
 
