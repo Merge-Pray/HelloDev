@@ -1,58 +1,16 @@
 import { create } from "zustand";
 import { persist } from "zustand/middleware";
 
-// Detect Samsung browser
-const isSamsungBrowser = () => {
-  return /SamsungBrowser/i.test(navigator.userAgent);
-};
-
 const zustandStorage = {
   getItem: (name) => {
-    try {
-      if (isSamsungBrowser()) {
-        // For Samsung browser, also try sessionStorage as fallback
-        const item = localStorage.getItem(name) || sessionStorage.getItem(name + '_samsung');
-        return item ? JSON.parse(item) : null;
-      }
-      const item = localStorage.getItem(name);
-      return item ? JSON.parse(item) : null;
-    } catch (error) {
-      console.error("Zustand getItem error:", error);
-      return null;
-    }
+    const item = localStorage.getItem(name);
+    return item ? JSON.parse(item) : null;
   },
   setItem: (name, value) => {
-    try {
-      const jsonValue = JSON.stringify(value);
-      localStorage.setItem(name, jsonValue);
-      
-      if (isSamsungBrowser()) {
-        // For Samsung browser, also store in sessionStorage as backup
-        sessionStorage.setItem(name + '_samsung', jsonValue);
-        console.log("🗄️ SAMSUNG: Stored in both localStorage and sessionStorage");
-      }
-    } catch (error) {
-      console.error("Zustand setItem error:", error);
-      if (isSamsungBrowser()) {
-        // Fallback to sessionStorage only for Samsung
-        try {
-          sessionStorage.setItem(name + '_samsung', JSON.stringify(value));
-          console.log("🗄️ SAMSUNG: Fallback to sessionStorage only");
-        } catch (sessionError) {
-          console.error("Samsung sessionStorage fallback failed:", sessionError);
-        }
-      }
-    }
+    localStorage.setItem(name, JSON.stringify(value));
   },
   removeItem: (name) => {
-    try {
-      localStorage.removeItem(name);
-      if (isSamsungBrowser()) {
-        sessionStorage.removeItem(name + '_samsung');
-      }
-    } catch (error) {
-      console.error("Zustand removeItem error:", error);
-    }
+    localStorage.removeItem(name);
   },
 };
 
@@ -62,14 +20,7 @@ const useUserStore = create(
       currentUser: null,
       socket: null,
 
-      setCurrentUser: (user) => {
-        console.log("🗄️ ZUSTAND: setCurrentUser called", {
-          hasUser: !!user,
-          userId: user?._id,
-          username: user?.username,
-          timestamp: new Date().toISOString()
-        });
-        
+      setCurrentUser: (user) =>
         set({
           currentUser: user
             ? {
@@ -82,10 +33,7 @@ const useUserStore = create(
                 lastSeen: user.lastSeen,
               }
             : null,
-        });
-        
-        console.log("🗄️ ZUSTAND: currentUser updated");
-      },
+        }),
 
       setSocket: (socket) => set({ socket }),
 

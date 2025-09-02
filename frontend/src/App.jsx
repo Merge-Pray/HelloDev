@@ -18,14 +18,8 @@ function App() {
   const isLoginPage = location.pathname === "/login";
 
   useEffect(() => {
-    console.log("🔌 APP: useEffect triggered", {
-      hasCurrentUser: !!currentUser,
-      hasSocket: !!socketRef.current,
-      userId: currentUser?._id
-    });
 
     if (currentUser && !socketRef.current) {
-      console.log("🔌 APP: Starting socket connection");
       const connectSocket = async () => {
         try {
           const socket = io(import.meta.env.VITE_BACKENDPATH, {
@@ -59,7 +53,6 @@ function App() {
     }
 
     if (!currentUser && socketRef.current) {
-      console.log("🔌 APP: Disconnecting socket - no currentUser");
       socketRef.current.disconnect();
       socketRef.current = null;
       setSocket(null);
