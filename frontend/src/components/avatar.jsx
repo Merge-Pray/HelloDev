@@ -57,6 +57,14 @@ const Avatar = forwardRef(function Avatar(
     return Array.from({ length: initialGridSize * initialGridSize }, () => "#ffffff");
   });
 
+  // Update pixels when initialData changes
+  useEffect(() => {
+    if (initialData && initialData.length === gridSize * gridSize) {
+      console.log('🎨 Avatar: Loading initial data with', initialData.length, 'pixels');
+      setPixels(initialData.slice()); // Create a copy to avoid mutation
+    }
+  }, [initialData, gridSize]);
+
   // Vorschläge (5 Arrays)
   const [suggestions, setSuggestions] = useState(() =>
     makeSuggestions(gridSize, 5)
@@ -231,6 +239,7 @@ const Avatar = forwardRef(function Avatar(
     },
     randomize: () => setPixels(randomizePixels(gridSize)),
     refreshSuggestions: () => setSuggestions(makeSuggestions(gridSize, 5)),
+    clear: () => setPixels(Array.from({ length: gridSize * gridSize }, () => "#ffffff")),
   }), [pixels, gridSize, sizePx, idx]);
 
   // JSON-Import (Buttons für Export wurden entfernt; Parent speichert über ref)
@@ -412,6 +421,13 @@ const renderSuggestion = (arr) => {
 
       {/* Zufall & Vorschläge */}
       <div className={styles.suggestionsBar}>
+        <button
+          className={styles.clearBtn}
+          onClick={() => setPixels(Array.from({ length: gridSize * gridSize }, () => "#ffffff"))}
+          title="Alle Pixel leeren (weiß)"
+        >
+          🧹 Clear
+        </button>
         <button
           className={styles.primaryBtn}
           onClick={() => setPixels(randomizePixels(gridSize))}

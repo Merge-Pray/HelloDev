@@ -4,6 +4,15 @@ import { hashPassword, comparePassword } from "../libs/pw.js";
 import UserModel from "../models/user.js";
 import { getUniversalCookieOptions } from "../utils/browserDetection.js";
 import { OAuth2Client } from 'google-auth-library';
+import { pixelizeImageFromUrl, dataUrlToBuffer, generateAndUploadRandomAvatar } from '../utils/imagePixelizer.js';
+import { v2 as cloudinary } from 'cloudinary';
+
+// Cloudinary configuration
+cloudinary.config({
+  cloud_name: process.env.CLOUDINARY_CLOUD_NAME,
+  api_key: process.env.CLOUDINARY_API_KEY,
+  api_secret: process.env.CLOUDINARY_API_SECRET,
+});
 
 const client = new OAuth2Client(process.env.GOOGLE_CLIENT_ID);
 
@@ -101,16 +110,69 @@ export const googleAuth = async (req, res, next) => {
         isNewUser: false
       });
     } else {
-      // Neuer User - Registrierung
+      // Neuer User - Registrierung mit Bildpixelisierung
       
       const username = await generateUniqueUsername(email);
+      
+      let finalAvatar = picture;
+      let avatarData = null;
+      
+      // Versuche das Google-Profilbild zu pixelisieren
+      if (picture) {
+        try {
+          console.log('🎨 Starting Google profile picture pixelization...');
+          
+          // Pixelisiere das Google-Bild
+          const pixelResult = await pixelizeImageFromUrl(picture, 16);
+          
+          // Konvertiere DataURL zu Buffer
+          const imageBuffer = dataUrlToBuffer(pixelResult.imageDataUrl);
+          
+          // Upload zu Cloudinary
+          const folder = `avatars/${username}`;
+          const cloudinaryResult = await new Promise((resolve, reject) => {
+            cloudinary.uploader.upload_stream(
+              {
+                folder: folder,
+                resource_type: 'image',
+                allowed_formats: ['png'],
+                transformation: [
+                  { width: 400, height: 400, crop: 'fill' },
+                  { quality: 'auto' },
+                  { fetch_format: 'auto' },
+                ],
+              },
+              (error, result) => {
+                if (error) {
+                  console.error('Cloudinary upload error:', error);
+                  reject(error);
+                } else {
+                  resolve(result);
+                }
+              }
+            ).end(imageBuffer);
+          });
+          
+          finalAvatar = cloudinaryResult.secure_url;
+          avatarData = JSON.stringify(pixelResult.pixels);
+          
+          console.log('✅ Google profile picture successfully pixelized and uploaded');
+          
+        } catch (pixelError) {
+          console.error('❌ Error pixelizing Google profile picture:', pixelError);
+          console.log('📝 Falling back to original Google picture');
+          // Fallback: Use original Google picture
+          finalAvatar = picture;
+        }
+      }
       
       const newUser = new UserModel({
         email,
         username,
         nickname: name || username,
         googleId,
-        avatar: picture,
+        avatar: finalAvatar,
+        avatarData: avatarData,
         isMatchable: false,
       });
 
@@ -129,6 +191,7 @@ export const googleAuth = async (req, res, next) => {
           nickname: newUser.nickname,
           email: newUser.email,
           avatar: newUser.avatar,
+          avatarData: newUser.avatarData,
           isMatchable: false,
         },
         isNewUser: true
@@ -153,10 +216,12 @@ export const googleAuth = async (req, res, next) => {
 
 export const createUser = async (req, res, next) => {
   try {
+    console.log('🔧 Creating new user with automatic random avatar...');
     const { email, password, username } = req.body;
 
     const hashedPassword = await hashPassword(password);
 
+    // Create user first without avatar
     let newAccount = new UserModel({
       email,
       hashedPassword,
@@ -166,11 +231,32 @@ export const createUser = async (req, res, next) => {
     });
 
     await newAccount.save();
+    console.log('✅ User created, now generating random avatar...');
+
+    // Generate and upload random avatar
+    let avatarUrl = null;
+    let avatarData = null;
+    
+    try {
+      const randomAvatarResult = await generateAndUploadRandomAvatar(newAccount._id, cloudinary, 16);
+      avatarUrl = randomAvatarResult.avatarUrl;
+      avatarData = randomAvatarResult.avatarData;
+      
+      // Update user with avatar data
+      newAccount.avatar = avatarUrl;
+      newAccount.avatarData = avatarData;
+      await newAccount.save();
+      
+      console.log('✅ Random avatar generated and saved for new user');
+      
+    } catch (avatarError) {
+      console.error('❌ Error generating random avatar for new user:', avatarError);
+      console.log('📝 User created without avatar, continuing registration...');
+      // Continue without avatar - user can create one later
+    }
 
     const token = generateToken(username, newAccount._id);
-
     const cookieOptions = getUniversalCookieOptions();
-
     res.cookie("jwt", token, cookieOptions);
 
     return res.status(201).json({
@@ -181,6 +267,8 @@ export const createUser = async (req, res, next) => {
         nickname: newAccount.nickname,
         email: newAccount.email,
         isMatchable: false,
+        avatar: newAccount.avatar || null,
+        avatarData: newAccount.avatarData || null,
       },
     });
   } catch (error) {
@@ -498,9 +586,14 @@ export const logout = async (req, res, next) => {
 
 export const getUserData = async (req, res, next) => {
   try {
+    console.log('🔍 getUserData called for user:', req.user._id);
     const userId = req.user._id;
 
     const user = await UserModel.findById(userId).select("-hashedPassword");
+    console.log('📦 User found in database:', !!user);
+    console.log('🎨 User avatarData present:', !!user?.avatarData);
+    console.log('🎨 AvatarData type:', typeof user?.avatarData);
+    console.log('🎨 AvatarData length:', user?.avatarData?.length);
 
     if (!user) {
       const error = new Error("User not found");
