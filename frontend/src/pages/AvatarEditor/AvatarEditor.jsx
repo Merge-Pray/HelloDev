@@ -2,13 +2,15 @@ import React, { useState, useRef } from "react";
 import Avatar from "../../components/avatar";
 import { authenticatedFetch } from "../../utils/authenticatedFetch";
 import useUserStore from "../../hooks/userstore";
+import { useQueryClient } from "@tanstack/react-query";
 import styles from "./AvatarEditor.module.css";
 
 const AvatarEditor = () => {
   const [avatarData, setAvatarData] = useState(null);
   const [isSaving, setIsSaving] = useState(false);
   const avatarRef = useRef(null);
-  const { setCurrentUser, currentUser } = useUserStore();
+  const { setCurrentUser } = useUserStore();
+  const queryClient = useQueryClient();
 
   const handleAvatarChange = (data) => {
     setAvatarData(data);
@@ -49,13 +51,9 @@ const AvatarEditor = () => {
         },
       });
 
-      // User Store mit neuer Avatar URL aktualisieren
-      if (result.user && currentUser) {
-        setCurrentUser({
-          ...currentUser,
-          avatar: result.user.avatar,
-          avatarData: result.user.avatarData,
-        });
+      if (result.user) {
+        setCurrentUser(result.user);
+        queryClient.setQueryData(["user-profile"], result.user);
       }
 
       alert("Avatar has been saved successfully! ✅");

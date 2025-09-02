@@ -29,24 +29,15 @@ export default function LoginPage() {
     },
   });
 
-  useEffect(() => {
-    if (currentUser) {
-      navigate("/home", { replace: true });
-    }
-  }, [currentUser, navigate]);
 
   async function onSubmit(values) {
     setIsLoading(true);
     setError(null);
 
     try {
-      const headers = {
-        "Content-Type": "application/json",
-      };
-
       const res = await fetch(`${API_URL}/api/user/login`, {
         method: "POST",
-        headers,
+        headers: { "Content-Type": "application/json" },
         credentials: "include",
         body: JSON.stringify(values),
       });
@@ -55,14 +46,10 @@ export default function LoginPage() {
       if (!res.ok) throw new Error(data.message || "Login failed");
 
       setCurrentUser(data.user);
-
       queryClient.setQueryData(["user-profile"], data.user);
 
-      setTimeout(() => {
-        navigate("/home", { replace: true });
-      }, 100);
+      navigate("/home", { replace: true });
     } catch (err) {
-      console.error("Login error:", err);
       setError("Login failed. Please try again.");
     } finally {
       setIsLoading(false);

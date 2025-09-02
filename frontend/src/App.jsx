@@ -21,33 +21,24 @@ function App() {
     if (currentUser && !socketRef.current) {
       const connectSocket = async () => {
         try {
-          const socketUrl = import.meta.env.VITE_BACKENDPATH;
-
-          const socket = io(socketUrl, {
+          const socket = io(import.meta.env.VITE_BACKENDPATH, {
             withCredentials: true,
           });
 
           socket.on("connect", () => {
-            console.log("Socket connected to server:", socket.id);
+            console.log("Socket connected:", socket.id);
           });
 
           socket.on("connect_error", async (error) => {
-            console.error("Socket connection error:", error);
-
             if (error.message === "Authentication failed") {
               try {
                 await authenticatedFetch("/api/user/refresh");
                 setTimeout(() => socket.connect(), 1000);
               } catch (refreshError) {
-                console.error("Token refresh failed:", refreshError);
                 clearUser();
                 window.location.href = "/login";
               }
             }
-          });
-
-          socket.on("disconnect", (reason) => {
-            console.log("Disconnected from server, reason:", reason);
           });
 
           socketRef.current = socket;

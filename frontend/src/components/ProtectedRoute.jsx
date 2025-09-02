@@ -7,17 +7,10 @@ const ProtectedRoute = ({ children }) => {
   const [redirect, setRedirect] = useState(false);
 
   useEffect(() => {
-    let timeout;
-
     if (!currentUser) {
-      timeout = setTimeout(() => {
-        setRedirect(true);
-      }, 3000);
+      const timeout = setTimeout(() => setRedirect(true), 1500);
+      return () => clearTimeout(timeout);
     }
-
-    return () => {
-      if (timeout) clearTimeout(timeout);
-    };
   }, [currentUser]);
 
   if (!currentUser && !redirect) {
@@ -37,4 +30,5 @@ const ProtectedRoute = ({ children }) => {
 
   return children;
 };
+
 export default ProtectedRoute;
