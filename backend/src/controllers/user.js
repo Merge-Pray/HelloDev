@@ -461,12 +461,12 @@ export const verifyLogin = async (req, res, next) => {
     console.log(`🔑 [LOGIN] Token generated, length: ${token.length} chars`);
     console.log(`🔑 [LOGIN] Token preview: ${token.substring(0, 20)}...`);
 
-    const cookieOptions = getUniversalCookieOptions();
-    console.log(`🔑 [LOGIN] Cookie options:`, cookieOptions);
-    
     const userAgent = req.headers['user-agent'] || 'Unknown';
     const isProblematicBrowser = /SamsungBrowser|CriOS/i.test(userAgent);
     console.log(`🔑 [LOGIN] Setting cookie for browser: ${isProblematicBrowser ? '⚠️ ' : ''}${userAgent.includes('SamsungBrowser') ? 'Samsung' : userAgent.includes('CriOS') ? 'iOS Chrome' : 'Other'}`);
+    
+    const cookieOptions = getUniversalCookieOptions({}, userAgent);
+    console.log(`🔑 [LOGIN] Cookie options:`, cookieOptions);
 
     res.cookie("jwt", token, cookieOptions);
     console.log(`🔑 [LOGIN] ✅ Cookie set successfully`);
