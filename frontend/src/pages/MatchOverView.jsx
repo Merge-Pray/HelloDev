@@ -26,12 +26,8 @@ const MatchOverView = () => {
   const [hoveredMatch, setHoveredMatch] = useState(null);
 
   useEffect(() => {
-    if (!currentUser) {
-      navigate("/login");
-      return;
-    }
     fetchMatches();
-  }, [currentUser, navigate]);
+  }, []);
 
   const fetchMatches = async () => {
     try {

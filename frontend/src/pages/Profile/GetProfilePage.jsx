@@ -49,11 +49,6 @@ export default function GetProfilePage() {
   const dropdownRef = useRef(null);
 
   useEffect(() => {
-    if (!currentUser) {
-      navigate("/login");
-      return;
-    }
-
     if (!userId) {
       navigate("/profile");
       return;

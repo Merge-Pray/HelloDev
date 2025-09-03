@@ -106,11 +106,6 @@ export default function BuildProfile() {
 
   useEffect(() => {
     const fetchUserData = async () => {
-      if (!currentUser) {
-        navigate("/login");
-        return;
-      }
-
       try {
         const userData = await authenticatedFetch("/api/user/user");
         setUserProfileData(userData);

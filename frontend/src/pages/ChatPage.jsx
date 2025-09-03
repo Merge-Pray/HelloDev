@@ -50,6 +50,11 @@ const ChatPage = () => {
         currentChatRef.current && message.chat === currentChatRef.current._id;
 
       if (shouldAdd) {
+        // Check if message already exists to prevent duplicates
+        const messageExists = prev.some(msg => msg._id === message._id);
+        if (messageExists) {
+          return prev;
+        }
         return [...prev, message];
       }
       return prev;
@@ -101,7 +106,7 @@ const ChatPage = () => {
         socket.off("userTyping", handleUserTyping);
       };
     }
-  }, [socket, handleReceiveMessage, handleUserTyping]);
+  }, [socket]); // Removed callback dependencies to prevent re-adding listeners
 
   useEffect(() => {
     scrollToBottom();
