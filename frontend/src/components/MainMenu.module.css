@@ -110,13 +110,13 @@
 
 .link:hover {
   background: var(--color-primary-hover);
-  color: var(--color-primary-hover-invert);
+  color: #fff;
   border-color: var(--color-border);
 }
 
 .active {
   background: var(--color-primary);
-  color: var(--color-primary-hover-invert);
+  color: #fff;
 }
 
 /* ───────── Icons ───────── */
@@ -135,11 +135,11 @@
 }
 
 .link:hover .icon {
-  filter: invert(1) brightness(120%);
+  filter: brightness(0) invert(1);
 }
 
 .active .icon {
-  filter: inherit;
+  filter: brightness(0) invert(1);
 }
 
 /* ───────── Labels ───────── */
@@ -412,9 +412,12 @@
     filter: none;
   }
 
-  :root[data-theme="light"] .bottomNavLink .icon {
-    filter: brightness(0) saturate(100%);
-  }
+:root[data-theme="light"] .active .icon {
+  filter: none !important;
+  color: #fff !important;
+  fill: #fff !important;
+}
+  
 
   :root[data-theme="dark"] .bottomNavLink .icon {
     filter: invert(1) brightness(100%);
@@ -441,6 +444,10 @@
   }
 }
 
+:root[data-theme="light"] .active .icon,
+:root[data-theme="light"] .link:hover .icon {
+  filter: invert(1) brightness(2) !important;
+}
 /* ───────── Responsive Desktop/Tablet ───────── */
 @media (max-width: 1200px) and (min-width: 769px) {
   .brand {
