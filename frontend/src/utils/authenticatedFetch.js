@@ -24,10 +24,9 @@ export const authenticatedFetch = async (endpoint, options = {}) => {
 
   let response = await makeRequest();
 
-  // TEMPORARY TEST: Disable retry logic to match Pollio's simple fetch approach
-  // if (isAuthError(response)) {
-  //   response = await handleAuthErrorAndRetry(makeRequest);
-  // }
+  if (isAuthError(response)) {
+    response = await handleAuthErrorAndRetry(makeRequest);
+  }
 
   if (!response.ok) {
     if (response.status === 403) {
