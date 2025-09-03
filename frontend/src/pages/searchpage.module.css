@@ -60,8 +60,16 @@
   margin: 0;
 }
 
-.searchBar {
+.searchControls {
+  display: flex;
+  gap: 16px;
   margin-bottom: 32px;
+  align-items: flex-start;
+}
+
+.searchBar {
+  flex: 1;
+  min-width: 0;
 }
 
 .searchInputContainer {
@@ -326,110 +334,143 @@
   box-shadow: 0 3px 6px rgba(var(--color-primary-rgb), 0.3);
 }
 
+/* User Actions */
 .userActions {
   display: flex;
   flex-direction: column;
   gap: 12px;
-  align-items: flex-end;
-  padding-top: 8px;
+  align-items: stretch;
+  justify-content: flex-start;
+  min-width: 160px;
+  flex-shrink: 0;
 }
 
-.viewProfileBtn {
+/* Friendship Status */
+.friendshipStatus {
   display: flex;
-  align-items: center;
-  gap: 8px;
-  padding: 10px 16px;
-  background: var(--color-input-bg);
-  color: var(--color-text);
-  border: 1px solid var(--color-card-border);
-  border-radius: 10px;
-  cursor: pointer;
-  font-size: 13px;
-  font-weight: 600;
-  transition: all 0.3s ease;
-  white-space: nowrap;
-  font-family: "Helvetica Neue", Helvetica, Arial, sans-serif;
-  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
-}
-
-.viewProfileBtn:hover {
-  background: var(--color-bg-secondary);
-  border-color: var(--color-primary);
-  transform: translateY(-2px);
-  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.15);
-}
-
-.friendRequestBtn {
-  display: flex;
-  align-items: center;
-  gap: 8px;
-  padding: 10px 16px;
-  background: var(--color-bg-gradient);
-  color: var(--color-primary-hover-invert);
-  border: none;
-  border-radius: 10px;
-  cursor: pointer;
-  font-size: 13px;
-  font-weight: 600;
-  transition: all 0.3s ease;
-  white-space: nowrap;
-  font-family: "Helvetica Neue", Helvetica, Arial, sans-serif;
-  box-shadow: 0 2px 4px rgba(var(--color-primary-rgb), 0.3);
-}
-
-.friendRequestBtn:hover {
-  background: var(--color-primary-hover);
-  transform: translateY(-2px);
-  box-shadow: 0 4px 12px rgba(var(--color-primary-rgb), 0.4);
-}
-
-/* Contact Status Styles */
-.contactStatus {
-  display: flex;
-  flex-direction: column;
-  gap: 12px;
-  align-items: flex-end;
-  padding-top: 8px;
+  justify-content: center;
+  margin-bottom: 4px;
 }
 
 .friendBadge {
   display: flex;
   align-items: center;
-  gap: 8px;
+  gap: 6px;
   padding: 8px 12px;
-  background: rgba(16, 185, 129, 0.1);
-  color: var(--color-success);
-  border: 1px solid rgba(16, 185, 129, 0.3);
-  border-radius: 10px;
-  font-size: 11px;
+  background: rgba(16, 185, 129, 0.2);
+  color: #10b981;
+  border-radius: 20px;
+  font-size: 13px;
   font-weight: 700;
   text-transform: uppercase;
   letter-spacing: 0.5px;
-  box-shadow: 0 2px 4px rgba(16, 185, 129, 0.2);
+  box-shadow: 0 2px 6px rgba(16, 185, 129, 0.3);
+  border: 1px solid #10b981;
+}
+
+.nonFriendStatus {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  padding: 8px 12px;
+  background: var(--color-bg-secondary);
+  color: var(--color-text-secondary);
+  border-radius: 20px;
+  font-size: 13px;
+  font-weight: 600;
+  border: 1px solid var(--color-border);
+}
+
+/* Action Buttons Container */
+.actionButtons {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  width: 100%;
+}
+
+.viewProfileBtn {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  padding: 12px 16px;
+  background: transparent;
+  color: var(--color-primary);
+  border: 2px solid var(--color-primary);
+  border-radius: 12px;
+  font-size: 14px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.3s ease;
+  text-decoration: none;
+  font-family: "Helvetica Neue", Helvetica, Arial, sans-serif;
+  width: 100%;
+}
+
+.viewProfileBtn:hover {
+  background: var(--color-primary);
+  color: var(--color-primary-hover-invert);
+  transform: translateY(-2px);
+  box-shadow: 0 4px 12px rgba(var(--color-primary-rgb), 0.4);
+}
+
+.friendRequestBtn {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  padding: 12px 16px;
+  background: var(--color-bg-gradient);
+  color: var(--color-primary-hover-invert);
+  border: 2px solid var(--color-primary);
+  border-radius: 12px;
+  font-size: 14px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.3s ease;
+  font-family: "Helvetica Neue", Helvetica, Arial, sans-serif;
+  box-shadow: 0 2px 6px rgba(var(--color-primary-rgb), 0.3);
+  width: 100%;
+}
+
+.friendRequestBtn:hover {
+  background: var(--color-primary-hover);
+  border-color: var(--color-primary-hover);
+  transform: translateY(-2px);
+  box-shadow: 0 4px 12px rgba(var(--color-primary-rgb), 0.5);
 }
 
 .messageBtn {
   display: flex;
   align-items: center;
+  justify-content: center;
   gap: 8px;
-  padding: 10px 16px;
+  padding: 12px 16px;
   background: var(--color-bg-gradient);
   color: var(--color-primary-hover-invert);
-  border: none;
-  border-radius: 10px;
-  cursor: pointer;
-  font-size: 13px;
+  border: 2px solid var(--color-primary);
+  border-radius: 12px;
+  font-size: 14px;
   font-weight: 600;
+  cursor: pointer;
   transition: all 0.3s ease;
-  white-space: nowrap;
   font-family: "Helvetica Neue", Helvetica, Arial, sans-serif;
-  box-shadow: 0 2px 4px rgba(var(--color-primary-rgb), 0.3);
+  box-shadow: 0 2px 6px rgba(var(--color-primary-rgb), 0.3);
+  width: 100%;
 }
 
 .messageBtn:hover {
   background: var(--color-primary-hover);
+  border-color: var(--color-primary-hover);
   transform: translateY(-2px);
-  box-shadow: 0 4px 12px rgba(var(--color-primary-rgb), 0.4);
+  box-shadow: 0 4px 12px rgba(var(--color-primary-rgb), 0.5);
+}
+
+/* Remove old contactStatus styles since we're restructuring */
+.contactStatus {
+  /* This class is no longer used in the new structure */
+  display: none;
 }
 
 /* Highlight - verbesserte Kontraste */
@@ -496,6 +537,171 @@
   border-color: var(--color-border);
 }
 
+/* City Filter Styles */
+.cityFilter {
+  position: relative;
+  flex-shrink: 0;
+  min-width: 200px;
+}
+
+.cityDropdownWrapper {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 16px;
+  background: var(--color-input-bg);
+  border: 2px solid var(--color-input-border);
+  border-radius: 12px;
+  cursor: pointer;
+  transition: all 0.3s ease;
+  box-shadow: 0 2px 4px var(--color-card-shadow);
+  min-height: 44px;
+  position: relative;
+}
+
+.cityDropdownWrapper:hover {
+  border-color: var(--color-primary);
+  transform: translateY(-1px);
+}
+
+.cityIcon {
+  color: var(--color-primary);
+  flex-shrink: 0;
+}
+
+.cityLabel {
+  flex: 1;
+  color: var(--color-text);
+  font-size: 14px;
+  font-weight: 500;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.chevron {
+  color: var(--color-text-secondary);
+  transition: transform 0.2s ease;
+  flex-shrink: 0;
+}
+
+.chevronUp {
+  transform: rotate(180deg);
+}
+
+.clearCityBtn {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 20px;
+  height: 20px;
+  background: none;
+  border: none;
+  border-radius: 50%;
+  color: var(--color-text-secondary);
+  cursor: pointer;
+  transition: all 0.2s ease;
+  flex-shrink: 0;
+  margin-left: 4px;
+}
+
+.clearCityBtn:hover {
+  background: var(--color-bg-secondary);
+  color: var(--color-text);
+  transform: scale(1.1);
+}
+
+.cityDropdown {
+  position: absolute;
+  top: 100%;
+  left: 0;
+  right: 0;
+  background: var(--color-card-bg);
+  border: 1px solid var(--color-card-border);
+  border-radius: 12px;
+  box-shadow: 0 8px 24px var(--color-card-shadow);
+  z-index: 1000;
+  max-height: 300px;
+  overflow-y: auto;
+  margin-top: 4px;
+}
+
+.cityOption {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 12px 16px;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  border-bottom: 1px solid var(--color-card-border);
+}
+
+.cityOption:last-child {
+  border-bottom: none;
+}
+
+.cityOption:hover {
+  background: var(--color-bg-secondary);
+}
+
+.cityOption.active {
+  background: var(--color-bg-gradient);
+  color: var(--color-primary-hover-invert);
+}
+
+.cityOption.active .cityIcon {
+  color: var(--color-primary-hover-invert);
+}
+
+.cityInfo {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+  flex: 1;
+  min-width: 0;
+}
+
+.cityName {
+  font-weight: 600;
+  color: var(--color-text);
+  font-size: 14px;
+}
+
+.cityOption.active .cityName {
+  color: var(--color-primary-hover-invert);
+}
+
+.cityCount {
+  font-size: 12px;
+  color: var(--color-text-secondary);
+  font-weight: 500;
+}
+
+.cityOption.active .cityCount {
+  color: var(--color-primary-hover-invert);
+  opacity: 0.8;
+}
+
+/* Scrollbar for city dropdown */
+.cityDropdown::-webkit-scrollbar {
+  width: 6px;
+}
+
+.cityDropdown::-webkit-scrollbar-track {
+  background: var(--color-bg-secondary);
+  border-radius: 6px;
+}
+
+.cityDropdown::-webkit-scrollbar-thumb {
+  background: var(--color-text-secondary);
+  border-radius: 6px;
+  opacity: 0.5;
+}
+
+.cityDropdown::-webkit-scrollbar-thumb:hover {
+  background: var(--color-primary);
+}
+
 /* Responsive Design */
 @media (max-width: 1200px) {
   .page {
@@ -516,6 +722,40 @@
 
   .searchContainer {
     padding: 0 16px;
+  }
+}
+
+@media (max-width: 768px) {
+  .searchControls {
+    flex-direction: column;
+    gap: 12px;
+  }
+
+  .cityFilter {
+    width: 100%;
+    min-width: auto;
+  }
+
+  .userActions {
+    min-width: 140px;
+    gap: 10px;
+  }
+
+  .friendBadge,
+  .nonFriendStatus {
+    padding: 6px 10px;
+    font-size: 12px;
+  }
+
+  .actionButtons {
+    gap: 6px;
+  }
+
+  .viewProfileBtn,
+  .friendRequestBtn,
+  .messageBtn {
+    padding: 10px 12px;
+    font-size: 13px;
   }
 }
 
@@ -540,15 +780,6 @@
   }
 
   .userActions {
-    grid-column: 1 / -1;
-    flex-direction: row;
-    justify-content: center;
-    padding-top: 12px;
-    border-top: 1px solid var(--color-card-border);
-    margin-top: 8px;
-  }
-
-  .contactStatus {
     grid-column: 1 / -1;
     flex-direction: row;
     justify-content: center;
@@ -588,6 +819,27 @@
 
   .searchIcon {
     left: 14px;
+  }
+
+  .cityDropdownWrapper {
+    padding: 12px;
+    min-height: 40px;
+  }
+
+  .cityLabel {
+    font-size: 13px;
+  }
+
+  .cityOption {
+    padding: 10px 12px;
+  }
+
+  .cityName {
+    font-size: 13px;
+  }
+
+  .cityCount {
+    font-size: 11px;
   }
 }
 
