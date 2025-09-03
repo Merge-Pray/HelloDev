@@ -691,9 +691,35 @@ export const updateUserProfile = async (req, res, next) => {
     }
 
     // Clean user data to avoid circular references from socket data
-    const cleanUserData = updatedUser.toObject();
-    delete cleanUserData.socketId;
-    delete cleanUserData.__v;
+    // Only return the fields we need, similar to what we do in githubAuth
+    const cleanUserData = {
+      _id: updatedUser._id,
+      username: updatedUser.username,
+      nickname: updatedUser.nickname,
+      email: updatedUser.email,
+      avatar: updatedUser.avatar,
+      avatarData: updatedUser.avatarData,
+      isMatchable: updatedUser.isMatchable,
+      aboutMe: updatedUser.aboutMe,
+      country: updatedUser.country,
+      city: updatedUser.city,
+      age: updatedUser.age,
+      status: updatedUser.status,
+      devExperience: updatedUser.devExperience,
+      techArea: updatedUser.techArea,
+      favoriteTimeToCode: updatedUser.favoriteTimeToCode,
+      programmingLanguages: updatedUser.programmingLanguages,
+      languages: updatedUser.languages,
+      techStack: updatedUser.techStack,
+      otherInterests: updatedUser.otherInterests,
+      personalWebsites: updatedUser.personalWebsites,
+      isOnline: updatedUser.isOnline,
+      lastSeen: updatedUser.lastSeen,
+      rating: updatedUser.rating,
+      points: updatedUser.points,
+      googleId: updatedUser.googleId,
+      githubId: updatedUser.githubId
+    };
 
     return res.status(200).json({
       success: true,
