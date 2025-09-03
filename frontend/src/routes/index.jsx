@@ -23,6 +23,7 @@ import Messages from "../pages/Messages";
 import Notifications from "../pages/Notifications";
 import GetProfilePage from "../pages/Profile/GetProfilePage";
 import AvatarEditor from "../pages/AvatarEditor/AvatarEditor";
+import GitHubCallback from "../pages/Auth/GitHubCallback";
 
 export const router = createBrowserRouter([
   {
@@ -33,6 +34,7 @@ export const router = createBrowserRouter([
       { index: true, element: <LandingPage /> },
       { path: "login", element: <LoginPage /> },
       { path: "register", element: <RegisterPage /> },
+      { path: "auth/github/callback", element: <GitHubCallback /> },
       {
         path: "buildprofile",
         element: (

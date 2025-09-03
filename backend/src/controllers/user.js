@@ -16,6 +16,51 @@ cloudinary.config({
 
 const client = new OAuth2Client(process.env.GOOGLE_CLIENT_ID);
 
+// GitHub OAuth helper function
+const getGitHubUserData = async (accessToken) => {
+  try {
+    // Get user basic info
+    const userResponse = await fetch('https://api.github.com/user', {
+      headers: {
+        'Authorization': `token ${accessToken}`,
+        'User-Agent': 'HelloDev-App'
+      }
+    });
+    
+    if (!userResponse.ok) {
+      throw new Error('Failed to fetch GitHub user data');
+    }
+    
+    const userData = await userResponse.json();
+    
+    // Get user email (might be private)
+    const emailResponse = await fetch('https://api.github.com/user/emails', {
+      headers: {
+        'Authorization': `token ${accessToken}`,
+        'User-Agent': 'HelloDev-App'
+      }
+    });
+    
+    let email = userData.email;
+    if (!email && emailResponse.ok) {
+      const emails = await emailResponse.json();
+      const primaryEmail = emails.find(e => e.primary && e.verified);
+      email = primaryEmail ? primaryEmail.email : emails[0]?.email;
+    }
+    
+    return {
+      id: userData.id.toString(),
+      email: email,
+      name: userData.name || userData.login,
+      username: userData.login,
+      avatar_url: userData.avatar_url
+    };
+  } catch (error) {
+    console.error('Error fetching GitHub user data:', error);
+    throw error;
+  }
+};
+
 // Hilfsfunktion zum Generieren eines eindeutigen Usernamens
 const generateUniqueUsername = async (email) => {
   // Extrahiere den Teil vor dem ersten Punkt oder @
@@ -241,6 +286,270 @@ export const googleAuth = async (req, res, next) => {
   }
 };
 
+export const githubAuth = async (req, res, next) => {
+  try {
+    const { code } = req.body;
+    
+    if (!code) {
+      return res.status(400).json({
+        success: false,
+        message: 'GitHub authorization code is required'
+      });
+    }
+
+    // Exchange code for access token
+    const tokenResponse = await fetch('https://github.com/login/oauth/access_token', {
+      method: 'POST',
+      headers: {
+        'Accept': 'application/json',
+        'Content-Type': 'application/json',
+      },
+      body: JSON.stringify({
+        client_id: process.env.GITHUB_CLIENT_ID,
+        client_secret: process.env.GITHUB_CLIENT_SECRET,
+        code: code,
+      }),
+    });
+
+    const tokenData = await tokenResponse.json();
+    
+    if (tokenData.error) {
+      return res.status(400).json({
+        success: false,
+        message: tokenData.error_description || 'GitHub authentication failed'
+      });
+    }
+
+    // Get user data from GitHub
+    const githubUser = await getGitHubUserData(tokenData.access_token);
+    
+    if (!githubUser.email) {
+      return res.status(400).json({
+        success: false,
+        message: 'Email not provided by GitHub'
+      });
+    }
+
+    // Check if user already exists (by email or GitHub ID)
+    // Exclude the contacts field temporarily to avoid the casting error
+    let existingUser = await UserModel.findOne({
+      $or: [{ email: githubUser.email }, { githubId: githubUser.id }]
+    }, { contacts: 0 }); // Exclude contacts field from the query
+
+    if (existingUser) {
+      // User exists - Login
+      
+      // Fix corrupted contacts field in database
+      try {
+        await UserModel.updateOne(
+          { _id: existingUser._id },
+          { $set: { contacts: [] } }
+        );
+        console.log('🔧 Fixed corrupted contacts field for user:', existingUser.email);
+      } catch (contactsError) {
+        console.log('⚠️ Could not fix contacts field, but continuing...');
+      }
+      
+      // Update GitHub ID if not set
+      if (!existingUser.githubId) {
+        existingUser.githubId = githubUser.id;
+        await existingUser.save();
+      }
+      
+      // Update GitHub profile picture if user doesn't have avatarData (pixel avatar)
+      if (githubUser.avatar_url && !existingUser.avatarData) {
+        try {
+          console.log('🎨 Updating GitHub profile picture for existing user...');
+          
+          // Pixelize GitHub image
+          const pixelResult = await pixelizeImageFromUrl(githubUser.avatar_url, 16);
+          
+          // Convert DataURL to Buffer
+          const imageBuffer = dataUrlToBuffer(pixelResult.imageDataUrl);
+          
+          // Upload to Cloudinary
+          const folder = `avatars/${existingUser.username}`;
+          const cloudinaryResult = await new Promise((resolve, reject) => {
+            cloudinary.uploader.upload_stream(
+              {
+                folder: folder,
+                resource_type: 'image',
+                allowed_formats: ['png'],
+                transformation: [
+                  { width: 400, height: 400, crop: 'fill' },
+                  { quality: 'auto' },
+                  { fetch_format: 'auto' },
+                ],
+              },
+              (error, result) => {
+                if (error) reject(error);
+                else resolve(result);
+              }
+            ).end(imageBuffer);
+          });
+          
+          // Update user with new avatar
+          existingUser.avatar = cloudinaryResult.secure_url;
+          existingUser.avatarData = pixelResult.pixelsData;
+          await existingUser.save();
+          
+          console.log('✅ GitHub profile picture updated for existing user');
+        } catch (pixelError) {
+          console.error('❌ Error updating GitHub profile picture for existing user:', pixelError);
+          // Continue without updating avatar
+        }
+      }
+      
+      const token = generateToken(existingUser.username, existingUser._id);
+      const cookieOptions = getUniversalCookieOptions();
+      res.cookie('jwt', token, cookieOptions);
+      
+      // Check if user profile is complete to determine if they should go to buildprofile
+      // A profile is considered complete if user has basic info filled out
+      const isProfileComplete = existingUser.programmingLanguages && 
+                               existingUser.programmingLanguages.length > 0;
+      
+      return res.status(200).json({
+        success: true,
+        message: 'Login successful',
+        user: {
+          _id: existingUser._id,
+          username: existingUser.username,
+          nickname: existingUser.nickname,
+          email: existingUser.email,
+          avatar: existingUser.avatar,
+          avatarData: existingUser.avatarData,
+          isMatchable: existingUser.isMatchable,
+          aboutMe: existingUser.aboutMe,
+          country: existingUser.country,
+          city: existingUser.city,
+          age: existingUser.age,
+          status: existingUser.status,
+          devExperience: existingUser.devExperience,
+          techArea: existingUser.techArea,
+          favoriteTimeToCode: existingUser.favoriteTimeToCode,
+          favoriteLineOfCode: existingUser.favoriteLineOfCode,
+          programmingLanguages: existingUser.programmingLanguages,
+          techStack: existingUser.techStack,
+          preferredOS: existingUser.preferredOS,
+          languages: existingUser.languages,
+          gaming: existingUser.gaming,
+          otherInterests: existingUser.otherInterests,
+          favoriteDrinkWhileCoding: existingUser.favoriteDrinkWhileCoding,
+          musicGenreWhileCoding: existingUser.musicGenreWhileCoding,
+          favoriteShowMovie: existingUser.favoriteShowMovie,
+          linkedinProfile: existingUser.linkedinProfile,
+          githubProfile: existingUser.githubProfile,
+          personalWebsites: existingUser.personalWebsites,
+          profileLinksVisibleToContacts: existingUser.profileLinksVisibleToContacts,
+          points: existingUser.points,
+          rating: existingUser.rating,
+          createdAt: existingUser.createdAt,
+          updatedAt: existingUser.updatedAt,
+        },
+        isNewUser: !isProfileComplete // Send user to buildprofile if profile is incomplete
+      });
+    } else {
+      // New user - Registration with image pixelization
+      
+      const username = await generateUniqueUsername(githubUser.email);
+      
+      let finalAvatar = githubUser.avatar_url;
+      let avatarData = null;
+      
+      // Try to pixelize GitHub profile picture
+      if (githubUser.avatar_url) {
+        try {
+          console.log('🎨 Starting GitHub profile picture pixelization...');
+          
+          // Pixelize GitHub image
+          const pixelResult = await pixelizeImageFromUrl(githubUser.avatar_url, 16);
+          
+          // Convert DataURL to Buffer
+          const imageBuffer = dataUrlToBuffer(pixelResult.imageDataUrl);
+          
+          // Upload to Cloudinary
+          const folder = `avatars/${username}`;
+          const cloudinaryResult = await new Promise((resolve, reject) => {
+            cloudinary.uploader.upload_stream(
+              {
+                folder: folder,
+                resource_type: 'image',
+                allowed_formats: ['png'],
+                transformation: [
+                  { width: 400, height: 400, crop: 'fill' },
+                  { quality: 'auto' },
+                  { fetch_format: 'auto' },
+                ],
+              },
+              (error, result) => {
+                if (error) {
+                  console.error('Cloudinary upload error:', error);
+                  reject(error);
+                } else {
+                  resolve(result);
+                }
+              }
+            ).end(imageBuffer);
+          });
+          
+          finalAvatar = cloudinaryResult.secure_url;
+          avatarData = JSON.stringify(pixelResult.pixels);
+          
+          console.log('✅ GitHub profile picture successfully pixelized and uploaded');
+          
+        } catch (pixelError) {
+          console.error('❌ Error pixelizing GitHub profile picture:', pixelError);
+          console.log('📝 Falling back to original GitHub picture');
+          // Fallback: Use original GitHub picture
+          finalAvatar = githubUser.avatar_url;
+        }
+      }
+      
+      const newUser = new UserModel({
+        email: githubUser.email,
+        username,
+        nickname: githubUser.name || username,
+        githubId: githubUser.id,
+        avatar: finalAvatar,
+        avatarData: avatarData,
+        isMatchable: false,
+        // Pre-fill GitHub profile link if available
+        githubProfile: `https://github.com/${githubUser.username}`,
+      });
+
+      await newUser.save();
+      
+      const token = generateToken(username, newUser._id);
+      const cookieOptions = getUniversalCookieOptions();
+      res.cookie('jwt', token, cookieOptions);
+      
+      return res.status(201).json({
+        success: true,
+        message: 'Registration successful',
+        user: {
+          _id: newUser._id,
+          username: newUser.username,
+          nickname: newUser.nickname,
+          email: newUser.email,
+          avatar: newUser.avatar,
+          avatarData: newUser.avatarData,
+          isMatchable: false,
+          githubProfile: newUser.githubProfile,
+        },
+        isNewUser: true
+      });
+    }
+  } catch (error) {
+    console.error('GitHub Auth Error:', error);
+    
+    return res.status(500).json({
+      success: false,
+      message: 'GitHub authentication failed'
+    });
+  }
+};
+
 export const createUser = async (req, res, next) => {
   try {
     console.log('🔧 Creating new user with automatic random avatar...');
@@ -312,14 +621,15 @@ export const updateUserProfile = async (req, res, next) => {
     console.log("🔄 Updating profile for user:", userId);
     console.log("📝 Profile updates:", updates);
 
-    // Check if user is trying to update password but is a Google user
+    // Check if user is trying to update password but is a OAuth user
     if (updates.hashedPassword || updates.password) {
       const existingUser = await UserModel.findById(userId);
-      if (existingUser && existingUser.googleId) {
-        return res.status(400).json({
-          success: false,
-          message: "Google users cannot update password through this interface. Please use your Google account settings.",
-        });
+      if (existingUser && (existingUser.googleId || existingUser.githubId)) {
+        const provider = existingUser.googleId ? 'Google' : 'GitHub';
+        console.log(`⚠️ ${provider} user tried to update password - removing password from updates`);
+        // Remove password-related fields from updates but continue with other updates
+        delete updates.hashedPassword;
+        delete updates.password;
       }
     }
 

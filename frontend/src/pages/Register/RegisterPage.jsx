@@ -7,6 +7,7 @@ import styles from "./registerpage.module.css";
 import { API_URL } from "../../lib/config";
 import DarkMode from "../../components/DarkMode";
 import GoogleAuthButton from "../../components/GoogleAuthButton";
+import GitHubAuthButton from "../../components/GitHubAuthButton";
 
 export default function RegisterPage() {
   const currentUser = useUserStore((state) => state.currentUser);
@@ -41,6 +42,15 @@ export default function RegisterPage() {
 
   const handleGoogleError = (error) => {
     console.error('🔐 GOOGLE REGISTER: Error', error);
+    setError(error);
+  };
+
+  const handleGitHubSuccess = (data) => {
+    console.log('🔐 GITHUB REGISTER: Success', data);
+  };
+
+  const handleGitHubError = (error) => {
+    console.error('🔐 GITHUB REGISTER: Error', error);
     setError(error);
   };
 
@@ -145,6 +155,25 @@ export default function RegisterPage() {
           <h1 className="title text-center">Sign Up</h1>
 
           {error && <div className="alert alert-error">{error}</div>}
+
+          {/* OAuth Buttons */}
+          <div className={styles.oauthContainer}>
+            <GoogleAuthButton 
+              text="Sign up with Google"
+              onSuccess={handleGoogleSuccess}
+              onError={handleGoogleError}
+            />
+            
+            <GitHubAuthButton 
+              text="Sign up with GitHub"
+              onSuccess={handleGitHubSuccess}
+              onError={handleGitHubError}
+            />
+          </div>
+
+          <div className={styles.divider}>
+            <span>or</span>
+          </div>
 
           <form onSubmit={handleSubmit(onSubmit)}>
             <div className="form-field">
@@ -277,17 +306,6 @@ export default function RegisterPage() {
               {isLoading ? "Registering..." : "Register"}
             </button>
           </form>
-
-          <div className={styles.divider}>
-            <span>or</span>
-          </div>
-
-          {/* Google Auth Button */}
-          <GoogleAuthButton 
-            text="Sign up with Google"
-            onSuccess={handleGoogleSuccess}
-            onError={handleGoogleError}
-          />
 
           <div className={styles.googleLoginContainer}>
             <div className="text-center">
