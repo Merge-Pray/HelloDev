@@ -114,6 +114,22 @@ export const router = createBrowserRouter([
         ),
       },
       {
+        path: "search/:query",
+        element: (
+          <ProtectedRoute>
+            <Searchpage />
+          </ProtectedRoute>
+        ),
+      },
+      {
+        path: "search/:query/:filter",
+        element: (
+          <ProtectedRoute>
+            <Searchpage />
+          </ProtectedRoute>
+        ),
+      },
+      {
         path: "avatar-editor",
         element: (
           <ProtectedRoute>
