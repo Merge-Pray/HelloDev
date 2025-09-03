@@ -198,7 +198,8 @@
 }
 
 .logo {
-  max-width: 200px;
+  max-width: 170px;
+  height: auto;
 
   padding-left: 0rem;
 
