@@ -65,9 +65,6 @@ const useUserStore = create(
     {
       name: "user-storage",
       storage: zustandStorage,
-      partialize: (state) => ({
-        currentUser: state.currentUser,
-      }),
     }
   )
 );
