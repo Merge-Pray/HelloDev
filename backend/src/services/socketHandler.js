@@ -37,7 +37,6 @@ export const socketHandler = (io) => {
           lastMessage: message._id,
         });
 
-        console.log(`📤 Emitting message ${message._id} to sender: user:${userId} and recipient: user:${recipientId}`);
         io.to(`user:${userId}`).emit("receiveMessage", message);
         io.to(`user:${recipientId}`).emit("receiveMessage", message);
 
@@ -45,9 +44,11 @@ export const socketHandler = (io) => {
           recipient: recipientId,
           isRead: false,
         });
+
         io.to(`user:${recipientId}`).emit("unreadCountUpdate", {
           totalUnreadCount: unreadCount,
           fromUserId: userId,
+          chatId: chatId,
         });
       } catch (error) {
         console.error("Error saving and emitting message:", error);

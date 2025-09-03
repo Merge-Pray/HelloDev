@@ -26,12 +26,15 @@ export const useUnreadCount = () => {
     }
   }, [currentUser]);
 
-  const handleUnreadCountUpdate = useCallback((data) => {
-    if (activeChatUserId && data.fromUserId === activeChatUserId) {
-      return;
-    }
-    setTotalUnreadCount(data.totalUnreadCount || 0);
-  }, [activeChatUserId]);
+  const handleUnreadCountUpdate = useCallback(
+    (data) => {
+      if (activeChatUserId && data.fromUserId === activeChatUserId) {
+        return;
+      }
+      setTotalUnreadCount(data.totalUnreadCount || 0);
+    },
+    [activeChatUserId]
+  );
 
   useEffect(() => {
     if (socket) {
@@ -48,8 +51,8 @@ export const useUnreadCount = () => {
   }, [fetchUnreadCount]);
 
   useEffect(() => {
-    if (location.pathname.startsWith('/chat/')) {
-      const pathParts = location.pathname.split('/');
+    if (location.pathname.startsWith("/chat/")) {
+      const pathParts = location.pathname.split("/");
       const userId = pathParts[2];
       if (userId) {
         setActiveChatUserId(userId);
@@ -65,9 +68,28 @@ export const useUnreadCount = () => {
     fetchUnreadCount();
   }, [fetchUnreadCount]);
 
+  const markChatAsRead = useCallback(
+    async (chatId) => {
+      if (!currentUser || !chatId) return;
+
+      try {
+        await authenticatedFetch(`/api/chats/${chatId}/mark-read`, {
+          method: "PATCH",
+        });
+
+        await fetchUnreadCount();
+      } catch (error) {
+        console.error("Error marking chat as read:", error);
+      }
+    },
+    [currentUser, fetchUnreadCount]
+  );
+
   return {
     totalUnreadCount,
     isLoading,
-    refreshUnreadCount,
+    refreshUnreadCount: fetchUnreadCount,
+    markChatAsRead,
+    setActiveChatUserId,
   };
 };

@@ -22,19 +22,14 @@ export const getUniversalCookieOptions = (baseOptions = {}, userAgent = '') => {
   const isProblematicBrowser = /SamsungBrowser|CriOS/i.test(userAgent);
   
   if (/CriOS/i.test(userAgent)) {
-    console.log(`🍪 [COOKIE] Using iOS Chrome-friendly settings`);
-    // Use settings similar to working test cookie for iOS Chrome
     return {
       ...baseOptions,
-      httpOnly: false, // Same as test cookie that works
+      httpOnly: false,
       secure: true,
       sameSite: "none",
       maxAge: 24 * 60 * 60 * 1000,
     };
   }
-  
-  // Use Pollio's exact working configuration for other browsers
-  console.log(`🍪 [COOKIE] Using Pollio's exact configuration`);
   return {
     ...baseOptions,
     httpOnly: true,
