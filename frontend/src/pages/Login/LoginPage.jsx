@@ -8,6 +8,7 @@ import styles from "./loginpage.module.css";
 import { API_URL } from "../../lib/config";
 import DarkMode from "../../components/DarkMode";
 import GoogleAuthButton from "../../components/GoogleAuthButton";
+import GitHubAuthButton from "../../components/GitHubAuthButton";
 
 export default function LoginPage() {
   const currentUser = useUserStore((state) => state.currentUser);
@@ -37,6 +38,15 @@ export default function LoginPage() {
 
   const handleGoogleError = (error) => {
     console.error('🔐 GOOGLE LOGIN: Error', error);
+    setError(error);
+  };
+
+  const handleGitHubSuccess = (data) => {
+    console.log('🔐 GITHUB LOGIN: Success', data);
+  };
+
+  const handleGitHubError = (error) => {
+    console.error('🔐 GITHUB LOGIN: Error', error);
     setError(error);
   };
 
@@ -98,6 +108,25 @@ export default function LoginPage() {
 
           {error && <div className="alert alert-error">{error}</div>}
 
+          {/* OAuth Buttons */}
+          <div className={styles.oauthContainer}>
+            <GoogleAuthButton 
+              text="Sign in with Google"
+              onSuccess={handleGoogleSuccess}
+              onError={handleGoogleError}
+            />
+            
+            <GitHubAuthButton 
+              text="Sign in with GitHub"
+              onSuccess={handleGitHubSuccess}
+              onError={handleGitHubError}
+            />
+          </div>
+
+          <div className={styles.divider}>
+            <span>or</span>
+          </div>
+
           <form onSubmit={handleSubmit(onSubmit)}>
             <div className="form-field">
               <label>Email or Username</label>
@@ -143,21 +172,6 @@ export default function LoginPage() {
               {isLoading ? "Signing in..." : "Sign In"}
             </button>
           </form>
-
-          <div className={styles.divider}>
-            <span>or</span>
-          </div>
-
-          {/* Google Auth Button */}
-          <GoogleAuthButton 
-            text="Sign in with Google"
-            onSuccess={handleGoogleSuccess}
-            onError={handleGoogleError}
-          />
-
-          <div className={styles.divider}>
-            <span>or</span>
-          </div>
 
           <div className="text-center">
             <button

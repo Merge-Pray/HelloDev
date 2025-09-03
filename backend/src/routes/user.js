@@ -13,6 +13,7 @@ import {
   updateUserProfile,
   getUserContacts,
   googleAuth,
+  githubAuth,
 } from "../controllers/user.js";
 import { registerValidationRules, validate } from "../middleware/validation.js";
 
@@ -22,6 +23,7 @@ userRouter
   .post("/register", registerValidationRules(), validate, createUser)
   .post("/login", verifyLogin)
   .post("/google-auth", googleAuth)
+  .post("/github-auth", githubAuth)
   .post("/logout", logout)
   .post("/refresh", refreshToken)
   .get("/auth-status", checkAuthStatus)

@@ -20,12 +20,19 @@ const UserSchema = new Schema(
     hashedPassword: {
       type: String,
       required: function() {
-        return !this.googleId;
+        return !this.googleId && !this.githubId;
       },
     },
 
     // Google OAuth Felder
     googleId: {
+      type: String,
+      unique: true,
+      sparse: true, // Erlaubt null/undefined values bei unique constraint
+    },
+
+    // GitHub OAuth Felder
+    githubId: {
       type: String,
       unique: true,
       sparse: true, // Erlaubt null/undefined values bei unique constraint

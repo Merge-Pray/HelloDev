@@ -67,11 +67,67 @@
   margin: 0 auto;
 }
 
+.loginCard h1 {
+  margin-bottom: 0.5rem;
+}
+
 .subtitle {
   text-align: center;
   color: var(--color-text-secondary);
   margin-bottom: 2rem;
   font-size: 0.95rem;
+}
+
+.oauthContainer {
+  display: flex;
+  flex-direction: column;
+  gap: 0.75rem;
+  margin-bottom: 1.5rem;
+}
+
+.divider {
+  display: flex;
+  align-items: center;
+  text-align: center;
+  margin: 1.5rem 0;
+}
+
+.divider::before,
+.divider::after {
+  content: "";
+  flex: 1;
+  height: 1px;
+  background: var(--color-input-border);
+}
+
+.divider::before {
+  margin-right: 16px;
+}
+
+.divider::after {
+  margin-left: 16px;
+}
+
+.divider span {
+  color: var(--color-text-secondary);
+  font-size: 14px;
+}
+
+/* Form spacing */
+.loginCard form {
+  margin-bottom: 1.5rem;
+}
+
+.loginCard form .form-field {
+  margin-bottom: 1.25rem;
+}
+
+.loginCard form .form-field:last-child {
+  margin-bottom: 1.5rem;
+}
+
+.loginCard form button[type="submit"] {
+  margin-top: 0.5rem;
 }
 
 /* Existing styles */
@@ -122,6 +178,13 @@
 .divider span {
   color: var(--color-text-secondary);
   font-size: 14px;
+}
+
+.oauthContainer {
+  display: flex;
+  flex-direction: column;
+  gap: 0.75rem;
+  margin-bottom: 1.5rem;
 }
 
 .googleBtn {
