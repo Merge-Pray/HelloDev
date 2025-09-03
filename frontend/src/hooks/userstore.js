@@ -85,6 +85,10 @@ const useUserStore = create(
     {
       name: "user-storage",
       storage: zustandStorage,
+      partialize: (state) => ({
+        currentUser: state.currentUser,
+        // Exclude socket from persistence to avoid circular reference
+      }),
     }
   )
 );
