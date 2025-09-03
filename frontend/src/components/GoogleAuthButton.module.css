@@ -3,7 +3,10 @@
   align-items: center;
   justify-content: center;
   width: 100%;
+  min-height: 48px;
+  max-height: 48px;
   height: 48px;
+  padding: 0 16px;
   background: #ffffff;
   border: 1px solid #dadce0;
   border-radius: 4px;
@@ -11,10 +14,12 @@
   font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
   font-size: 14px;
   font-weight: 500;
+  line-height: 1;
   cursor: pointer;
   transition: all 0.2s ease;
   text-decoration: none;
   box-shadow: 0 1px 2px 0 rgba(60, 64, 67, 0.30), 0 1px 3px 1px rgba(60, 64, 67, 0.15);
+  box-sizing: border-box;
 }
 
 .googleButton:hover:not(:disabled) {
@@ -38,17 +43,25 @@
 .content {
   display: flex;
   align-items: center;
+  justify-content: center;
   gap: 12px;
+  height: 100%;
+  width: 100%;
 }
 
 .googleIcon {
   flex-shrink: 0;
+  width: 18px;
+  height: 18px;
 }
 
 .loading {
   display: flex;
   align-items: center;
+  justify-content: center;
   gap: 8px;
+  height: 100%;
+  width: 100%;
 }
 
 .spinner {
@@ -79,5 +92,31 @@
   
   .googleButton:active:not(:disabled) {
     background: #1f2937;
+  }
+}
+
+/* Responsive height consistency */
+@media (max-width: 768px) {
+  .googleButton {
+    min-height: 48px;
+    max-height: 48px;
+    height: 48px;
+    font-size: 14px;
+    padding: 0 12px;
+  }
+}
+
+@media (max-width: 480px) {
+  .googleButton {
+    min-height: 44px;
+    max-height: 44px;
+    height: 44px;
+    font-size: 13px;
+    padding: 0 10px;
+  }
+  
+  .googleIcon {
+    width: 16px;
+    height: 16px;
   }
 }
