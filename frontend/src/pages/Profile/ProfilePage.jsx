@@ -46,11 +46,6 @@ export default function ProfilePage() {
   const navigate = useNavigate();
 
   useEffect(() => {
-    if (!currentUser) {
-      navigate("/login");
-      return;
-    }
-
     if (profileError) {
       if (profileError.message.includes("401")) {
         navigate("/login");
@@ -58,7 +53,7 @@ export default function ProfilePage() {
       }
       setError("Failed to load profile data. Please try again.");
     }
-  }, [currentUser, navigate, profileError]);
+  }, [navigate, profileError]);
 
   const handleEditProfile = () => {
     navigate("/editprofile");

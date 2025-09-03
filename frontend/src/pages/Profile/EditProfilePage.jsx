@@ -93,11 +93,6 @@ const EditProfilePage = () => {
   }, []);
 
   useEffect(() => {
-    if (!currentUser) {
-      navigate("/login");
-      return;
-    }
-
     if (profileError) {
       if (profileError.message.includes("401")) {
         navigate("/login");
@@ -105,7 +100,7 @@ const EditProfilePage = () => {
       }
       setError("Failed to load profile data. Please try again.");
     }
-  }, [currentUser, navigate, profileError]);
+  }, [navigate, profileError]);
 
   useEffect(() => {
     if (profileData && Object.keys(profileData).length > 0) {

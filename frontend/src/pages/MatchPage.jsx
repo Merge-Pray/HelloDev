@@ -38,13 +38,8 @@ const MatchPage = () => {
   const [contactedUserData, setContactedUserData] = useState(null);
 
   useEffect(() => {
-    if (!currentUser) {
-      navigate("/login");
-      return;
-    }
-
     fetchMatches();
-  }, [currentUser, navigate]);
+  }, []);
 
   const fetchMatches = async () => {
     try {
