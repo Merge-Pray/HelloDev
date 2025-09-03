@@ -690,9 +690,14 @@ export const updateUserProfile = async (req, res, next) => {
       });
     }
 
+    // Clean user data to avoid circular references from socket data
+    const cleanUserData = updatedUser.toObject();
+    delete cleanUserData.socketId;
+    delete cleanUserData.__v;
+
     return res.status(200).json({
       success: true,
-      user: updatedUser,
+      user: cleanUserData,
     });
   } catch (error) {
     console.error("❌ Profile update error:", error);
