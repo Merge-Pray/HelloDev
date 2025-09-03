@@ -25,6 +25,16 @@ userRouter
   .post("/logout", logout)
   .post("/refresh", refreshToken)
   .get("/auth-status", checkAuthStatus)
+  .get("/test-cookie", (req, res) => {
+    // Set a simple test cookie
+    res.cookie("test-cookie", "hello-samsung", {
+      httpOnly: false,
+      secure: true,
+      sameSite: "none",
+      maxAge: 60000, // 1 minute
+    });
+    res.json({ message: "Test cookie set", timestamp: Date.now() });
+  })
   .get("/debug-cookies", (req, res) => {
     const userAgent = req.headers['user-agent'] || 'Unknown';
     const isProblematicBrowser = /SamsungBrowser|CriOS/i.test(userAgent);
