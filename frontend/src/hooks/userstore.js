@@ -20,17 +20,17 @@ const useUserStore = create(
       currentUser: null,
       socket: null,
 
-      setCurrentUser: (user) =>
-        set({
-          currentUser: user
-            ? {
-                _id: user._id,
-                username: user.username,
-                nickname: user.nickname,
-                avatar: user.avatar,
-              }
-            : null,
-        }),
+      setCurrentUser: (user) => {
+        // Clean user data to avoid any potential circular references
+        const cleanUser = user ? {
+          _id: user._id,
+          username: user.username,
+          nickname: user.nickname,
+          avatar: user.avatar,
+        } : null;
+        
+        set({ currentUser: cleanUser });
+      },
 
       setSocket: (socket) => set({ socket }),
 
