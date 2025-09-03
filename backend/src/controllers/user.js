@@ -105,7 +105,34 @@ export const googleAuth = async (req, res, next) => {
           nickname: existingUser.nickname,
           email: existingUser.email,
           avatar: existingUser.avatar,
+          avatarData: existingUser.avatarData,
           isMatchable: existingUser.isMatchable,
+          aboutMe: existingUser.aboutMe,
+          country: existingUser.country,
+          city: existingUser.city,
+          age: existingUser.age,
+          status: existingUser.status,
+          devExperience: existingUser.devExperience,
+          techArea: existingUser.techArea,
+          favoriteTimeToCode: existingUser.favoriteTimeToCode,
+          favoriteLineOfCode: existingUser.favoriteLineOfCode,
+          programmingLanguages: existingUser.programmingLanguages,
+          techStack: existingUser.techStack,
+          preferredOS: existingUser.preferredOS,
+          languages: existingUser.languages,
+          gaming: existingUser.gaming,
+          otherInterests: existingUser.otherInterests,
+          favoriteDrinkWhileCoding: existingUser.favoriteDrinkWhileCoding,
+          musicGenreWhileCoding: existingUser.musicGenreWhileCoding,
+          favoriteShowMovie: existingUser.favoriteShowMovie,
+          linkedinProfile: existingUser.linkedinProfile,
+          githubProfile: existingUser.githubProfile,
+          personalWebsites: existingUser.personalWebsites,
+          profileLinksVisibleToContacts: existingUser.profileLinksVisibleToContacts,
+          points: existingUser.points,
+          rating: existingUser.rating,
+          createdAt: existingUser.createdAt,
+          updatedAt: existingUser.updatedAt,
         },
         isNewUser: false
       });
@@ -276,192 +303,100 @@ export const createUser = async (req, res, next) => {
   }
 };
 
+// Update user profile
 export const updateUserProfile = async (req, res, next) => {
   try {
     const userId = req.user._id;
-    const {
-      username,
-      nickname,
-      email,
-      avatar,
-      avatarData,
-      aboutMe,
-      country,
-      city,
-      age,
-      status,
-      devExperience,
-      techArea,
-      favoriteTimeToCode,
-      favoriteLineOfCode,
-      programmingLanguages,
-      techStack,
-      preferredOS,
-      languages,
-      gaming,
-      otherInterests,
-      favoriteDrinkWhileCoding,
-      musicGenreWhileCoding,
-      favoriteShowMovie,
-      linkedinProfile,
-      githubProfile,
-      personalWebsites,
-      profileLinksVisibleToContacts,
-      password,
-      currentPassword,
-    } = req.body;
+    const updates = req.body;
 
-    const updateData = {};
+    console.log("🔄 Updating profile for user:", userId);
+    console.log("📝 Profile updates:", updates);
 
-    if (username !== undefined) {
-      const existingUsername = await UserModel.findOne({
-        username: username,
-        _id: { $ne: userId },
-      });
-
-      if (existingUsername) {
+    // Check if user is trying to update password but is a Google user
+    if (updates.hashedPassword || updates.password) {
+      const existingUser = await UserModel.findById(userId);
+      if (existingUser && existingUser.googleId) {
         return res.status(400).json({
           success: false,
-          message: "Username already exists",
+          message: "Google users cannot update password through this interface. Please use your Google account settings.",
         });
       }
-
-      updateData.username = username;
     }
 
-    if (email !== undefined) {
-      const existingEmail = await UserModel.findOne({
-        email: email,
-        _id: { $ne: userId },
-      });
-
-      if (existingEmail) {
-        return res.status(400).json({
-          success: false,
-          message: "Email already exists",
-        });
+    // Clean up numeric fields - convert empty strings to null or undefined
+    if (updates.age !== undefined) {
+      if (updates.age === "" || updates.age === null || isNaN(updates.age)) {
+        updates.age = null;
+      } else {
+        updates.age = Number(updates.age);
       }
-
-      updateData.email = email;
     }
 
-    if (password !== undefined) {
-      if (!currentPassword) {
-        return res.status(400).json({
-          success: false,
-          message: "Current password is required to update password",
-        });
+    if (updates.rating !== undefined) {
+      if (updates.rating === "" || updates.rating === null || isNaN(updates.rating)) {
+        updates.rating = null;
+      } else {
+        updates.rating = Number(updates.rating);
       }
-
-      const currentUser = await UserModel.findById(userId);
-
-      if (!currentUser) {
-        return res.status(404).json({
-          success: false,
-          message: "User not found",
-        });
-      }
-
-      const passwordMatch = await comparePassword(
-        currentPassword,
-        currentUser.hashedPassword
-      );
-
-      if (!passwordMatch) {
-        return res.status(401).json({
-          success: false,
-          message: "Current password is incorrect",
-        });
-      }
-
-      if (password.length < 8) {
-        return res.status(400).json({
-          success: false,
-          message: "New password must be at least 8 characters long",
-        });
-      }
-
-      const hashedPassword = await hashPassword(password);
-      updateData.hashedPassword = hashedPassword;
     }
 
-    if (aboutMe !== undefined) updateData.aboutMe = aboutMe;
-    if (nickname !== undefined) updateData.nickname = nickname;
-    if (avatar !== undefined) updateData.avatar = avatar;
-    if (avatarData !== undefined) updateData.avatarData = avatarData;
-    if (country !== undefined) updateData.country = country;
-    if (city !== undefined) updateData.city = city;
-    if (age !== undefined) updateData.age = age;
-    if (status !== undefined) updateData.status = status;
-    if (devExperience !== undefined) updateData.devExperience = devExperience;
-    if (techArea !== undefined) updateData.techArea = techArea;
-    if (favoriteTimeToCode !== undefined)
-      updateData.favoriteTimeToCode = favoriteTimeToCode;
-    if (favoriteLineOfCode !== undefined)
-      updateData.favoriteLineOfCode = favoriteLineOfCode;
-    if (programmingLanguages !== undefined)
-      updateData.programmingLanguages = programmingLanguages;
-    if (techStack !== undefined) updateData.techStack = techStack;
-    if (preferredOS !== undefined) updateData.preferredOS = preferredOS;
-    if (languages !== undefined) updateData.languages = languages;
-    if (gaming !== undefined) updateData.gaming = gaming;
-    if (otherInterests !== undefined)
-      updateData.otherInterests = otherInterests;
-    if (favoriteDrinkWhileCoding !== undefined)
-      updateData.favoriteDrinkWhileCoding = favoriteDrinkWhileCoding;
-    if (musicGenreWhileCoding !== undefined)
-      updateData.musicGenreWhileCoding = musicGenreWhileCoding;
-    if (favoriteShowMovie !== undefined)
-      updateData.favoriteShowMovie = favoriteShowMovie;
-    if (linkedinProfile !== undefined)
-      updateData.linkedinProfile = linkedinProfile;
-    if (githubProfile !== undefined) updateData.githubProfile = githubProfile;
-    if (personalWebsites !== undefined)
-      updateData.personalWebsites = personalWebsites;
-    if (profileLinksVisibleToContacts !== undefined)
-      updateData.profileLinksVisibleToContacts = profileLinksVisibleToContacts;
+    if (updates.points !== undefined) {
+      if (updates.points === "" || updates.points === null || isNaN(updates.points)) {
+        updates.points = 0;
+      } else {
+        updates.points = Number(updates.points);
+      }
+    }
 
-    const updatedUser = await UserModel.findByIdAndUpdate(userId, updateData, {
+    // Clean up array fields
+    ['techArea', 'languages', 'techStack', 'otherInterests', 'personalWebsites'].forEach(field => {
+      if (updates[field] && Array.isArray(updates[field])) {
+        updates[field] = updates[field].filter(item => item && item.trim && item.trim() !== '');
+      }
+    });
+
+    // Special handling for programmingLanguages array of arrays
+    if (updates.programmingLanguages && Array.isArray(updates.programmingLanguages)) {
+      updates.programmingLanguages = updates.programmingLanguages.filter(item => 
+        Array.isArray(item) && item.length === 2 && item[0] && item[0].trim() !== ''
+      ).map(item => [item[0], Number(item[1])]);
+    }
+
+    // Password processing for regular users only
+    if (updates.password && updates.password.trim() !== "") {
+      updates.hashedPassword = await hashPassword(updates.password);
+      delete updates.password;
+    }
+
+    const updatedUser = await UserModel.findByIdAndUpdate(userId, updates, {
       new: true,
       runValidators: true,
-    }).select("-hashedPassword");
+    });
 
     if (!updatedUser) {
-      const error = new Error("User not found");
-      error.statusCode = 404;
-      return next(error);
-    }
-
-    const isNowMatchable = checkIsMatchable(updatedUser);
-
-    if (isNowMatchable !== updatedUser.isMatchable) {
-      updatedUser.isMatchable = isNowMatchable;
-      await updatedUser.save();
-    }
-
-    let newToken = null;
-    if (password !== undefined) {
-      newToken = generateToken(updatedUser.username, updatedUser._id);
-
-      const cookieOptions = getUniversalCookieOptions();
-
-      res.cookie("jwt", newToken, cookieOptions);
+      return res.status(404).json({
+        success: false,
+        message: "User not found",
+      });
     }
 
     return res.status(200).json({
       success: true,
-      message: password
-        ? "Profile and password updated successfully"
-        : "Profile updated successfully",
       user: updatedUser,
-      isMatchable: updatedUser.isMatchable,
-      passwordUpdated: password !== undefined,
     });
   } catch (error) {
+    console.error("❌ Profile update error:", error);
+    console.error("Error details:", error.message);
+    console.error("Error name:", error.name);
+    if (error.errors) {
+      console.error("Validation errors:", error.errors);
+    }
+    
     if (error.name === "ValidationError") {
       const validationErrors = Object.values(error.errors).map(
         (err) => err.message
       );
+      console.error("Formatted validation errors:", validationErrors);
       return res.status(400).json({
         success: false,
         message: "Validation failed",
