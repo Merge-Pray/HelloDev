@@ -2,12 +2,14 @@ import checkIsMatchable from "../../utils/profileValidator.js";
 import { generateToken } from "../libs/jwt.js";
 import { hashPassword, comparePassword } from "../libs/pw.js";
 import UserModel from "../models/user.js";
-import { getUniversalCookieOptions } from "../utils/browserDetection.js";
-import { OAuth2Client } from 'google-auth-library';
-import { pixelizeImageFromUrl, dataUrlToBuffer, generateAndUploadRandomAvatar } from '../utils/imagePixelizer.js';
-import { v2 as cloudinary } from 'cloudinary';
+import { OAuth2Client } from "google-auth-library";
+import {
+  pixelizeImageFromUrl,
+  dataUrlToBuffer,
+  generateAndUploadRandomAvatar,
+} from "../utils/imagePixelizer.js";
+import { v2 as cloudinary } from "cloudinary";
 
-// Cloudinary configuration
 cloudinary.config({
   cloud_name: process.env.CLOUDINARY_CLOUD_NAME,
   api_key: process.env.CLOUDINARY_API_KEY,
@@ -16,134 +18,127 @@ cloudinary.config({
 
 const client = new OAuth2Client(process.env.GOOGLE_CLIENT_ID);
 
-// GitHub OAuth helper function
 const getGitHubUserData = async (accessToken) => {
   try {
-    // Get user basic info
-    const userResponse = await fetch('https://api.github.com/user', {
+    const userResponse = await fetch("https://api.github.com/user", {
       headers: {
-        'Authorization': `token ${accessToken}`,
-        'User-Agent': 'HelloDev-App'
-      }
+        Authorization: `token ${accessToken}`,
+        "User-Agent": "HelloDev-App",
+      },
     });
-    
+
     if (!userResponse.ok) {
-      throw new Error('Failed to fetch GitHub user data');
+      throw new Error("Failed to fetch GitHub user data");
     }
-    
+
     const userData = await userResponse.json();
-    
-    // Get user email (might be private)
-    const emailResponse = await fetch('https://api.github.com/user/emails', {
+
+    const emailResponse = await fetch("https://api.github.com/user/emails", {
       headers: {
-        'Authorization': `token ${accessToken}`,
-        'User-Agent': 'HelloDev-App'
-      }
+        Authorization: `token ${accessToken}`,
+        "User-Agent": "HelloDev-App",
+      },
     });
-    
+
     let email = userData.email;
     if (!email && emailResponse.ok) {
       const emails = await emailResponse.json();
-      const primaryEmail = emails.find(e => e.primary && e.verified);
+      const primaryEmail = emails.find((e) => e.primary && e.verified);
       email = primaryEmail ? primaryEmail.email : emails[0]?.email;
     }
-    
+
     return {
       id: userData.id.toString(),
       email: email,
       name: userData.name || userData.login,
       username: userData.login,
-      avatar_url: userData.avatar_url
+      avatar_url: userData.avatar_url,
     };
   } catch (error) {
-    console.error('Error fetching GitHub user data:', error);
+    console.error("Error fetching GitHub user data:", error);
     throw error;
   }
 };
 
-// Hilfsfunktion zum Generieren eines eindeutigen Usernamens
 const generateUniqueUsername = async (email) => {
-  // Extrahiere den Teil vor dem ersten Punkt oder @
-  const emailPrefix = email.split('@')[0];
-  let baseUsername = emailPrefix.split('.')[0].toLowerCase();
-  
-  // Entferne ungültige Zeichen und stelle sicher, dass es mindestens 3 Zeichen hat
-  baseUsername = baseUsername.replace(/[^a-z0-9]/g, '');
+  const emailPrefix = email.split("@")[0];
+  let baseUsername = emailPrefix.split(".")[0].toLowerCase();
+
+  baseUsername = baseUsername.replace(/[^a-z0-9]/g, "");
   if (baseUsername.length < 3) {
-    baseUsername = 'user' + baseUsername;
+    baseUsername = "user" + baseUsername;
   }
-  
+
   let username = baseUsername;
   let attempts = 0;
   const maxAttempts = 100;
-  
-  // Prüfe ob Username bereits existiert
+
   while (attempts < maxAttempts) {
     const existingUser = await UserModel.findOne({ username });
-    
+
     if (!existingUser) {
       return username;
     }
-    
-    // Füge 2-stellige Zufallszahl hinzu
-    const randomNumber = Math.floor(Math.random() * 90) + 10; // 10-99
+
+    const randomNumber = Math.floor(Math.random() * 90) + 10;
     username = `${baseUsername}${randomNumber}`;
     attempts++;
   }
-  
-  // Fallback wenn alle Versuche fehlschlagen
+
   const timestamp = Date.now().toString().slice(-4);
   return `${baseUsername}${timestamp}`;
+};
+
+const cookieOptions = {
+  httpOnly: true,
+  secure: process.env.NODE_ENV === "production",
+  sameSite: process.env.NODE_ENV === "production" ? "none" : "lax",
+  maxAge: 24 * 60 * 60 * 1000,
+  path: "/",
 };
 
 export const googleAuth = async (req, res, next) => {
   try {
     const { credential } = req.body;
-    
+
     if (!credential) {
       return res.status(400).json({
         success: false,
-        message: 'Google credential is required'
+        message: "Google credential is required",
       });
     }
 
-    // Verifiziere das Google Token
     const ticket = await client.verifyIdToken({
       idToken: credential,
       audience: process.env.GOOGLE_CLIENT_ID,
     });
-    
+
     const payload = ticket.getPayload();
     const { email, name, picture, sub: googleId } = payload;
-    
+
     if (!email) {
       return res.status(400).json({
         success: false,
-        message: 'Email not provided by Google'
+        message: "Email not provided by Google",
       });
     }
 
-    // Prüfe ob User bereits existiert (per Email oder Google ID)
     let existingUser = await UserModel.findOne({
-      $or: [{ email }, { googleId }]
+      $or: [{ email }, { googleId }],
     });
 
     if (existingUser) {
-      // User existiert bereits - Anmeldung
-      
-      // Update Google ID falls noch nicht gesetzt
       if (!existingUser.googleId) {
         existingUser.googleId = googleId;
         await existingUser.save();
       }
-      
+
       const token = generateToken(existingUser.username, existingUser._id);
-      const cookieOptions = getUniversalCookieOptions();
-      res.cookie('jwt', token, cookieOptions);
-      
+      res.cookie("jwt", token, cookieOptions);
+
       return res.status(200).json({
         success: true,
-        message: 'Login successful',
+        message: "Login successful",
         user: {
           _id: existingUser._id,
           username: existingUser.username,
@@ -173,71 +168,58 @@ export const googleAuth = async (req, res, next) => {
           linkedinProfile: existingUser.linkedinProfile,
           githubProfile: existingUser.githubProfile,
           personalWebsites: existingUser.personalWebsites,
-          profileLinksVisibleToContacts: existingUser.profileLinksVisibleToContacts,
+          profileLinksVisibleToContacts:
+            existingUser.profileLinksVisibleToContacts,
           points: existingUser.points,
           rating: existingUser.rating,
           createdAt: existingUser.createdAt,
           updatedAt: existingUser.updatedAt,
         },
-        isNewUser: false
+        isNewUser: false,
       });
     } else {
-      // Neuer User - Registrierung mit Bildpixelisierung
-      
       const username = await generateUniqueUsername(email);
-      
+
       let finalAvatar = picture;
       let avatarData = null;
-      
-      // Versuche das Google-Profilbild zu pixelisieren
+
       if (picture) {
         try {
-          console.log('🎨 Starting Google profile picture pixelization...');
-          
-          // Pixelisiere das Google-Bild
           const pixelResult = await pixelizeImageFromUrl(picture, 16);
-          
-          // Konvertiere DataURL zu Buffer
           const imageBuffer = dataUrlToBuffer(pixelResult.imageDataUrl);
-          
-          // Upload zu Cloudinary
+
           const folder = `avatars/${username}`;
           const cloudinaryResult = await new Promise((resolve, reject) => {
-            cloudinary.uploader.upload_stream(
-              {
-                folder: folder,
-                resource_type: 'image',
-                allowed_formats: ['png'],
-                transformation: [
-                  { width: 400, height: 400, crop: 'fill' },
-                  { quality: 'auto' },
-                  { fetch_format: 'auto' },
-                ],
-              },
-              (error, result) => {
-                if (error) {
-                  console.error('Cloudinary upload error:', error);
-                  reject(error);
-                } else {
-                  resolve(result);
+            cloudinary.uploader
+              .upload_stream(
+                {
+                  folder: folder,
+                  resource_type: "image",
+                  allowed_formats: ["png"],
+                  transformation: [
+                    { width: 400, height: 400, crop: "fill" },
+                    { quality: "auto" },
+                    { fetch_format: "auto" },
+                  ],
+                },
+                (error, result) => {
+                  if (error) {
+                    reject(error);
+                  } else {
+                    resolve(result);
+                  }
                 }
-              }
-            ).end(imageBuffer);
+              )
+              .end(imageBuffer);
           });
-          
+
           finalAvatar = cloudinaryResult.secure_url;
           avatarData = JSON.stringify(pixelResult.pixels);
-          
-          console.log('✅ Google profile picture successfully pixelized and uploaded');
-          
         } catch (pixelError) {
-          console.error('❌ Error pixelizing Google profile picture:', pixelError);
-          console.log('📝 Falling back to original Google picture');
-          // Fallback: Use original Google picture
           finalAvatar = picture;
         }
       }
-      
+
       const newUser = new UserModel({
         email,
         username,
@@ -249,14 +231,13 @@ export const googleAuth = async (req, res, next) => {
       });
 
       await newUser.save();
-      
+
       const token = generateToken(username, newUser._id);
-      const cookieOptions = getUniversalCookieOptions();
-      res.cookie('jwt', token, cookieOptions);
-      
+      res.cookie("jwt", token, cookieOptions);
+
       return res.status(201).json({
         success: true,
-        message: 'Registration successful',
+        message: "Registration successful",
         user: {
           _id: newUser._id,
           username: newUser.username,
@@ -266,22 +247,20 @@ export const googleAuth = async (req, res, next) => {
           avatarData: newUser.avatarData,
           isMatchable: false,
         },
-        isNewUser: true
+        isNewUser: true,
       });
     }
   } catch (error) {
-    console.error('Google Auth Error:', error);
-    
-    if (error.message.includes('Token used too late')) {
+    if (error.message.includes("Token used too late")) {
       return res.status(400).json({
         success: false,
-        message: 'Google token has expired. Please try again.'
+        message: "Google token has expired. Please try again.",
       });
     }
-    
+
     return res.status(500).json({
       success: false,
-      message: 'Google authentication failed'
+      message: "Google authentication failed",
     });
   }
 };
@@ -289,129 +268,114 @@ export const googleAuth = async (req, res, next) => {
 export const githubAuth = async (req, res, next) => {
   try {
     const { code } = req.body;
-    
+
     if (!code) {
       return res.status(400).json({
         success: false,
-        message: 'GitHub authorization code is required'
+        message: "GitHub authorization code is required",
       });
     }
 
-    // Exchange code for access token
-    const tokenResponse = await fetch('https://github.com/login/oauth/access_token', {
-      method: 'POST',
-      headers: {
-        'Accept': 'application/json',
-        'Content-Type': 'application/json',
-      },
-      body: JSON.stringify({
-        client_id: process.env.GITHUB_CLIENT_ID,
-        client_secret: process.env.GITHUB_CLIENT_SECRET,
-        code: code,
-      }),
-    });
+    const tokenResponse = await fetch(
+      "https://github.com/login/oauth/access_token",
+      {
+        method: "POST",
+        headers: {
+          Accept: "application/json",
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({
+          client_id: process.env.GITHUB_CLIENT_ID,
+          client_secret: process.env.GITHUB_CLIENT_SECRET,
+          code: code,
+        }),
+      }
+    );
 
     const tokenData = await tokenResponse.json();
-    
+
     if (tokenData.error) {
       return res.status(400).json({
         success: false,
-        message: tokenData.error_description || 'GitHub authentication failed'
+        message: tokenData.error_description || "GitHub authentication failed",
       });
     }
 
-    // Get user data from GitHub
     const githubUser = await getGitHubUserData(tokenData.access_token);
-    
+
     if (!githubUser.email) {
       return res.status(400).json({
         success: false,
-        message: 'Email not provided by GitHub'
+        message: "Email not provided by GitHub",
       });
     }
 
-    // Check if user already exists (by email or GitHub ID)
-    // Exclude the contacts field temporarily to avoid the casting error
-    let existingUser = await UserModel.findOne({
-      $or: [{ email: githubUser.email }, { githubId: githubUser.id }]
-    }, { contacts: 0 }); // Exclude contacts field from the query
+    let existingUser = await UserModel.findOne(
+      {
+        $or: [{ email: githubUser.email }, { githubId: githubUser.id }],
+      },
+      { contacts: 0 }
+    );
 
     if (existingUser) {
-      // User exists - Login
-      
-      // Fix corrupted contacts field in database
       try {
         await UserModel.updateOne(
           { _id: existingUser._id },
           { $set: { contacts: [] } }
         );
-        console.log('🔧 Fixed corrupted contacts field for user:', existingUser.email);
-      } catch (contactsError) {
-        console.log('⚠️ Could not fix contacts field, but continuing...');
-      }
-      
-      // Update GitHub ID if not set
+      } catch (contactsError) {}
+
       if (!existingUser.githubId) {
         existingUser.githubId = githubUser.id;
         await existingUser.save();
       }
-      
-      // Update GitHub profile picture if user doesn't have avatarData (pixel avatar)
+
       if (githubUser.avatar_url && !existingUser.avatarData) {
         try {
-          console.log('🎨 Updating GitHub profile picture for existing user...');
-          
-          // Pixelize GitHub image
-          const pixelResult = await pixelizeImageFromUrl(githubUser.avatar_url, 16);
-          
-          // Convert DataURL to Buffer
+          const pixelResult = await pixelizeImageFromUrl(
+            githubUser.avatar_url,
+            16
+          );
           const imageBuffer = dataUrlToBuffer(pixelResult.imageDataUrl);
-          
-          // Upload to Cloudinary
+
           const folder = `avatars/${existingUser.username}`;
           const cloudinaryResult = await new Promise((resolve, reject) => {
-            cloudinary.uploader.upload_stream(
-              {
-                folder: folder,
-                resource_type: 'image',
-                allowed_formats: ['png'],
-                transformation: [
-                  { width: 400, height: 400, crop: 'fill' },
-                  { quality: 'auto' },
-                  { fetch_format: 'auto' },
-                ],
-              },
-              (error, result) => {
-                if (error) reject(error);
-                else resolve(result);
-              }
-            ).end(imageBuffer);
+            cloudinary.uploader
+              .upload_stream(
+                {
+                  folder: folder,
+                  resource_type: "image",
+                  allowed_formats: ["png"],
+                  transformation: [
+                    { width: 400, height: 400, crop: "fill" },
+                    { quality: "auto" },
+                    { fetch_format: "auto" },
+                  ],
+                },
+                (error, result) => {
+                  if (error) reject(error);
+                  else resolve(result);
+                }
+              )
+              .end(imageBuffer);
           });
-          
-          // Update user with new avatar
+
           existingUser.avatar = cloudinaryResult.secure_url;
           existingUser.avatarData = pixelResult.pixelsData;
           await existingUser.save();
-          
-          console.log('✅ GitHub profile picture updated for existing user');
-        } catch (pixelError) {
-          console.error('❌ Error updating GitHub profile picture for existing user:', pixelError);
-          // Continue without updating avatar
-        }
+        } catch (pixelError) {}
       }
-      
+
       const token = generateToken(existingUser.username, existingUser._id);
-      const cookieOptions = getUniversalCookieOptions();
-      res.cookie('jwt', token, cookieOptions);
-      
-      // Check if user profile is complete to determine if they should go to buildprofile
-      // A profile is considered complete if user has basic info filled out
-      const isProfileComplete = existingUser.programmingLanguages && 
-                               existingUser.programmingLanguages.length > 0;
-      
+      res.cookie("jwt", token, cookieOptions);
+
+      const isProfileComplete =
+        existingUser.programmingLanguages &&
+        existingUser.programmingLanguages.length > 0;
+
       return res.status(200).json({
         success: true,
-        message: 'Login successful',
+        message: "Login successful",
         user: {
           _id: existingUser._id,
           username: existingUser.username,
@@ -441,71 +405,61 @@ export const githubAuth = async (req, res, next) => {
           linkedinProfile: existingUser.linkedinProfile,
           githubProfile: existingUser.githubProfile,
           personalWebsites: existingUser.personalWebsites,
-          profileLinksVisibleToContacts: existingUser.profileLinksVisibleToContacts,
+          profileLinksVisibleToContacts:
+            existingUser.profileLinksVisibleToContacts,
           points: existingUser.points,
           rating: existingUser.rating,
           createdAt: existingUser.createdAt,
           updatedAt: existingUser.updatedAt,
         },
-        isNewUser: !isProfileComplete // Send user to buildprofile if profile is incomplete
+        isNewUser: !isProfileComplete,
       });
     } else {
-      // New user - Registration with image pixelization
-      
       const username = await generateUniqueUsername(githubUser.email);
-      
+
       let finalAvatar = githubUser.avatar_url;
       let avatarData = null;
-      
-      // Try to pixelize GitHub profile picture
+
       if (githubUser.avatar_url) {
         try {
-          console.log('🎨 Starting GitHub profile picture pixelization...');
-          
-          // Pixelize GitHub image
-          const pixelResult = await pixelizeImageFromUrl(githubUser.avatar_url, 16);
-          
-          // Convert DataURL to Buffer
+          const pixelResult = await pixelizeImageFromUrl(
+            githubUser.avatar_url,
+            16
+          );
           const imageBuffer = dataUrlToBuffer(pixelResult.imageDataUrl);
-          
-          // Upload to Cloudinary
+
           const folder = `avatars/${username}`;
           const cloudinaryResult = await new Promise((resolve, reject) => {
-            cloudinary.uploader.upload_stream(
-              {
-                folder: folder,
-                resource_type: 'image',
-                allowed_formats: ['png'],
-                transformation: [
-                  { width: 400, height: 400, crop: 'fill' },
-                  { quality: 'auto' },
-                  { fetch_format: 'auto' },
-                ],
-              },
-              (error, result) => {
-                if (error) {
-                  console.error('Cloudinary upload error:', error);
-                  reject(error);
-                } else {
-                  resolve(result);
+            cloudinary.uploader
+              .upload_stream(
+                {
+                  folder: folder,
+                  resource_type: "image",
+                  allowed_formats: ["png"],
+                  transformation: [
+                    { width: 400, height: 400, crop: "fill" },
+                    { quality: "auto" },
+                    { fetch_format: "auto" },
+                  ],
+                },
+                (error, result) => {
+                  if (error) {
+                    reject(error);
+                  } else {
+                    resolve(result);
+                  }
                 }
-              }
-            ).end(imageBuffer);
+              )
+              .end(imageBuffer);
           });
-          
+
           finalAvatar = cloudinaryResult.secure_url;
           avatarData = JSON.stringify(pixelResult.pixels);
-          
-          console.log('✅ GitHub profile picture successfully pixelized and uploaded');
-          
         } catch (pixelError) {
-          console.error('❌ Error pixelizing GitHub profile picture:', pixelError);
-          console.log('📝 Falling back to original GitHub picture');
-          // Fallback: Use original GitHub picture
           finalAvatar = githubUser.avatar_url;
         }
       }
-      
+
       const newUser = new UserModel({
         email: githubUser.email,
         username,
@@ -514,19 +468,17 @@ export const githubAuth = async (req, res, next) => {
         avatar: finalAvatar,
         avatarData: avatarData,
         isMatchable: false,
-        // Pre-fill GitHub profile link if available
         githubProfile: `https://github.com/${githubUser.username}`,
       });
 
       await newUser.save();
-      
+
       const token = generateToken(username, newUser._id);
-      const cookieOptions = getUniversalCookieOptions();
-      res.cookie('jwt', token, cookieOptions);
-      
+      res.cookie("jwt", token, cookieOptions);
+
       return res.status(201).json({
         success: true,
-        message: 'Registration successful',
+        message: "Registration successful",
         user: {
           _id: newUser._id,
           username: newUser.username,
@@ -537,27 +489,23 @@ export const githubAuth = async (req, res, next) => {
           isMatchable: false,
           githubProfile: newUser.githubProfile,
         },
-        isNewUser: true
+        isNewUser: true,
       });
     }
   } catch (error) {
-    console.error('GitHub Auth Error:', error);
-    
     return res.status(500).json({
       success: false,
-      message: 'GitHub authentication failed'
+      message: "GitHub authentication failed",
     });
   }
 };
 
 export const createUser = async (req, res, next) => {
   try {
-    console.log('🔧 Creating new user with automatic random avatar...');
     const { email, password, username } = req.body;
 
     const hashedPassword = await hashPassword(password);
 
-    // Create user first without avatar
     let newAccount = new UserModel({
       email,
       hashedPassword,
@@ -567,32 +515,25 @@ export const createUser = async (req, res, next) => {
     });
 
     await newAccount.save();
-    console.log('✅ User created, now generating random avatar...');
 
-    // Generate and upload random avatar
     let avatarUrl = null;
     let avatarData = null;
-    
+
     try {
-      const randomAvatarResult = await generateAndUploadRandomAvatar(newAccount._id, cloudinary, 16);
+      const randomAvatarResult = await generateAndUploadRandomAvatar(
+        newAccount._id,
+        cloudinary,
+        16
+      );
       avatarUrl = randomAvatarResult.avatarUrl;
       avatarData = randomAvatarResult.avatarData;
-      
-      // Update user with avatar data
+
       newAccount.avatar = avatarUrl;
       newAccount.avatarData = avatarData;
       await newAccount.save();
-      
-      console.log('✅ Random avatar generated and saved for new user');
-      
-    } catch (avatarError) {
-      console.error('❌ Error generating random avatar for new user:', avatarError);
-      console.log('📝 User created without avatar, continuing registration...');
-      // Continue without avatar - user can create one later
-    }
+    } catch (avatarError) {}
 
     const token = generateToken(username, newAccount._id);
-    const cookieOptions = getUniversalCookieOptions();
     res.cookie("jwt", token, cookieOptions);
 
     return res.status(201).json({
@@ -612,28 +553,19 @@ export const createUser = async (req, res, next) => {
   }
 };
 
-// Update user profile
 export const updateUserProfile = async (req, res, next) => {
   try {
     const userId = req.user._id;
     const updates = req.body;
 
-    console.log("🔄 Updating profile for user:", userId);
-    console.log("📝 Profile updates:", updates);
-
-    // Check if user is trying to update password but is a OAuth user
     if (updates.hashedPassword || updates.password) {
       const existingUser = await UserModel.findById(userId);
       if (existingUser && (existingUser.googleId || existingUser.githubId)) {
-        const provider = existingUser.googleId ? 'Google' : 'GitHub';
-        console.log(`⚠️ ${provider} user tried to update password - removing password from updates`);
-        // Remove password-related fields from updates but continue with other updates
         delete updates.hashedPassword;
         delete updates.password;
       }
     }
 
-    // Clean up numeric fields - convert empty strings to null or undefined
     if (updates.age !== undefined) {
       if (updates.age === "" || updates.age === null || isNaN(updates.age)) {
         updates.age = null;
@@ -643,7 +575,11 @@ export const updateUserProfile = async (req, res, next) => {
     }
 
     if (updates.rating !== undefined) {
-      if (updates.rating === "" || updates.rating === null || isNaN(updates.rating)) {
+      if (
+        updates.rating === "" ||
+        updates.rating === null ||
+        isNaN(updates.rating)
+      ) {
         updates.rating = null;
       } else {
         updates.rating = Number(updates.rating);
@@ -651,28 +587,46 @@ export const updateUserProfile = async (req, res, next) => {
     }
 
     if (updates.points !== undefined) {
-      if (updates.points === "" || updates.points === null || isNaN(updates.points)) {
+      if (
+        updates.points === "" ||
+        updates.points === null ||
+        isNaN(updates.points)
+      ) {
         updates.points = 0;
       } else {
         updates.points = Number(updates.points);
       }
     }
 
-    // Clean up array fields
-    ['techArea', 'languages', 'techStack', 'otherInterests', 'personalWebsites'].forEach(field => {
+    [
+      "techArea",
+      "languages",
+      "techStack",
+      "otherInterests",
+      "personalWebsites",
+    ].forEach((field) => {
       if (updates[field] && Array.isArray(updates[field])) {
-        updates[field] = updates[field].filter(item => item && item.trim && item.trim() !== '');
+        updates[field] = updates[field].filter(
+          (item) => item && item.trim && item.trim() !== ""
+        );
       }
     });
 
-    // Special handling for programmingLanguages array of arrays
-    if (updates.programmingLanguages && Array.isArray(updates.programmingLanguages)) {
-      updates.programmingLanguages = updates.programmingLanguages.filter(item => 
-        Array.isArray(item) && item.length === 2 && item[0] && item[0].trim() !== ''
-      ).map(item => [item[0], Number(item[1])]);
+    if (
+      updates.programmingLanguages &&
+      Array.isArray(updates.programmingLanguages)
+    ) {
+      updates.programmingLanguages = updates.programmingLanguages
+        .filter(
+          (item) =>
+            Array.isArray(item) &&
+            item.length === 2 &&
+            item[0] &&
+            item[0].trim() !== ""
+        )
+        .map((item) => [item[0], Number(item[1])]);
     }
 
-    // Password processing for regular users only
     if (updates.password && updates.password.trim() !== "") {
       updates.hashedPassword = await hashPassword(updates.password);
       delete updates.password;
@@ -690,8 +644,6 @@ export const updateUserProfile = async (req, res, next) => {
       });
     }
 
-    // Clean user data to avoid circular references from socket data
-    // Only return the fields we need, similar to what we do in githubAuth
     const cleanUserData = {
       _id: updatedUser._id,
       username: updatedUser.username,
@@ -718,7 +670,7 @@ export const updateUserProfile = async (req, res, next) => {
       rating: updatedUser.rating,
       points: updatedUser.points,
       googleId: updatedUser.googleId,
-      githubId: updatedUser.githubId
+      githubId: updatedUser.githubId,
     };
 
     return res.status(200).json({
@@ -726,18 +678,10 @@ export const updateUserProfile = async (req, res, next) => {
       user: cleanUserData,
     });
   } catch (error) {
-    console.error("❌ Profile update error:", error);
-    console.error("Error details:", error.message);
-    console.error("Error name:", error.name);
-    if (error.errors) {
-      console.error("Validation errors:", error.errors);
-    }
-    
     if (error.name === "ValidationError") {
       const validationErrors = Object.values(error.errors).map(
         (err) => err.message
       );
-      console.error("Formatted validation errors:", validationErrors);
       return res.status(400).json({
         success: false,
         message: "Validation failed",
@@ -798,8 +742,6 @@ export const verifyLogin = async (req, res, next) => {
     }
 
     const token = generateToken(existingUser.username, existingUser._id);
-    const userAgent = req.headers['user-agent'] || 'Unknown';
-    const cookieOptions = getUniversalCookieOptions({}, userAgent);
     res.cookie("jwt", token, cookieOptions);
 
     return res.status(200).json({
@@ -861,14 +803,9 @@ export const logout = async (req, res, next) => {
 
 export const getUserData = async (req, res, next) => {
   try {
-    console.log('🔍 getUserData called for user:', req.user._id);
     const userId = req.user._id;
 
     const user = await UserModel.findById(userId).select("-hashedPassword");
-    console.log('📦 User found in database:', !!user);
-    console.log('🎨 User avatarData present:', !!user?.avatarData);
-    console.log('🎨 AvatarData type:', typeof user?.avatarData);
-    console.log('🎨 AvatarData length:', user?.avatarData?.length);
 
     if (!user) {
       const error = new Error("User not found");
@@ -1112,7 +1049,6 @@ export const getUserContacts = async (req, res, next) => {
       totalContacts: formattedContacts.length,
     });
   } catch (error) {
-    console.error("Error fetching user contacts:", error);
     return next(error);
   }
 };
