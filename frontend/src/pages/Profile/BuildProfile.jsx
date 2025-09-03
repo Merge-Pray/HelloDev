@@ -106,6 +106,11 @@ export default function BuildProfile() {
 
   useEffect(() => {
     const fetchUserData = async () => {
+      if (!currentUser) {
+        navigate("/login");
+        return;
+      }
+
       try {
         const userData = await authenticatedFetch("/api/user/user");
         setUserProfileData(userData);
@@ -157,6 +162,7 @@ export default function BuildProfile() {
           ...data,
         };
       } else {
+        // Für radio-buttons und andere single-value fields
         const stepData = data[fieldName];
         newProfileData = {
           ...profileData,
@@ -169,11 +175,8 @@ export default function BuildProfile() {
       if (isLastStep) {
         setIsLoading(true);
         try {
-          console.log("Sending profile data:", newProfileData);
-
           await updateProfile.mutateAsync(newProfileData);
 
-          console.log("Profile saved successfully");
           navigate("/profile");
         } catch (error) {
           console.error("Profile creation error:", error);
@@ -192,7 +195,6 @@ export default function BuildProfile() {
       profileData,
       fieldName,
       isLastStep,
-      currentUser,
       navigate,
       updateProfile,
     ]
@@ -207,7 +209,6 @@ export default function BuildProfile() {
       };
 
       await updateProfile.mutateAsync(fallbackData);
-      console.log("Set nickname to username on cancel");
     } catch (error) {
       console.error("Error setting fallback nickname:", error);
     }
@@ -231,7 +232,6 @@ export default function BuildProfile() {
 
   const onSubmit = useCallback(
     (data) => {
-      console.log("Form submitted with data:", data);
       handleNext(data);
     },
     [handleNext]
@@ -347,103 +347,6 @@ export default function BuildProfile() {
     );
   };
 
-  const renderProgrammingLanguages = () => {
-    const selectedValues = watchedField || [];
-
-    return (
-      <div className={styles.programmingLanguagesContainer}>
-        <div className={styles.programmingLanguagesGrid}>
-          {currentStepData.options.map((language, index) => {
-            const inputId = `${fieldName}-${index}`;
-            const selectedEntry = selectedValues.find((item) =>
-              Array.isArray(item) ? item[0] === language : item === language
-            );
-            const isSelected = !!selectedEntry;
-            const currentSkillLevel = Array.isArray(selectedEntry)
-              ? selectedEntry[1]
-              : 5;
-            return (
-              <div
-                key={language}
-                className={`${styles.programmingLanguageCard} ${
-                  isSelected ? styles.selected : ""
-                }`}
-              >
-                <div className={styles.languageHeader}>
-                  <input
-                    type="checkbox"
-                    id={inputId}
-                    checked={isSelected}
-                    {...register(fieldName, {
-                      required:
-                        "Please select at least one programming language",
-                    })}
-                    onChange={(e) => {
-                      const currentValues = selectedValues || [];
-                      if (e.target.checked) {
-                        const newValues = [...currentValues, [language, 5]];
-                        setValue(fieldName, newValues);
-                      } else {
-                        const newValues = currentValues.filter((item) =>
-                          Array.isArray(item)
-                            ? item[0] !== language
-                            : item !== language
-                        );
-                        setValue(fieldName, newValues);
-                      }
-                    }}
-                  />
-                  <label htmlFor={inputId} className={styles.languageLabel}>
-                    {language}
-                  </label>
-                </div>
-
-                {isSelected && (
-                  <div className={styles.skillSection}>
-                    <div className={styles.skillHeader}>
-                      <span>Skill Level</span>
-                      <span className={styles.skillValue}>
-                        {currentSkillLevel}/10
-                      </span>
-                    </div>
-                    <input
-                      type="range"
-                      min="1"
-                      max="10"
-                      value={currentSkillLevel}
-                      className={styles.skillSlider}
-                      onChange={(e) => {
-                        const newLevel = parseInt(e.target.value);
-                        const currentValues = selectedValues || [];
-                        const newValues = currentValues.map((item) => {
-                          if (Array.isArray(item) && item[0] === language) {
-                            return [language, newLevel];
-                          }
-                          return item;
-                        });
-                        setValue(fieldName, newValues);
-                      }}
-                    />
-                    <div className={styles.skillLabels}>
-                      <span>Beginner</span>
-                      <span>Expert</span>
-                    </div>
-                  </div>
-                )}
-              </div>
-            );
-          })}
-        </div>
-
-        {currentStepData.maxSelections && (
-          <div className={styles.selectionCounter}>
-            {selectedValues.length}/{currentStepData.maxSelections} selected
-          </div>
-        )}
-      </div>
-    );
-  };
-
   const renderOptions = () => {
     const inputType = currentStepData.type;
     const maxSelections = currentStepData.maxSelections;
@@ -482,6 +385,35 @@ export default function BuildProfile() {
           allowMultiple={true}
           showButtons={true}
         />
+      );
+    }
+
+    if (inputType === "radio") {
+      return (
+        <div className={styles.optionsGrid}>
+          {currentStepData.options.map((option, index) => {
+            const inputId = `${fieldName}-${index}`;
+
+            return (
+              <div
+                key={option}
+                className={`${styles.optionItem} ${
+                  watchedField === option ? styles.selected : ""
+                }`}
+              >
+                <input
+                  type="radio"
+                  id={inputId}
+                  value={option}
+                  {...register(fieldName, {
+                    required: "Please select an option",
+                  })}
+                />
+                <label htmlFor={inputId}>{option}</label>
+              </div>
+            );
+          })}
+        </div>
       );
     }
 

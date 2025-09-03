@@ -37,6 +37,8 @@ export const useUpdateProfile = () => {
 
   return useMutation({
     mutationFn: async (profileData) => {
+      console.log("📤 Sending profile data to backend:", profileData);
+
       const makeRequest = async () => {
         return await fetch(`${API_URL}/api/user/update`, {
           method: "PATCH",
@@ -62,12 +64,13 @@ export const useUpdateProfile = () => {
       return response.json();
     },
     onSuccess: (data) => {
-      queryClient.setQueryData(["user-profile"], data.user);
+      queryClient.invalidateQueries(["user-profile"]);
+
       const { setCurrentUser } = useUserStore.getState();
       setCurrentUser(data.user);
     },
     onError: (error) => {
-      console.error("Profile update failed:", error);
+      console.error("❌ Profile update failed:", error);
     },
   });
 };
