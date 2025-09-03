@@ -9,6 +9,7 @@ export const getChats = async (req, res) => {
     const chats = await ChatModel.find({ participants: { $in: [userId] } })
       .populate("participants", "username nickname avatar isOnline")
       .populate("lastMessage");
+
     const chatsWithUnreadCount = await Promise.all(
       chats.map(async (chat) => {
         const unreadCount = await MessageModel.countDocuments({
@@ -19,12 +20,21 @@ export const getChats = async (req, res) => {
 
         return {
           ...chat.toObject(),
-          unreadCount,
+          unreadCount: Math.max(0, unreadCount),
         };
       })
     );
 
-    res.status(200).json(chatsWithUnreadCount);
+    const sortedChats = chatsWithUnreadCount.sort((a, b) => {
+      if (a.unreadCount > 0 && b.unreadCount === 0) return -1;
+      if (a.unreadCount === 0 && b.unreadCount > 0) return 1;
+
+      const aTime = a.lastMessage?.createdAt || a.createdAt;
+      const bTime = b.lastMessage?.createdAt || b.createdAt;
+      return new Date(bTime) - new Date(aTime);
+    });
+
+    res.status(200).json(sortedChats);
   } catch (error) {
     console.error(error);
     res.status(500).json({ message: "Server Error" });

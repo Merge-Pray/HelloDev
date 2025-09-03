@@ -11,7 +11,6 @@ export const socketAuth = async (socket, next) => {
     socket.user = user;
     next();
   } catch (error) {
-    console.error("Socket Authentication Error:", error.message);
     const authError = new Error("Authentication failed");
     authError.data = { status: 401 };
     next(authError);

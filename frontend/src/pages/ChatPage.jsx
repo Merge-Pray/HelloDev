@@ -14,7 +14,7 @@ const ChatPage = () => {
   const navigate = useNavigate();
   const currentUser = useUserStore((state) => state.currentUser);
   const socket = useUserStore((state) => state.socket);
-  const { refreshUnreadCount } = useUnreadCount();
+  const { refreshUnreadCount, markChatAsRead } = useUnreadCount();
   const [chats, setChats] = useState([]);
   const [currentChat, setCurrentChat] = useState(null);
   const [messages, setMessages] = useState([]);
@@ -44,22 +44,26 @@ const ChatPage = () => {
     currentChatRef.current = currentChat;
   }, [currentChat]);
 
-  const handleReceiveMessage = useCallback((message) => {
-    setMessages((prev) => {
-      const shouldAdd =
-        currentChatRef.current && message.chat === currentChatRef.current._id;
+  const handleReceiveMessage = useCallback(
+    (message) => {
+      setMessages((prev) => {
+        const shouldAdd =
+          currentChatRef.current && message.chat === currentChatRef.current._id;
 
-      if (shouldAdd) {
-        // Check if message already exists to prevent duplicates
-        const messageExists = prev.some(msg => msg._id === message._id);
-        if (messageExists) {
-          return prev;
+        if (shouldAdd) {
+          const messageExists = prev.some((msg) => msg._id === message._id);
+          if (messageExists) {
+            return prev;
+          }
+
+          markChatAsRead(currentChatRef.current._id);
+          return [...prev, message];
         }
-        return [...prev, message];
-      }
-      return prev;
-    });
-  }, []);
+        return prev;
+      });
+    },
+    [markChatAsRead]
+  );
   useEffect(() => {
     if (currentChat) {
       const markAsRead = async () => {
@@ -67,6 +71,12 @@ const ChatPage = () => {
           await authenticatedFetch(`/api/chats/${currentChat._id}/mark-read`, {
             method: "PATCH",
           });
+
+          refreshUnreadCount();
+
+          if (userId) {
+            loadChatOverview();
+          }
         } catch (error) {
           console.error("Error auto-marking messages as read:", error);
         }
@@ -74,7 +84,7 @@ const ChatPage = () => {
 
       markAsRead();
     }
-  }, [currentChat]);
+  }, [currentChat, refreshUnreadCount, userId]);
 
   const handleUserTyping = useCallback((data) => {
     const { userId: typingUserId, isTyping, chatId } = data;
@@ -97,25 +107,11 @@ const ChatPage = () => {
   }, []);
 
   useEffect(() => {
-    if (socket) {
-      socket.on("receiveMessage", handleReceiveMessage);
-      socket.on("userTyping", handleUserTyping);
-
-      return () => {
-        socket.off("receiveMessage", handleReceiveMessage);
-        socket.off("userTyping", handleUserTyping);
-      };
-    }
-  }, [socket]); // Removed callback dependencies to prevent re-adding listeners
-
-  useEffect(() => {
     scrollToBottom();
   }, [messages]);
 
-  // Ensure scroll to bottom when entering an individual chat
   useEffect(() => {
     if (userId && messages.length > 0 && !isLoading) {
-      // Use a longer timeout to ensure the DOM is fully rendered
       const timeoutId = setTimeout(() => {
         scrollToBottom();
       }, 200);
@@ -173,23 +169,12 @@ const ChatPage = () => {
 
         if (messagesResponse && Array.isArray(messagesResponse)) {
           setMessages(messagesResponse);
-          // Scroll to bottom after messages are set
-          setTimeout(() => {
-            scrollToBottom();
-          }, 100);
+          setTimeout(() => scrollToBottom(), 100);
         } else {
           setMessages([]);
         }
 
-        try {
-          await authenticatedFetch(`/api/chats/${chatResponse._id}/mark-read`, {
-            method: "PATCH",
-          });
-
-          refreshUnreadCount();
-        } catch (error) {
-          console.error("Error marking messages as read:", error);
-        }
+        await markChatAsRead(chatResponse._id);
       }
     } catch (err) {
       console.error("Error loading chat:", err);
@@ -546,6 +531,25 @@ const ChatPage = () => {
       </div>
     </div>
   );
+
+  useEffect(() => {
+    if (socket) {
+      socket.on("receiveMessage", handleReceiveMessage);
+      socket.on("userTyping", handleUserTyping);
+
+      socket.on("unreadCountUpdate", (data) => {
+        if (!currentChat || currentChat._id !== data.chatId) {
+          refreshUnreadCount();
+        }
+      });
+
+      return () => {
+        socket.off("receiveMessage", handleReceiveMessage);
+        socket.off("userTyping", handleUserTyping);
+        socket.off("unreadCountUpdate");
+      };
+    }
+  }, [socket, currentChat, refreshUnreadCount]);
 
   return (
     <div className={styles.page}>
