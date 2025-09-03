@@ -1,5 +1,5 @@
 import React, { useState, useEffect, useRef } from "react";
-import { useNavigate, useLocation } from "react-router";
+import { useNavigate, useParams, useLocation } from "react-router";
 import {
   Search,
   MapPin,
@@ -14,6 +14,7 @@ import {
   ExternalLink,
   MessageCircle,
   UserCheck,
+  Filter,
 } from "lucide-react";
 import useUserStore from "../hooks/userstore";
 import { authenticatedFetch } from "../utils/authenticatedFetch";
@@ -23,6 +24,7 @@ import styles from "./searchpage.module.css";
 const SearchPage = () => {
   const navigate = useNavigate();
   const location = useLocation();
+  const params = useParams();
   const currentUser = useUserStore((state) => state.currentUser);
   const searchInputRef = useRef(null);
 
@@ -34,21 +36,42 @@ const SearchPage = () => {
   const [hasSearched, setHasSearched] = useState(false);
   const [totalCount, setTotalCount] = useState(0);
 
-  // Get query from URL params
+  // Filter states
+  const [friendshipFilter, setFriendshipFilter] = useState("all"); // "all", "friends", "non-friends"
+
+  // Filter options
+  const filterOptions = [
+    { value: "all", label: "All Developers" },
+    { value: "friends", label: "Friends Only" },
+    { value: "non-friends", label: "Non-Friends Only" },
+  ];
+
+  // Get query and filter from URL params or search params
   useEffect(() => {
-    const params = new URLSearchParams(location.search);
-    const query = params.get("q");
-    if (query) {
-      setSearchQuery(query);
-      performSearch(query);
+    const urlParams = new URLSearchParams(location.search);
+    const queryFromUrl = params.query || urlParams.get("q");
+    const filterFromUrl = params.filter || urlParams.get("filter");
+
+    if (queryFromUrl) {
+      setSearchQuery(queryFromUrl);
     }
-  }, [location.search]);
+    if (
+      filterFromUrl &&
+      ["all", "friends", "non-friends"].includes(filterFromUrl)
+    ) {
+      setFriendshipFilter(filterFromUrl);
+    }
+
+    if (queryFromUrl) {
+      performSearch(queryFromUrl, filterFromUrl || "all");
+    }
+  }, [params.query, params.filter, location.search]);
 
   // Debounced search on input change
   useEffect(() => {
     const timer = setTimeout(() => {
       if (searchQuery.trim()) {
-        performSearch(searchQuery);
+        performSearch(searchQuery, friendshipFilter);
       } else {
         setSearchResults([]);
         setHasSearched(false);
@@ -57,9 +80,12 @@ const SearchPage = () => {
     }, 500); // 500ms delay
 
     return () => clearTimeout(timer);
-  }, [searchQuery]);
+  }, [searchQuery, friendshipFilter]);
 
-  const performSearch = async (query = searchQuery) => {
+  const performSearch = async (
+    query = searchQuery,
+    filter = friendshipFilter
+  ) => {
     if (!query.trim()) {
       setSearchResults([]);
       setHasSearched(false);
@@ -75,6 +101,11 @@ const SearchPage = () => {
       const searchParams = new URLSearchParams();
       searchParams.append("q", query.trim());
 
+      // Add friendship filter to the request
+      if (filter !== "all") {
+        searchParams.append("friendshipFilter", filter);
+      }
+
       const response = await authenticatedFetch(
         `/api/search/users?${searchParams.toString()}`
       );
@@ -82,13 +113,30 @@ const SearchPage = () => {
       console.log("Search response:", response);
 
       if (response.success) {
-        setSearchResults(response.users || []);
-        setTotalCount(response.totalCount || 0);
+        let filteredResults = response.users || [];
 
-        // Update URL without triggering navigation
-        const newUrl = new URL(window.location);
-        newUrl.searchParams.set("q", query.trim());
-        window.history.replaceState({}, "", newUrl);
+        // Client-side filtering as fallback (if backend doesn't support it yet)
+        if (filter === "friends") {
+          filteredResults = filteredResults.filter((user) => user.isContact);
+        } else if (filter === "non-friends") {
+          filteredResults = filteredResults.filter((user) => !user.isContact);
+        }
+
+        setSearchResults(filteredResults);
+        setTotalCount(filteredResults.length);
+
+        // Update URL using navigate with proper route structure
+        const searchPath = `/search/${encodeURIComponent(query.trim())}`;
+        const searchParams = new URLSearchParams();
+        if (filter !== "all") {
+          searchParams.append("filter", filter);
+        }
+
+        const finalPath = searchParams.toString()
+          ? `${searchPath}?${searchParams.toString()}`
+          : searchPath;
+
+        navigate(finalPath, { replace: true });
       } else {
         setError(response.message || "Search failed");
         setSearchResults([]);
@@ -109,11 +157,17 @@ const SearchPage = () => {
     setSearchResults([]);
     setHasSearched(false);
     setTotalCount(0);
+    setFriendshipFilter("all");
 
-    // Clear URL params
-    const newUrl = new URL(window.location);
-    newUrl.searchParams.delete("q");
-    window.history.replaceState({}, "", newUrl);
+    // Navigate back to base search route
+    navigate("/search", { replace: true });
+  };
+
+  const handleFilterChange = (newFilter) => {
+    setFriendshipFilter(newFilter);
+    if (searchQuery.trim()) {
+      performSearch(searchQuery, newFilter);
+    }
   };
 
   const handleProfileClick = (userId) => {
@@ -158,28 +212,42 @@ const SearchPage = () => {
     const statusMap = {
       searchhelp: {
         label: "Seeking Help",
-        color: "#f59e0b",
+        bgColor: "rgba(245, 158, 11, 0.2)",
+        borderColor: "#f59e0b",
         keywords: ["seeking help", "help"],
       },
       offerhelp: {
         label: "Offering Help",
-        color: "#10b981",
-        keywords: ["offering help", "offer help"],
+        bgColor: "rgba(16, 185, 129, 0.2)",
+        borderColor: "#10b981",
+        keywords: ["offering help", "offer help", "offerhelp"],
       },
       networking: {
         label: "Networking",
-        color: "#3b82f6",
+        bgColor: "rgba(var(--color-primary-rgb), 0.2)",
+        borderColor: "var(--color-primary)",
         keywords: ["networking", "network"],
       },
       learnpartner: {
         label: "Learning Partner",
-        color: "#8b5cf6",
-        keywords: ["learning partner", "learn partner", "partner"],
+        bgColor: "rgba(139, 92, 246, 0.2)",
+        borderColor: "#8b5cf6",
+        keywords: [
+          "learning partner",
+          "learn partner",
+          "partner",
+          "learningpartner",
+        ],
       },
     };
 
     return (
-      statusMap[status] || { label: status, color: "#6b7280", keywords: [] }
+      statusMap[status] || {
+        label: status,
+        bgColor: "var(--color-bg-secondary)",
+        borderColor: "var(--color-border)",
+        keywords: [],
+      }
     );
   };
 
@@ -199,6 +267,13 @@ const SearchPage = () => {
     return `${diffDays}d ago`;
   };
 
+  const formatDevExperience = (experience) => {
+    if (!experience) return "";
+    return (
+      experience.charAt(0).toUpperCase() + experience.slice(1).toLowerCase()
+    );
+  };
+
   const renderUserCard = (user) => {
     const displayName = user.nickname || user.username;
     const location = [user.city, user.country].filter(Boolean).join(", ");
@@ -216,7 +291,6 @@ const SearchPage = () => {
               e.target.src = "/avatars/default_avatar.png";
             }}
           />
-          {user.isOnline && <div className={styles.onlineBadge}></div>}
         </div>
 
         <div className={styles.userInfo}>
@@ -232,7 +306,10 @@ const SearchPage = () => {
           <div className={styles.userMeta}>
             <div
               className={styles.statusBadge}
-              style={{ backgroundColor: statusInfo.color }}
+              style={{
+                backgroundColor: statusInfo.bgColor,
+                borderColor: statusInfo.borderColor,
+              }}
             >
               {highlightMatch(statusInfo.label, searchQuery)}
             </div>
@@ -254,7 +331,12 @@ const SearchPage = () => {
             {user.devExperience && (
               <div className={styles.metaItem}>
                 <User size={14} />
-                <span>{highlightMatch(user.devExperience, searchQuery)}</span>
+                <span>
+                  {highlightMatch(
+                    formatDevExperience(user.devExperience),
+                    searchQuery
+                  )}
+                </span>
               </div>
             )}
 
@@ -380,6 +462,24 @@ const SearchPage = () => {
             </div>
           </div>
 
+          {/* Filter Tabs */}
+          <div className={styles.filterTabs}>
+            <div className={styles.filterIcon}>
+              <Filter size={16} />
+            </div>
+            {filterOptions.map((option) => (
+              <button
+                key={option.value}
+                className={`${styles.filterTab} ${
+                  friendshipFilter === option.value ? styles.active : ""
+                }`}
+                onClick={() => handleFilterChange(option.value)}
+              >
+                {option.label}
+              </button>
+            ))}
+          </div>
+
           {/* Search Results */}
           <div className={styles.searchResults}>
             {hasSearched && (
@@ -391,6 +491,17 @@ const SearchPage = () => {
                         totalCount !== 1 ? "s" : ""
                       } found`}
                   {searchQuery && ` for "${searchQuery}"`}
+                  {friendshipFilter !== "all" && (
+                    <span className={styles.filterIndicator}>
+                      {" "}
+                      (
+                      {
+                        filterOptions.find((f) => f.value === friendshipFilter)
+                          ?.label
+                      }
+                      )
+                    </span>
+                  )}
                 </h3>
                 {searchQuery && (
                   <button className={styles.clearAllBtn} onClick={clearSearch}>
@@ -426,7 +537,13 @@ const SearchPage = () => {
                 <div className={styles.emptyResults}>
                   <Search size={48} className={styles.emptyIcon} />
                   <h3>No developers found</h3>
-                  <p>Try different search terms or check your spelling</p>
+                  <p>
+                    {friendshipFilter === "friends"
+                      ? "No friends match your search criteria. Try different search terms or browse all developers."
+                      : friendshipFilter === "non-friends"
+                      ? "No non-friends match your search criteria. Try different search terms."
+                      : "Try different search terms or check your spelling"}
+                  </p>
                 </div>
               )}
 
