@@ -108,8 +108,8 @@
   align-items: center;
   padding: 1.5rem 2rem;
   background: var(--color-bg);
-  border-bottom: 1px solid var(--color-border);
   flex-shrink: 0;
+  /* ✅ Entfernt: border-bottom für Linie */
   /* ✅ Entfernt: position: sticky - nicht nötig bei Scrolling */
   /* ✅ Entfernt: top: 0; z-index: 10; */
 }
