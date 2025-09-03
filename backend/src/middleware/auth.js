@@ -2,7 +2,14 @@ import jwt from "jsonwebtoken";
 import UserModel from "../models/user.js";
 import { generateToken } from "../libs/jwt.js";
 import { verifyTokenAndGetUser } from "../libs/authHelpers.js";
-import { getUniversalCookieOptions } from "../utils/browserDetection.js";
+
+const cookieOptions = {
+  httpOnly: true,
+  secure: process.env.NODE_ENV === "production",
+  sameSite: process.env.NODE_ENV === "production" ? "none" : "lax",
+  maxAge: 24 * 60 * 60 * 1000,
+  path: "/",
+};
 
 export const authorizeJwt = async (req, res, next) => {
   try {
@@ -51,8 +58,6 @@ export const refreshToken = async (req, res, next) => {
 
     const newToken = generateToken(user.username, user._id);
 
-    const cookieOptions = getUniversalCookieOptions();
-    
     res.cookie("jwt", newToken, cookieOptions);
 
     return res.status(200).json({
