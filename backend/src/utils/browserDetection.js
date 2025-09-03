@@ -21,17 +21,15 @@ export const getUniversalCookieOptions = (baseOptions = {}, userAgent = '') => {
   // Check if it's a problematic browser
   const isProblematicBrowser = /SamsungBrowser|CriOS/i.test(userAgent);
   
-  if (isProblematicBrowser) {
-    console.log(`🍪 [COOKIE] Using relaxed settings for problematic browser`);
-    // Use more permissive settings for Samsung Browser and iOS Chrome
-    return {
-      ...baseOptions,
-      httpOnly: true,
-      secure: true,
-      sameSite: "lax", // More permissive than "none"
-      maxAge: 24 * 60 * 60 * 1000,
-    };
-  }
+  // Use Pollio's exact working configuration for ALL browsers
+  console.log(`🍪 [COOKIE] Using Pollio's exact configuration`);
+  return {
+    ...baseOptions,
+    httpOnly: true,
+    secure: true,
+    sameSite: "none",
+    maxAge: 24 * 60 * 60 * 1000,
+  };
   
   // Use Pollio's proven working configuration for other browsers
   return {
