@@ -21,15 +21,35 @@ const useUserStore = create(
       socket: null,
 
       setCurrentUser: (user) => {
-        // Clean user data to avoid any potential circular references
-        const cleanUser = user ? {
-          _id: user._id,
-          username: user.username,
-          nickname: user.nickname,
-          avatar: user.avatar,
-        } : null;
-        
-        set({ currentUser: cleanUser });
+        try {
+          // Clean user data to avoid any potential circular references
+          const cleanUser = user ? {
+            _id: user._id,
+            username: user.username,
+            nickname: user.nickname,
+            avatar: user.avatar,
+          } : null;
+          
+          // Test if the cleaned user can be JSON stringified
+          if (cleanUser) {
+            JSON.stringify(cleanUser);
+          }
+          
+          set({ currentUser: cleanUser });
+        } catch (error) {
+          console.error('❌ Error setting user in store:', error);
+          console.log('🔧 Attempting to set user with minimal data only');
+          
+          // Fallback to absolute minimum data
+          const minimalUser = user ? {
+            _id: String(user._id || ''),
+            username: String(user.username || ''),
+            nickname: String(user.nickname || user.username || ''),
+            avatar: user.avatar && typeof user.avatar === 'string' ? user.avatar : null,
+          } : null;
+          
+          set({ currentUser: minimalUser });
+        }
       },
 
       setSocket: (socket) => set({ socket }),
