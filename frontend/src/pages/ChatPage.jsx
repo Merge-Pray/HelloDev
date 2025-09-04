@@ -14,7 +14,7 @@ const ChatPage = () => {
   const navigate = useNavigate();
   const currentUser = useUserStore((state) => state.currentUser);
   const socket = useUserStore((state) => state.socket);
-  const { refreshUnreadCount, markChatAsRead } = useUnreadCount();
+  const { refreshUnreadCount } = useUnreadCount();
   const [chats, setChats] = useState([]);
   const [currentChat, setCurrentChat] = useState(null);
   const [messages, setMessages] = useState([]);
@@ -56,35 +56,22 @@ const ChatPage = () => {
             return prev;
           }
 
-          markChatAsRead(currentChatRef.current._id);
+          if (message.recipient === currentUser._id) {
+            socket?.emit("markAsRead", { chatId: currentChatRef.current._id });
+          }
+          
           return [...prev, message];
         }
         return prev;
       });
     },
-    [markChatAsRead]
+    [socket, currentUser]
   );
   useEffect(() => {
     if (currentChat) {
-      const markAsRead = async () => {
-        try {
-          await authenticatedFetch(`/api/chats/${currentChat._id}/mark-read`, {
-            method: "PATCH",
-          });
-
-          refreshUnreadCount();
-
-          if (userId) {
-            loadChatOverview();
-          }
-        } catch (error) {
-          console.error("Error auto-marking messages as read:", error);
-        }
-      };
-
-      markAsRead();
+      socket?.emit("markAsRead", { chatId: currentChat._id });
     }
-  }, [currentChat, refreshUnreadCount, userId]);
+  }, [currentChat, socket]);
 
   const handleUserTyping = useCallback((data) => {
     const { userId: typingUserId, isTyping, chatId } = data;
@@ -173,8 +160,6 @@ const ChatPage = () => {
         } else {
           setMessages([]);
         }
-
-        await markChatAsRead(chatResponse._id);
       }
     } catch (err) {
       console.error("Error loading chat:", err);
@@ -447,21 +432,21 @@ const ChatPage = () => {
           })
         )}
 
-        {typingUsers.size > 0 && (
-          <div className={styles.typingIndicator}>
-            <div className={styles.typingDots}>
-              <span></span>
-              <span></span>
-              <span></span>
-            </div>
-            <span>
-              {otherUser?.nickname || otherUser?.username} is typing...
-            </span>
-          </div>
-        )}
-
         <div ref={messagesEndRef} />
       </div>
+
+      {typingUsers.size > 0 && (
+        <div className={styles.typingIndicator}>
+          <div className={styles.typingDots}>
+            <span></span>
+            <span></span>
+            <span></span>
+          </div>
+          <span>
+            {otherUser?.nickname || otherUser?.username} is typing...
+          </span>
+        </div>
+      )}
 
       <div className={styles.messageInput}>
         <div className={styles.inputContainer}>
@@ -537,16 +522,9 @@ const ChatPage = () => {
       socket.on("receiveMessage", handleReceiveMessage);
       socket.on("userTyping", handleUserTyping);
 
-      socket.on("unreadCountUpdate", (data) => {
-        if (!currentChat || currentChat._id !== data.chatId) {
-          refreshUnreadCount();
-        }
-      });
-
       return () => {
         socket.off("receiveMessage", handleReceiveMessage);
         socket.off("userTyping", handleUserTyping);
-        socket.off("unreadCountUpdate");
       };
     }
   }, [socket, currentChat, refreshUnreadCount]);

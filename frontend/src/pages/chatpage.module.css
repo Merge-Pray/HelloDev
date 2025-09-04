@@ -247,10 +247,14 @@
 .typingIndicator {
   display: flex;
   align-items: center;
-  gap: 8px;
+  gap: 6px;
   padding: 8px 16px;
   color: var(--color-text-secondary);
-  font-size: 14px;
+  font-size: 12px;
+  background: var(--color-background);
+  border-top: 1px solid var(--color-border);
+  margin: 0;
+  min-height: 40px;
 }
 
 .typingDots {
