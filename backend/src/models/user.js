@@ -53,10 +53,6 @@ const UserSchema = new Schema(
       type: Date,
       default: Date.now,
     },
-    socketId: {
-      type: String,
-      default: null,
-    },
 
     isMatchable: {
       type: Boolean,

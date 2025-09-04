@@ -73,35 +73,35 @@ export const getUserChat = async (req, res, next) => {
     const userId = req.user._id;
     const { recipientId } = req.body;
 
+    console.log(`🔍 getUserChat: ${userId} → ${recipientId}`);
+
     if (userId.toString() === recipientId) {
-      return res
-        .status(400)
-        .json({ message: "You cannot chat with yourself." });
+      return res.status(400).json({ message: "Cannot chat with yourself" });
     }
 
     const recipient = await UserModel.findById(recipientId);
     if (!recipient) {
-      return res.status(404).json({ message: "User not found." });
+      return res.status(404).json({ message: "User not found" });
     }
 
+    // Try simple approach first
     let chat = await ChatModel.findOne({
-      participants: {
-        $size: 2,
-        $all: [userId, recipientId],
-      },
+      participants: { $all: [userId, recipientId], $size: 2 }
     });
 
     if (!chat) {
+      console.log("Creating new chat");
       chat = await ChatModel.create({
-        participants: [userId, recipientId],
+        participants: [userId, recipientId]
       });
     }
 
     await chat.populate("participants", "username nickname avatar isOnline");
+    console.log("✅ Chat found/created successfully");
 
     res.status(200).json(chat);
   } catch (error) {
-    console.error(error);
+    console.error("❌ getUserChat error:", error);
     res.status(500).json({ message: "Server Error" });
   }
 };

@@ -39,8 +39,8 @@ const useUserStore = create(
         if (currentSocket) {
           currentSocket.disconnect();
         }
-        set({ currentUser: null, socket: null });
         localStorage.removeItem("user-storage");
+        set({ currentUser: null, socket: null });
       },
 
       logout: async () => {
@@ -56,8 +56,8 @@ const useUserStore = create(
           if (currentSocket) {
             currentSocket.disconnect();
           }
-          set({ currentUser: null, socket: null });
           localStorage.removeItem("user-storage");
+          set({ currentUser: null, socket: null });
         }
       },
     }),
