@@ -61,7 +61,6 @@ export default function PostCard({
     e.preventDefault();
     e.stopPropagation();
 
-    // Prüfen ob es das eigene Profil ist
     if (post.author._id === currentUser?._id) {
       navigate("/profile");
     } else {
@@ -102,6 +101,7 @@ export default function PostCard({
 
         <div className={styles.authorInfo}>
           <div className={styles.nameRow}>
+            {/* Only show online dot when user is actually online */}
             {post.author?.isOnline && (
               <span className={styles.onlineDot} aria-label="Online" />
             )}
@@ -120,18 +120,16 @@ export default function PostCard({
           </div>
 
           <div className={styles.meta}>
-            {/* Only show post creation time if user is NOT online */}
-            {!post.author?.isOnline && (
-              <time
-                className={styles.time}
-                dateTime={new Date(post.createdAt).toISOString()}
-                title={new Date(post.createdAt).toLocaleString()}
-              >
-                {formatDistanceToNow(new Date(post.createdAt), {
-                  addSuffix: true,
-                })}
-              </time>
-            )}
+            {/* Always show post creation time */}
+            <time
+              className={styles.time}
+              dateTime={new Date(post.createdAt).toISOString()}
+              title={new Date(post.createdAt).toLocaleString()}
+            >
+              {formatDistanceToNow(new Date(post.createdAt), {
+                addSuffix: true,
+              })}
+            </time>
           </div>
         </div>
 
@@ -157,7 +155,6 @@ export default function PostCard({
             loading="lazy"
             decoding="async"
           />
-          {/* light */}
           <img
             src="/Klipy/KLIPY - 200 dark text - horizontal.png"
             alt="Powered by Klipy"
@@ -165,7 +162,6 @@ export default function PostCard({
             loading="lazy"
             decoding="async"
           />
-          {/* dark */}
           <img
             src="/Klipy/KLIPY - 200 light text - horizontal.png"
             alt="Powered by Klipy"
