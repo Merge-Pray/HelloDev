@@ -34,7 +34,12 @@ const ONBOARDING_STEPS = [
         label: "Status",
         type: "select",
         required: true,
-        options: ["searchhelp", "offerhelp", "networking", "learnpartner"],
+        options: [
+          { value: "searchhelp", label: "Seeking Help" },
+          { value: "offerhelp", label: "Offering Help" },
+          { value: "networking", label: "Networking" },
+          { value: "learnpartner", label: "Learning Partner" },
+        ],
       },
     ],
   },
@@ -44,7 +49,11 @@ const ONBOARDING_STEPS = [
     subtitle: "How would you describe your programming experience?",
     type: "radio",
     fieldName: "devExperience",
-    options: ["beginner", "intermediate", "expert"],
+    options: [
+      { value: "beginner", label: "Beginner" },
+      { value: "intermediate", label: "Intermediate" },
+      { value: "expert", label: "Expert" },
+    ],
   },
   {
     id: 3,
@@ -79,7 +88,12 @@ const ONBOARDING_STEPS = [
     subtitle: "What OS do you prefer for development?",
     type: "radio",
     fieldName: "preferredOS",
-    options: ["Windows", "macOS", "Linux", "Other"],
+    options: [
+      { value: "Windows", label: "Windows" },
+      { value: "macOS", label: "macOS" },
+      { value: "Linux", label: "Linux" },
+      { value: "Other", label: "Other" },
+    ],
   },
 ];
 
@@ -278,8 +292,8 @@ export default function BuildProfile() {
                 >
                   <option value="">Select {field.label}</option>
                   {field.options.map((option) => (
-                    <option key={option} value={option}>
-                      {option}
+                    <option key={option.value} value={option.value}>
+                      {option.label}
                     </option>
                   ))}
                 </select>
@@ -388,28 +402,33 @@ export default function BuildProfile() {
       );
     }
 
+    // ✅ AKTUALISIERT: Radio-Button Behandlung mit Labels
     if (inputType === "radio") {
       return (
         <div className={styles.optionsGrid}>
           {currentStepData.options.map((option, index) => {
+            const optionValue =
+              typeof option === "object" ? option.value : option;
+            const optionLabel =
+              typeof option === "object" ? option.label : option;
             const inputId = `${fieldName}-${index}`;
 
             return (
               <div
-                key={option}
+                key={optionValue}
                 className={`${styles.optionItem} ${
-                  watchedField === option ? styles.selected : ""
+                  watchedField === optionValue ? styles.selected : ""
                 }`}
               >
                 <input
                   type="radio"
                   id={inputId}
-                  value={option}
+                  value={optionValue}
                   {...register(fieldName, {
                     required: "Please select an option",
                   })}
                 />
-                <label htmlFor={inputId}>{option}</label>
+                <label htmlFor={inputId}>{optionLabel}</label>
               </div>
             );
           })}
