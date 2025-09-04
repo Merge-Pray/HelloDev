@@ -23,7 +23,6 @@ export const useUnreadCount = () => {
     if (!socket) return;
 
     const handleUnreadCountUpdate = (count) => {
-      console.log("🔔 Notification update:", count);
       setTotalUnreadCount(count);
     };
 
