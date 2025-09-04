@@ -117,7 +117,10 @@ export const createPost = async (req, res, next) => {
 
     await newPost.save();
 
-    await newPost.populate("author", "username nickname avatar");
+    await newPost.populate(
+      "author",
+      "username nickname avatar isOnline lastSeen"
+    );
     await newPost.populate("mentions", "username nickname");
 
     res.status(201).json({
@@ -441,7 +444,10 @@ export const addCommentToPost = async (req, res, next) => {
     addComment(post, userId, content, mentions, imageUrl);
     await post.save();
 
-    await post.populate("comments.author", "username nickname avatar");
+    await post.populate(
+      "comments.author",
+      "username nickname avatar isOnline lastSeen"
+    );
     const newComment = post.comments[post.comments.length - 1];
 
     res.status(201).json({
@@ -636,9 +642,15 @@ export const repostPost = async (req, res, next) => {
     originalPost.engagementScore = calculateEngagementScore(originalPost);
     await originalPost.save();
 
-    await repost.populate("author", "username nickname avatar");
+    await repost.populate(
+      "author",
+      "username nickname avatar isOnline lastSeen"
+    );
     await repost.populate("originalPost");
-    await repost.populate("originalPost.author", "username nickname avatar");
+    await repost.populate(
+      "originalPost.author",
+      "username nickname avatar isOnline lastSeen"
+    );
 
     res.status(201).json({
       success: true,
