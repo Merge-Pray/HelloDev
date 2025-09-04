@@ -26,7 +26,7 @@ export const useProfile = () => {
       const data = await response.json();
       return data.user;
     },
-    staleTime: 5 * 60 * 1000,
+    staleTime: 2 * 60 * 1000,
     cacheTime: 10 * 60 * 1000,
     retry: 2,
   });
@@ -65,7 +65,6 @@ export const useUpdateProfile = () => {
     },
     onSuccess: (data) => {
       queryClient.invalidateQueries(["user-profile"]);
-
       const { setCurrentUser } = useUserStore.getState();
       setCurrentUser(data.user);
     },
@@ -98,7 +97,7 @@ export const useOtherUserProfile = (userId) => {
       const data = await response.json();
       return data.user;
     },
-    staleTime: 2 * 60 * 1000,
+    staleTime: 1 * 60 * 1000,
     cacheTime: 5 * 60 * 1000,
     retry: 2,
     enabled: !!userId,
@@ -128,7 +127,7 @@ export const usePrefetchProfile = () => {
         const data = await response.json();
         return data.user;
       },
-      staleTime: 5 * 60 * 1000,
+      staleTime: 2 * 60 * 1000,
     });
   };
 };

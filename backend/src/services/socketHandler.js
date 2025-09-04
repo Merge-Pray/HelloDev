@@ -82,14 +82,21 @@ export const socketHandler = (io) => {
       const userSockets = await io.in(`user:${userId}`).fetchSockets();
 
       if (userSockets.length === 0) {
-        try {
-          await UserModel.findByIdAndUpdate(userId, {
-            isOnline: false,
-            lastSeen: new Date(),
-          });
-        } catch (error) {
-          console.error("Failed to update user status:", error);
-        }
+        // Grace period: wait 10 seconds before marking offline
+        setTimeout(async () => {
+          const stillNoSockets = await io.in(`user:${userId}`).fetchSockets();
+
+          if (stillNoSockets.length === 0) {
+            try {
+              await UserModel.findByIdAndUpdate(userId, {
+                isOnline: false,
+                lastSeen: new Date(),
+              });
+            } catch (error) {
+              console.error("Failed to update user status:", error);
+            }
+          }
+        }, 10000); // 10 second grace period
       }
     });
 

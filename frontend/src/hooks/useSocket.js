@@ -1,5 +1,6 @@
 import { useEffect, useRef } from "react";
 import { io } from "socket.io-client";
+import { useQueryClient } from "@tanstack/react-query";
 import useUserStore from "./userstore";
 import { authenticatedFetch } from "../utils/authenticatedFetch";
 
@@ -8,6 +9,7 @@ export const useSocket = () => {
   const setSocket = useUserStore((state) => state.setSocket);
   const clearUser = useUserStore((state) => state.clearUser);
   const socketRef = useRef(null);
+  const queryClient = useQueryClient();
 
   useEffect(() => {
     if (currentUser && !socketRef.current) {
@@ -16,12 +18,14 @@ export const useSocket = () => {
           const socket = io(import.meta.env.VITE_BACKENDPATH, {
             withCredentials: true,
             timeout: 20000,
-            forceNew: true,
+            reconnection: true,
+            reconnectionAttempts: 3,
             transports: ["websocket", "polling"],
           });
 
           socket.on("connect", () => {
             console.log("Socket connected successfully");
+            queryClient.invalidateQueries(["user-profile"]);
           });
 
           socket.on("connect_error", async (error) => {
@@ -62,7 +66,7 @@ export const useSocket = () => {
       socketRef.current = null;
       setSocket(null);
     }
-  }, [currentUser, setSocket, clearUser]);
+  }, [currentUser, setSocket, clearUser, queryClient]);
 
   return socketRef.current;
 };
