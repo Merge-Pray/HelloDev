@@ -34,7 +34,12 @@ const ONBOARDING_STEPS = [
         label: "Status",
         type: "select",
         required: true,
-        options: ["searchhelp", "offerhelp", "networking", "learnpartner"],
+        options: [
+          { value: "searchhelp", label: "Seeking Help" },
+          { value: "offerhelp", label: "Offering Help" },
+          { value: "networking", label: "Networking" },
+          { value: "learnpartner", label: "Learning Partner" },
+        ],
       },
     ],
   },
@@ -44,7 +49,11 @@ const ONBOARDING_STEPS = [
     subtitle: "How would you describe your programming experience?",
     type: "radio",
     fieldName: "devExperience",
-    options: ["beginner", "intermediate", "expert"],
+    options: [
+      { value: "beginner", label: "Beginner" },
+      { value: "intermediate", label: "Intermediate" },
+      { value: "expert", label: "Expert" },
+    ],
   },
   {
     id: 3,
@@ -79,7 +88,12 @@ const ONBOARDING_STEPS = [
     subtitle: "What OS do you prefer for development?",
     type: "radio",
     fieldName: "preferredOS",
-    options: ["Windows", "macOS", "Linux", "Other"],
+    options: [
+      { value: "Windows", label: "Windows" },
+      { value: "macOS", label: "macOS" },
+      { value: "Linux", label: "Linux" },
+      { value: "Other", label: "Other" },
+    ],
   },
 ];
 
@@ -102,6 +116,7 @@ export default function BuildProfile() {
     watch,
     setValue,
     formState: { errors },
+    trigger,
   } = useForm();
 
   useEffect(() => {
@@ -147,8 +162,21 @@ export default function BuildProfile() {
 
   useEffect(() => {
     reset();
+
+    if (currentStepData.type === "mixed") {
+      currentStepData.fields.forEach((field) => {
+        if (field.type !== "location" && profileData[field.name]) {
+          setValue(field.name, profileData[field.name]);
+        }
+      });
+    } else if (fieldName && profileData[fieldName]) {
+      setTimeout(() => {
+        setValue(fieldName, profileData[fieldName]);
+      }, 10);
+    }
+
     setSelectedCount(0);
-  }, [currentStep, reset]);
+  }, [currentStep, reset, setValue, profileData, currentStepData, fieldName]);
 
   const handleNext = useCallback(
     async (data) => {
@@ -157,12 +185,13 @@ export default function BuildProfile() {
       let newProfileData;
 
       if (currentStepData.type === "mixed") {
+        const { country, city, ...otherFormData } = data;
+
         newProfileData = {
           ...profileData,
-          ...data,
+          ...otherFormData,
         };
       } else {
-        // Für radio-buttons und andere single-value fields
         const stepData = data[fieldName];
         newProfileData = {
           ...profileData,
@@ -176,7 +205,6 @@ export default function BuildProfile() {
         setIsLoading(true);
         try {
           await updateProfile.mutateAsync(newProfileData);
-
           navigate("/profile");
         } catch (error) {
           console.error("Profile creation error:", error);
@@ -199,6 +227,33 @@ export default function BuildProfile() {
       updateProfile,
     ]
   );
+
+  const handleBack = useCallback(() => {
+    if (currentStep > 1) {
+      const currentFormData = watch();
+
+      let updatedProfileData;
+
+      if (currentStepData.type === "mixed") {
+        const { country, city, ...otherFormData } = currentFormData;
+
+        updatedProfileData = {
+          ...profileData,
+          ...otherFormData,
+        };
+      } else if (fieldName && currentFormData[fieldName] !== undefined) {
+        updatedProfileData = {
+          ...profileData,
+          [fieldName]: currentFormData[fieldName],
+        };
+      } else {
+        updatedProfileData = profileData;
+      }
+
+      setProfileData(updatedProfileData);
+      setCurrentStep((prev) => prev - 1);
+    }
+  }, [currentStep, profileData, currentStepData, fieldName, watch]);
 
   const confirmCancel = useCallback(async () => {
     setShowCancelDialog(false);
@@ -224,18 +279,39 @@ export default function BuildProfile() {
     setShowCancelDialog(false);
   }, []);
 
-  const handleBack = useCallback(() => {
-    if (currentStep > 1) {
-      setCurrentStep((prev) => prev - 1);
-    }
-  }, [currentStep]);
-
   const onSubmit = useCallback(
-    (data) => {
+    async (data) => {
+      if (
+        currentStepData.type === "hybrid-selector" ||
+        currentStepData.type === "programming-languages"
+      ) {
+        const selectedValues = profileData[currentStepData.fieldName] || [];
+        if (selectedValues.length === 0) {
+          setError("Please select at least one option before continuing.");
+          return;
+        }
+      }
+
+      if (currentStepData.type === "mixed") {
+        if (!profileData.country || !profileData.city) {
+          setError("Please select your location before continuing.");
+          return;
+        }
+      }
+
+      setError(null);
       handleNext(data);
     },
-    [handleNext]
+    [handleNext, currentStepData, profileData]
   );
+
+  const handleCountryChange = useCallback((country) => {
+    setProfileData((prev) => ({ ...prev, country, city: "" }));
+  }, []);
+
+  const handleCityChange = useCallback((city) => {
+    setProfileData((prev) => ({ ...prev, city }));
+  }, []);
 
   const renderMixedFields = () => {
     return (
@@ -246,20 +322,19 @@ export default function BuildProfile() {
               <div key={field.name} className="form-field">
                 <label>{field.label}</label>
                 <LocationSelector
-                  selectedCountry={
-                    watch("country") || profileData.country || ""
-                  }
-                  selectedCity={watch("city") || profileData.city || ""}
-                  onCountryChange={(country) => {
-                    setProfileData({ ...profileData, country });
-                    setValue("country", country);
-                  }}
-                  onCityChange={(city) => {
-                    setProfileData({ ...profileData, city });
-                    setValue("city", city);
-                  }}
+                  selectedCountry={profileData.country || ""}
+                  selectedCity={profileData.city || ""}
+                  onCountryChange={handleCountryChange}
+                  onCityChange={handleCityChange}
                   required={field.required}
                 />
+
+                {!profileData.country && (
+                  <div className="form-hint">Country is required</div>
+                )}
+                {profileData.country && !profileData.city && (
+                  <div className="form-hint">City is required</div>
+                )}
               </div>
             );
           }
@@ -278,8 +353,8 @@ export default function BuildProfile() {
                 >
                   <option value="">Select {field.label}</option>
                   {field.options.map((option) => (
-                    <option key={option} value={option}>
-                      {option}
+                    <option key={option.value} value={option.value}>
+                      {option.label}
                     </option>
                   ))}
                 </select>
@@ -356,7 +431,7 @@ export default function BuildProfile() {
       return (
         <HybridSelector
           category="programmingLanguages"
-          selectedValues={selectedValues}
+          selectedValues={profileData.programmingLanguages || []}
           onSelectionChange={(values) => {
             setProfileData({ ...profileData, programmingLanguages: values });
             setValue("programmingLanguages", values);
@@ -373,7 +448,7 @@ export default function BuildProfile() {
       return (
         <HybridSelector
           category={currentStepData.fieldName}
-          selectedValues={watchedField || []}
+          selectedValues={profileData[currentStepData.fieldName] || []}
           onSelectionChange={(values) => {
             setProfileData({
               ...profileData,
@@ -389,27 +464,56 @@ export default function BuildProfile() {
     }
 
     if (inputType === "radio") {
+      const currentValue = watchedField || profileData[fieldName];
+
       return (
         <div className={styles.optionsGrid}>
           {currentStepData.options.map((option, index) => {
+            const optionValue =
+              typeof option === "object" ? option.value : option;
+            const optionLabel =
+              typeof option === "object" ? option.label : option;
             const inputId = `${fieldName}-${index}`;
+            const isSelected = currentValue === optionValue;
 
             return (
               <div
-                key={option}
+                key={optionValue}
                 className={`${styles.optionItem} ${
-                  watchedField === option ? styles.selected : ""
+                  isSelected ? styles.selected : ""
                 }`}
+                onClick={() => {
+                  setValue(fieldName, optionValue);
+                  setProfileData((prev) => ({
+                    ...prev,
+                    [fieldName]: optionValue,
+                  }));
+                }}
               >
                 <input
                   type="radio"
                   id={inputId}
-                  value={option}
+                  value={optionValue}
+                  checked={isSelected}
+                  onChange={() => {
+                    setValue(fieldName, optionValue);
+                    setProfileData((prev) => ({
+                      ...prev,
+                      [fieldName]: optionValue,
+                    }));
+                  }}
                   {...register(fieldName, {
                     required: "Please select an option",
                   })}
                 />
-                <label htmlFor={inputId}>{option}</label>
+                <label
+                  htmlFor={inputId}
+                  onClick={(e) => {
+                    e.preventDefault();
+                  }}
+                >
+                  {optionLabel}
+                </label>
               </div>
             );
           })}
