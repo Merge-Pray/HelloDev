@@ -82,7 +82,6 @@ export const socketHandler = (io) => {
       const userSockets = await io.in(`user:${userId}`).fetchSockets();
 
       if (userSockets.length === 0) {
-        // Grace period: wait 10 seconds before marking offline
         setTimeout(async () => {
           const stillNoSockets = await io.in(`user:${userId}`).fetchSockets();
 
@@ -96,7 +95,7 @@ export const socketHandler = (io) => {
               console.error("Failed to update user status:", error);
             }
           }
-        }, 10000); // 10 second grace period
+        }, 10000);
       }
     });
 
