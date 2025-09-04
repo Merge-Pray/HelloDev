@@ -73,7 +73,6 @@ export const getUserChat = async (req, res, next) => {
     const userId = req.user._id;
     const { recipientId } = req.body;
 
-    console.log(`🔍 getUserChat: ${userId} → ${recipientId}`);
 
     if (userId.toString() === recipientId) {
       return res.status(400).json({ message: "Cannot chat with yourself" });
@@ -90,18 +89,16 @@ export const getUserChat = async (req, res, next) => {
     });
 
     if (!chat) {
-      console.log("Creating new chat");
       chat = await ChatModel.create({
         participants: [userId, recipientId]
       });
     }
 
     await chat.populate("participants", "username nickname avatar isOnline");
-    console.log("✅ Chat found/created successfully");
 
     res.status(200).json(chat);
   } catch (error) {
-    console.error("❌ getUserChat error:", error);
+    console.error("getUserChat error:", error);
     res.status(500).json({ message: "Server Error" });
   }
 };

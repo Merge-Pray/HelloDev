@@ -6,7 +6,6 @@ export const socketHandler = (io) => {
   io.on("connection", async (socket) => {
     const userId = socket.user._id.toString();
     
-    console.log(`🔌 User ${userId} connected`);
     
     socket.join(`user:${userId}`);
     
@@ -76,7 +75,6 @@ export const socketHandler = (io) => {
           isRead: false,
         });
 
-        console.log(`📤 Sending unreadCountUpdate to ${userId}: ${unreadCount}`);
         io.to(`user:${userId}`).emit("unreadCountUpdate", unreadCount);
       } catch (error) {
         console.error("Error marking messages as read:", error);
@@ -84,7 +82,6 @@ export const socketHandler = (io) => {
     });
 
     socket.on("disconnect", async () => {
-      console.log(`❌ User ${userId} disconnected`);
       
       setTimeout(async () => {
         const userSockets = await io.in(`user:${userId}`).fetchSockets();
