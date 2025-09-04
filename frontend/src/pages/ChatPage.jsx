@@ -432,21 +432,21 @@ const ChatPage = () => {
           })
         )}
 
-        {typingUsers.size > 0 && (
-          <div className={styles.typingIndicator}>
-            <div className={styles.typingDots}>
-              <span></span>
-              <span></span>
-              <span></span>
-            </div>
-            <span>
-              {otherUser?.nickname || otherUser?.username} is typing...
-            </span>
-          </div>
-        )}
-
         <div ref={messagesEndRef} />
       </div>
+
+      {typingUsers.size > 0 && (
+        <div className={styles.typingIndicator}>
+          <div className={styles.typingDots}>
+            <span></span>
+            <span></span>
+            <span></span>
+          </div>
+          <span>
+            {otherUser?.nickname || otherUser?.username} is typing...
+          </span>
+        </div>
+      )}
 
       <div className={styles.messageInput}>
         <div className={styles.inputContainer}>
