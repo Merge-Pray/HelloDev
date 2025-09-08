@@ -18,6 +18,7 @@
 .center {
   min-width: 0;
 }
+
 .right {
   border-left: 1px solid var(--border);
   min-width: 0;
@@ -33,9 +34,428 @@
   display: none;
 }
 
-/* ---------- Breakpoints ---------- */
+/* Container */
+.container {
+  max-width: 800px;
+  margin: 0 auto;
+  padding: 24px;
+}
 
-/* < 1200px: Sidebar bleibt sichtbar aber schmaler */
+/* Header */
+.header {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  margin-bottom: 32px;
+  gap: 20px;
+}
+
+.headerLeft {
+  flex: 1;
+}
+
+.title {
+  font-size: 2rem;
+  font-weight: 700;
+  color: var(--color-text);
+  margin: 0 0 8px 0;
+}
+
+.subtitle {
+  font-size: 1rem;
+  color: var(--color-text-secondary);
+  margin: 0;
+  line-height: 1.5;
+}
+
+.headerRight {
+  display: flex;
+  gap: 12px;
+}
+
+.markAllBtn {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 8px 16px;
+  background: var(--color-input-bg);
+  border: 1px solid var(--color-input-border);
+  color: var(--color-text);
+  border-radius: 10px;
+  font-weight: 500;
+  cursor: pointer;
+  transition: all 0.2s ease;
+}
+
+.markAllBtn:hover:not(:disabled) {
+  background: var(--color-primary);
+  color: var(--color-primary-hover-invert);
+  border-color: var(--color-primary);
+  transform: translateY(-1px);
+}
+
+.markAllBtn:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+}
+
+/* Filter Tabs */
+.filterTabs {
+  display: flex;
+  gap: 4px;
+  margin-bottom: 24px;
+  background: var(--color-input-bg);
+  border: 1px solid var(--color-input-border);
+  border-radius: 12px;
+  padding: 4px;
+}
+
+.filterTab {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 8px 16px;
+  background: transparent;
+  border: none;
+  color: var(--color-text-secondary);
+  border-radius: 8px;
+  font-weight: 500;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  flex: 1;
+  justify-content: center;
+}
+
+.filterTab:hover {
+  background: rgba(var(--color-primary-rgb), 0.1);
+  color: var(--color-text);
+}
+
+.filterTab.active {
+  background: var(--color-primary);
+  color: var(--color-primary-hover-invert);
+}
+
+.count {
+  background: rgba(255, 255, 255, 0.2);
+  padding: 2px 6px;
+  border-radius: 6px;
+  font-size: 0.75rem;
+  font-weight: 600;
+  min-width: 18px;
+  text-align: center;
+}
+
+.filterTab.active .count {
+  background: rgba(255, 255, 255, 0.3);
+}
+
+/* Loading */
+.loadingContainer {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  padding: 60px 20px;
+  color: var(--color-text-secondary);
+}
+
+/* Error */
+.error {
+  background: rgba(var(--color-error), 0.1);
+  border: 1px solid rgba(var(--color-error), 0.2);
+  color: var(--color-error);
+  padding: 16px;
+  border-radius: 12px;
+  margin-bottom: 24px;
+  font-weight: 500;
+}
+
+/* Empty State */
+.emptyState {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  padding: 60px 20px;
+  text-align: center;
+  color: var(--color-text-secondary);
+}
+
+.emptyIcon {
+  margin-bottom: 16px;
+  opacity: 0.5;
+}
+
+.emptyState h3 {
+  font-size: 1.25rem;
+  font-weight: 600;
+  color: var(--color-text);
+  margin: 0 0 8px 0;
+}
+
+.emptyState p {
+  font-size: 1rem;
+  line-height: 1.5;
+  max-width: 400px;
+  margin: 0;
+}
+
+/* Notifications List */
+.notificationsList {
+  display: flex;
+  flex-direction: column;
+  gap: 0;
+}
+
+/* Notification Card */
+.notificationCard {
+  position: relative;
+  display: flex;
+  gap: 16px;
+  padding: 20px;
+  background: var(--color-card-bg);
+  border-bottom: 1px solid var(--color-card-border);
+  cursor: pointer;
+  transition: all 0.2s ease;
+}
+
+.notificationCard:first-child {
+  border-top-left-radius: 12px;
+  border-top-right-radius: 12px;
+}
+
+.notificationCard:last-child {
+  border-bottom-left-radius: 12px;
+  border-bottom-right-radius: 12px;
+  border-bottom: none;
+}
+
+.notificationCard:hover {
+  background: var(--color-bg-secondary);
+  transform: translateY(-1px);
+}
+
+.notificationCard.unread {
+  background: rgba(var(--color-primary-rgb), 0.03);
+  border-left: 3px solid var(--color-primary);
+}
+
+.unreadDot {
+  position: absolute;
+  top: 20px;
+  left: 8px;
+  width: 8px;
+  height: 8px;
+  background: var(--color-primary);
+  border-radius: 50%;
+}
+
+/* Avatar */
+.avatar {
+  flex-shrink: 0;
+  width: 48px;
+  height: 48px;
+  border-radius: 50%;
+  overflow: hidden;
+  background: var(--color-bg-secondary);
+}
+
+.avatarImage {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+}
+
+/* Content */
+.content {
+  flex: 1;
+  min-width: 0;
+}
+
+.notificationHeader {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  margin-bottom: 8px;
+  gap: 12px;
+}
+
+.iconAndUser {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  flex: 1;
+  min-width: 0;
+}
+
+.userInfo {
+  display: flex;
+  flex-direction: column;
+  min-width: 0;
+}
+
+.userName {
+  font-weight: 600;
+  color: var(--color-text);
+  font-size: 0.95rem;
+}
+
+.userHandle {
+  font-size: 0.85rem;
+  color: var(--color-text-secondary);
+}
+
+.timeAndMore {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  flex-shrink: 0;
+}
+
+.time {
+  font-size: 0.85rem;
+  color: var(--color-text-secondary);
+  white-space: nowrap;
+}
+
+.moreBtn {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 32px;
+  height: 32px;
+  background: transparent;
+  border: none;
+  color: var(--color-text-secondary);
+  border-radius: 8px;
+  cursor: pointer;
+  transition: all 0.2s ease;
+}
+
+.moreBtn:hover {
+  background: var(--color-input-bg);
+  color: var(--color-text);
+}
+
+/* Icons */
+.iconRequest {
+  color: var(--color-primary);
+}
+
+.iconSuccess {
+  color: var(--color-success);
+}
+
+.iconMatch {
+  color: var(--color-like);
+}
+
+.iconDefault {
+  color: var(--color-text-secondary);
+}
+
+/* Message */
+.message {
+  font-size: 0.95rem;
+  line-height: 1.4;
+  color: var(--color-text);
+  margin-bottom: 12px;
+}
+
+/* Actions */
+.actions {
+  display: flex;
+  gap: 8px;
+  align-items: center;
+}
+
+.actionButtons {
+  display: flex;
+  gap: 8px;
+}
+
+.actionBtn {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  padding: 6px 12px;
+  border: 1px solid;
+  border-radius: 8px;
+  font-size: 0.85rem;
+  font-weight: 500;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  background: transparent;
+}
+
+.acceptBtn {
+  color: var(--color-success);
+  border-color: var(--color-success);
+}
+
+.acceptBtn:hover:not(:disabled) {
+  background: var(--color-success);
+  color: white;
+  transform: translateY(-1px);
+}
+
+.declineBtn {
+  color: var(--color-error);
+  border-color: var(--color-error);
+}
+
+.declineBtn:hover:not(:disabled) {
+  background: var(--color-error);
+  color: white;
+  transform: translateY(-1px);
+}
+
+.messageBtn {
+  color: var(--color-primary);
+  border-color: var(--color-primary);
+}
+
+.messageBtn:hover {
+  background: var(--color-primary);
+  color: var(--color-primary-hover-invert);
+  transform: translateY(-1px);
+}
+
+.actionBtn:disabled {
+  opacity: 0.6;
+  cursor: not-allowed;
+  transform: none;
+}
+
+.spinner {
+  animation: spin 1s linear infinite;
+}
+
+@keyframes spin {
+  from {
+    transform: rotate(0deg);
+  }
+  to {
+    transform: rotate(360deg);
+  }
+}
+
+/* Match Badge */
+.matchBadge {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  padding: 4px 8px;
+  background: rgba(var(--color-like), 0.1);
+  color: var(--color-like);
+  border: 1px solid rgba(var(--color-like), 0.2);
+  border-radius: 8px;
+  font-size: 0.85rem;
+  font-weight: 500;
+}
+
+/* Responsive */
 @media (max-width: 1200px) {
   .page {
     grid-template-columns: 1fr var(--aside-mid);
@@ -43,7 +463,6 @@
   }
 }
 
-/* < 900px: Sidebar ausblenden */
 @media (max-width: 900px) {
   .page {
     grid-template-columns: 1fr;
@@ -55,15 +474,70 @@
   }
 }
 
-/* < 520px: etwas kompakter */
+@media (max-width: 768px) {
+  .container {
+    padding: 16px;
+  }
+
+  .header {
+    flex-direction: column;
+    gap: 16px;
+  }
+
+  .headerRight {
+    align-self: stretch;
+  }
+
+  .markAllBtn {
+    flex: 1;
+    justify-content: center;
+  }
+
+  .filterTabs {
+    overflow-x: auto;
+    scrollbar-width: none;
+    -ms-overflow-style: none;
+  }
+
+  .filterTabs::-webkit-scrollbar {
+    display: none;
+  }
+
+  .filterTab {
+    white-space: nowrap;
+    flex: none;
+    min-width: 120px;
+  }
+
+  .notificationCard {
+    padding: 16px;
+  }
+
+  .actionButtons {
+    flex-direction: column;
+    width: 100%;
+  }
+
+  .actionBtn {
+    justify-content: center;
+    flex: 1;
+  }
+}
+
 @media (max-width: 520px) {
   .page {
     gap: 12px;
   }
+
   .center {
     padding: 12px;
   }
-  .right {
-    display: none;
+
+  .container {
+    padding: 12px;
+  }
+
+  .title {
+    font-size: 1.5rem;
   }
 }

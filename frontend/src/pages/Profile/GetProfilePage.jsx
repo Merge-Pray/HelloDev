@@ -133,17 +133,38 @@ export default function GetProfilePage() {
     try {
       setContactActionLoading(true);
 
-      // Simuliere API-Aufruf mit Delay (placeholder)
-      await new Promise((resolve) => setTimeout(resolve, 1000));
+      const response = await authenticatedFetch("/api/contactrequest/send", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({
+          recipientId: userId,
+        }),
+      });
 
-      console.log(`Would send friend request to user ${userId}`);
-      // TODO: Hier wird später die echte API-Anfrage implementiert
-
-      // Placeholder: Nach erfolgreichem Senden der Anfrage könnte man den Status ändern
-      // setIsContact(true); // Nur wenn die Anfrage sofort akzeptiert wird
+      if (response.success) {
+        console.log("Friend request sent successfully");
+        // Optional: Status-Update oder Benachrichtigung anzeigen
+        // setIsContact(true); // Nur wenn die Anfrage sofort akzeptiert wird
+      }
     } catch (err) {
       console.error("Error sending friend request:", err);
-      setError("Failed to send friend request");
+
+      // Spezifische Fehlermeldungen basierend auf der Antwort
+      if (err.message.includes("400")) {
+        if (err.message.includes("already friends")) {
+          setError("You are already friends with this user");
+        } else if (err.message.includes("already exists")) {
+          setError("Friend request already sent");
+        } else if (err.message.includes("dismissed")) {
+          setError("Friend request was previously declined");
+        } else {
+          setError("Cannot send friend request");
+        }
+      } else {
+        setError("Failed to send friend request");
+      }
     } finally {
       setContactActionLoading(false);
     }
@@ -154,17 +175,27 @@ export default function GetProfilePage() {
       setContactActionLoading(true);
       setShowDropdown(false);
 
-      // Simuliere API-Aufruf mit Delay (placeholder)
-      await new Promise((resolve) => setTimeout(resolve, 1000));
+      const response = await authenticatedFetch(
+        `/api/contact-requests/friend/${userId}`,
+        {
+          method: "DELETE",
+        }
+      );
 
-      console.log(`Would remove contact ${userId}`);
-      // TODO: Hier wird später die echte API-Anfrage implementiert
-
-      // Placeholder: Nach erfolgreichem Entfernen den Status ändern
-      setIsContact(false);
+      if (response.success) {
+        console.log("Contact removed successfully");
+        setIsContact(false);
+      }
     } catch (err) {
       console.error("Error removing contact:", err);
-      setError("Failed to remove contact");
+
+      if (err.message.includes("404")) {
+        setError("User not found");
+      } else if (err.message.includes("400")) {
+        setError("You are not friends with this user");
+      } else {
+        setError("Failed to remove contact");
+      }
     } finally {
       setContactActionLoading(false);
     }
