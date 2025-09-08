@@ -29,6 +29,7 @@ export const socketHandler = (io) => {
         await message.populate("sender", "username avatar");
         await ChatModel.findByIdAndUpdate(chatId, { lastMessage: message._id });
 
+        io.to(`chat:${chatId}`).emit("receiveMessage", message);
         io.to(`user:${userId}`).emit("receiveMessage", message);
         io.to(`user:${recipientId}`).emit("receiveMessage", message);
 
@@ -45,6 +46,11 @@ export const socketHandler = (io) => {
 
     socket.on("typing", (data) => {
       const { chatId, recipientId } = data;
+      io.to(`chat:${chatId}`).emit("userTyping", {
+        chatId,
+        userId,
+        isTyping: true,
+      });
       io.to(`user:${recipientId}`).emit("userTyping", {
         chatId,
         userId,
@@ -54,11 +60,26 @@ export const socketHandler = (io) => {
 
     socket.on("stopTyping", (data) => {
       const { chatId, recipientId } = data;
+      io.to(`chat:${chatId}`).emit("userTyping", {
+        chatId,
+        userId,
+        isTyping: false,
+      });
       io.to(`user:${recipientId}`).emit("userTyping", {
         chatId,
         userId,
         isTyping: false,
       });
+    });
+
+    socket.on("joinChat", (data) => {
+      const { chatId } = data;
+      socket.join(`chat:${chatId}`);
+    });
+
+    socket.on("leaveChat", (data) => {
+      const { chatId } = data;
+      socket.leave(`chat:${chatId}`);
     });
 
     socket.on("markAsRead", async (data) => {

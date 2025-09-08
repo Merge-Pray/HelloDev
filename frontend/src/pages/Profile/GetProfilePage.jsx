@@ -132,7 +132,7 @@ export default function GetProfilePage() {
   };
 
   const handleSendMessage = () => {
-    navigate(`/chat?userId=${userId}&username=${profileData.username}`);
+    navigate(`/chat/${userId}`);
   };
 
   const checkPendingFriendRequest = async () => {

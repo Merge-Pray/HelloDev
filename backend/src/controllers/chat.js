@@ -6,7 +6,7 @@ import UserModel from "../models/user.js";
 export const getChats = async (req, res) => {
   try {
     const userId = req.user._id;
-    const chats = await ChatModel.find({ participants: { $in: [userId] } })
+    const chats = await ChatModel.find({ participants: userId })
       .populate("participants", "username nickname avatar isOnline")
       .populate("lastMessage");
 
@@ -48,7 +48,7 @@ export const getMessages = async (req, res, next) => {
 
     const chat = await ChatModel.findOne({
       _id: chatId,
-      participants: { $in: [requestingUserId] },
+      participants: requestingUserId,
     });
 
     if (!chat) {
@@ -73,7 +73,6 @@ export const getUserChat = async (req, res, next) => {
     const userId = req.user._id;
     const { recipientId } = req.body;
 
-
     if (userId.toString() === recipientId) {
       return res.status(400).json({ message: "Cannot chat with yourself" });
     }
@@ -83,14 +82,15 @@ export const getUserChat = async (req, res, next) => {
       return res.status(404).json({ message: "User not found" });
     }
 
-    // Try simple approach first
+    const sortedParticipants = [userId.toString(), recipientId.toString()].sort();
+    
     let chat = await ChatModel.findOne({
-      participants: { $all: [userId, recipientId], $size: 2 }
+      participants: { $all: sortedParticipants, $size: 2 }
     });
 
     if (!chat) {
       chat = await ChatModel.create({
-        participants: [userId, recipientId]
+        participants: sortedParticipants
       });
     }
 
@@ -110,7 +110,7 @@ export const markMessagesAsRead = async (req, res) => {
 
     const chat = await ChatModel.findOne({
       _id: chatId,
-      participants: { $in: [userId] },
+      participants: userId,
     });
 
     if (!chat) {

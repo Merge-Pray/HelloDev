@@ -41,6 +41,16 @@ const ChatPage = () => {
   }, [userId]);
 
   useEffect(() => {
+    if (currentChat && socket) {
+      socket.emit("joinChat", { chatId: currentChat._id });
+      
+      return () => {
+        socket.emit("leaveChat", { chatId: currentChat._id });
+      };
+    }
+  }, [currentChat, socket]);
+
+  useEffect(() => {
     currentChatRef.current = currentChat;
   }, [currentChat]);
 
@@ -76,6 +86,11 @@ const ChatPage = () => {
   const handleUserTyping = useCallback((data) => {
     const { userId: typingUserId, isTyping, chatId } = data;
 
+    // Don't show typing indicator for current user
+    if (typingUserId === currentUser._id.toString()) {
+      return;
+    }
+
     setTypingUsers((prev) => {
       const shouldUpdate =
         currentChatRef.current && chatId === currentChatRef.current._id;
@@ -91,7 +106,7 @@ const ChatPage = () => {
       }
       return prev;
     });
-  }, []);
+  }, [currentUser]);
 
   useEffect(() => {
     scrollToBottom();

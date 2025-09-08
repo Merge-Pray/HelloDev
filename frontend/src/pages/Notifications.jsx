@@ -56,7 +56,8 @@ const Notifications = () => {
           filteredNotifications = response.notifications.filter(
             (n) =>
               n.type === "friend_request" ||
-              n.type === "friend_request_accepted"
+              n.type === "friend_request_accepted" ||
+              n.type === "friend_request_declined"
           );
         } else if (filter === "matches") {
           filteredNotifications = response.notifications.filter(
@@ -206,6 +207,8 @@ const Notifications = () => {
         return <UserPlus size={20} className={styles.iconRequest} />;
       case "friend_request_accepted":
         return <UserCheck size={20} className={styles.iconSuccess} />;
+      case "friend_request_declined":
+        return <X size={20} className={styles.iconDeclined} />;
       case "match_found":
         return <Heart size={20} className={styles.iconMatch} />;
       default:
@@ -372,7 +375,8 @@ const Notifications = () => {
                 count: allNotifications.filter(
                   (n) =>
                     n.type === "friend_request" ||
-                    n.type === "friend_request_accepted"
+                    n.type === "friend_request_accepted" ||
+                    n.type === "friend_request_declined"
                 ).length,
               },
               {

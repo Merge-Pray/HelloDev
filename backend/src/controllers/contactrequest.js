@@ -29,24 +29,23 @@ export const sendFriendRequest = async (req, res, next) => {
       });
     }
 
-    const existingRequest = await ContactRequestModel.findOne({
-      $or: [
-        { user1: senderId, user2: recipientId, type: "friend_request" },
-        { user1: recipientId, user2: senderId, type: "friend_request" },
-      ],
+    const existingSentRequest = await ContactRequestModel.findOne({
+      user1: senderId,
+      user2: recipientId,
+      type: "friend_request",
     });
 
-    if (existingRequest) {
-      if (existingRequest.status === "dismissed") {
-        return res.status(400).json({
-          success: false,
-          message: "Friend request was previously dismissed",
-        });
-      }
-      if (existingRequest.status === "pending") {
+    if (existingSentRequest) {
+      if (existingSentRequest.status === "contacted") {
         return res.status(400).json({
           success: false,
           message: "Friend request already exists",
+        });
+      }
+      if (existingSentRequest.status === "dismissed") {
+        return res.status(400).json({
+          success: false,
+          message: "Your friend request was previously dismissed",
         });
       }
     }
@@ -230,10 +229,33 @@ export const declineFriendRequest = async (req, res, next) => {
       message: `${
         contactRequest.user2.nickname || contactRequest.user2.username
       } declined your friend request`,
-      status: "pending",
+      status: "contacted",
     });
 
     await declineNotification.save();
+
+    const io = req.app.get("socketio");
+    if (io) {
+      io.to(`user:${contactRequest.user1._id}`).emit("newNotification", {
+        notification: await declineNotification.populate(
+          "user1",
+          "username nickname avatar"
+        ),
+        type: "friend_request_declined",
+      });
+
+      const senderUnreadCount = await ContactRequestModel.countDocuments({
+        user2: contactRequest.user1._id,
+        isRead: false,
+      });
+      io.to(`user:${contactRequest.user1._id}`).emit("notificationCountUpdate", senderUnreadCount);
+
+      const declinerUnreadCount = await ContactRequestModel.countDocuments({
+        user2: userId,
+        isRead: false,
+      });
+      io.to(`user:${userId}`).emit("notificationCountUpdate", declinerUnreadCount);
+    }
 
     res.json({
       success: true,
@@ -453,6 +475,12 @@ export const removeFriend = async (req, res, next) => {
         ),
         type: "friend_removed",
       });
+
+      const removedUserUnreadCount = await ContactRequestModel.countDocuments({
+        user2: friendId,
+        isRead: false,
+      });
+      io.to(`user:${friendId}`).emit("notificationCountUpdate", removedUserUnreadCount);
 
       io.to(`user:${friendId}`).emit("friendRemoved", {
         removedBy: userId,
