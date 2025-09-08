@@ -8,12 +8,12 @@ import {
   markAsRead,
   markAllAsRead,
   removeFriend,
+  getUnreadNotificationCount,
 } from "../controllers/contactrequest.js";
 import { authorizeJwt } from "../middleware/auth.js";
 
 export const contactRequestRouter = express.Router();
 
-// Friend Request Routes
 contactRequestRouter.post("/send", authorizeJwt, sendFriendRequest);
 contactRequestRouter.patch(
   "/:requestId/accept",
@@ -27,8 +27,6 @@ contactRequestRouter.patch(
 );
 contactRequestRouter.get("/friendrequests", authorizeJwt, getFriendRequests);
 contactRequestRouter.delete("/friend/:friendId", authorizeJwt, removeFriend);
-
-// Notification Routes
 contactRequestRouter.get("/notifications", authorizeJwt, getNotifications);
 contactRequestRouter.patch(
   "/notifications/mark-read",
@@ -39,4 +37,9 @@ contactRequestRouter.patch(
   "/notifications/mark-all-read",
   authorizeJwt,
   markAllAsRead
+);
+contactRequestRouter.get(
+  "/unread-count",
+  authorizeJwt,
+  getUnreadNotificationCount
 );

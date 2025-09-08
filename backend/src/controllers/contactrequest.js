@@ -13,7 +13,6 @@ export const sendFriendRequest = async (req, res, next) => {
       });
     }
 
-    // Prüfen ob Empfänger existiert
     const recipient = await UserModel.findById(recipientId);
     if (!recipient) {
       return res.status(404).json({
@@ -22,7 +21,6 @@ export const sendFriendRequest = async (req, res, next) => {
       });
     }
 
-    // Prüfen ob bereits Kontakte
     const sender = await UserModel.findById(senderId);
     if (sender.contacts.includes(recipientId)) {
       return res.status(400).json({
@@ -31,7 +29,6 @@ export const sendFriendRequest = async (req, res, next) => {
       });
     }
 
-    // Prüfen ob bereits eine Anfrage existiert (in beide Richtungen)
     const existingRequest = await ContactRequestModel.findOne({
       $or: [
         { user1: senderId, user2: recipientId, type: "friend_request" },
@@ -54,7 +51,6 @@ export const sendFriendRequest = async (req, res, next) => {
       }
     }
 
-    // Neue Freundschaftsanfrage erstellen
     const contactRequest = new ContactRequestModel({
       user1: senderId,
       user2: recipientId,
@@ -68,7 +64,6 @@ export const sendFriendRequest = async (req, res, next) => {
 
     await contactRequest.save();
 
-    // Socket.IO Benachrichtigung senden
     const io = req.app.get("socketio");
     if (io) {
       io.to(`user:${recipientId}`).emit("newNotification", {
@@ -78,6 +73,12 @@ export const sendFriendRequest = async (req, res, next) => {
         ),
         type: "friend_request",
       });
+
+      const unreadCount = await ContactRequestModel.countDocuments({
+        user2: recipientId,
+        isRead: false,
+      });
+      io.to(`user:${recipientId}`).emit("notificationCountUpdate", unreadCount);
     }
 
     res.status(201).json({
@@ -106,7 +107,6 @@ export const acceptFriendRequest = async (req, res, next) => {
       });
     }
 
-    // Prüfen ob User berechtigt ist (muss user2 sein)
     if (contactRequest.user2._id.toString() !== userId.toString()) {
       return res.status(403).json({
         success: false,
@@ -115,21 +115,19 @@ export const acceptFriendRequest = async (req, res, next) => {
     }
 
     if (
-      contactRequest.status !== "pending" ||
+      contactRequest.status !== "contacted" ||
       contactRequest.type !== "friend_request"
     ) {
       return res.status(400).json({
         success: false,
-        message: "Friend request is not pending",
+        message: "Friend request is not available for this action",
       });
     }
 
-    // Status aktualisieren
     contactRequest.status = "connected";
     contactRequest.connectedAt = new Date();
     await contactRequest.save();
 
-    // Beide User als Kontakte hinzufügen
     await UserModel.findByIdAndUpdate(contactRequest.user1._id, {
       $addToSet: { contacts: contactRequest.user2._id },
     });
@@ -137,7 +135,6 @@ export const acceptFriendRequest = async (req, res, next) => {
       $addToSet: { contacts: contactRequest.user1._id },
     });
 
-    // Benachrichtigung für Sender erstellen
     const acceptNotification = new ContactRequestModel({
       user1: userId,
       user2: contactRequest.user1._id,
@@ -150,7 +147,6 @@ export const acceptFriendRequest = async (req, res, next) => {
 
     await acceptNotification.save();
 
-    // Socket.IO Benachrichtigung senden
     const io = req.app.get("socketio");
     if (io) {
       io.to(`user:${contactRequest.user1._id}`).emit("newNotification", {
@@ -160,6 +156,24 @@ export const acceptFriendRequest = async (req, res, next) => {
         ),
         type: "friend_request_accepted",
       });
+
+      const senderUnreadCount = await ContactRequestModel.countDocuments({
+        user2: contactRequest.user1._id,
+        isRead: false,
+      });
+      io.to(`user:${contactRequest.user1._id}`).emit(
+        "notificationCountUpdate",
+        senderUnreadCount
+      );
+
+      const accepterUnreadCount = await ContactRequestModel.countDocuments({
+        user2: userId,
+        isRead: false,
+      });
+      io.to(`user:${userId}`).emit(
+        "notificationCountUpdate",
+        accepterUnreadCount
+      );
     }
 
     res.json({
@@ -188,7 +202,6 @@ export const declineFriendRequest = async (req, res, next) => {
       });
     }
 
-    // Prüfen ob User berechtigt ist (muss user2 sein)
     if (contactRequest.user2._id.toString() !== userId.toString()) {
       return res.status(403).json({
         success: false,
@@ -197,21 +210,19 @@ export const declineFriendRequest = async (req, res, next) => {
     }
 
     if (
-      contactRequest.status !== "pending" ||
+      contactRequest.status !== "contacted" ||
       contactRequest.type !== "friend_request"
     ) {
       return res.status(400).json({
         success: false,
-        message: "Friend request is not pending",
+        message: "Friend request is not available for this action",
       });
     }
 
-    // Status aktualisieren
     contactRequest.status = "dismissed";
     contactRequest.dismissedBy = userId;
     await contactRequest.save();
 
-    // Optional: Benachrichtigung für Sender erstellen
     const declineNotification = new ContactRequestModel({
       user1: userId,
       user2: contactRequest.user1._id,
@@ -238,24 +249,23 @@ export const getFriendRequests = async (req, res, next) => {
   try {
     const userId = req.user._id;
 
-    // Eingehende Freundschaftsanfragen
     const incomingRequests = await ContactRequestModel.find({
       user2: userId,
       type: "friend_request",
-      status: "pending",
+      status: "contacted",
     }).populate("user1", "username nickname avatar");
 
-    // Ausgehende Freundschaftsanfragen
     const outgoingRequests = await ContactRequestModel.find({
       user1: userId,
       type: "friend_request",
-      status: "pending",
+      status: "contacted",
     }).populate("user2", "username nickname avatar");
 
     res.json({
       success: true,
       incomingRequests,
       outgoingRequests,
+      friendRequests: incomingRequests, // For backward compatibility
     });
   } catch (error) {
     next(error);
@@ -314,6 +324,15 @@ export const markAsRead = async (req, res, next) => {
       { isRead: true }
     );
 
+    const io = req.app.get("socketio");
+    if (io) {
+      const unreadCount = await ContactRequestModel.countDocuments({
+        user2: userId,
+        isRead: false,
+      });
+      io.to(`user:${userId}`).emit("notificationCountUpdate", unreadCount);
+    }
+
     res.json({
       success: true,
       message: "Notifications marked as read",
@@ -332,9 +351,32 @@ export const markAllAsRead = async (req, res, next) => {
       { isRead: true }
     );
 
+    const io = req.app.get("socketio");
+    if (io) {
+      io.to(`user:${userId}`).emit("notificationCountUpdate", 0);
+    }
+
     res.json({
       success: true,
       message: "All notifications marked as read",
+    });
+  } catch (error) {
+    next(error);
+  }
+};
+
+export const getUnreadNotificationCount = async (req, res, next) => {
+  try {
+    const userId = req.user._id;
+
+    const unreadCount = await ContactRequestModel.countDocuments({
+      user2: userId,
+      isRead: false,
+    });
+
+    res.json({
+      success: true,
+      unreadNotificationCount: unreadCount,
     });
   } catch (error) {
     next(error);
@@ -353,7 +395,6 @@ export const removeFriend = async (req, res, next) => {
       });
     }
 
-    // Prüfen ob Friend existiert
     const friend = await UserModel.findById(friendId);
     if (!friend) {
       return res.status(404).json({
@@ -362,7 +403,6 @@ export const removeFriend = async (req, res, next) => {
       });
     }
 
-    // Prüfen ob sie überhaupt Freunde sind
     const user = await UserModel.findById(userId);
     if (!user.contacts.includes(friendId)) {
       return res.status(400).json({
@@ -371,7 +411,6 @@ export const removeFriend = async (req, res, next) => {
       });
     }
 
-    // Beide User aus den Kontakten entfernen
     await UserModel.findByIdAndUpdate(userId, {
       $pull: { contacts: friendId },
     });
@@ -379,7 +418,6 @@ export const removeFriend = async (req, res, next) => {
       $pull: { contacts: userId },
     });
 
-    // Original Contact Request auf "dismissed" setzen
     await ContactRequestModel.findOneAndUpdate(
       {
         $or: [
@@ -394,7 +432,6 @@ export const removeFriend = async (req, res, next) => {
       }
     );
 
-    // Optional: Benachrichtigung für den anderen User erstellen
     const removeNotification = new ContactRequestModel({
       user1: userId,
       user2: friendId,
@@ -407,7 +444,6 @@ export const removeFriend = async (req, res, next) => {
 
     await removeNotification.save();
 
-    // Socket.IO Benachrichtigung senden
     const io = req.app.get("socketio");
     if (io) {
       io.to(`user:${friendId}`).emit("newNotification", {
@@ -418,7 +454,6 @@ export const removeFriend = async (req, res, next) => {
         type: "friend_removed",
       });
 
-      // Auch über Entfernung informieren (für Live-Updates der Kontaktliste)
       io.to(`user:${friendId}`).emit("friendRemoved", {
         removedBy: userId,
         removedUser: friendId,

@@ -13,16 +13,19 @@ import {
   MoreHorizontal,
 } from "lucide-react";
 import { authenticatedFetch } from "../utils/authenticatedFetch";
+import { useNotificationCount } from "../hooks/useNotificationCount";
 import Sidebar from "../components/Sidebar/Sidebar";
 import styles from "./notifications.module.css";
 
 const Notifications = () => {
   const navigate = useNavigate();
+  const { refreshNotificationCount } = useNotificationCount();
   const [notifications, setNotifications] = useState([]);
+  const [allNotifications, setAllNotifications] = useState([]); // Store all notifications for accurate counts
   const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState(null);
   const [actionLoading, setActionLoading] = useState({});
-  const [filter, setFilter] = useState("all"); // all, unread, friend_requests, matches
+  const [filter, setFilter] = useState("all");
 
   useEffect(() => {
     fetchNotifications();
@@ -39,10 +42,17 @@ const Notifications = () => {
       );
 
       if (response.success) {
+        // Store all notifications for accurate counts
+        setAllNotifications(response.notifications);
+        
         let filteredNotifications = response.notifications;
 
-        // Zusätzliche Filterung je nach ausgewähltem Filter
-        if (filter === "friend_requests") {
+        // Apply unread filter first if selected
+        if (filter === "unread") {
+          filteredNotifications = response.notifications.filter(
+            (n) => !n.isRead
+          );
+        } else if (filter === "friend_requests") {
           filteredNotifications = response.notifications.filter(
             (n) =>
               n.type === "friend_request" ||
@@ -71,17 +81,23 @@ const Notifications = () => {
       setActionLoading((prev) => ({ ...prev, [notificationId]: "accept" }));
 
       const response = await authenticatedFetch(
-        `/api/notification/${notificationId}/accept`,
+        `/api/contactrequest/${notificationId}/accept`,
         {
           method: "PATCH",
         }
       );
 
       if (response.success) {
-        // Notification aus der Liste entfernen
         setNotifications((prev) =>
           prev.filter((n) => n._id !== notificationId)
         );
+        
+        // Also remove from allNotifications for accurate counts
+        setAllNotifications((prev) =>
+          prev.filter((n) => n._id !== notificationId)
+        );
+
+        refreshNotificationCount();
       } else {
         setError("Failed to accept friend request");
       }
@@ -98,17 +114,23 @@ const Notifications = () => {
       setActionLoading((prev) => ({ ...prev, [notificationId]: "decline" }));
 
       const response = await authenticatedFetch(
-        `/api/notification/${notificationId}/decline`,
+        `/api/contactrequest/${notificationId}/decline`,
         {
           method: "PATCH",
         }
       );
 
       if (response.success) {
-        // Notification aus der Liste entfernen
         setNotifications((prev) =>
           prev.filter((n) => n._id !== notificationId)
         );
+        
+        // Also remove from allNotifications for accurate counts
+        setAllNotifications((prev) =>
+          prev.filter((n) => n._id !== notificationId)
+        );
+
+        refreshNotificationCount();
       } else {
         setError("Failed to decline friend request");
       }
@@ -122,18 +144,27 @@ const Notifications = () => {
 
   const handleMarkAsRead = async (notificationIds) => {
     try {
-      await authenticatedFetch("/api/notification/mark-read", {
+      await authenticatedFetch("/api/contactrequest/notifications/mark-read", {
         method: "PATCH",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ notificationIds }),
       });
 
-      // Notifications als gelesen markieren
       setNotifications((prev) =>
         prev.map((n) =>
           notificationIds.includes(n._id) ? { ...n, isRead: true } : n
         )
       );
+      
+      // Also update allNotifications for accurate counts
+      setAllNotifications((prev) =>
+        prev.map((n) =>
+          notificationIds.includes(n._id) ? { ...n, isRead: true } : n
+        )
+      );
+      
+      // Refresh notification count
+      refreshNotificationCount();
     } catch (err) {
       console.error("Error marking as read:", err);
     }
@@ -141,23 +172,27 @@ const Notifications = () => {
 
   const handleMarkAllAsRead = async () => {
     try {
-      await authenticatedFetch("/api/notification/mark-all-read", {
+      await authenticatedFetch("/api/contactrequest/notifications/mark-all-read", {
         method: "PATCH",
       });
 
       setNotifications((prev) => prev.map((n) => ({ ...n, isRead: true })));
+      
+      // Also update allNotifications for accurate counts
+      setAllNotifications((prev) => prev.map((n) => ({ ...n, isRead: true })));
+      
+      // Refresh notification count (should be 0 after mark all as read)
+      refreshNotificationCount();
     } catch (err) {
       console.error("Error marking all as read:", err);
     }
   };
 
   const handleCardClick = async (notification) => {
-    // Als gelesen markieren wenn noch nicht gelesen
     if (!notification.isRead) {
       await handleMarkAsRead([notification._id]);
     }
 
-    // Zum Profil navigieren
     navigate(`/profile/${notification.user1._id}`);
   };
 
@@ -325,16 +360,16 @@ const Notifications = () => {
           {/* Filter Tabs */}
           <div className={styles.filterTabs}>
             {[
-              { key: "all", label: "All", count: notifications.length },
+              { key: "all", label: "All", count: allNotifications.length },
               {
                 key: "unread",
                 label: "Unread",
-                count: notifications.filter((n) => !n.isRead).length,
+                count: allNotifications.filter((n) => !n.isRead).length,
               },
               {
                 key: "friend_requests",
                 label: "Friend Requests",
-                count: notifications.filter(
+                count: allNotifications.filter(
                   (n) =>
                     n.type === "friend_request" ||
                     n.type === "friend_request_accepted"
@@ -343,7 +378,7 @@ const Notifications = () => {
               {
                 key: "matches",
                 label: "Matches",
-                count: notifications.filter((n) => n.type === "match_found")
+                count: allNotifications.filter((n) => n.type === "match_found")
                   .length,
               },
             ].map((tab) => (
