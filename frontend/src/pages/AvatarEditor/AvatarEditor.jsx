@@ -9,6 +9,8 @@ const AvatarEditor = () => {
   const [avatarData, setAvatarData] = useState(null);
   const [isSaving, setIsSaving] = useState(false);
   const [initialPixelData, setInitialPixelData] = useState(null);
+  const [showSuccessModal, setShowSuccessModal] = useState(false);
+  const [gridSize, setGridSize] = useState(16); // Default 16x16
   const avatarRef = useRef(null);
   const { setCurrentUser } = useUserStore();
   const queryClient = useQueryClient();
@@ -17,57 +19,26 @@ const AvatarEditor = () => {
   useEffect(() => {
     const loadExistingAvatarData = async () => {
       try {
-        console.log('� AvatarEditor mounted - starting to load existing avatar data...');
-        
-        // Fetch current user data to get avatarData
-        console.log('📡 Making API call to /api/user/user...');
         const userData = await authenticatedFetch('/api/user/user');
-        console.log('📦 User data received:', userData);
-        console.log('🔍 User object in response:', userData.user);
-        console.log('🔍 Avatar data in response:', userData.user?.avatarData);
-        console.log('🔍 Avatar data type:', typeof userData.user?.avatarData);
-        
         if (userData.user?.avatarData) {
-          console.log('✅ Found existing avatar data, type:', typeof userData.user.avatarData);
-          console.log('📝 Raw avatarData value:', userData.user.avatarData);
-          
-          // Parse the JSON string to get pixel array
           let pixelArray;
           try {
             pixelArray = JSON.parse(userData.user.avatarData);
-            console.log('✅ Successfully parsed avatar data:', pixelArray);
-            console.log('📊 Parsed data info:', {
-              isArray: Array.isArray(pixelArray),
-              length: pixelArray?.length,
-              firstFewPixels: pixelArray?.slice(0, 5)
-            });
-          } catch (parseError) {
-            console.error('❌ Error parsing avatarData:', parseError);
-            console.error('📝 Raw avatarData that failed to parse:', userData.user.avatarData);
+          } catch {
             pixelArray = null;
           }
-          
           if (pixelArray && Array.isArray(pixelArray)) {
-            console.log('📥 Setting initial pixel data with', pixelArray.length, 'pixels');
             setInitialPixelData(pixelArray);
             setAvatarData(pixelArray);
-            console.log('✅ State updated with pixel data');
-          } else {
-            console.log('❌ Pixel array is invalid:', { pixelArray, isArray: Array.isArray(pixelArray) });
+            // gridSize automatisch bestimmen anhand der Pixelanzahl
+            if (pixelArray.length === 256) setGridSize(16);
+            else if (pixelArray.length === 1024) setGridSize(32);
           }
-        } else {
-          console.log('📝 No existing avatar data found - starting fresh');
-          console.log('🔍 Full user data keys:', Object.keys(userData.user || {}));
         }
       } catch (error) {
-        console.error('❌ Error loading avatar data:', error);
-        console.error('📝 Error details:', {
-          message: error.message,
-          stack: error.stack
-        });
+        // Fehlerbehandlung
       }
     };
-
     loadExistingAvatarData();
   }, []);
 
@@ -124,7 +95,7 @@ const AvatarEditor = () => {
         queryClient.setQueryData(["user-profile"], result.user);
       }
 
-      alert("Avatar has been saved successfully! ✅");
+  setShowSuccessModal(true);
     } catch (error) {
       console.error("Error saving avatar:", error);
       console.error("Error details:", {
@@ -166,8 +137,8 @@ const AvatarEditor = () => {
         <div className={styles.avatarWrapper}>
           <Avatar
             ref={avatarRef}
-            sizePx={512}
-            gridSize={16}
+            sizePx={typeof window !== 'undefined' && window.innerWidth < 600 ? 320 : 512}
+            gridSize={gridSize}
             initialData={initialPixelData}
             onDataChange={handleAvatarChange}
           />
@@ -187,6 +158,44 @@ const AvatarEditor = () => {
           🔄 Reset
         </button>
       </div>
+
+      {/* Success Modal */}
+      {showSuccessModal && (
+        <div style={{
+          position: 'fixed',
+          top: 0,
+          left: 0,
+          width: '100vw',
+          height: '100vh',
+          background: 'rgba(0,0,0,0.5)',
+          display: 'flex',
+          alignItems: 'center',
+          justifyContent: 'center',
+          zIndex: 9999
+        }}>
+          <div className="card enhanced" style={{
+            minWidth: '220px',
+            maxWidth: '95vw',
+            textAlign: 'center',
+            display: 'flex',
+            flexDirection: 'column',
+            alignItems: 'center',
+            padding: '24px 12px'
+          }}>
+            <div className="title" style={{marginBottom: '16px'}}>Avatar has been saved successfully! ✅</div>
+            <div style={{display: 'flex', gap: '16px', marginTop: '16px'}}>
+              <button
+                className="btn btn-primary"
+                onClick={() => window.location.href = '/profile'}
+              >Back to profile</button>
+              <button
+                className="btn btn-secondary"
+                onClick={() => setShowSuccessModal(false)}
+              >Stay on the page</button>
+            </div>
+          </div>
+        </div>
+      )}
 
       {/* {avatarData && (
         <div className={styles.preview}>

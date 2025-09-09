@@ -355,7 +355,7 @@ const renderSuggestion = (arr) => {
               value={gridSize}
               onChange={(e) => setGridSize(parseInt(e.target.value, 10))}
             >
-              {[16, 32, 64].map((n) => (
+              {[16, 32].map((n) => (
                 <option key={n} value={n}>
                   {n} × {n}
                 </option>
