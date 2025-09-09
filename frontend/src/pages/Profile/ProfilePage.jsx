@@ -22,7 +22,7 @@ import {
   Target,
   Wrench,
   Briefcase,
-  Camera,
+  Brush,
   ExternalLink,
   Eye,
   EyeOff,
@@ -780,7 +780,7 @@ export default function ProfilePage() {
               title="Edit Avatar"
               aria-label="Edit Avatar"
             >
-              <Camera size={16} />
+              <Brush size={16} />
             </button>
           </div>
 
