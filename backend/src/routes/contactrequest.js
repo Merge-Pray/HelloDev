@@ -9,6 +9,7 @@ import {
   markAllAsRead,
   removeFriend,
   getUnreadNotificationCount,
+  deleteNotification,
 } from "../controllers/contactrequest.js";
 import { authorizeJwt } from "../middleware/auth.js";
 
@@ -42,4 +43,9 @@ contactRequestRouter.get(
   "/unread-count",
   authorizeJwt,
   getUnreadNotificationCount
+);
+contactRequestRouter.delete(
+  "/notifications/:notificationId",
+  authorizeJwt,
+  deleteNotification
 );

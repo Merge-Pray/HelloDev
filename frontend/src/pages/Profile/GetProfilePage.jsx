@@ -112,7 +112,7 @@ export default function GetProfilePage() {
 
       setProfileData(data.user);
       setIsContact(data.isContact);
-      
+
       // Check for pending friend request from this user
       await checkPendingFriendRequest();
     } catch (err) {
@@ -138,30 +138,30 @@ export default function GetProfilePage() {
 
   const checkPendingFriendRequest = async () => {
     try {
-      const response = await authenticatedFetch("/api/contactrequest/friendrequests");
+      const response = await authenticatedFetch(
+        "/api/contactrequest/friendrequests"
+      );
       if (response.success) {
         // Look for incoming friend request from this user to current user
-        const incomingRequests = response.friendRequests || response.incomingRequests || [];
+        const incomingRequests =
+          response.friendRequests || response.incomingRequests || [];
         const pendingRequest = incomingRequests.find(
-          (request) => 
-            request.user1._id === userId && 
-            request.type === "friend_request" && 
+          (request) =>
+            request.user1._id === userId &&
+            request.type === "friend_request" &&
             request.status === "contacted"
         );
         setPendingFriendRequest(pendingRequest || null);
-        
+
         // Look for outgoing friend request from current user to this user
         const outgoingRequests = response.outgoingRequests || [];
         const sentRequest = outgoingRequests.find(
-          (request) => 
-            request.user2._id === userId && 
-            request.type === "friend_request" && 
+          (request) =>
+            request.user2._id === userId &&
+            request.type === "friend_request" &&
             request.status === "contacted"
         );
         setSentFriendRequest(sentRequest || null);
-        
-        console.log("Incoming friend request found:", pendingRequest);
-        console.log("Outgoing friend request found:", sentRequest);
       }
     } catch (err) {
       console.error("Error checking friend requests:", err);
@@ -188,7 +188,7 @@ export default function GetProfilePage() {
         setSentFriendRequest({
           user2: { _id: userId },
           type: "friend_request",
-          status: "contacted"
+          status: "contacted",
         });
       }
     } catch (err) {
@@ -215,7 +215,7 @@ export default function GetProfilePage() {
 
   const handleAcceptFriendRequest = async () => {
     if (!pendingFriendRequest) return;
-    
+
     try {
       setContactActionLoading(true);
 
@@ -243,7 +243,7 @@ export default function GetProfilePage() {
 
   const handleDismissFriendRequest = async () => {
     if (!pendingFriendRequest) return;
-    
+
     try {
       setContactActionLoading(true);
 
@@ -274,7 +274,7 @@ export default function GetProfilePage() {
       setShowDropdown(false);
 
       const response = await authenticatedFetch(
-        `/api/contact-requests/friend/${userId}`,
+        `/api/contactrequest/friend/${userId}`,
         {
           method: "DELETE",
         }
@@ -390,7 +390,7 @@ export default function GetProfilePage() {
           <button
             className={`btn btn-secondary ${styles.actionButton}`}
             disabled
-            style={{ opacity: 0.6, cursor: 'default' }}
+            style={{ opacity: 0.6, cursor: "default" }}
           >
             <UserPlus size={16} />
             <span>Request Sent</span>
