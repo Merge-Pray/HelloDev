@@ -35,6 +35,7 @@ import styles from "./profilepage.module.css";
 import { calculateProfileCompletion } from "../../utils/profileCompletion";
 
 export default function ProfilePage() {
+  const [showAvatarModal, setShowAvatarModal] = useState(false);
   const currentUser = useUserStore((state) => state.currentUser);
   const {
     data: profileData,
@@ -65,6 +66,17 @@ export default function ProfilePage() {
 
   const handleEditAvatar = () => {
     navigate("/avatar-editor");
+  };
+
+  const handleAvatarClick = () => {
+    setShowAvatarModal(true);
+  };
+
+  const handleCloseAvatarModal = (e) => {
+    // Schließt Modal bei Klick auf Overlay oder Button
+    if (e.target.classList.contains("avatar-modal-overlay") || e.target.classList.contains("avatar-modal-close")) {
+      setShowAvatarModal(false);
+    }
   };
 
   if (isLoading) {
@@ -728,16 +740,27 @@ export default function ProfilePage() {
 
   return (
     <div className="page">
+      {/* Avatar Modal */}
+      {showAvatarModal && (
+        <div className="avatar-modal-overlay" onClick={handleCloseAvatarModal} style={{position: 'fixed', top:0, left:0, width:'100vw', height:'100vh', background:'rgba(0,0,0,0.5)', zIndex:1000, display:'flex', alignItems:'center', justifyContent:'center'}}>
+          <div className="avatar-modal-content" style={{background:'#fff', borderRadius:'24px', padding:'32px', boxShadow:'0 4px 32px rgba(0,0,0,0.2)', position:'relative', display:'flex', flexDirection:'column', alignItems:'center'}}>
+            <button className="avatar-modal-close" onClick={handleCloseAvatarModal} style={{position:'absolute', top:16, right:16, background:'none', border:'none', fontSize:'2rem', cursor:'pointer'}}>&times;</button>
+            <img
+              src={profileData?.avatar || currentUser?.avatar || "/default-avatar.png"}
+              alt="Avatar groß"
+              style={{width:'320px', height:'320px', borderRadius:'50%', objectFit:'cover', boxShadow:'0 2px 16px rgba(0,0,0,0.15)'}}
+            />
+          </div>
+        </div>
+      )}
       <div className={styles.profileContainer}>
-        <div className={`card enhanced ${styles.profileHeader}`}>
+        <div className={`card enhanced ${styles.profileHeader}`}> 
           <div className={styles.avatarContainer}>
-            <div className={styles.avatar}>
+            <div className={styles.avatar} style={{cursor:'pointer'}} onClick={handleAvatarClick} title="Avatar vergrößern">
               {profileData?.avatar || currentUser?.avatar ? (
                 <img
                   src={profileData?.avatar || currentUser?.avatar}
-                  alt={`${
-                    currentUser?.nickname || currentUser?.username
-                  }'s avatar`}
+                  alt={`${currentUser?.nickname || currentUser?.username}'s avatar`}
                   className={styles.avatarImage}
                   onError={(e) => {
                     e.target.src = "/avatars/default_avatar.png";
@@ -780,7 +803,7 @@ export default function ProfilePage() {
           </p>
         </div>
 
-        <div className={`card enhanced ${styles.profileActionsCard}`}>
+  <div className={`card enhanced ${styles.profileActionsCard}`}>
           <div className={styles.profileActionsContainer}>
             <button
               className={`btn btn-primary ${styles.editProfileBtn}`}
@@ -850,7 +873,7 @@ export default function ProfilePage() {
           </div>
         </div>
 
-        <div className={styles.profileContent}>
+  <div className={styles.profileContent}>
           {renderAboutMe()}
 
           {renderFavouriteLineOfCode()}
