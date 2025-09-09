@@ -35,19 +35,23 @@
   font-weight: 500;
 }
 
-.editorSection {
+ .editorSection {
   background: var(--color-bg-secondary);
   border-radius: 16px;
   padding: 24px;
   box-shadow: 0 4px 12px var(--color-card-shadow);
   margin-bottom: 24px;
   border: 1px solid var(--color-card-border);
-}
+  max-width: 100vw;
+  overflow-x: auto;
+ }
 
 .avatarWrapper {
   display: flex;
   justify-content: center;
   align-items: center;
+  max-width: 100vw;
+  overflow-x: auto;
 }
 
 .controls {
@@ -131,30 +135,30 @@
 /* Responsive Design */
 @media (max-width: 768px) {
   .container {
-    padding: 16px;
+    padding: 8px;
   }
-
   .header h1 {
-    font-size: 2rem;
+    font-size: 1.5rem;
   }
-
   .editorSection {
-    padding: 16px;
+    padding: 8px;
+    max-width: 100vw;
   }
-
+  .avatarWrapper {
+    max-width: 100vw;
+    overflow-x: auto;
+  }
   .controls {
     flex-direction: column;
     width: 100%;
     max-width: 300px;
   }
-
   .saveButton,
   .resetButton {
     min-width: auto;
     width: 100%;
   }
-
   .preview {
-    padding: 16px;
+    padding: 8px;
   }
 }

@@ -5,7 +5,7 @@
   gap: 16px;
   width: 100%;
   max-width: 900px;
-  font-family: "Helvetica Neue", Helvetica, Arial, sans-serif;
+  /* font-family: "Helvetica Neue", Helvetica, Arial, sans-serif; */
   color: var(--color-text);
 }
 
