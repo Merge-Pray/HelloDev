@@ -29,15 +29,15 @@ const SearchPage = () => {
   const currentUser = useUserStore((state) => state.currentUser);
   const searchInputRef = useRef(null);
 
-  // Search states
   const [searchQuery, setSearchQuery] = useState("");
   const [searchResults, setSearchResults] = useState([]);
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState(null);
   const [hasSearched, setHasSearched] = useState(false);
   const [totalCount, setTotalCount] = useState(0);
+  const [pendingRequests, setPendingRequests] = useState([]);
+  const [incomingRequests, setIncomingRequests] = useState([]);
 
-  // Filter states
   const [friendshipFilter, setFriendshipFilter] = useState("all");
   const [selectedCity, setSelectedCity] = useState("");
   const [availableCities, setAvailableCities] = useState([]);
@@ -45,19 +45,17 @@ const SearchPage = () => {
 
   const cityDropdownRef = useRef(null);
 
-  // Filter options
   const filterOptions = [
     { value: "all", label: "All Developers" },
     { value: "friends", label: "Friends Only" },
     { value: "non-friends", label: "Non-Friends Only" },
   ];
 
-  // Load available cities on component mount
   useEffect(() => {
     fetchAvailableCities();
+    fetchPendingRequests();
   }, []);
 
-  // Close city dropdown when clicking outside
   useEffect(() => {
     const handleClickOutside = (event) => {
       if (
@@ -72,7 +70,6 @@ const SearchPage = () => {
     return () => document.removeEventListener("mousedown", handleClickOutside);
   }, []);
 
-  // Get query and filter from URL params
   useEffect(() => {
     const urlParams = new URLSearchParams(location.search);
     const queryFromUrl = params.query || urlParams.get("q");
@@ -101,7 +98,6 @@ const SearchPage = () => {
     }
   }, [params.query, params.filter, location.search]);
 
-  // Debounced search on input change - FIXED
   useEffect(() => {
     const timer = setTimeout(() => {
       if (searchQuery.trim() || selectedCity) {
@@ -114,7 +110,13 @@ const SearchPage = () => {
     }, 500);
 
     return () => clearTimeout(timer);
-  }, [searchQuery, friendshipFilter, selectedCity]);
+  }, [
+    searchQuery,
+    friendshipFilter,
+    selectedCity,
+    pendingRequests,
+    incomingRequests,
+  ]);
 
   const fetchAvailableCities = async () => {
     try {
@@ -127,12 +129,38 @@ const SearchPage = () => {
     }
   };
 
+  const fetchPendingRequests = async () => {
+    try {
+      const response = await authenticatedFetch(
+        "/api/contactrequest/friendrequests"
+      );
+      if (response.success) {
+        const outgoingRequests = response.outgoingRequests || [];
+        const pendingUserIds = outgoingRequests
+          .filter((request) => request.status === "contacted")
+          .map((request) => request.user2._id);
+        setPendingRequests(pendingUserIds);
+
+        const incomingRequestsList =
+          response.friendRequests || response.incomingRequests || [];
+        const incomingRequestsData = incomingRequestsList
+          .filter((request) => request.status === "contacted")
+          .map((request) => ({
+            userId: request.user1._id,
+            requestId: request._id,
+          }));
+        setIncomingRequests(incomingRequestsData);
+      }
+    } catch (error) {
+      console.error("Error fetching pending requests:", error);
+    }
+  };
+
   const performSearch = async (
     query = searchQuery,
     filter = friendshipFilter,
     city = selectedCity
   ) => {
-    // Allow search with either query OR city (or both)
     if (!query.trim() && !city) {
       setSearchResults([]);
       setHasSearched(false);
@@ -147,32 +175,38 @@ const SearchPage = () => {
     try {
       const searchParams = new URLSearchParams();
 
-      // Add query parameter if provided
       if (query && query.trim()) {
         searchParams.append("q", query.trim());
       }
 
-      // Add city parameter if provided
       if (city) {
         searchParams.append("city", city);
       }
 
-      // Add friendship filter if not "all"
       if (filter && filter !== "all") {
         searchParams.append("friendshipFilter", filter);
       }
-
-      console.log("Search params:", searchParams.toString());
 
       const response = await authenticatedFetch(
         `/api/search/users?${searchParams.toString()}`
       );
 
       if (response.success) {
-        setSearchResults(response.users || []);
-        setTotalCount(response.users?.length || 0);
+        const usersWithRequestStatus = (response.users || []).map((user) => {
+          const incomingRequest = incomingRequests.find(
+            (req) => req.userId === user._id
+          );
+          return {
+            ...user,
+            friendRequestSent: pendingRequests.includes(user._id),
+            hasIncomingRequest: !!incomingRequest,
+            incomingRequestId: incomingRequest?.requestId,
+          };
+        });
 
-        // Update URL
+        setSearchResults(usersWithRequestStatus);
+        setTotalCount(usersWithRequestStatus.length || 0);
+
         updateURL(query, filter, city);
       } else {
         setError(response.message || "Search failed");
@@ -223,7 +257,7 @@ const SearchPage = () => {
 
   const handleFilterChange = (newFilter) => {
     setFriendshipFilter(newFilter);
-    // Trigger search with current query and city
+
     if (searchQuery.trim() || selectedCity) {
       performSearch(searchQuery, newFilter, selectedCity);
     }
@@ -232,17 +266,16 @@ const SearchPage = () => {
   const handleCityChange = (city) => {
     setSelectedCity(city);
     setCityDropdownOpen(false);
-    // Trigger search immediately with current query
+
     performSearch(searchQuery, friendshipFilter, city);
   };
 
   const clearCityFilter = () => {
     setSelectedCity("");
-    // Continue search with current query but no city filter
+
     if (searchQuery.trim()) {
       performSearch(searchQuery, friendshipFilter, "");
     } else {
-      // If no search query, clear all results
       setSearchResults([]);
       setHasSearched(false);
       setTotalCount(0);
@@ -338,13 +371,147 @@ const SearchPage = () => {
     navigate(`/chat/${userId}`);
   };
 
+  const handleAcceptFriendRequest = async (requestId, userId, event) => {
+    event.stopPropagation();
+    try {
+      setIsLoading(true);
+
+      const response = await authenticatedFetch(
+        `/api/contactrequest/${requestId}/accept`,
+        {
+          method: "PATCH",
+        }
+      );
+
+      if (response.success) {
+        console.log("Friend request accepted successfully");
+
+        setSearchResults((prevResults) =>
+          prevResults.map((user) =>
+            user._id === userId
+              ? {
+                  ...user,
+                  isContact: true,
+                  hasIncomingRequest: false,
+                  incomingRequestId: null,
+                }
+              : user
+          )
+        );
+
+        setIncomingRequests((prev) =>
+          prev.filter((req) => req.requestId !== requestId)
+        );
+
+        alert("Friend request accepted!");
+      }
+    } catch (err) {
+      console.error("Error accepting friend request:", err);
+      alert("Failed to accept friend request");
+    } finally {
+      setIsLoading(false);
+    }
+  };
+
+  const handleDismissFriendRequest = async (requestId, userId, event) => {
+    event.stopPropagation();
+    try {
+      setIsLoading(true);
+
+      const response = await authenticatedFetch(
+        `/api/contactrequest/${requestId}/decline`,
+        {
+          method: "PATCH",
+        }
+      );
+
+      if (response.success) {
+        console.log("Friend request dismissed successfully");
+
+        setSearchResults((prevResults) =>
+          prevResults.map((user) =>
+            user._id === userId
+              ? { ...user, hasIncomingRequest: false, incomingRequestId: null }
+              : user
+          )
+        );
+
+        setIncomingRequests((prev) =>
+          prev.filter((req) => req.requestId !== requestId)
+        );
+
+        alert("Friend request dismissed");
+      }
+    } catch (err) {
+      console.error("Error dismissing friend request:", err);
+      alert("Failed to dismiss friend request");
+    } finally {
+      setIsLoading(false);
+    }
+  };
+
   const handleSendFriendRequest = async (userId, event) => {
     event.stopPropagation();
     try {
-      console.log(`Sending friend request to user ${userId}`);
-      alert("Friend request functionality will be implemented soon!");
+      setIsLoading(true);
+
+      const response = await authenticatedFetch("/api/contactrequest/send", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({
+          recipientId: userId,
+        }),
+      });
+
+      if (response.success) {
+        console.log("Friend request sent successfully");
+
+        setSearchResults((prevResults) =>
+          prevResults.map((user) => {
+            if (user._id === userId) {
+              return { ...user, friendRequestSent: true };
+            }
+            return user;
+          })
+        );
+
+        setPendingRequests((prev) => [...prev, userId]);
+
+        alert("Friend request sent successfully!");
+      }
     } catch (err) {
       console.error("Error sending friend request:", err);
+
+      let errorMessage = "Failed to send friend request";
+      if (err.message.includes("400")) {
+        if (err.message.includes("already friends")) {
+          errorMessage = "You are already friends with this user";
+
+          setSearchResults((prevResults) =>
+            prevResults.map((user) =>
+              user._id === userId ? { ...user, isContact: true } : user
+            )
+          );
+        } else if (err.message.includes("already exists")) {
+          errorMessage = "Friend request already sent";
+
+          setSearchResults((prevResults) =>
+            prevResults.map((user) =>
+              user._id === userId ? { ...user, friendRequestSent: true } : user
+            )
+          );
+        } else if (err.message.includes("dismissed")) {
+          errorMessage = "Friend request was previously declined";
+        } else {
+          errorMessage = "Cannot send friend request";
+        }
+      }
+
+      alert(errorMessage);
+    } finally {
+      setIsLoading(false);
     }
   };
 
@@ -495,14 +662,88 @@ const SearchPage = () => {
                 <MessageCircle size={16} />
                 Message
               </button>
+            ) : user.hasIncomingRequest ? (
+              <>
+                <div
+                  style={{
+                    fontSize: "12px",
+                    color: "#6b7280",
+                    marginBottom: "8px",
+                    textAlign: "center",
+                  }}
+                >
+                  User sent you a friend request
+                </div>
+                <button
+                  className={styles.acceptBtn}
+                  onClick={(e) =>
+                    handleAcceptFriendRequest(
+                      user.incomingRequestId,
+                      user._id,
+                      e
+                    )
+                  }
+                  title="Accept Friend Request"
+                  disabled={isLoading}
+                  style={{
+                    backgroundColor: "#10b981",
+                    color: "white",
+                    border: "none",
+                    padding: "8px 12px",
+                    borderRadius: "6px",
+                    cursor: "pointer",
+                    display: "flex",
+                    alignItems: "center",
+                    gap: "4px",
+                  }}
+                >
+                  <UserCheck size={16} />
+                  Accept
+                </button>
+                <button
+                  className={styles.dismissBtn}
+                  onClick={(e) =>
+                    handleDismissFriendRequest(
+                      user.incomingRequestId,
+                      user._id,
+                      e
+                    )
+                  }
+                  title="Dismiss Friend Request"
+                  disabled={isLoading}
+                  style={{
+                    backgroundColor: "#6b7280",
+                    color: "white",
+                    border: "none",
+                    padding: "8px 12px",
+                    borderRadius: "6px",
+                    cursor: "pointer",
+                    display: "flex",
+                    alignItems: "center",
+                    gap: "4px",
+                  }}
+                >
+                  <X size={16} />
+                  Dismiss
+                </button>
+              </>
             ) : (
               <button
                 className={styles.friendRequestBtn}
                 onClick={(e) => handleSendFriendRequest(user._id, e)}
-                title="Send Friend Request"
+                title={
+                  user.friendRequestSent
+                    ? "Friend Request Sent"
+                    : "Send Friend Request"
+                }
+                disabled={user.friendRequestSent || isLoading}
+                style={{
+                  opacity: user.friendRequestSent ? 0.6 : 1,
+                  cursor: user.friendRequestSent ? "default" : "pointer",
+                }}
               >
                 <UserPlus size={16} />
-                Add Friend
+                {user.friendRequestSent ? "Request Sent" : "Add Friend"}
               </button>
             )}
           </div>
