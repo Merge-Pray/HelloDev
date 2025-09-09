@@ -20,5 +20,7 @@ const ChatSchema = new Schema(
   }
 );
 
+ChatSchema.index({ participants: 1 }, { unique: true, background: true });
+
 const ChatModel = model("Chat", ChatSchema);
 export default ChatModel;

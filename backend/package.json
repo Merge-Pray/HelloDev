@@ -12,7 +12,8 @@
     "start": "node src/server.js",
     "dev": "nodemon src/server.js",
     "match": "node src/scripts/runMatching.js",
-    "enhance": "node src/scripts/enhanceAliases.js"
+    "enhance": "node src/scripts/enhanceAliases.js",
+    "migrate-chats": "node src/scripts/migrateDuplicateChats.js"
   },
   "dependencies": {
     "bcrypt": "^6.0.0",

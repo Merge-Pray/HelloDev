@@ -32,6 +32,7 @@ import {
   Github,
 } from "lucide-react";
 import useUserStore from "../../hooks/userstore";
+import { useNotificationCount } from "../../hooks/useNotificationCount";
 import { authenticatedFetch } from "../../utils/authenticatedFetch";
 import styles from "./getprofilepage.module.css";
 
@@ -39,6 +40,7 @@ export default function GetProfilePage() {
   const { userId } = useParams();
   const navigate = useNavigate();
   const currentUser = useUserStore((state) => state.currentUser);
+  const { refreshNotificationCount } = useNotificationCount();
   const [profileData, setProfileData] = useState(null);
   const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState(null);
@@ -46,6 +48,7 @@ export default function GetProfilePage() {
   const [contactActionLoading, setContactActionLoading] = useState(false);
   const [showDropdown, setShowDropdown] = useState(false);
   const [showAvatarModal, setShowAvatarModal] = useState(false);
+  const [pendingFriendRequest, setPendingFriendRequest] = useState(null);
   const dropdownRef = useRef(null);
 
   useEffect(() => {
@@ -108,6 +111,9 @@ export default function GetProfilePage() {
 
       setProfileData(data.user);
       setIsContact(data.isContact);
+      
+      // Check for pending friend request from this user
+      await checkPendingFriendRequest();
     } catch (err) {
       console.error("Error fetching profile:", err);
 
@@ -126,24 +132,121 @@ export default function GetProfilePage() {
   };
 
   const handleSendMessage = () => {
-    navigate(`/chat?userId=${userId}&username=${profileData.username}`);
+    navigate(`/chat/${userId}`);
+  };
+
+  const checkPendingFriendRequest = async () => {
+    try {
+      const response = await authenticatedFetch("/api/contactrequest/friendrequests");
+      if (response.success) {
+        // Look for friend request from this user to current user
+        // Check both friendRequests (backward compatibility) and incomingRequests
+        const requests = response.friendRequests || response.incomingRequests || [];
+        const pendingRequest = requests.find(
+          (request) => 
+            request.user1._id === userId && 
+            request.type === "friend_request" && 
+            request.status === "contacted"
+        );
+        setPendingFriendRequest(pendingRequest || null);
+        console.log("Pending friend request found:", pendingRequest);
+      }
+    } catch (err) {
+      console.error("Error checking friend requests:", err);
+    }
   };
 
   const handleSendFriendRequest = async () => {
     try {
       setContactActionLoading(true);
 
-      // Simuliere API-Aufruf mit Delay (placeholder)
-      await new Promise((resolve) => setTimeout(resolve, 1000));
+      const response = await authenticatedFetch("/api/contactrequest/send", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({
+          recipientId: userId,
+        }),
+      });
 
-      console.log(`Would send friend request to user ${userId}`);
-      // TODO: Hier wird später die echte API-Anfrage implementiert
-
-      // Placeholder: Nach erfolgreichem Senden der Anfrage könnte man den Status ändern
-      // setIsContact(true); // Nur wenn die Anfrage sofort akzeptiert wird
+      if (response.success) {
+        console.log("Friend request sent successfully");
+        // Optional: Status-Update oder Benachrichtigung anzeigen
+        // setIsContact(true); // Nur wenn die Anfrage sofort akzeptiert wird
+      }
     } catch (err) {
       console.error("Error sending friend request:", err);
-      setError("Failed to send friend request");
+
+      // Spezifische Fehlermeldungen basierend auf der Antwort
+      if (err.message.includes("400")) {
+        if (err.message.includes("already friends")) {
+          setError("You are already friends with this user");
+        } else if (err.message.includes("already exists")) {
+          setError("Friend request already sent");
+        } else if (err.message.includes("dismissed")) {
+          setError("Friend request was previously declined");
+        } else {
+          setError("Cannot send friend request");
+        }
+      } else {
+        setError("Failed to send friend request");
+      }
+    } finally {
+      setContactActionLoading(false);
+    }
+  };
+
+  const handleAcceptFriendRequest = async () => {
+    if (!pendingFriendRequest) return;
+    
+    try {
+      setContactActionLoading(true);
+
+      const response = await authenticatedFetch(
+        `/api/contactrequest/${pendingFriendRequest._id}/accept`,
+        {
+          method: "PATCH",
+        }
+      );
+
+      if (response.success) {
+        console.log("Friend request accepted successfully");
+        setIsContact(true);
+        setPendingFriendRequest(null);
+        // Refresh notification count
+        refreshNotificationCount();
+      }
+    } catch (err) {
+      console.error("Error accepting friend request:", err);
+      setError("Failed to accept friend request");
+    } finally {
+      setContactActionLoading(false);
+    }
+  };
+
+  const handleDismissFriendRequest = async () => {
+    if (!pendingFriendRequest) return;
+    
+    try {
+      setContactActionLoading(true);
+
+      const response = await authenticatedFetch(
+        `/api/contactrequest/${pendingFriendRequest._id}/decline`,
+        {
+          method: "PATCH",
+        }
+      );
+
+      if (response.success) {
+        console.log("Friend request dismissed successfully");
+        setPendingFriendRequest(null);
+        // Refresh notification count
+        refreshNotificationCount();
+      }
+    } catch (err) {
+      console.error("Error dismissing friend request:", err);
+      setError("Failed to dismiss friend request");
     } finally {
       setContactActionLoading(false);
     }
@@ -154,17 +257,27 @@ export default function GetProfilePage() {
       setContactActionLoading(true);
       setShowDropdown(false);
 
-      // Simuliere API-Aufruf mit Delay (placeholder)
-      await new Promise((resolve) => setTimeout(resolve, 1000));
+      const response = await authenticatedFetch(
+        `/api/contact-requests/friend/${userId}`,
+        {
+          method: "DELETE",
+        }
+      );
 
-      console.log(`Would remove contact ${userId}`);
-      // TODO: Hier wird später die echte API-Anfrage implementiert
-
-      // Placeholder: Nach erfolgreichem Entfernen den Status ändern
-      setIsContact(false);
+      if (response.success) {
+        console.log("Contact removed successfully");
+        setIsContact(false);
+      }
     } catch (err) {
       console.error("Error removing contact:", err);
-      setError("Failed to remove contact");
+
+      if (err.message.includes("404")) {
+        setError("User not found");
+      } else if (err.message.includes("400")) {
+        setError("You are not friends with this user");
+      } else {
+        setError("Failed to remove contact");
+      }
     } finally {
       setContactActionLoading(false);
     }
@@ -230,11 +343,36 @@ export default function GetProfilePage() {
       );
     }
 
+    // If there's a pending friend request from this user, show accept/dismiss buttons
+    if (pendingFriendRequest) {
+      return (
+        <div className={styles.actionButtons}>
+          <button
+            className={`btn btn-success ${styles.actionButton}`}
+            onClick={handleAcceptFriendRequest}
+            disabled={contactActionLoading}
+          >
+            <UserCheck size={16} />
+            <span>Accept Friend Request</span>
+          </button>
+          <button
+            className={`btn btn-secondary ${styles.actionButton}`}
+            onClick={handleDismissFriendRequest}
+            disabled={contactActionLoading}
+          >
+            <X size={16} />
+            <span>Dismiss</span>
+          </button>
+        </div>
+      );
+    }
+
     return (
       <div className={styles.actionButtons}>
         <button
           className={`btn btn-primary ${styles.actionButton}`}
           onClick={handleSendFriendRequest}
+          disabled={contactActionLoading}
         >
           <UserPlus size={16} />
           <span>Send Friend Request</span>

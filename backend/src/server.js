@@ -15,6 +15,7 @@ import http from "http";
 import { Server } from "socket.io";
 import { socketHandler } from "./services/socketHandler.js";
 import { socketAuth } from "./services/socketAuth.js";
+import { contactRequestRouter } from "./routes/contactrequest.js";
 
 const PORT = process.env.PORT || 3001;
 
@@ -53,6 +54,7 @@ app.use("/api/match", matchRouter);
 app.use("/api/upload", uploadRouter);
 app.use("/api/chats", chatRouter);
 app.use("/api/search", searchRouter);
+app.use("/api/contactrequest", contactRequestRouter);
 app.get("/", (req, res) => {
   res.send("hello");
 });

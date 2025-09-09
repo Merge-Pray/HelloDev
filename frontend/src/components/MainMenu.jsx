@@ -2,6 +2,7 @@ import styles from "./MainMenu.module.css";
 import { NavLink, useNavigate, useLocation } from "react-router";
 import DarkMode from "./DarkMode";
 import { useUnreadCount } from "../hooks/useUnreadCount";
+import { useNotificationCount } from "../hooks/useNotificationCount";
 import { useState } from "react";
 
 const topItems = [
@@ -13,11 +14,14 @@ const topItems = [
     icon: "/icons/messages.svg",
     label: "Chat",
     hasUnreadBadge: true,
+    badgeType: "chat",
   },
   {
     to: "/notifications",
     icon: "/icons/notifications.svg",
     label: "Notifications",
+    hasUnreadBadge: true,
+    badgeType: "notifications",
   },
 ];
 
@@ -28,9 +32,17 @@ const bottomItems = [
 
 export default function MainMenu() {
   const { totalUnreadCount } = useUnreadCount();
+  const { notificationCount } = useNotificationCount();
   const navigate = useNavigate();
   const location = useLocation();
   const [isBurgerOpen, setIsBurgerOpen] = useState(false);
+
+  const getBadgeCount = (item) => {
+    if (!item.hasUnreadBadge) return 0;
+    if (item.badgeType === "chat") return totalUnreadCount;
+    if (item.badgeType === "notifications") return notificationCount;
+    return 0;
+  };
 
   const handleHomeClick = (e) => {
     e.preventDefault();
@@ -126,9 +138,9 @@ export default function MainMenu() {
                     >
                       <div className={styles.iconContainer}>
                         <img src={item.icon} alt="" className={styles.icon} />
-                        {item.hasUnreadBadge && totalUnreadCount > 0 && (
+                        {item.hasUnreadBadge && getBadgeCount(item) > 0 && (
                           <span className={styles.unreadBadge}>
-                            {totalUnreadCount > 99 ? "99+" : totalUnreadCount}
+                            {getBadgeCount(item) > 99 ? "99+" : getBadgeCount(item)}
                           </span>
                         )}
                       </div>
@@ -146,9 +158,9 @@ export default function MainMenu() {
                     >
                       <div className={styles.iconContainer}>
                         <img src={item.icon} alt="" className={styles.icon} />
-                        {item.hasUnreadBadge && totalUnreadCount > 0 && (
+                        {item.hasUnreadBadge && getBadgeCount(item) > 0 && (
                           <span className={styles.unreadBadge}>
-                            {totalUnreadCount > 99 ? "99+" : totalUnreadCount}
+                            {getBadgeCount(item) > 99 ? "99+" : getBadgeCount(item)}
                           </span>
                         )}
                       </div>
@@ -213,9 +225,9 @@ export default function MainMenu() {
                 >
                   <div className={styles.iconContainer}>
                     <img src={item.icon} alt="" className={styles.icon} />
-                    {item.hasUnreadBadge && totalUnreadCount > 0 && (
+                    {item.hasUnreadBadge && getBadgeCount(item) > 0 && (
                       <span className={styles.unreadBadge}>
-                        {totalUnreadCount > 99 ? "99+" : totalUnreadCount}
+                        {getBadgeCount(item) > 99 ? "99+" : getBadgeCount(item)}
                       </span>
                     )}
                   </div>
@@ -230,9 +242,9 @@ export default function MainMenu() {
                 >
                   <div className={styles.iconContainer}>
                     <img src={item.icon} alt="" className={styles.icon} />
-                    {item.hasUnreadBadge && totalUnreadCount > 0 && (
+                    {item.hasUnreadBadge && getBadgeCount(item) > 0 && (
                       <span className={styles.unreadBadge}>
-                        {totalUnreadCount > 99 ? "99+" : totalUnreadCount}
+                        {getBadgeCount(item) > 99 ? "99+" : getBadgeCount(item)}
                       </span>
                     )}
                   </div>
@@ -279,9 +291,9 @@ export default function MainMenu() {
                 >
                   <div className={styles.iconContainer}>
                     <img src={item.icon} alt="" className={styles.icon} />
-                    {item.hasUnreadBadge && totalUnreadCount > 0 && (
+                    {item.hasUnreadBadge && getBadgeCount(item) > 0 && (
                       <span className={styles.unreadBadge}>
-                        {totalUnreadCount > 99 ? "99+" : totalUnreadCount}
+                        {getBadgeCount(item) > 99 ? "99+" : getBadgeCount(item)}
                       </span>
                     )}
                   </div>
@@ -298,9 +310,9 @@ export default function MainMenu() {
                 >
                   <div className={styles.iconContainer}>
                     <img src={item.icon} alt="" className={styles.icon} />
-                    {item.hasUnreadBadge && totalUnreadCount > 0 && (
+                    {item.hasUnreadBadge && getBadgeCount(item) > 0 && (
                       <span className={styles.unreadBadge}>
-                        {totalUnreadCount > 99 ? "99+" : totalUnreadCount}
+                        {getBadgeCount(item) > 99 ? "99+" : getBadgeCount(item)}
                       </span>
                     )}
                   </div>
