@@ -1,6 +1,6 @@
 import { useState, useEffect, useRef, useCallback } from "react";
 import { useParams, useNavigate } from "react-router";
-import { ArrowLeft, Send, MessageCircle, Smile } from "lucide-react";
+import { ArrowLeft, Send, MessageCircle, Smile, UserPlus, AlertCircle } from "lucide-react";
 import EmojiPicker from "emoji-picker-react";
 import Sidebar from "../components/Sidebar/Sidebar";
 import useUserStore from "../hooks/userstore";
@@ -25,6 +25,8 @@ const ChatPage = () => {
   const [typingUsers, setTypingUsers] = useState(new Set());
   const [isCurrentUserTyping, setIsCurrentUserTyping] = useState(false);
   const [showEmojiPicker, setShowEmojiPicker] = useState(false);
+  const [areFriends, setAreFriends] = useState(true);
+  const [friendshipError, setFriendshipError] = useState(null);
 
   const messagesEndRef = useRef(null);
   const typingTimeoutRef = useRef(null);
@@ -32,10 +34,15 @@ const ChatPage = () => {
   const emojiPickerRef = useRef(null);
   const messageInputRef = useRef(null);
 
+  const loadIndividualChatRef = useRef(false);
+
   useEffect(() => {
-    if (userId) {
-      loadIndividualChat();
-    } else {
+    if (userId && !loadIndividualChatRef.current) {
+      loadIndividualChatRef.current = true;
+      loadIndividualChat().finally(() => {
+        loadIndividualChatRef.current = false;
+      });
+    } else if (!userId) {
       loadChatOverview();
     }
   }, [userId]);
@@ -169,11 +176,22 @@ const ChatPage = () => {
           `/api/chats/${chatResponse._id}`
         );
 
-        if (messagesResponse && Array.isArray(messagesResponse)) {
-          setMessages(messagesResponse);
-          setTimeout(() => scrollToBottom(), 100);
+        if (messagesResponse) {
+          if (messagesResponse.messages && Array.isArray(messagesResponse.messages)) {
+            setMessages(messagesResponse.messages);
+            setAreFriends(messagesResponse.areFriends);
+            setTimeout(() => scrollToBottom(), 100);
+          } else if (Array.isArray(messagesResponse)) {
+            setMessages(messagesResponse);
+            setAreFriends(true);
+            setTimeout(() => scrollToBottom(), 100);
+          } else {
+            setMessages([]);
+            setAreFriends(true);
+          }
         } else {
           setMessages([]);
+          setAreFriends(true);
         }
       }
     } catch (err) {
@@ -406,6 +424,31 @@ const ChatPage = () => {
       </div>
 
       <div className={styles.messageList}>
+        {/* Friendship Status Banner */}
+        {!areFriends && otherUser && (
+          <div className={styles.friendshipBanner}>
+            <div className={styles.bannerContent}>
+              <AlertCircle size={20} />
+              <span>You are no longer friends with {otherUser.nickname || otherUser.username}</span>
+              <button 
+                className={styles.addFriendBtn}
+                onClick={handleSendFriendRequest}
+              >
+                <UserPlus size={16} />
+                Add Friend
+              </button>
+            </div>
+          </div>
+        )}
+
+        {/* Error Message */}
+        {friendshipError && (
+          <div className={styles.errorBanner}>
+            <AlertCircle size={16} />
+            <span>{friendshipError}</span>
+          </div>
+        )}
+
         {isLoading ? (
           <div className={styles.loading}>Loading messages...</div>
         ) : error ? (
@@ -514,16 +557,17 @@ const ChatPage = () => {
           <textarea
             ref={messageInputRef}
             className={styles.textInput}
-            placeholder="Type a message..."
+            placeholder={areFriends ? "Type a message..." : "Add as friend to send messages"}
             value={newMessage}
             onChange={handleInputChange}
             onKeyPress={handleKeyPress}
             rows={1}
+            disabled={!areFriends}
           />
           <button
             className={styles.sendButton}
             onClick={handleSendMessage}
-            disabled={!newMessage.trim()}
+            disabled={!newMessage.trim() || !areFriends}
           >
             <Send size={20} />
           </button>
@@ -532,14 +576,47 @@ const ChatPage = () => {
     </div>
   );
 
+  const handleMessageError = (data) => {
+    if (data.type === "not_friends") {
+      setAreFriends(false);
+      setFriendshipError(data.error);
+      setTimeout(() => setFriendshipError(null), 5000);
+    }
+  };
+
+  const handleSendFriendRequest = async () => {
+    try {
+      const response = await authenticatedFetch("/api/contactrequest/send", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({
+          recipientId: otherUser._id,
+        }),
+      });
+
+      if (response.success) {
+        setFriendshipError("Friend request sent successfully!");
+        setTimeout(() => setFriendshipError(null), 3000);
+      }
+    } catch (err) {
+      console.error("Error sending friend request:", err);
+      setFriendshipError("Failed to send friend request");
+      setTimeout(() => setFriendshipError(null), 3000);
+    }
+  };
+
   useEffect(() => {
     if (socket) {
       socket.on("receiveMessage", handleReceiveMessage);
       socket.on("userTyping", handleUserTyping);
+      socket.on("messageError", handleMessageError);
 
       return () => {
         socket.off("receiveMessage", handleReceiveMessage);
         socket.off("userTyping", handleUserTyping);
+        socket.off("messageError", handleMessageError);
       };
     }
   }, [socket, currentChat, refreshUnreadCount]);

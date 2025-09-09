@@ -1,5 +1,6 @@
 import MatchModel from "../models/match.js";
 import UserModel from "../models/user.js";
+import ContactRequestModel from "../models/contactrequest.js";
 
 export const getUserMatches = async (req, res, next) => {
   try {
@@ -158,6 +159,63 @@ export const contactMatch = async (req, res, next) => {
         { $addToSet: { contacts: user1Id } },
         { new: true }
       );
+
+      const user1 = await UserModel.findById(user1Id).select('nickname username');
+      const user2 = await UserModel.findById(user2Id).select('nickname username');
+
+      await ContactRequestModel.insertMany([
+        {
+          user1: user1Id,
+          user2: user2Id,
+          type: "match_found",
+          message: `You and ${user1.nickname || user1.username} are now connected through matching!`,
+          relatedData: { matchId: match._id }
+        },
+        {
+          user1: user2Id,
+          user2: user1Id,
+          type: "match_found",
+          message: `You and ${user2.nickname || user2.username} are now connected through matching!`,
+          relatedData: { matchId: match._id }
+        }
+      ]);
+
+      const io = req.app.get("socketio");
+      if (io) {
+        const user1Notification = await ContactRequestModel.findOne({
+          user1: user1Id,
+          user2: user2Id,
+          type: "match_found"
+        }).populate("user1", "username nickname avatar");
+
+        const user2Notification = await ContactRequestModel.findOne({
+          user1: user2Id,
+          user2: user1Id,
+          type: "match_found"
+        }).populate("user1", "username nickname avatar");
+
+        io.to(`user:${user2Id}`).emit("newNotification", {
+          notification: user1Notification,
+          type: "match_found",
+        });
+
+        io.to(`user:${user1Id}`).emit("newNotification", {
+          notification: user2Notification,
+          type: "match_found",
+        });
+
+        const user1UnreadCount = await ContactRequestModel.countDocuments({
+          user2: user1Id,
+          isRead: false,
+        });
+        const user2UnreadCount = await ContactRequestModel.countDocuments({
+          user2: user2Id,
+          isRead: false,
+        });
+
+        io.to(`user:${user1Id}`).emit("notificationCountUpdate", user1UnreadCount);
+        io.to(`user:${user2Id}`).emit("notificationCountUpdate", user2UnreadCount);
+      }
     }
     await match.save();
 

@@ -49,6 +49,7 @@ export default function GetProfilePage() {
   const [showDropdown, setShowDropdown] = useState(false);
   const [showAvatarModal, setShowAvatarModal] = useState(false);
   const [pendingFriendRequest, setPendingFriendRequest] = useState(null);
+  const [sentFriendRequest, setSentFriendRequest] = useState(null);
   const dropdownRef = useRef(null);
 
   useEffect(() => {
@@ -111,7 +112,7 @@ export default function GetProfilePage() {
 
       setProfileData(data.user);
       setIsContact(data.isContact);
-      
+
       // Check for pending friend request from this user
       await checkPendingFriendRequest();
     } catch (err) {
@@ -137,19 +138,30 @@ export default function GetProfilePage() {
 
   const checkPendingFriendRequest = async () => {
     try {
-      const response = await authenticatedFetch("/api/contactrequest/friendrequests");
+      const response = await authenticatedFetch(
+        "/api/contactrequest/friendrequests"
+      );
       if (response.success) {
-        // Look for friend request from this user to current user
-        // Check both friendRequests (backward compatibility) and incomingRequests
-        const requests = response.friendRequests || response.incomingRequests || [];
-        const pendingRequest = requests.find(
-          (request) => 
-            request.user1._id === userId && 
-            request.type === "friend_request" && 
+        // Look for incoming friend request from this user to current user
+        const incomingRequests =
+          response.friendRequests || response.incomingRequests || [];
+        const pendingRequest = incomingRequests.find(
+          (request) =>
+            request.user1._id === userId &&
+            request.type === "friend_request" &&
             request.status === "contacted"
         );
         setPendingFriendRequest(pendingRequest || null);
-        console.log("Pending friend request found:", pendingRequest);
+
+        // Look for outgoing friend request from current user to this user
+        const outgoingRequests = response.outgoingRequests || [];
+        const sentRequest = outgoingRequests.find(
+          (request) =>
+            request.user2._id === userId &&
+            request.type === "friend_request" &&
+            request.status === "contacted"
+        );
+        setSentFriendRequest(sentRequest || null);
       }
     } catch (err) {
       console.error("Error checking friend requests:", err);
@@ -172,8 +184,12 @@ export default function GetProfilePage() {
 
       if (response.success) {
         console.log("Friend request sent successfully");
-        // Optional: Status-Update oder Benachrichtigung anzeigen
-        // setIsContact(true); // Nur wenn die Anfrage sofort akzeptiert wird
+        // Set the sent friend request state to show "Request Sent" button
+        setSentFriendRequest({
+          user2: { _id: userId },
+          type: "friend_request",
+          status: "contacted",
+        });
       }
     } catch (err) {
       console.error("Error sending friend request:", err);
@@ -199,7 +215,7 @@ export default function GetProfilePage() {
 
   const handleAcceptFriendRequest = async () => {
     if (!pendingFriendRequest) return;
-    
+
     try {
       setContactActionLoading(true);
 
@@ -227,7 +243,7 @@ export default function GetProfilePage() {
 
   const handleDismissFriendRequest = async () => {
     if (!pendingFriendRequest) return;
-    
+
     try {
       setContactActionLoading(true);
 
@@ -258,7 +274,7 @@ export default function GetProfilePage() {
       setShowDropdown(false);
 
       const response = await authenticatedFetch(
-        `/api/contact-requests/friend/${userId}`,
+        `/api/contactrequest/friend/${userId}`,
         {
           method: "DELETE",
         }
@@ -362,6 +378,22 @@ export default function GetProfilePage() {
           >
             <X size={16} />
             <span>Dismiss</span>
+          </button>
+        </div>
+      );
+    }
+
+    // If we've sent a friend request to this user, show "Request Sent" button
+    if (sentFriendRequest) {
+      return (
+        <div className={styles.actionButtons}>
+          <button
+            className={`btn btn-secondary ${styles.actionButton}`}
+            disabled
+            style={{ opacity: 0.6, cursor: "default" }}
+          >
+            <UserPlus size={16} />
+            <span>Request Sent</span>
           </button>
         </div>
       );

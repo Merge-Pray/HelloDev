@@ -18,6 +18,17 @@ export const socketHandler = (io) => {
       const { content, chatId, recipientId } = data;
       
       try {
+        const sender = await UserModel.findById(userId);
+        const isStillFriend = sender.contacts.includes(recipientId);
+        
+        if (!isStillFriend) {
+          socket.emit("messageError", { 
+            error: "Cannot send message - you are no longer friends",
+            type: "not_friends"
+          });
+          return;
+        }
+
         const message = await MessageModel.create({
           chat: chatId,
           sender: userId,

@@ -405,6 +405,42 @@ export const getUnreadNotificationCount = async (req, res, next) => {
   }
 };
 
+export const deleteNotification = async (req, res, next) => {
+  try {
+    const userId = req.user._id;
+    const { notificationId } = req.params;
+
+    const result = await ContactRequestModel.findOneAndDelete({
+      _id: notificationId,
+      user2: userId
+    });
+
+    if (!result) {
+      return res.status(404).json({
+        success: false,
+        message: "Notification not found or not authorized"
+      });
+    }
+
+    // Update notification count via socket
+    const io = req.app.get("socketio");
+    if (io) {
+      const unreadCount = await ContactRequestModel.countDocuments({
+        user2: userId,
+        isRead: false,
+      });
+      io.to(`user:${userId}`).emit("notificationCountUpdate", unreadCount);
+    }
+
+    res.json({
+      success: true,
+      message: "Notification deleted successfully"
+    });
+  } catch (error) {
+    next(error);
+  }
+};
+
 export const removeFriend = async (req, res, next) => {
   try {
     const userId = req.user._id;

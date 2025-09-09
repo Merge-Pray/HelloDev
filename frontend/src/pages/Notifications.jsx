@@ -1,4 +1,4 @@
-import { useState, useEffect } from "react";
+import { useState, useEffect, useRef } from "react";
 import { useNavigate } from "react-router";
 import {
   UserCheck,
@@ -11,6 +11,7 @@ import {
   Users,
   Loader,
   MoreHorizontal,
+  Trash2,
 } from "lucide-react";
 import { authenticatedFetch } from "../utils/authenticatedFetch";
 import { useNotificationCount } from "../hooks/useNotificationCount";
@@ -26,10 +27,22 @@ const Notifications = () => {
   const [error, setError] = useState(null);
   const [actionLoading, setActionLoading] = useState({});
   const [filter, setFilter] = useState("all");
+  const [openDropdown, setOpenDropdown] = useState(null);
 
   useEffect(() => {
     fetchNotifications();
   }, [filter]);
+
+  useEffect(() => {
+    const handleClickOutside = (event) => {
+      if (!event.target.closest('.dropdownContainer')) {
+        setOpenDropdown(null);
+      }
+    };
+
+    document.addEventListener("mousedown", handleClickOutside);
+    return () => document.removeEventListener("mousedown", handleClickOutside);
+  }, []);
 
   const fetchNotifications = async () => {
     try {
@@ -74,6 +87,43 @@ const Notifications = () => {
       setError("Failed to load notifications");
     } finally {
       setIsLoading(false);
+    }
+  };
+
+  const handleDeleteNotification = async (notificationId) => {
+    try {
+      setActionLoading((prev) => ({ ...prev, [notificationId]: "delete" }));
+
+      const response = await authenticatedFetch(
+        `/api/contactrequest/notifications/${notificationId}`,
+        {
+          method: "DELETE",
+        }
+      );
+
+      if (response.success) {
+        setNotifications((prev) =>
+          prev.filter((n) => n._id !== notificationId)
+        );
+        
+        setAllNotifications((prev) =>
+          prev.filter((n) => n._id !== notificationId)
+        );
+
+        // Force refresh notification count after deletion
+        setTimeout(() => {
+          refreshNotificationCount();
+        }, 100);
+        
+        setOpenDropdown(null);
+      } else {
+        setError("Failed to delete notification");
+      }
+    } catch (err) {
+      console.error("Error deleting notification:", err);
+      setError("Failed to delete notification");
+    } finally {
+      setActionLoading((prev) => ({ ...prev, [notificationId]: false }));
     }
   };
 
@@ -464,9 +514,36 @@ const Notifications = () => {
                         <span className={styles.time}>
                           {formatTimeAgo(notification.createdAt)}
                         </span>
-                        <button className={styles.moreBtn}>
-                          <MoreHorizontal size={16} />
-                        </button>
+                        <div className={`${styles.dropdownContainer} dropdownContainer`}>
+                          <button 
+                            className={styles.moreBtn}
+                            onClick={(e) => {
+                              e.stopPropagation();
+                              setOpenDropdown(openDropdown === notification._id ? null : notification._id);
+                            }}
+                          >
+                            <MoreHorizontal size={16} />
+                          </button>
+                          {openDropdown === notification._id && (
+                            <div className={styles.dropdown}>
+                              <button
+                                className={styles.dropdownItem}
+                                onClick={(e) => {
+                                  e.stopPropagation();
+                                  handleDeleteNotification(notification._id);
+                                }}
+                                disabled={actionLoading[notification._id] === "delete"}
+                              >
+                                {actionLoading[notification._id] === "delete" ? (
+                                  <Loader size={14} className={styles.spinner} />
+                                ) : (
+                                  <Trash2 size={14} />
+                                )}
+                                <span>Delete</span>
+                              </button>
+                            </div>
+                          )}
+                        </div>
                       </div>
                     </div>
 
