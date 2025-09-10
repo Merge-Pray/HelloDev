@@ -164,8 +164,11 @@ export const router = createBrowserRouter([
         ),
       },
       { path: "legalnotice", element: <LegalNotice /> },
+      
       { path: "gtc", element: <GeneralTermsandConditions /> },
-      { path: "dataprivacy", element: <DataPrivacy /> },
+
+      { path: "generaltermsandconditions", element: <DataPrivacy /> },
+      
       { path: "about", element: <About /> },
     ],
   },
