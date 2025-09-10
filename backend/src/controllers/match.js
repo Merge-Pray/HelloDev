@@ -6,6 +6,10 @@ export const getUserMatches = async (req, res, next) => {
   try {
     const userId = req.user._id;
 
+    // Get user's contacts to filter out existing friends
+    const currentUser = await UserModel.findById(userId).select('contacts');
+    const userContacts = currentUser.contacts || [];
+
     const matches = await MatchModel.find({
       $or: [{ user1: userId }, { user2: userId }],
       status: { $in: ["pending", "contacted"] },
@@ -23,12 +27,17 @@ export const getUserMatches = async (req, res, next) => {
       .sort({ compatibilityScore: -1, createdAt: -1 })
       .lean();
 
-    const formattedMatches = matches.map((match) => {
+    // Filter out matches where users are already contacts (handles edge case)
+    const filteredMatches = matches.filter((match) => {
+      const otherUserId = match.user1.toString() === userId.toString() ? match.user2 : match.user1;
+      return !userContacts.some(contactId => contactId.toString() === otherUserId.toString());
+    });
+
+    const formattedMatches = filteredMatches.map((match) => {
       const isCurrentUserUser1 =
         match.user1._id.toString() === userId.toString();
       const otherUser = isCurrentUserUser1 ? match.user2 : match.user1;
 
-      // FIX: Ensure contactedBy is always an array
       const contactedBy = Array.isArray(match.contactedBy)
         ? match.contactedBy
         : [];
@@ -36,12 +45,12 @@ export const getUserMatches = async (req, res, next) => {
       const hasUserContacted = contactedBy.some(
         (contactId) => contactId.toString() === userId.toString()
       );
-      const otherUserId = isCurrentUserUser1
+      const otherUserIdForContacted = isCurrentUserUser1
         ? match.user2._id
         : match.user1._id;
 
       const hasOtherContacted = contactedBy.some(
-        (contactId) => contactId.toString() === otherUserId.toString()
+        (contactId) => contactId.toString() === otherUserIdForContacted.toString()
       );
 
       return {
@@ -98,6 +107,12 @@ export const contactMatch = async (req, res, next) => {
 
     const match = await MatchModel.findById(matchId);
 
+    const otherUserId = match
+      ? match.user1.toString() === userId.toString()
+        ? match.user2
+        : match.user1
+      : null;
+
     if (!match) {
       return res.status(404).json({
         success: false,
@@ -127,6 +142,20 @@ export const contactMatch = async (req, res, next) => {
       return res.status(400).json({
         success: false,
         message: "This match is already connected",
+      });
+    }
+
+    const currentUser = await UserModel.findById(userId).select("contacts");
+
+    if (currentUser.contacts && currentUser.contacts.includes(otherUserId)) {
+      match.status = "connected";
+      match.connectedAt = new Date();
+      match.contactedBy = [match.user1, match.user2];
+      await match.save();
+
+      return res.status(400).json({
+        success: false,
+        message: "You are already friends with this user",
       });
     }
 
@@ -160,24 +189,32 @@ export const contactMatch = async (req, res, next) => {
         { new: true }
       );
 
-      const user1 = await UserModel.findById(user1Id).select('nickname username');
-      const user2 = await UserModel.findById(user2Id).select('nickname username');
+      const user1 = await UserModel.findById(user1Id).select(
+        "nickname username"
+      );
+      const user2 = await UserModel.findById(user2Id).select(
+        "nickname username"
+      );
 
       await ContactRequestModel.insertMany([
         {
           user1: user1Id,
           user2: user2Id,
           type: "match_found",
-          message: `You and ${user1.nickname || user1.username} are now connected through matching!`,
-          relatedData: { matchId: match._id }
+          message: `You and ${
+            user1.nickname || user1.username
+          } are now connected through matching!`,
+          relatedData: { matchId: match._id },
         },
         {
           user1: user2Id,
           user2: user1Id,
           type: "match_found",
-          message: `You and ${user2.nickname || user2.username} are now connected through matching!`,
-          relatedData: { matchId: match._id }
-        }
+          message: `You and ${
+            user2.nickname || user2.username
+          } are now connected through matching!`,
+          relatedData: { matchId: match._id },
+        },
       ]);
 
       const io = req.app.get("socketio");
@@ -185,13 +222,13 @@ export const contactMatch = async (req, res, next) => {
         const user1Notification = await ContactRequestModel.findOne({
           user1: user1Id,
           user2: user2Id,
-          type: "match_found"
+          type: "match_found",
         }).populate("user1", "username nickname avatar");
 
         const user2Notification = await ContactRequestModel.findOne({
           user1: user2Id,
           user2: user1Id,
-          type: "match_found"
+          type: "match_found",
         }).populate("user1", "username nickname avatar");
 
         io.to(`user:${user2Id}`).emit("newNotification", {
@@ -213,14 +250,19 @@ export const contactMatch = async (req, res, next) => {
           isRead: false,
         });
 
-        io.to(`user:${user1Id}`).emit("notificationCountUpdate", user1UnreadCount);
-        io.to(`user:${user2Id}`).emit("notificationCountUpdate", user2UnreadCount);
+        io.to(`user:${user1Id}`).emit(
+          "notificationCountUpdate",
+          user1UnreadCount
+        );
+        io.to(`user:${user2Id}`).emit(
+          "notificationCountUpdate",
+          user2UnreadCount
+        );
       }
     }
     await match.save();
 
     const isCurrentUserUser1 = match.user1.toString() === userId.toString();
-    const otherUserId = isCurrentUserUser1 ? match.user2 : match.user1;
     const otherUser = await UserModel.findById(otherUserId).select(
       "username nickname"
     );

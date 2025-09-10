@@ -1,5 +1,6 @@
 import ContactRequestModel from "../models/contactrequest.js";
 import UserModel from "../models/user.js";
+import MatchModel from "../models/match.js";
 
 export const sendFriendRequest = async (req, res, next) => {
   try {
@@ -133,6 +134,20 @@ export const acceptFriendRequest = async (req, res, next) => {
     await UserModel.findByIdAndUpdate(contactRequest.user2._id, {
       $addToSet: { contacts: contactRequest.user1._id },
     });
+
+    // Update match status if a match exists between these users
+    await MatchModel.findOneAndUpdate(
+      {
+        $or: [
+          { user1: contactRequest.user1._id, user2: contactRequest.user2._id },
+          { user1: contactRequest.user2._id, user2: contactRequest.user1._id }
+        ]
+      },
+      { 
+        status: "connected",
+        connectedAt: new Date()
+      }
+    );
 
     const acceptNotification = new ContactRequestModel({
       user1: userId,
@@ -475,6 +490,22 @@ export const removeFriend = async (req, res, next) => {
     await UserModel.findByIdAndUpdate(friendId, {
       $pull: { contacts: userId },
     });
+
+    // Update match status back to pending if a match exists between these users
+    await MatchModel.findOneAndUpdate(
+      {
+        $or: [
+          { user1: userId, user2: friendId },
+          { user1: friendId, user2: userId }
+        ],
+        status: "connected"
+      },
+      { 
+        status: "pending",
+        $unset: { connectedAt: 1 },
+        contactedBy: []
+      }
+    );
 
     await ContactRequestModel.findOneAndUpdate(
       {
