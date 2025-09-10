@@ -1,4 +1,3 @@
-
 import styles from "./about.module.css";
 
 const About = () => {
@@ -8,15 +7,22 @@ const About = () => {
         <h1 className={styles.aboutTitle}>About HelloDev</h1>
         <div className={styles.aboutText}>
           <p>
-            HelloDev is the final project of our one-year web development course at DCI Digital Carere Institute. It is a full-stack project for which we wrote the front-end and back-end ourselves.
+            HelloDev is the capstone project of our one-year Web Development course at the DCI (September 2024 – September 2025). It’s a full-stack application; we built both the front end and back end ourselves.
+          </p>
+          <p>
+            Who are we? We are Sarah, Ben, and Calle. Find us on GitHub:
+            {" "}
+            <a href="https://github.com/SarahDomscheit" target="_blank" rel="noopener noreferrer">Sarah</a>,
+            <a href="https://github.com/benNurtjipta" target="_blank" rel="noopener noreferrer">Ben</a>,
+            <a href="https://github.com/cmgoersch" target="_blank" rel="noopener noreferrer">Calle</a>.
             
+            The project lives in our course organization{" "}
+            <a href="https://github.com/Merge-Pray" target="_blank" rel="noopener noreferrer">Merge &amp; Pray</a>
+            {" "}— repository:{" "}
+            <a href="https://github.com/Merge-Pray/HelloDev" target="_blank" rel="noopener noreferrer">HelloDev</a>.
           </p>
           <p>
-            Who are we?
-We are Sarah, Ben and Calle. You can find us on GitHub as:
-          </p>
-          <p>
-            The project was mainly developed between 11 August and 21 September 2025, although we plan to continue working on it. A practice environment has been created, and although we welcome guests to our platform, it is not intended for actual operation. 
+            Primary development took place between 11 August and 21 September 2025, and we plan to keep iterating. This is a practice environment—guests are welcome to explore, but it’s not intended for production use.
           </p>
         </div>
       </div>

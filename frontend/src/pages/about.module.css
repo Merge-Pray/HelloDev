@@ -1,3 +1,16 @@
+.aboutContent a {
+  color: var(--color-primary);
+  text-decoration: none;
+  font-weight: 600;
+  border-radius: 6px;
+  padding: 2px 6px;
+  transition: background 0.15s, color 0.15s;
+}
+.aboutContent a:hover {
+  background: var(--color-bg-hover);
+  color: var(--color-primary-dark, #2563eb);
+  text-decoration: underline;
+}
 .aboutPage {
   min-height: 100vh;
   background: var(--color-bg);
