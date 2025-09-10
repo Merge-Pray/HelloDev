@@ -107,6 +107,11 @@ export default function LandingPage() {
           </button>
         </div>
       </div>
+
+      {/* Footer unterhalb von left und right im Grid */}
+      <div className={styles.footer}>
+        <p>Hallo</p>
+      </div>
     </div>
   );
 }
