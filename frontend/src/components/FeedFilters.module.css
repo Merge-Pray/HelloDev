@@ -8,7 +8,6 @@
   background: var(--color-input-bg);
 }
 
-
 .btn {
   display: flex;
   align-items: center;
@@ -33,8 +32,10 @@
 
 /* Aktiver Button */
 .active {
-  background: var(  --color-text-secondary);
+  background: var(--color-bg-gradient);
   color: var(--color-primary-hover-invert);
+  border-color: var(--color-primary);
+  box-shadow: 0 4px 10px var(--color-card-shadow);
 }
 
 /* Icon + Label */
