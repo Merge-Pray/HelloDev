@@ -8,6 +8,7 @@ import {
 } from "lucide-react";
 import DarkMode from "../components/DarkMode";
 import styles from "./settings.module.css";
+import { Link } from "react-router";
 import useUserStore from "../hooks/userstore";
 import { useNavigate } from "react-router";
 import { authenticatedFetch } from "../utils/authenticatedFetch";
@@ -64,9 +65,13 @@ const Settings = () => {
           </div>
         )}
 
+
         <div className={styles.settingsHeader}>
           <h1 className="title">Settings</h1>
         </div>
+
+       
+   
 
         <div className={styles.settingsContent}>
           <div className="card enhanced">
@@ -103,6 +108,18 @@ const Settings = () => {
                 </button>
               </div>
             </div>
+          </div>
+        </div>
+
+             <div className={styles.legalLinksBox}>
+          <div className={styles.legalLinksHeader}>
+            <span className={styles.legalLinksTitle}>Legal information</span>
+          </div>
+          <div className={styles.legalLinksLinks}>
+            <Link className={styles.legalLink} to="/about">About HelloDev</Link>
+            <Link className={styles.legalLink} to="/legal/dataprivacy">Datenschutz</Link>
+            <Link className={styles.legalLink} to="/legal/generaltermsandconditions">AGB</Link>
+            <Link className={styles.legalLink} to="/legal/legalnotice">Impressum</Link>
           </div>
         </div>
 
