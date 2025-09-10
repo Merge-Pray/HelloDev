@@ -1,10 +1,24 @@
+.legalLink {
+  color: var(--color-text-secondary);
+  text-decoration: none;
+  font-size: 0.9rem;
+  padding: 0.5rem 1rem;
+  border-radius: 999px;
+  /* transition: background 0.2s, color 0.2s; */
+  margin: 0 0.25rem;
+  /* display: inline-block; */
+}
+
+.legalLink:hover {
+  text-decoration: underline;
+}
 /* Footer unter dem Content */
 .footer {
   width: 100%;
   display: flex;
   justify-content: center;
   align-items: center;
-  margin-top: 48px;
+  margin-top: 0px;
   margin-bottom: 16px;
 }
 
