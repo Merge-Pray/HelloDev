@@ -9,6 +9,7 @@ import {
   generateAndUploadRandomAvatar,
 } from "../utils/imagePixelizer.js";
 import { v2 as cloudinary } from "cloudinary";
+import { runMatchingForAllUsers } from "../libs/matchingAlgorithm.js";
 
 cloudinary.config({
   cloud_name: process.env.CLOUDINARY_CLOUD_NAME,
@@ -642,6 +643,13 @@ export const updateUserProfile = async (req, res, next) => {
         success: false,
         message: "User not found",
       });
+    }
+
+    const isNowMatchable = checkIsMatchable(updatedUser);
+    if (isNowMatchable !== updatedUser.isMatchable) {
+      updatedUser.isMatchable = isNowMatchable;
+      runMatchingForAllUsers();
+      await updatedUser.save();
     }
 
     const cleanUserData = {
