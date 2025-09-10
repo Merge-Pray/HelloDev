@@ -1,6 +1,7 @@
 
 import { useNavigate } from "react-router";
 import React from "react";
+import useUserStore from "../hooks/userstore";
 import styles from "./notfound.module.css";
 import logoColor from "/public/logo/HelloDev_Logo_Color.svg";
 import logoWhite from "/public/logo/HelloDev_Logo_White.svg";
@@ -9,6 +10,15 @@ import DarkMode from "../components/DarkMode";
 
 const NotFound = () => {
   const navigate = useNavigate();
+  const currentUser = useUserStore((state) => state.currentUser);
+
+  const handleGoBack = () => {
+    if (currentUser) {
+      navigate("/home");
+    } else {
+      navigate("/");
+    }
+  };
   return (
     <div className={styles.wrapper}>
       <div className={styles.logo}>
@@ -30,8 +40,10 @@ const NotFound = () => {
       <div className={styles.text}>You had one job, router!</div>
       <button
         className={styles.button}
-        onClick={() => navigate("/home")}
-      >Back to a functioning environment</button>
+        onClick={handleGoBack}
+      >
+        {currentUser ? "Back to Home" : "Back to HelloDev"}
+      </button>
     </div>
   );
 };
