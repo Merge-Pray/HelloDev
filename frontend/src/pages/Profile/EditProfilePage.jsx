@@ -225,6 +225,57 @@ const EditProfilePage = () => {
           processedData.username || profileData?.username || "";
       }
 
+      [
+        "techArea",
+        "programmingLanguages",
+        "techStack",
+        "languages",
+        "otherInterests",
+        "personalWebsites",
+      ].forEach((field) => {
+        if (!processedData[field] || !Array.isArray(processedData[field])) {
+          processedData[field] = [];
+        }
+      });
+
+      [
+        "country",
+        "city",
+        "status",
+        "devExperience",
+        "preferredOS",
+        "aboutMe",
+        "favoriteTimeToCode",
+        "favoriteLineOfCode",
+        "favoriteDrinkWhileCoding",
+        "musicGenreWhileCoding",
+        "favoriteShowMovie",
+        "linkedinProfile",
+        "githubProfile",
+        "gaming",
+      ].forEach((field) => {
+        if (
+          processedData[field] === undefined ||
+          processedData[field] === null
+        ) {
+          processedData[field] = "";
+        }
+      });
+
+      if (processedData.profileLinksVisibleToContacts === undefined) {
+        processedData.profileLinksVisibleToContacts = false;
+      }
+
+      if (
+        processedData.age === undefined ||
+        processedData.age === null ||
+        processedData.age === ""
+      ) {
+        processedData.age = null;
+      }
+
+      console.log("📤 Processed data being sent:", processedData);
+
       await updateProfile.mutateAsync(processedData);
       setSuccess("Profile updated successfully!");
 
@@ -250,7 +301,22 @@ const EditProfilePage = () => {
       }, 1000);
     } catch (error) {
       console.error("Error saving profile:", error);
-      setError(error.message || "Failed to save changes. Please try again.");
+
+      let errorMessage = "Failed to save changes. Please try again.";
+
+      if (error.message) {
+        if (error.message.includes("Validation failed")) {
+          errorMessage =
+            "Some required fields are missing or invalid. Please check your input and try again.";
+        } else if (error.message.includes("duplicate")) {
+          errorMessage =
+            "Username or email already exists. Please choose different values.";
+        } else {
+          errorMessage = error.message;
+        }
+      }
+
+      setError(errorMessage);
     }
   };
 
