@@ -144,14 +144,14 @@ export default function PostActions({
         </button>
 
         {/* Share */}
-        <button
+        {/* <button
           type="button"
           onClick={handleShare}
           className={[styles.actionBtn, styles.share].join(" ")}
           aria-label="Copy post link"
         >
           <Share2 size={20} className={styles.icon} />
-        </button>
+        </button> */}
       </div>
 
       {showRepostModal && (
