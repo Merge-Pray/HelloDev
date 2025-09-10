@@ -176,7 +176,7 @@ export default function BuildProfile() {
     }
 
     setSelectedCount(0);
-  }, [currentStep, reset, setValue, profileData, currentStepData, fieldName]);
+  }, [currentStep, reset, setValue, currentStepData, fieldName]);
 
   const handleNext = useCallback(
     async (data) => {
