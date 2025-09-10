@@ -117,9 +117,9 @@ const Settings = () => {
           </div>
           <div className={styles.legalLinksLinks}>
             <Link className={styles.legalLink} to="/about">About HelloDev</Link>
-            <Link className={styles.legalLink} to="/legal/dataprivacy">Datenschutz</Link>
-            <Link className={styles.legalLink} to="/legal/generaltermsandconditions">AGB</Link>
-            <Link className={styles.legalLink} to="/legal/legalnotice">Impressum</Link>
+            <Link className={styles.legalLink} to="/legal/dataprivacy">Datenschutz (Privacy Policy)</Link>
+            <Link className={styles.legalLink} to="/legal/generaltermsandconditions">AGB (Terms & Conditions)</Link>
+            <Link className={styles.legalLink} to="/legal/legalnotice">Impressum (Legal Notice)</Link>
           </div>
         </div>
 
