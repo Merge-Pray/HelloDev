@@ -5,6 +5,7 @@ import styles from "./landingpage.module.css";
 import DarkMode from "../../components/DarkMode";
 import GoogleAuthButton from "../../components/GoogleAuthButton";
 import GitHubAuthButton from "../../components/GitHubAuthButton";
+import { Link } from "react-router";
 
 export default function LandingPage() {
   const navigate = useNavigate();
@@ -106,6 +107,18 @@ export default function LandingPage() {
             Log in
           </button>
         </div>
+      </div>
+
+      {/* Footer unterhalb von left und right im Grid */}
+      <div className={styles.footer}>
+         <Link className={styles.legalLink} to="/about">About HelloDev</Link>
+        
+                    <Link className={styles.legalLink} to="/generaltermsandconditions">Datenschutz (Privacy Policy)</Link>
+        
+                    <Link className={styles.legalLink} to="/gtc">AGB (Terms & Conditions)</Link>
+                    
+                    <Link className={styles.legalLink} to="/legalnotice">Impressum (Legal Notice)</Link>
+         
       </div>
     </div>
   );

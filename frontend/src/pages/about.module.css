@@ -1,3 +1,18 @@
+.aboutBackBtn {
+  background: var(--color-primary);
+  color: #fff;
+  border: none;
+  border-radius: 999px;
+  padding: 0.5rem 1.5rem;
+  font-size: 1rem;
+  font-weight: bold;
+  cursor: pointer;
+  margin-top: 32px;
+  transition: background 0.2s;
+}
+.aboutBackBtn:hover {
+  background: var(--color-primary-hover);
+}
 .aboutContent a {
   color: var(--color-primary);
   text-decoration: none;
