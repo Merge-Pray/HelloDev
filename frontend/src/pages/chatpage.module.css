@@ -520,24 +520,24 @@
 }
 
 .friendshipBanner {
-  background: #fef3c7;
-  border: 1px solid #f59e0b;
+  background: var(--color-bg-secondary);
+  border: 1px solid var(--color-border);
+  border-left: 3px solid #ef4444;
   border-radius: 8px;
   padding: 12px 16px;
-  margin: 16px;
-  margin-bottom: 0;
+  margin: 16px 0;
 }
 
 .bannerContent {
   display: flex;
   align-items: center;
   gap: 12px;
-  color: #92400e;
+  color: var(--color-text);
 }
 
 .addFriendBtn {
-  background: #f59e0b;
-  color: white;
+  background: var(--color-primary);
+  color: var(--color-primary-text, white);
   border: none;
   border-radius: 6px;
   padding: 6px 12px;
@@ -547,21 +547,22 @@
   cursor: pointer;
   font-size: 14px;
   margin-left: auto;
+  transition: background-color 0.2s ease;
 }
 
 .addFriendBtn:hover {
-  background: #d97706;
+  background: var(--color-primary-hover);
 }
 
 .errorBanner {
-  background: #fee2e2;
-  border: 1px solid #ef4444;
+  background: var(--color-bg-secondary);
+  border: 1px solid var(--color-border);
+  border-left: 3px solid var(--color-error, #ef4444);
   border-radius: 8px;
   padding: 12px 16px;
-  margin: 16px;
-  margin-bottom: 0;
+  margin: 16px 0;
   display: flex;
   align-items: center;
   gap: 8px;
-  color: #dc2626;
+  color: var(--color-text);
 }
