@@ -10,6 +10,17 @@ import { authenticatedFetch } from "../utils/authenticatedFetch";
 import styles from "./NewsfeedContainer.module.css";
 
 export default function NewsfeedContainer() {
+  const [isMobile, setIsMobile] = useState(window.innerWidth <= 600);
+  const [showFeedControls, setShowFeedControls] = useState(false);
+  const [filtersOpen, setFiltersOpen] = useState(false);
+
+  useEffect(() => {
+    const handleResize = () => {
+      setIsMobile(window.innerWidth <= 600);
+    };
+    window.addEventListener("resize", handleResize);
+    return () => window.removeEventListener("resize", handleResize);
+  }, []);
   const [posts, setPosts] = useState([]);
   const [feedType, setFeedType] = useState("all");
   const [algorithm, setAlgorithm] = useState("chronological");
@@ -71,7 +82,23 @@ export default function NewsfeedContainer() {
   const handleSearch = (query) => {
     setSearchQuery(query);
     setIsSearchActive(!!query.trim());
+    setShowFeedControls(false); // Filter nach Suche ausblenden
+    setFiltersOpen(false); // Filter nach Suche ausblenden
   };
+  // Callback für SearchBar: Feed Controls beim Fokussieren/Eingabe anzeigen
+  const handleSearchFocus = () => {
+    setShowFeedControls(true);
+  };
+  const handleSearchBlur = () => {
+    if (!searchQuery.trim()) setShowFeedControls(false);
+  };
+  useEffect(() => {
+    if (searchQuery.trim()) {
+      setShowFeedControls(true);
+    } else {
+      setShowFeedControls(false);
+    }
+  }, [searchQuery]);
 
   const handleClearSearch = () => {
     setSearchQuery("");
@@ -149,10 +176,15 @@ export default function NewsfeedContainer() {
         onClear={handleClearSearch}
         isActive={isSearchActive}
         query={searchQuery}
+        onFocus={handleSearchFocus}
+        onBlur={handleSearchBlur}
+        onFilterClick={() => setFiltersOpen((prev) => !prev)}
+        filtersOpen={filtersOpen}
       />
 
-      {/* Feed Controls - Hide during search */}
-      {!isSearchActive && (
+
+      {/* Feed Controls: Immer wenn Filter offen, auch nach Suche */}
+      {filtersOpen && (
         <div className={styles.feedControls}>
           <FeedToggle
             feedType={feedType}

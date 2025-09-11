@@ -1,3 +1,8 @@
+@media (max-width: 768px) {
+  .legalLinksBox {
+    max-width: 100%;
+  }
+}
 .legalLinksBox,
 .settingsSection,
 .errorAlert {
@@ -82,6 +87,20 @@
   flex-direction: row;
   gap: 32px;
   margin-top: 16px;
+}
+
+@media (max-width: 600px) {
+  .legalLinksLinks {
+    flex-wrap: wrap;
+    justify-content: center;
+    gap: 16px;
+    text-align: center;
+  }
+  .legalLink {
+    min-width: 120px;
+    width: 100%;
+    box-sizing: border-box;
+  }
 }
 .legalLinksTitle {
   font-size: 1.25rem;
