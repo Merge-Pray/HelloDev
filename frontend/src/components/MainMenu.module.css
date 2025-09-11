@@ -174,6 +174,51 @@
   z-index: 10;
 }
 
+/* ✅ NEUE: Lucide Icon Styling */
+.lucideIcon {
+  transition: all 0.2s ease;
+}
+
+/* Desktop Lucide Icons */
+:root[data-theme="light"] .lucideIcon {
+  color: var(--color-text);
+}
+
+:root[data-theme="dark"] .lucideIcon {
+  color: var(--color-text);
+}
+
+.link:hover .lucideIcon,
+.active .lucideIcon {
+  color: var(--color-primary-hover-invert);
+}
+
+/* Burger Menu Lucide Icons */
+.burgerLink .lucideIcon {
+  color: var(--color-text);
+}
+
+.burgerLink:hover .lucideIcon,
+.burgerLink.active .lucideIcon {
+  color: var(--color-primary-hover-invert);
+}
+
+/* Mobile Bottom Nav Lucide Icons */
+@media (max-width: 768px) {
+  :root[data-theme="dark"] .bottomNavLink .lucideIcon {
+    color: var(--color-text);
+  }
+
+  :root[data-theme="light"] .bottomNavLink .lucideIcon {
+    color: var(--color-text);
+  }
+
+  .bottomNavLink:hover .lucideIcon,
+  .bottomNavLink.active .lucideIcon {
+    color: var(--color-primary);
+  }
+}
+
 /* ═══════════ MOBILE COMPONENTS ═══════════ */
 
 /* Mobile Top Bar */
@@ -412,12 +457,11 @@
     filter: none;
   }
 
-:root[data-theme="light"] .active .icon {
-  filter: none !important;
-  color: #fff !important;
-  fill: #fff !important;
-}
-  
+  :root[data-theme="light"] .active .icon {
+    filter: none !important;
+    color: #fff !important;
+    fill: #fff !important;
+  }
 
   :root[data-theme="dark"] .bottomNavLink .icon {
     filter: invert(1) brightness(100%);
@@ -444,10 +488,37 @@
   }
 }
 
-:root[data-theme="light"] .active .icon,
-:root[data-theme="light"] .link:hover .icon {
-  filter: invert(1) brightness(2) !important;
+/* ───────── Icons ───────── */
+.icon {
+  width: 25px;
+  height: 25px;
+  transition: filter 0.2s ease;
 }
+
+:root[data-theme="light"] .icon {
+  filter: brightness(0) saturate(100%);
+}
+
+:root[data-theme="dark"] .icon {
+  filter: invert(1) brightness(100%);
+}
+
+.link:hover .icon {
+  filter: brightness(0) invert(1);
+}
+
+.active .icon {
+  filter: brightness(0) invert(1);
+}
+
+/* Desktop/Tablet specific light mode active icons */
+@media (min-width: 769px) {
+  :root[data-theme="light"] .active .icon,
+  :root[data-theme="light"] .link:hover .icon {
+    filter: invert(1) brightness(2) !important;
+  }
+}
+
 /* ───────── Responsive Desktop/Tablet ───────── */
 @media (max-width: 1200px) and (min-width: 769px) {
   .brand {
