@@ -21,6 +21,7 @@ import { authenticatedFetch } from "../utils/authenticatedFetch";
 import styles from "./matchpage.module.css";
 import PopUpMatch from "../components/PopUpMatch";
 import PopUpContact from "../components/PopUpContact";
+import { useProfile } from "../hooks/useProfile";
 
 const MatchPage = () => {
   const currentUser = useUserStore((state) => state.currentUser);
@@ -36,6 +37,11 @@ const MatchPage = () => {
   const [connectedMatchData, setConnectedMatchData] = useState(null);
   const [showContactPopup, setShowContactPopup] = useState(false);
   const [contactedUserData, setContactedUserData] = useState(null);
+  const {
+    data: profileData,
+
+    error: profileError,
+  } = useProfile();
 
   useEffect(() => {
     fetchMatches();
@@ -270,7 +276,7 @@ const MatchPage = () => {
     );
   }
 
-  if (pendingMatches.length === 0) {
+  if (pendingMatches.length === 0 && profileData?.isMatchable) {
     return (
       <div className="page centered">
         <div className="card enhanced">
@@ -294,6 +300,31 @@ const MatchPage = () => {
               style={{ marginTop: "20px" }}
             >
               Back to Home
+            </button>
+          </div>
+        </div>
+      </div>
+    );
+  } else if (pendingMatches.length === 0 && !profileData?.isMatchable) {
+    return (
+      <div className="page centered">
+        <div className="card enhanced">
+          <div style={{ textAlign: "center", padding: "40px" }}>
+            <Heart
+              size={48}
+              style={{
+                color: "var(--color-primary, #667eea)",
+                marginBottom: "20px",
+              }}
+            />
+            <h1 className="title">No Matches</h1>
+            <p className="subtitle">You are not matchable</p>
+            <button
+              className="btn btn-primary"
+              onClick={() => navigate("/editprofile")}
+              style={{ marginTop: "20px" }}
+            >
+              Continue Setup
             </button>
           </div>
         </div>

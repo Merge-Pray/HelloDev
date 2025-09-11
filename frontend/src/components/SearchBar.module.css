@@ -10,9 +10,10 @@
 .form {
   display: grid;
   grid-template-columns: 1fr auto auto; 
-  /* gap: 8px; */
   align-items: center;
   padding-top: 5px;
+  gap: 12px;
+  padding-top: 8px;
 }
 
 /* Aktiver Zustand (wenn isActive=true) → leicht betonen */
@@ -53,9 +54,12 @@
   display: inline-flex;
   align-items: center;
   justify-content: center;
-  gap: 8px;
   height: 35px;
   padding: 0 10px;
+  margin-left: 0;
+  margin-right: 0;
+  gap: 8px;
+  padding: 0 14px;
 
   font-size: 14px;
   font-weight: 600;
@@ -71,26 +75,14 @@
   color: #fff;
 }
 .searchButton:hover {
-  transform: translateY(-1px);
-  background: linear-gradient(
-    135deg,
-    var(--color-primary-hover) 0%,
-    var(--color-accent) 100%
-  );
+ 
+    /* border: 1px solid var(--color-input-border); */
+    /* background: var(--color-input-bg);
+    color: var(--color-text-secondary); */
+    cursor: pointer;
+    box-shadow: none;
 }
 
-/* Clear-Button (sekundär) */
-.clearButton {
-  background: var(--color-input-bg);
-  color: var(--color-text);
-  border-color: var(--color-card-border);
-}
-.clearButton:hover {
-  background: var(--color-bg-secondary);
-  border-color: var(--color-primary);
-}
-
-/* Deaktiviert */
 .button:disabled {
   opacity: 0.6;
   cursor: not-allowed;
@@ -113,6 +105,15 @@
   white-space: nowrap; border: 0;
 }
 
+/* Feed Controls standardmäßig ausblenden */
+.feedControls {
+  display: none;
+}
+/* Sichtbar, wenn das Input nicht im Placeholder-Zustand ist (= hat Inhalt) */
+.wrapper:has(.input:not(:placeholder-shown)) .feedControls {
+  display: flex;
+}
+
 /* Responsiv: auf schmalen Screens Buttons kompakter untereinander */
 @media (max-width: 480px) {
   .form {
@@ -128,4 +129,37 @@
     width: 100%;
     max-width: 100vw;
   }
+}
+
+/* Filter-Button nur Icon, grau, aktiv dunkler */
+.filterToggleBtn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  border: 1px solid var(--color-input-border);
+  background: var(--color-input-bg);
+  color: var(--color-text-secondary);
+  border-radius: 8px;
+  padding: 0;
+  width: 35px;
+  height: 35px;
+  font-size: 16px;
+  cursor: pointer;
+  transition: background 0.2s, border-color 0.2s, color 0.2s;
+  box-shadow: none;
+  margin-left: 12px;
+  margin-right: 0;
+}
+.filterToggleBtn:hover {
+  background: var(--color-bg-secondary);
+  color: var(--color-text);
+  border-color: var(--color-primary);
+}
+.filterIcon {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 18px;
+  height: 18px;
+  color: inherit;
 }

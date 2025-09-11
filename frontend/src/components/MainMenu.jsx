@@ -4,6 +4,7 @@ import DarkMode from "./DarkMode";
 import { useUnreadCount } from "../hooks/useUnreadCount";
 import { useNotificationCount } from "../hooks/useNotificationCount";
 import { useState } from "react";
+import { Users } from "lucide-react";
 
 const topItems = [
   { to: "/home", icon: "/icons/home.svg", label: "Home" },
@@ -140,7 +141,9 @@ export default function MainMenu() {
                         <img src={item.icon} alt="" className={styles.icon} />
                         {item.hasUnreadBadge && getBadgeCount(item) > 0 && (
                           <span className={styles.unreadBadge}>
-                            {getBadgeCount(item) > 99 ? "99+" : getBadgeCount(item)}
+                            {getBadgeCount(item) > 99
+                              ? "99+"
+                              : getBadgeCount(item)}
                           </span>
                         )}
                       </div>
@@ -160,7 +163,9 @@ export default function MainMenu() {
                         <img src={item.icon} alt="" className={styles.icon} />
                         {item.hasUnreadBadge && getBadgeCount(item) > 0 && (
                           <span className={styles.unreadBadge}>
-                            {getBadgeCount(item) > 99 ? "99+" : getBadgeCount(item)}
+                            {getBadgeCount(item) > 99
+                              ? "99+"
+                              : getBadgeCount(item)}
                           </span>
                         )}
                       </div>
@@ -169,6 +174,21 @@ export default function MainMenu() {
                   )}
                 </li>
               ))}
+
+              <li>
+                <NavLink
+                  to="/contacts"
+                  onClick={closeBurger}
+                  className={({ isActive }) =>
+                    [styles.burgerLink, isActive ? styles.active : ""].join(" ")
+                  }
+                >
+                  <div className={styles.iconContainer}>
+                    <Users size={28} className={styles.lucideIcon} />
+                  </div>
+                  <span className={styles.label}>Contacts</span>
+                </NavLink>
+              </li>
             </ul>
 
             <div className={styles.burgerDivider}></div>
@@ -276,7 +296,6 @@ export default function MainMenu() {
         </ul>
       </nav>
 
-      {/* Mobile Bottom Navigation */}
       <nav className={styles.bottomNav} aria-label="Main">
         <ul className={styles.bottomNavList}>
           {topItems.map((item) => (
@@ -321,6 +340,20 @@ export default function MainMenu() {
               )}
             </li>
           ))}
+
+          <li>
+            <NavLink
+              to="/contacts"
+              className={({ isActive }) =>
+                [styles.bottomNavLink, isActive ? styles.active : ""].join(" ")
+              }
+            >
+              <div className={styles.iconContainer}>
+                <Users size={22} className={styles.lucideIcon} />
+              </div>
+              <span className={styles.label}>Contacts</span>
+            </NavLink>
+          </li>
         </ul>
       </nav>
     </>

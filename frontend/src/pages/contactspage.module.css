@@ -1,0 +1,80 @@
+.contactsPage {
+  min-height: 100vh;
+  background: var(--color-bg);
+  padding: 20px;
+}
+
+.contactsContainer {
+  max-width: 600px;
+  margin: 0 auto;
+  background: var(--color-card-bg);
+  border-radius: 16px;
+  box-shadow: 0 6px 20px var(--color-card-shadow);
+  overflow: hidden;
+}
+
+.contactsHeader {
+  padding: 24px 24px 16px 24px;
+  border-bottom: 1px solid var(--color-border);
+  background: var(--color-card-bg);
+}
+
+.contactsHeader h1 {
+  margin: 0 0 8px 0;
+  font-size: 1.8rem;
+  font-weight: 700;
+  color: var(--color-text);
+}
+
+.contactsHeader p {
+  margin: 0;
+  color: var(--color-text-secondary);
+  font-size: 0.95rem;
+}
+
+.contactsContent {
+  padding: 0;
+}
+
+/* Mobile Anpassungen */
+@media (max-width: 768px) {
+  .contactsPage {
+    padding: 16px;
+    padding-bottom: 90px; /* Platz für Bottom Navigation */
+  }
+
+  .contactsContainer {
+    max-width: 100%;
+    border-radius: 12px;
+  }
+
+  .contactsHeader {
+    padding: 20px 16px 12px 16px;
+  }
+
+  .contactsHeader h1 {
+    font-size: 1.5rem;
+  }
+
+  .contactsHeader p {
+    font-size: 0.9rem;
+  }
+}
+
+@media (max-width: 480px) {
+  .contactsPage {
+    padding: 12px;
+  }
+
+  .contactsContainer {
+    border-radius: 8px;
+  }
+
+  .contactsHeader {
+    padding: 16px 12px 8px 12px;
+  }
+
+  .contactsHeader h1 {
+    font-size: 1.3rem;
+  }
+}

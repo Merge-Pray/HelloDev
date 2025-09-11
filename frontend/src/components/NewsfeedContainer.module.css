@@ -4,7 +4,6 @@
   color: var(--color-text);
   border-bottom: 1px solid var(--color-card-border);
   padding: 16px;
-  /* box-shadow: 0 6px 24px var(--color-card-shadow); */
   display: grid;
   gap: 16px;
 }
@@ -12,14 +11,11 @@
 /* Top: Suche / Controls */
 .feedControls {
   display: grid;
-  grid-template-columns: 1fr; /* eine Spalte */
-  gap: 12px;                  /* Abstand zwischen Toggle und Filters */
-  align-items: stretch;       /* lässt die Kinder (optional) volle Breite nehmen */
-}
-
-/* die Mobile-Regel kannst du dann entfernen */
-@media (max-width: 720px) {
-  .feedControls { /* kann weg */ }
+  grid-template-columns: 1fr;
+  gap: 2px;
+  align-items: stretch;
+  padding-left: 10px;
+  padding-right: 10px;
 }
 
 /* Sektionen / Trenner */
@@ -43,6 +39,31 @@
   border: 1px solid var(--color-input-border);
   padding: 10px 12px;
   border-radius: 12px;
+}
+
+/* Filter-Button mobil */
+.filterToggleBtn {
+  appearance: none;
+  border: 1px solid var(--color-input-border);
+  background: var(--color-input-bg);
+  color: var(--color-text-secondary);
+  border-radius: 8px;
+  padding: 10px 0;
+  font-size: 0.98rem;
+  font-weight: 500;
+  cursor: pointer;
+  width: 100%;
+  transition: background 0.2s, border-color 0.2s, color 0.2s;
+  box-shadow: none;
+  margin-bottom: 8px;
+
+}
+
+
+.filterToggleBtn:hover {
+  background: var(--color-bg-secondary);
+  color: var(--color-text);
+  border-color: var(--color-primary);
 }
 .searchResultsHeader h3 {
   margin: 0;
