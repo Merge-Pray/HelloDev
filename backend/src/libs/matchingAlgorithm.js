@@ -42,12 +42,12 @@ export function calculatePersonalScore(user1, user2) {
 
   const interestsScore = calculatePersonalInterestsScore(user1, user2);
   if (interestsScore !== null) {
-    scores.push({ score: interestsScore, weight: 0.4 }); 
+    scores.push({ score: interestsScore, weight: 0.4 });
   }
 
   const timeScore = calculateCodingTimeCompatibility(user1, user2);
   if (timeScore !== null) {
-    scores.push({ score: timeScore, weight: 0.3 }); 
+    scores.push({ score: timeScore, weight: 0.3 });
   }
 
   const locationScore = calculateLocationCompatibility(user1, user2);
@@ -55,10 +55,9 @@ export function calculatePersonalScore(user1, user2) {
     scores.push({ score: locationScore, weight: 0.15 });
   }
 
-  
   const languageScore = calculateSpokenLanguageScore(user1, user2);
   if (languageScore > 0) {
-    scores.push({ score: languageScore, weight: 0.15 }); 
+    scores.push({ score: languageScore, weight: 0.15 });
   }
 
   if (scores.length === 0) {
@@ -548,6 +547,7 @@ export function calculateCompatibility(user1, user2) {
 export async function runMatchingForAllUsers() {
   try {
     console.log("🔄 Starting matching algorithm...");
+    const startTime = Date.now();
 
     const users = await UserModel.find({}).lean();
     console.log(`Found ${users.length} users to match`);
@@ -596,9 +596,15 @@ export async function runMatchingForAllUsers() {
       }
     }
 
+    const endTime = Date.now();
+    const executionTime = endTime - startTime;
+    const executionTimeSeconds = (executionTime / 1000).toFixed(2);
+
+    console.log(`⏱️ Algorithm completed in ${executionTimeSeconds}s`);
     console.log(
       `✅ Matching complete! Created: ${matchesCreated}, Updated: ${matchesUpdated}`
     );
+
     return { matchesCreated, matchesUpdated };
   } catch (error) {
     console.error("❌ Error in matching algorithm:", error);
@@ -645,7 +651,6 @@ export async function getMatchesForUser(userId, limit = 10) {
   }
 }
 
-
 export function calculateSpokenLanguageScore(user1, user2) {
   if (!user1.languages?.length || !user2.languages?.length) {
     return 0;
@@ -666,10 +671,8 @@ export function calculateSpokenLanguageScore(user1, user2) {
     return 0;
   }
 
-  
   const baseScore = 60;
 
-  
   const multiLanguageBonus = Math.min(commonLanguages.size * 15, 40);
 
   return Math.min(100, baseScore + multiLanguageBonus);

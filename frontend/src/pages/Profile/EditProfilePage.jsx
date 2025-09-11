@@ -344,9 +344,12 @@ const EditProfilePage = () => {
     }
   };
 
-  // Safe calculation with fallback
+  // Safe calculation with fallback - use backend isMatchable as source of truth
   const profileStats = profileData
-    ? calculateProfileCompletion(profileData)
+    ? {
+        ...calculateProfileCompletion(profileData),
+        isMatchable: profileData.isMatchable // Override with backend value
+      }
     : {
         totalCompletion: 0,
         isMatchable: false,

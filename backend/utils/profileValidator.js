@@ -1,5 +1,6 @@
 function checkIsMatchable(user) {
   const requiredStringFields = [
+    "nickname",
     "country",
     "city",
     "status",

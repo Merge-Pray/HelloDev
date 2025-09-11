@@ -531,7 +531,10 @@ export default function ProfilePage() {
   };
 
   const renderStats = () => {
-    const profileStats = calculateProfileCompletion(profileData);
+    const profileStats = {
+      ...calculateProfileCompletion(profileData),
+      isMatchable: profileData.isMatchable // Use backend value as source of truth
+    };
 
     const stats = [
       {
@@ -815,7 +818,10 @@ export default function ProfilePage() {
 
             <div className={styles.profileStatusContainer}>
               {(() => {
-                const profileStats = calculateProfileCompletion(profileData);
+                const profileStats = {
+                  ...calculateProfileCompletion(profileData),
+                  isMatchable: profileData.isMatchable // Use backend value as source of truth
+                };
                 return (
                   <>
                     <div className={styles.completionSection}>
@@ -930,7 +936,10 @@ export default function ProfilePage() {
           {renderProfessionalLinks()}
 
           {(() => {
-            const profileStats = calculateProfileCompletion(profileData);
+            const profileStats = {
+              ...calculateProfileCompletion(profileData),
+              isMatchable: profileData.isMatchable // Use backend value as source of truth
+            };
             const stats = [
               {
                 label: "Languages",
