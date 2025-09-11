@@ -24,6 +24,7 @@ import Notifications from "../pages/Notifications";
 import GetProfilePage from "../pages/Profile/GetProfilePage";
 import AvatarEditor from "../pages/AvatarEditor/AvatarEditor";
 import GitHubCallback from "../pages/Auth/GitHubCallback";
+import ContactsPage from "../pages/ContactsPage";
 
 export const router = createBrowserRouter([
   {
@@ -163,12 +164,20 @@ export const router = createBrowserRouter([
           </ProtectedRoute>
         ),
       },
+      {
+        path: "contacts",
+        element: (
+          <ProtectedRoute>
+            <ContactsPage />
+          </ProtectedRoute>
+        ),
+      },
       { path: "legalnotice", element: <LegalNotice /> },
-      
+
       { path: "gtc", element: <GeneralTermsandConditions /> },
 
       { path: "generaltermsandconditions", element: <DataPrivacy /> },
-      
+
       { path: "about", element: <About /> },
     ],
   },
