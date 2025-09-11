@@ -248,5 +248,18 @@
     font-size: 1.1rem;
   }
 
+  .footer {
+    flex-wrap: wrap;
+    justify-content: center;
+    gap: 8px;
+    text-align: center;
+  }
+  .legalLink {
+    min-width: 120px;
+    width: 100%;
+    box-sizing: border-box;
+    margin: 0px 0;
+  }
+
 
 }
