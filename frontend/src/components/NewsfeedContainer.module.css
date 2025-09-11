@@ -13,7 +13,7 @@
 .feedControls {
   display: grid;
   grid-template-columns: 1fr; /* eine Spalte */
-  gap: 12px;                  /* Abstand zwischen Toggle und Filters */
+  gap: 6px;                   /* Abstand zwischen Toggle und Filters (verringert) */
   align-items: stretch;       /* lässt die Kinder (optional) volle Breite nehmen */
 }
 
@@ -43,6 +43,31 @@
   border: 1px solid var(--color-input-border);
   padding: 10px 12px;
   border-radius: 12px;
+}
+
+/* Filter-Button mobil */
+.filterToggleBtn {
+  appearance: none;
+  border: 1px solid var(--color-input-border);
+  background: var(--color-input-bg);
+  color: var(--color-text-secondary);
+  border-radius: 8px;
+  padding: 10px 0;
+  font-size: 0.98rem;
+  font-weight: 500;
+  cursor: pointer;
+  width: 100%;
+  transition: background 0.2s, border-color 0.2s, color 0.2s;
+  box-shadow: none;
+  margin-bottom: 8px;
+
+}
+
+
+.filterToggleBtn:hover {
+  background: var(--color-bg-secondary);
+  color: var(--color-text);
+  border-color: var(--color-primary);
 }
 .searchResultsHeader h3 {
   margin: 0;
