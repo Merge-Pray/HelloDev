@@ -1,7 +1,7 @@
 import React from "react";
 import { Users, Search, UserPlus } from "lucide-react";
 import { useNavigate } from "react-router";
-import styles from "./EmptyFriendsFeed.module.css";
+import styles from "./emptyfriendsfeed.module.css";
 
 export default function EmptyFriendsFeed({ friendsCount }) {
   const navigate = useNavigate();
