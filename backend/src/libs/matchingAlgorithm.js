@@ -152,13 +152,13 @@ function calculateDirectOverlap(interests1, interests2) {
 
   for (const interest1 of interests1) {
     for (const interest2 of interests2) {
-      const pairKey = [interest1, interest2].sort().join('|');
+      const pairKey = [interest1, interest2].sort().join("|");
       if (matchedPairs.has(pairKey)) continue;
-      
+
       const similarity = fuzzyMatch(interest1, interest2);
-      
+
       if (similarity >= 70) {
-        storeSimilarity(interest1, interest2, 'otherInterests', similarity);
+        storeSimilarity(interest1, interest2, "otherInterests", similarity);
         totalSimilarity += similarity;
         comparisons++;
         matchedPairs.add(pairKey);
@@ -251,14 +251,14 @@ export function calculateProgrammingLanguageScore(user1, user2) {
   for (const [lang1, skill1] of user1Map) {
     for (const [lang2, skill2] of user2Map) {
       const similarity = fuzzyMatch(lang1, lang2);
-      
+
       if (similarity >= 70) {
-        storeSimilarity(lang1, lang2, 'programmingLanguages', similarity);
-        
+        storeSimilarity(lang1, lang2, "programmingLanguages", similarity);
+
         const skillDiff = Math.abs(skill1 - skill2);
         const skillScore = Math.max(0, 100 - skillDiff * 10);
         const languageScore = (similarity / 100) * skillScore;
-        
+
         totalScore += languageScore;
         comparisons++;
       }
@@ -279,13 +279,13 @@ export function calculateTechStackScore(user1, user2) {
 
   for (const tech1 of user1.techStack) {
     for (const tech2 of user2.techStack) {
-      const pairKey = [tech1, tech2].sort().join('|');
+      const pairKey = [tech1, tech2].sort().join("|");
       if (matchedPairs.has(pairKey)) continue;
-      
+
       const similarity = fuzzyMatch(tech1, tech2);
-      
+
       if (similarity >= 70) {
-        storeSimilarity(tech1, tech2, 'techStack', similarity);
+        storeSimilarity(tech1, tech2, "techStack", similarity);
         totalSimilarity += similarity;
         comparisons++;
         matchedPairs.add(pairKey);
@@ -307,13 +307,13 @@ export function calculateTechAreaScore(user1, user2) {
 
   for (const area1 of user1.techArea) {
     for (const area2 of user2.techArea) {
-      const pairKey = [area1, area2].sort().join('|');
+      const pairKey = [area1, area2].sort().join("|");
       if (matchedPairs.has(pairKey)) continue;
-      
+
       const similarity = fuzzyMatch(area1, area2);
-      
+
       if (similarity >= 70) {
-        storeSimilarity(area1, area2, 'techArea', similarity);
+        storeSimilarity(area1, area2, "techArea", similarity);
         totalSimilarity += similarity;
         comparisons++;
         matchedPairs.add(pairKey);
@@ -589,9 +589,10 @@ export async function runMatchingForAllUsers() {
   try {
     console.log("🔄 Starting matching algorithm...");
     const startTime = Date.now();
-
-    const users = await UserModel.find({}).lean();
-    console.log(`Found ${users.length} users to match`);
+    const users = await UserModel.find({ isMatchable: true }).lean();
+    console.log(
+      `Found ${users.length} matchable users (filtered by isMatchable: true)`
+    );
 
     let matchesCreated = 0;
     let matchesUpdated = 0;
@@ -714,13 +715,13 @@ export function calculateSpokenLanguageScore(user1, user2) {
 
   for (const lang1 of user1.languages) {
     for (const lang2 of user2.languages) {
-      const pairKey = [lang1, lang2].sort().join('|');
+      const pairKey = [lang1, lang2].sort().join("|");
       if (matchedPairs.has(pairKey)) continue;
-      
+
       const similarity = fuzzyMatch(lang1, lang2);
-      
+
       if (similarity >= 70) {
-        storeSimilarity(lang1, lang2, 'languages', similarity);
+        storeSimilarity(lang1, lang2, "languages", similarity);
         totalSimilarity += similarity;
         comparisons++;
         matchedPairs.add(pairKey);
