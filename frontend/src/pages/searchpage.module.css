@@ -731,6 +731,10 @@
     gap: 12px;
   }
 
+  .searchBar {
+    width: 100%;
+  }
+
   .cityFilter {
     width: 100%;
     min-width: auto;
@@ -815,6 +819,10 @@
   .searchInput {
     padding: 14px 14px 14px 44px;
     font-size: 15px;
+  }
+
+  .searchBar {
+    width: 100%;
   }
 
   .searchIcon {
@@ -902,12 +910,22 @@
   .filterTabs {
     flex-wrap: wrap;
     gap: 6px;
-    padding: 8px 12px;
+    padding: 8px 10px;
   }
 
   .filterTab {
     font-size: 12px;
-    padding: 6px 12px;
+    padding: 6px 10px;
+  }
+
+  .filterIcon {
+    display: none;
+  }
+}
+
+@media (max-width: 400px) {
+  .filterTabs {
+    flex-wrap: nowrap;
   }
 }
 

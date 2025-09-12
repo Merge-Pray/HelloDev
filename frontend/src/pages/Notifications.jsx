@@ -35,7 +35,7 @@ const Notifications = () => {
 
   useEffect(() => {
     const handleClickOutside = (event) => {
-      if (!event.target.closest('.dropdownContainer')) {
+      if (!event.target.closest(".dropdownContainer")) {
         setOpenDropdown(null);
       }
     };
@@ -57,7 +57,7 @@ const Notifications = () => {
       if (response.success) {
         // Store all notifications for accurate counts
         setAllNotifications(response.notifications);
-        
+
         let filteredNotifications = response.notifications;
 
         // Apply unread filter first if selected
@@ -105,7 +105,7 @@ const Notifications = () => {
         setNotifications((prev) =>
           prev.filter((n) => n._id !== notificationId)
         );
-        
+
         setAllNotifications((prev) =>
           prev.filter((n) => n._id !== notificationId)
         );
@@ -114,7 +114,7 @@ const Notifications = () => {
         setTimeout(() => {
           refreshNotificationCount();
         }, 100);
-        
+
         setOpenDropdown(null);
       } else {
         setError("Failed to delete notification");
@@ -142,7 +142,7 @@ const Notifications = () => {
         setNotifications((prev) =>
           prev.filter((n) => n._id !== notificationId)
         );
-        
+
         // Also remove from allNotifications for accurate counts
         setAllNotifications((prev) =>
           prev.filter((n) => n._id !== notificationId)
@@ -175,7 +175,7 @@ const Notifications = () => {
         setNotifications((prev) =>
           prev.filter((n) => n._id !== notificationId)
         );
-        
+
         // Also remove from allNotifications for accurate counts
         setAllNotifications((prev) =>
           prev.filter((n) => n._id !== notificationId)
@@ -206,14 +206,14 @@ const Notifications = () => {
           notificationIds.includes(n._id) ? { ...n, isRead: true } : n
         )
       );
-      
+
       // Also update allNotifications for accurate counts
       setAllNotifications((prev) =>
         prev.map((n) =>
           notificationIds.includes(n._id) ? { ...n, isRead: true } : n
         )
       );
-      
+
       // Refresh notification count
       refreshNotificationCount();
     } catch (err) {
@@ -223,15 +223,18 @@ const Notifications = () => {
 
   const handleMarkAllAsRead = async () => {
     try {
-      await authenticatedFetch("/api/contactrequest/notifications/mark-all-read", {
-        method: "PATCH",
-      });
+      await authenticatedFetch(
+        "/api/contactrequest/notifications/mark-all-read",
+        {
+          method: "PATCH",
+        }
+      );
 
       setNotifications((prev) => prev.map((n) => ({ ...n, isRead: true })));
-      
+
       // Also update allNotifications for accurate counts
       setAllNotifications((prev) => prev.map((n) => ({ ...n, isRead: true })));
-      
+
       // Refresh notification count (should be 0 after mark all as read)
       refreshNotificationCount();
     } catch (err) {
@@ -260,7 +263,7 @@ const Notifications = () => {
       case "friend_request_declined":
         return <X size={20} className={styles.iconDeclined} />;
       case "match_found":
-        return <Heart size={20} className={styles.iconMatch} />;
+        return <Users size={20} className={styles.iconMatch} />;
       default:
         return <Users size={20} className={styles.iconDefault} />;
     }
@@ -343,7 +346,7 @@ const Notifications = () => {
     if (notification.type === "match_found") {
       return (
         <div className={styles.matchBadge}>
-          <Heart size={14} />
+          <Users size={14} />
           <span>New Match!</span>
         </div>
       );
@@ -514,12 +517,18 @@ const Notifications = () => {
                         <span className={styles.time}>
                           {formatTimeAgo(notification.createdAt)}
                         </span>
-                        <div className={`${styles.dropdownContainer} dropdownContainer`}>
-                          <button 
+                        <div
+                          className={`${styles.dropdownContainer} dropdownContainer`}
+                        >
+                          <button
                             className={styles.moreBtn}
                             onClick={(e) => {
                               e.stopPropagation();
-                              setOpenDropdown(openDropdown === notification._id ? null : notification._id);
+                              setOpenDropdown(
+                                openDropdown === notification._id
+                                  ? null
+                                  : notification._id
+                              );
                             }}
                           >
                             <MoreHorizontal size={16} />
@@ -532,10 +541,16 @@ const Notifications = () => {
                                   e.stopPropagation();
                                   handleDeleteNotification(notification._id);
                                 }}
-                                disabled={actionLoading[notification._id] === "delete"}
+                                disabled={
+                                  actionLoading[notification._id] === "delete"
+                                }
                               >
-                                {actionLoading[notification._id] === "delete" ? (
-                                  <Loader size={14} className={styles.spinner} />
+                                {actionLoading[notification._id] ===
+                                "delete" ? (
+                                  <Loader
+                                    size={14}
+                                    className={styles.spinner}
+                                  />
                                 ) : (
                                   <Trash2 size={14} />
                                 )}

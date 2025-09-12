@@ -169,11 +169,23 @@
   }
 }
 
+.titleIcon {
+  display: inline-block;
+  margin-right: 8px;
+  vertical-align: middle;
+  color: var(--color-primary);
+}
+
 .title {
-  font-size: 24px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  font-size: 1.5rem;
   font-weight: 700;
   color: var(--color-text);
-  margin: 0 0 20px;
+  margin-bottom: 16px;
+  text-align: center;
 }
 
 .userInfo {
@@ -224,10 +236,16 @@
 }
 
 .message {
-  font-size: 14px;
+  text-align: center;
   color: var(--color-text-secondary);
-  line-height: 1.5;
-  margin: 16px 0 24px;
+  line-height: 1.6;
+  margin-bottom: 24px;
+  font-size: 15px;
+}
+
+.message strong {
+  color: var(--color-text);
+  font-weight: 600;
 }
 
 .actions {
@@ -237,26 +255,44 @@
 }
 
 .continueButton {
-  background: var(--color-bg-gradient);
-  color: var(--color-primary-hover-invert);
-  border: none;
-  border-radius: 12px;
+  width: 100%;
   padding: 12px 24px;
+  background: var(--color-bg-gradient);
+  color: white;
+  border: none;
+  border-radius: 10px;
+  font-size: 14px;
   font-weight: 600;
   cursor: pointer;
   transition: all 0.3s ease;
-  font-size: 14px;
-  min-width: 160px;
-}
-
-.continueButton:hover {
-  background: var(--color-primary-hover);
-  transform: translateY(-2px);
   box-shadow: 0 4px 12px rgba(var(--color-primary-rgb), 0.3);
 }
 
-.continueButton:active {
-  transform: translateY(0);
+.continueButton:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 6px 16px rgba(var(--color-primary-rgb), 0.4);
+}
+
+/* Mobile Anpassungen */
+@media (max-width: 520px) {
+  .title {
+    font-size: 1.3rem;
+    gap: 6px;
+  }
+
+  .titleIcon {
+    margin-right: 4px;
+  }
+
+  .message {
+    font-size: 14px;
+    margin-bottom: 20px;
+  }
+
+  .continueButton {
+    padding: 10px 20px;
+    font-size: 13px;
+  }
 }
 
 /* Dark mode wird automatisch über CSS-Variablen gehandhabt */
