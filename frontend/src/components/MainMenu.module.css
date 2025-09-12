@@ -488,6 +488,18 @@
   }
 }
 
+/* Contacts Item - standardmäßig versteckt */
+.contactsItem {
+  display: none;
+}
+
+/* Bei < 900px: Contacts Item anzeigen (wenn Sidebar verschwindet) */
+@media (max-width: 900px) {
+  .contactsItem {
+    display: block;
+  }
+}
+
 /* ───────── Icons ───────── */
 .icon {
   width: 25px;

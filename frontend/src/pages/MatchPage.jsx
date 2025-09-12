@@ -22,6 +22,7 @@ import styles from "./matchpage.module.css";
 import PopUpMatch from "../components/PopUpMatch";
 import PopUpContact from "../components/PopUpContact";
 import { useProfile } from "../hooks/useProfile";
+import Sidebar from "../components/Sidebar/Sidebar";
 
 const MatchPage = () => {
   const currentUser = useUserStore((state) => state.currentUser);
@@ -336,152 +337,162 @@ const MatchPage = () => {
   const user = currentMatch?.user;
 
   return (
-    <div className="page">
-      <div className={styles.matchContainer}>
-        <div className={styles.header}>
-          <h1 className="title">Find Your Coding Matches</h1>
-        </div>
+    <div className={styles.page}>
+      <main className={styles.center}>
+        <div className={styles.matchContainer}>
+          <div className={styles.header}>
+            <h1 className="title">Find Your Coding Matches</h1>
+          </div>
 
-        <div className={styles.matchCard}>
-          {pendingMatches.length > 1 && (
-            <>
-              <button
-                className={`${styles.navButton} ${styles.navLeft}`}
-                onClick={goToPreviousMatch}
-                disabled={currentMatchIndex === 0}
-              >
-                <ChevronLeft size={24} />
-              </button>
+          <div className={styles.matchCard}>
+            {pendingMatches.length > 1 && (
+              <>
+                <button
+                  className={`${styles.navButton} ${styles.navLeft}`}
+                  onClick={goToPreviousMatch}
+                  disabled={currentMatchIndex === 0}
+                >
+                  <ChevronLeft size={24} />
+                </button>
 
-              <button
-                className={`${styles.navButton} ${styles.navRight}`}
-                onClick={goToNextMatch}
-                disabled={currentMatchIndex === pendingMatches.length - 1}
-              >
-                <ChevronRight size={24} />
-              </button>
-            </>
-          )}
+                <button
+                  className={`${styles.navButton} ${styles.navRight}`}
+                  onClick={goToNextMatch}
+                  disabled={currentMatchIndex === pendingMatches.length - 1}
+                >
+                  <ChevronRight size={24} />
+                </button>
+              </>
+            )}
 
-          <div className={styles.matchContent}>
-            <div className={styles.profileHeader}>
-              <div className={styles.avatar}>
-                {user?.avatar ? (
-                  <img
-                    src={user.avatar}
-                    alt={`${user.nickname || user.username}'s avatar`}
-                    className={styles.avatarImage}
-                    onError={(e) => {
-                      e.target.src = "/avatars/default_avatar.png";
-                    }}
-                  />
-                ) : (
-                  <img
-                    src="/avatars/default_avatar.png"
-                    alt="Default avatar"
-                    className={styles.avatarImage}
-                  />
-                )}
-              </div>
-
-              <div className={styles.profileInfo}>
-                <h2 className={styles.profileName}>
-                  {user?.nickname || user?.username}
-                </h2>
-                <span className={styles.handle}>
-                  @{user?.username}.HelloDev.social
-                </span>
-                <p className={styles.status}>{getStatusLabel(user?.status)}</p>
-              </div>
-            </div>
-
-            <div className={styles.profileDetails}>
-              {user?.aboutMe && (
-                <div className={styles.aboutSection}>
-                  <p className={styles.aboutText}>{user.aboutMe}</p>
+            <div className={styles.matchContent}>
+              <div className={styles.profileHeader}>
+                <div className={styles.avatar}>
+                  {user?.avatar ? (
+                    <img
+                      src={user.avatar}
+                      alt={`${user.nickname || user.username}'s avatar`}
+                      className={styles.avatarImage}
+                      onError={(e) => {
+                        e.target.src = "/avatars/default_avatar.png";
+                      }}
+                    />
+                  ) : (
+                    <img
+                      src="/avatars/default_avatar.png"
+                      alt="Default avatar"
+                      className={styles.avatarImage}
+                    />
+                  )}
                 </div>
-              )}
 
-              <div className={styles.infoGrid}>
-                {user?.country && (
-                  <div className={styles.infoItem}>
-                    <MapPin size={16} />
-                    <span>{user.country}</span>
-                  </div>
-                )}
-
-                {user?.languages?.length > 0 && (
-                  <div className={styles.infoItem}>
-                    <Globe size={16} />
-                    <span>Speaks {user.languages.slice(0, 2).join(", ")}</span>
-                  </div>
-                )}
-
-                {user?.preferredOS && (
-                  <div className={styles.infoItem}>
-                    <User size={16} />
-                    <span>{user.preferredOS}</span>
-                  </div>
-                )}
+                <div className={styles.profileInfo}>
+                  <h2 className={styles.profileName}>
+                    {user?.nickname || user?.username}
+                  </h2>
+                  <span className={styles.handle}>
+                    @{user?.username}.HelloDev.social
+                  </span>
+                  <p className={styles.status}>
+                    {getStatusLabel(user?.status)}
+                  </p>
+                </div>
               </div>
 
-              <div className={styles.skillsSection}>
-                {user?.programmingLanguages?.length > 0 && (
-                  <div className={styles.skillCategory}>
-                    <h4>Programming Languages</h4>
-                    {renderSkillTags(
-                      user.programmingLanguages,
-                      <Code size={14} />
-                    )}
+              <div className={styles.profileDetails}>
+                {user?.aboutMe && (
+                  <div className={styles.aboutSection}>
+                    <p className={styles.aboutText}>{user.aboutMe}</p>
                   </div>
                 )}
 
-                {user?.techStack?.length > 0 && (
-                  <div className={styles.skillCategory}>
-                    <h4>Tech Stack</h4>
-                    {renderSkillTags(user.techStack, <Wrench size={14} />)}
-                  </div>
-                )}
+                <div className={styles.infoGrid}>
+                  {user?.country && (
+                    <div className={styles.infoItem}>
+                      <MapPin size={16} />
+                      <span>{user.country}</span>
+                    </div>
+                  )}
 
-                {user?.techArea?.length > 0 && (
-                  <div className={styles.skillCategory}>
-                    <h4>Tech Interests</h4>
-                    {renderSkillTags(user.techArea, <Heart size={14} />)}
-                  </div>
-                )}
+                  {user?.languages?.length > 0 && (
+                    <div className={styles.infoItem}>
+                      <Globe size={16} />
+                      <span>
+                        Speaks {user.languages.slice(0, 2).join(", ")}
+                      </span>
+                    </div>
+                  )}
+
+                  {user?.preferredOS && (
+                    <div className={styles.infoItem}>
+                      <User size={16} />
+                      <span>{user.preferredOS}</span>
+                    </div>
+                  )}
+                </div>
+
+                <div className={styles.skillsSection}>
+                  {user?.programmingLanguages?.length > 0 && (
+                    <div className={styles.skillCategory}>
+                      <h4>Programming Languages</h4>
+                      {renderSkillTags(
+                        user.programmingLanguages,
+                        <Code size={14} />
+                      )}
+                    </div>
+                  )}
+
+                  {user?.techStack?.length > 0 && (
+                    <div className={styles.skillCategory}>
+                      <h4>Tech Stack</h4>
+                      {renderSkillTags(user.techStack, <Wrench size={14} />)}
+                    </div>
+                  )}
+
+                  {user?.techArea?.length > 0 && (
+                    <div className={styles.skillCategory}>
+                      <h4>Tech Interests</h4>
+                      {renderSkillTags(user.techArea, <Heart size={14} />)}
+                    </div>
+                  )}
+                </div>
               </div>
-            </div>
 
-            <div className={styles.actionButtons}>
-              <button
-                className={`${styles.actionButton} ${styles.cancelButton}`}
-                onClick={handleCancel}
-                disabled={isActionLoading}
-              >
-                {isActionLoading ? (
-                  <Loader size={20} className={styles.spin} />
-                ) : (
-                  <X size={20} />
-                )}
-                <span>git ignore</span>
-              </button>
+              <div className={styles.actionButtons}>
+                <button
+                  className={`${styles.actionButton} ${styles.cancelButton}`}
+                  onClick={handleCancel}
+                  disabled={isActionLoading}
+                >
+                  {isActionLoading ? (
+                    <Loader size={20} className={styles.spin} />
+                  ) : (
+                    <X size={20} />
+                  )}
+                  <span>git ignore</span>
+                </button>
 
-              <button
-                className={`${styles.actionButton} ${styles.gitAddButton}`}
-                onClick={handleGitAdd}
-                disabled={isActionLoading}
-              >
-                {isActionLoading ? (
-                  <Loader size={20} className={styles.spin} />
-                ) : (
-                  <GitBranch size={20} />
-                )}
-                <span>git add</span>
-              </button>
+                <button
+                  className={`${styles.actionButton} ${styles.gitAddButton}`}
+                  onClick={handleGitAdd}
+                  disabled={isActionLoading}
+                >
+                  {isActionLoading ? (
+                    <Loader size={20} className={styles.spin} />
+                  ) : (
+                    <GitBranch size={20} />
+                  )}
+                  <span>git add</span>
+                </button>
+              </div>
             </div>
           </div>
         </div>
-      </div>
+      </main>
+
+      <aside className={styles.right}>
+        <Sidebar />
+      </aside>
 
       <PopUpMatch
         isOpen={showConnectedPopup}
