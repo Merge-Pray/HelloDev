@@ -1,3 +1,38 @@
+.page {
+  --bg: var(--color-bg);
+  --panel: var(--color-bg-secondary);
+  --border: var(--color-border);
+
+  --aside-wide: 380px;
+  --aside-mid: 320px;
+
+  display: grid;
+  grid-template-columns: 1fr var(--aside-wide);
+  gap: 24px;
+  min-height: 100vh;
+  background: var(--bg);
+  color: var(--color-text);
+  box-sizing: border-box;
+}
+
+.center {
+  min-width: 0;
+}
+.right {
+  border-left: 1px solid var(--border);
+  min-width: 0;
+  position: sticky;
+  top: 0;
+  height: 100vh;
+  overflow-y: auto;
+  scrollbar-width: none;
+  -ms-overflow-style: none;
+}
+
+.right::-webkit-scrollbar {
+  display: none;
+}
+
 .matchContainer {
   max-width: 600px;
   margin: 0 auto;
@@ -305,8 +340,34 @@
   }
 }
 
+/* ---------- Breakpoints ---------- */
+
+/* < 1200px: Sidebar bleibt sichtbar aber schmaler */
+@media (max-width: 1200px) {
+  .page {
+    grid-template-columns: 1fr var(--aside-mid);
+    gap: 20px;
+  }
+}
+
+/* < 900px: Sidebar ausblenden */
+@media (max-width: 900px) {
+  .page {
+    grid-template-columns: 1fr;
+    gap: 16px;
+  }
+
+  .right {
+    display: none;
+  }
+}
+
 /* Mobile Responsive */
 @media (max-width: 768px) {
+  .center {
+    padding: 12px;
+  }
+
   .matchContainer {
     padding: 16px;
   }
@@ -363,6 +424,19 @@
 
   .skillTags {
     justify-content: center;
+  }
+}
+
+/* < 520px: etwas kompakter */
+@media (max-width: 520px) {
+  .page {
+    gap: 12px;
+  }
+  .center {
+    padding: 12px;
+  }
+  .right {
+    display: none;
   }
 }
 

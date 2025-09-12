@@ -273,6 +273,20 @@ export default function MainMenu() {
               )}
             </li>
           ))}
+
+          <li className={styles.contactsItem}>
+            <NavLink
+              to="/contacts"
+              className={({ isActive }) =>
+                [styles.link, isActive ? styles.active : ""].join(" ")
+              }
+            >
+              <div className={styles.iconContainer}>
+                <Users size={25} className={styles.lucideIcon} />
+              </div>
+              <span className={styles.label}>Contacts</span>
+            </NavLink>
+          </li>
         </ul>
 
         <li className={styles.darkmode}>
