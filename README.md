@@ -151,11 +151,7 @@ Ratings, coins, and badges make your engagement visible. Every successful connec
 
 ## How It Works  
 
-1. **Sign up for free** with Google, LinkedIn, GitHub, or email.  
+1. **Sign up for free** with Google, GitHub, or email.  
 2. **Complete your profile** – skills, interests, and experience level.  
 3. **Find buddies, share ideas, and kick off new projects!**  
 
----
-
-**HelloDev.social – Your network for inspiration, knowledge, and community.**  
-Don’t wait any longer – **become part of the community today!**
