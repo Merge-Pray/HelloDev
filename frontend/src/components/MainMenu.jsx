@@ -289,10 +289,6 @@ export default function MainMenu() {
           </li>
         </ul>
 
-        <li className={styles.darkmode}>
-          <DarkMode />
-        </li>
-
         <ul className={styles.listBottom}>
           {bottomItems.map((item) => (
             <li key={item.to}>

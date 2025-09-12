@@ -20,6 +20,7 @@ import {
 import useUserStore from "../hooks/userstore";
 import { authenticatedFetch } from "../utils/authenticatedFetch";
 import Sidebar from "../components/Sidebar/Sidebar";
+import PopUpContact from "../components/PopUpContact";
 import styles from "./searchpage.module.css";
 
 const SearchPage = () => {
@@ -42,6 +43,9 @@ const SearchPage = () => {
   const [selectedCity, setSelectedCity] = useState("");
   const [availableCities, setAvailableCities] = useState([]);
   const [cityDropdownOpen, setCityDropdownOpen] = useState(false);
+
+  const [showContactPopup, setShowContactPopup] = useState(false);
+  const [contactedUserData, setContactedUserData] = useState(null);
 
   const cityDropdownRef = useRef(null);
 
@@ -468,6 +472,9 @@ const SearchPage = () => {
       if (response.success) {
         console.log("Friend request sent successfully");
 
+        // User-Daten für das PopUp sammeln
+        const contactedUser = searchResults.find((user) => user._id === userId);
+
         setSearchResults((prevResults) =>
           prevResults.map((user) => {
             if (user._id === userId) {
@@ -479,7 +486,12 @@ const SearchPage = () => {
 
         setPendingRequests((prev) => [...prev, userId]);
 
-        alert("Friend request sent successfully!");
+        // PopUp anzeigen statt Alert
+        setContactedUserData({
+          user: contactedUser,
+          type: "friendRequest",
+        });
+        setShowContactPopup(true);
       }
     } catch (err) {
       console.error("Error sending friend request:", err);
@@ -509,10 +521,16 @@ const SearchPage = () => {
         }
       }
 
+      // Für Fehler weiterhin Alert verwenden (oder später auch durch PopUp ersetzen)
       alert(errorMessage);
     } finally {
       setIsLoading(false);
     }
+  };
+
+  const handleCloseContactPopup = () => {
+    setShowContactPopup(false);
+    setContactedUserData(null);
   };
 
   const renderUserCard = (user) => {
@@ -1001,6 +1019,13 @@ const SearchPage = () => {
       <aside className={styles.right}>
         <Sidebar />
       </aside>
+
+      {/* Contact PopUp */}
+      <PopUpContact
+        isOpen={showContactPopup}
+        onClose={handleCloseContactPopup}
+        userData={contactedUserData}
+      />
     </div>
   );
 };

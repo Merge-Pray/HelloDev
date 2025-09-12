@@ -1,4 +1,4 @@
-import { X } from "lucide-react";
+import { X, UserPlus, UserCheck } from "lucide-react";
 import styles from "./popupcontact.module.css";
 import useUserStore from "../hooks/userstore";
 
@@ -8,6 +8,7 @@ const PopUpContact = ({ isOpen, onClose, userData }) => {
   if (!isOpen || !userData) return null;
 
   const user = userData.user;
+  const isFriendRequest = userData.type === "friendRequest";
 
   return (
     <div className={styles.overlay} onClick={onClose}>
@@ -66,7 +67,20 @@ const PopUpContact = ({ isOpen, onClose, userData }) => {
             </div>
           </div>
 
-          <h2 className={styles.title}>Contact Sent!</h2>
+          {/* Dynamischer Titel basierend auf dem Typ */}
+          <h2 className={styles.title}>
+            {isFriendRequest ? (
+              <>
+                <UserPlus size={24} className={styles.titleIcon} />
+                Friend Request Sent!
+              </>
+            ) : (
+              <>
+                <UserCheck size={24} className={styles.titleIcon} />
+                Contact Sent!
+              </>
+            )}
+          </h2>
 
           <div className={styles.userInfo}>
             <div className={styles.avatar}>
@@ -93,14 +107,25 @@ const PopUpContact = ({ isOpen, onClose, userData }) => {
             </div>
           </div>
 
+          {/* Dynamische Nachricht basierend auf dem Typ */}
           <p className={styles.message}>
-            Your contact request has been sent to{" "}
-            {user?.nickname || user?.username}.
+            {isFriendRequest ? (
+              <>
+                Your friend request has been sent to{" "}
+                <strong>{user?.nickname || user?.username}</strong>. It will be
+                notified and can accept or decline your request.
+              </>
+            ) : (
+              <>
+                Your contact request has been sent to{" "}
+                <strong>{user?.nickname || user?.username}</strong>.
+              </>
+            )}
           </p>
 
           <div className={styles.actions}>
             <button className={styles.continueButton} onClick={onClose}>
-              Continue Matching
+              {isFriendRequest ? "Continue Searching" : "Continue Matching"}
             </button>
           </div>
         </div>
