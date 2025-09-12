@@ -58,10 +58,15 @@
 /* < 520px: etwas kompakter */
 @media (max-width: 520px) {
   .page {
-    gap: 12px;
+    gap: 8px;
+    padding: 0;
+    margin: 0;
   }
   .center {
-    padding: 12px;
+    padding: 8px;
+    width: 100%;
+    max-width: 100vw;
+    box-sizing: border-box;
   }
   .right {
     display: none;

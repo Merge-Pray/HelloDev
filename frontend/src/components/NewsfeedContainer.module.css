@@ -27,7 +27,7 @@
 .divider {
   height: 1px;
   background: var(--color-card-border);
-  opacity: .65;
+  opacity: 0.65;
 }
 
 /* Suche aktiv Header */
@@ -56,9 +56,7 @@
   transition: background 0.2s, border-color 0.2s, color 0.2s;
   box-shadow: none;
   margin-bottom: 8px;
-
 }
-
 
 .filterToggleBtn:hover {
   background: var(--color-bg-secondary);
@@ -79,7 +77,7 @@
   border-radius: 10px;
   padding: 8px 10px;
   cursor: pointer;
-  transition: all .2s ease;
+  transition: all 0.2s ease;
 }
 .clearSearchBtn:hover {
   background: var(--color-primary);
@@ -116,7 +114,9 @@
   padding: 16px 8px;
   border-bottom: 1px solid var(--color-card-border);
 }
-.post:last-child { border-bottom: 0; }
+.post:last-child {
+  border-bottom: 0;
+}
 
 .avatar {
   width: 48px;
@@ -133,7 +133,9 @@
   align-items: baseline;
   font-weight: 700;
 }
-.displayName { color: var(--color-text); }
+.displayName {
+  color: var(--color-text);
+}
 .handle {
   color: var(--color-text-secondary);
   font-weight: 600;
@@ -171,7 +173,7 @@
   border-radius: 8px;
   cursor: pointer;
   border: 1px solid transparent;
-  transition: background .15s ease, border-color .15s ease, color .15s ease;
+  transition: background 0.15s ease, border-color 0.15s ease, color 0.15s ease;
 }
 .actionBtn:hover {
   background: var(--color-bg);
@@ -192,7 +194,7 @@
   border-radius: 10px;
   padding: 10px 16px;
   cursor: pointer;
-  transition: all .2s ease;
+  transition: all 0.2s ease;
   min-width: 180px;
 }
 .loadMoreBtn:hover {
@@ -226,7 +228,9 @@
   color: var(--color-text);
   padding: 8px 0;
 }
-.composerInput::placeholder { color: var(--color-text-secondary); }
+.composerInput::placeholder {
+  color: var(--color-text-secondary);
+}
 .composerActions {
   display: flex;
   gap: 12px;
@@ -235,7 +239,46 @@
 
 /* Responsive Feinheiten */
 @media (max-width: 560px) {
-  .post { grid-template-columns: 40px 1fr; padding: 14px 6px; }
-  .avatar { width: 36px; height: 36px; border-radius: 8px; }
-  .actions { gap: 14px; }
+  .post {
+    grid-template-columns: 40px 1fr;
+    padding: 14px 6px;
+  }
+  .avatar {
+    width: 36px;
+    height: 36px;
+    border-radius: 8px;
+  }
+  .actions {
+    gap: 14px;
+  }
+}
+
+/* Mobile Anpassungen */
+@media (max-width: 520px) {
+  .newsfeedContainer {
+    padding: 8px 4px;
+    width: 100%;
+    max-width: 100%;
+    box-sizing: border-box;
+  }
+
+  .feedControls {
+    padding-left: 4px;
+    padding-right: 4px;
+    width: 100%;
+    max-width: 100%;
+  }
+
+  .post {
+    grid-template-columns: 36px 1fr;
+    padding: 12px 8px;
+    width: 100%;
+    max-width: 100%;
+    box-sizing: border-box;
+  }
+
+  .avatar {
+    width: 32px;
+    height: 32px;
+  }
 }

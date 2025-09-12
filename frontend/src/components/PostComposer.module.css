@@ -1,7 +1,7 @@
 .composer {
-  /* background: var(--color-card-bg); */
-  border-top: 1px solid var( --color-border);
-  /* border-radius: 14px; */
+  background: var(--color-card-bg);
+  /* border: 1px solid var(--color-card-border); */
+  border-radius: 12px;
   /* box-shadow: 0 8px 20px var(--color-card-shadow); */
   padding: 12px;
 }
@@ -30,7 +30,10 @@
 }
 
 /* Formular */
-.form { display: grid; gap: 10px; }
+.form {
+  display: grid;
+  gap: 10px;
+}
 
 /* Textarea */
 .input {
@@ -44,9 +47,11 @@
   padding: 12px 14px;
   font-size: 15px;
   line-height: 1.4;
-  transition: border-color .2s ease, box-shadow .2s ease, background .2s ease;
+  transition: border-color 0.2s ease, box-shadow 0.2s ease, background 0.2s ease;
 }
-.input::placeholder { color: var(--color-text-secondary); }
+.input::placeholder {
+  color: var(--color-text-secondary);
+}
 .input:focus {
   outline: none;
   border-color: var(--color-input-border-focus);
@@ -81,7 +86,7 @@
   font-weight: 700;
   font-size: 13px;
   cursor: pointer;
-  transition: background .15s ease, color .15s ease, border-color .15s ease;
+  transition: background 0.15s ease, color 0.15s ease, border-color 0.15s ease;
 }
 .visBtn:hover:not(.active) {
   background: var(--color-bg-secondary);
@@ -120,7 +125,7 @@
   cursor: pointer;
   font-size: 13px;
   font-weight: 600;
-  transition: background .15s ease, border-color .15s ease;
+  transition: background 0.15s ease, border-color 0.15s ease;
 }
 .toolBtn:hover {
   background: var(--color-bg-secondary);
@@ -137,7 +142,9 @@
   font-weight: 700;
   color: var(--color-text-secondary);
 }
-.counterOver { color: var(--color-error); }
+.counterOver {
+  color: var(--color-error);
+}
 
 .submit {
   display: inline-flex;
@@ -150,13 +157,16 @@
   color: #fff;
   font-weight: 700;
   cursor: pointer;
-  transition: transform .05s ease, filter .15s ease;
+  transition: transform 0.05s ease, filter 0.15s ease;
 }
 .submit:hover:not(:disabled) {
   transform: translateY(-1px);
   filter: brightness(1.05);
 }
-.submit:disabled { opacity: .6; cursor: not-allowed; }
+.submit:disabled {
+  opacity: 0.6;
+  cursor: not-allowed;
+}
 
 /* Emoji Picker Styles */
 .emojiContainer {
@@ -280,12 +290,71 @@
 
 /* Responsive */
 @media (max-width: 780px) {
-  .toolbar { grid-template-columns: 1fr; }
-  .toolsRight { justify-content: flex-end; }
+  .toolbar {
+    grid-template-columns: 1fr;
+  }
+  .toolsRight {
+    justify-content: flex-end;
+  }
 }
 @media (max-width: 560px) {
-  .composer { padding: 10px; }
-  .header { grid-template-columns: 40px 1fr; }
-  .avatar { width: 40px; height: 40px; }
-  .submit { padding: 9px 12px; }
+  .composer {
+    padding: 10px;
+  }
+  .header {
+    grid-template-columns: 40px 1fr;
+  }
+  .avatar {
+    width: 40px;
+    height: 40px;
+  }
+  .submit {
+    padding: 9px 12px;
+  }
+}
+
+/* Mobile Responsive Fixes */
+@media (max-width: 520px) {
+  .composer {
+    margin: 0;
+    padding: 12px 8px;
+    width: 100%;
+    max-width: 100%;
+    box-sizing: border-box;
+  }
+
+  .form {
+    width: 100%;
+    max-width: 100%;
+  }
+
+  .input {
+    width: 100%;
+    max-width: 100%;
+    box-sizing: border-box;
+    padding: 10px 8px;
+    font-size: 14px;
+  }
+
+  .toolbar {
+    width: 100%;
+    max-width: 100%;
+    gap: 8px;
+  }
+
+  .visibilityGroup {
+    grid-template-columns: 1fr 1fr 1fr;
+    gap: 4px;
+    width: 100%;
+  }
+
+  .visBtn {
+    font-size: 11px;
+    padding: 6px 4px;
+  }
+
+  .bottomRow {
+    gap: 8px;
+    width: 100%;
+  }
 }
