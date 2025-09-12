@@ -1,61 +1,24 @@
+import jaroWinkler from "jaro-winkler";
+
 export function normalizeText(text) {
-  if (!text) return '';
-  
+  if (!text) return "";
+
   return text
     .toLowerCase()
     .trim()
-    .replace(/[^\w\s]/g, '')
+    .replace(/[^\w\s#+.-]/g, "")
+    .replace(/\s+/g, "");
 }
 
+export function fuzzyMatch(term1, term2) {
+  if (!term1 || !term2) return 0;
 
-export function fuzzyMatch(searchTerm, targetValue, aliases = []) {
-  const normalizedSearch = normalizeText(searchTerm);
-  const normalizedTarget = normalizeText(targetValue);
-  
-  if (normalizedSearch === normalizedTarget) return 100;
-  
-  if (normalizedTarget.startsWith(normalizedSearch)) return 90;
-  
-  if (normalizedTarget.includes(normalizedSearch)) return 80;
-  
-  for (const alias of aliases) {
-    const normalizedAlias = normalizeText(alias);
-    if (normalizedAlias === normalizedSearch) return 85;
-    if (normalizedAlias.startsWith(normalizedSearch)) return 75;
-    if (normalizedAlias.includes(normalizedSearch)) return 70;
-  }
-  
-  const distance = levenshteinDistance(normalizedSearch, normalizedTarget);
-  const maxLength = Math.max(normalizedSearch.length, normalizedTarget.length);
-  const similarity = ((maxLength - distance) / maxLength) * 100;
-  
-  return similarity > 60 ? similarity : 0;
-}
+  const normalized1 = normalizeText(term1);
+  const normalized2 = normalizeText(term2);
 
-function levenshteinDistance(str1, str2) {
-  const matrix = [];
-  
-  for (let i = 0; i <= str2.length; i++) {
-    matrix[i] = [i];
-  }
-  
-  for (let j = 0; j <= str1.length; j++) {
-    matrix[0][j] = j;
-  }
-  
-  for (let i = 1; i <= str2.length; i++) {
-    for (let j = 1; j <= str1.length; j++) {
-      if (str2.charAt(i - 1) === str1.charAt(j - 1)) {
-        matrix[i][j] = matrix[i - 1][j - 1];
-      } else {
-        matrix[i][j] = Math.min(
-          matrix[i - 1][j - 1] + 1,
-          matrix[i][j - 1] + 1,
-          matrix[i - 1][j] + 1
-        );
-      }
-    }
-  }
-  
-  return matrix[str2.length][str1.length];
+  if (normalized1 === normalized2) return 100;
+
+  const score = Math.round(jaroWinkler(normalized1, normalized2) * 100);
+
+  return score >= 70 ? score : 0;
 }

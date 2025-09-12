@@ -1,6 +1,13 @@
 import { useState, useEffect, useRef, useCallback } from "react";
 import { useParams, useNavigate } from "react-router";
-import { ArrowLeft, Send, MessageCircle, Smile, UserPlus, AlertCircle } from "lucide-react";
+import {
+  ArrowLeft,
+  Send,
+  MessageCircle,
+  Smile,
+  UserPlus,
+  AlertCircle,
+} from "lucide-react";
 import EmojiPicker from "emoji-picker-react";
 import Sidebar from "../components/Sidebar/Sidebar";
 import useUserStore from "../hooks/userstore";
@@ -50,7 +57,7 @@ const ChatPage = () => {
   useEffect(() => {
     if (currentChat && socket) {
       socket.emit("joinChat", { chatId: currentChat._id });
-      
+
       return () => {
         socket.emit("leaveChat", { chatId: currentChat._id });
       };
@@ -76,7 +83,7 @@ const ChatPage = () => {
           if (message.recipient === currentUser._id) {
             socket?.emit("markAsRead", { chatId: currentChatRef.current._id });
           }
-          
+
           return [...prev, message];
         }
         return prev;
@@ -90,30 +97,33 @@ const ChatPage = () => {
     }
   }, [currentChat, socket]);
 
-  const handleUserTyping = useCallback((data) => {
-    const { userId: typingUserId, isTyping, chatId } = data;
+  const handleUserTyping = useCallback(
+    (data) => {
+      const { userId: typingUserId, isTyping, chatId } = data;
 
-    // Don't show typing indicator for current user
-    if (typingUserId === currentUser._id.toString()) {
-      return;
-    }
-
-    setTypingUsers((prev) => {
-      const shouldUpdate =
-        currentChatRef.current && chatId === currentChatRef.current._id;
-
-      if (shouldUpdate) {
-        const newSet = new Set(prev);
-        if (isTyping) {
-          newSet.add(typingUserId);
-        } else {
-          newSet.delete(typingUserId);
-        }
-        return newSet;
+      // Don't show typing indicator for current user
+      if (typingUserId === currentUser._id.toString()) {
+        return;
       }
-      return prev;
-    });
-  }, [currentUser]);
+
+      setTypingUsers((prev) => {
+        const shouldUpdate =
+          currentChatRef.current && chatId === currentChatRef.current._id;
+
+        if (shouldUpdate) {
+          const newSet = new Set(prev);
+          if (isTyping) {
+            newSet.add(typingUserId);
+          } else {
+            newSet.delete(typingUserId);
+          }
+          return newSet;
+        }
+        return prev;
+      });
+    },
+    [currentUser]
+  );
 
   useEffect(() => {
     scrollToBottom();
@@ -177,7 +187,10 @@ const ChatPage = () => {
         );
 
         if (messagesResponse) {
-          if (messagesResponse.messages && Array.isArray(messagesResponse.messages)) {
+          if (
+            messagesResponse.messages &&
+            Array.isArray(messagesResponse.messages)
+          ) {
             setMessages(messagesResponse.messages);
             setAreFriends(messagesResponse.areFriends);
             setTimeout(() => scrollToBottom(), 100);
@@ -424,31 +437,6 @@ const ChatPage = () => {
       </div>
 
       <div className={styles.messageList}>
-        {/* Friendship Status Banner */}
-        {!areFriends && otherUser && (
-          <div className={styles.friendshipBanner}>
-            <div className={styles.bannerContent}>
-              <AlertCircle size={20} />
-              <span>You are no longer friends with {otherUser.nickname || otherUser.username}</span>
-              <button 
-                className={styles.addFriendBtn}
-                onClick={handleSendFriendRequest}
-              >
-                <UserPlus size={16} />
-                Add Friend
-              </button>
-            </div>
-          </div>
-        )}
-
-        {/* Error Message */}
-        {friendshipError && (
-          <div className={styles.errorBanner}>
-            <AlertCircle size={16} />
-            <span>{friendshipError}</span>
-          </div>
-        )}
-
         {isLoading ? (
           <div className={styles.loading}>Loading messages...</div>
         ) : error ? (
@@ -490,6 +478,34 @@ const ChatPage = () => {
           })
         )}
 
+        {/* Friendship Status Banner */}
+        {!areFriends && otherUser && (
+          <div className={styles.friendshipBanner}>
+            <div className={styles.bannerContent}>
+              <AlertCircle size={20} />
+              <span>
+                You are no longer friends with{" "}
+                {otherUser.nickname || otherUser.username}
+              </span>
+              <button
+                className={styles.addFriendBtn}
+                onClick={handleSendFriendRequest}
+              >
+                <UserPlus size={16} />
+                Add Friend
+              </button>
+            </div>
+          </div>
+        )}
+
+        {/* Error Message */}
+        {friendshipError && (
+          <div className={styles.errorBanner}>
+            <AlertCircle size={16} />
+            <span>{friendshipError}</span>
+          </div>
+        )}
+
         <div ref={messagesEndRef} />
       </div>
 
@@ -500,9 +516,7 @@ const ChatPage = () => {
             <span></span>
             <span></span>
           </div>
-          <span>
-            {otherUser?.nickname || otherUser?.username} is typing...
-          </span>
+          <span>{otherUser?.nickname || otherUser?.username} is typing...</span>
         </div>
       )}
 
@@ -557,7 +571,11 @@ const ChatPage = () => {
           <textarea
             ref={messageInputRef}
             className={styles.textInput}
-            placeholder={areFriends ? "Type a message..." : "Add as friend to send messages"}
+            placeholder={
+              areFriends
+                ? "Type a message..."
+                : "Add as friend to send messages"
+            }
             value={newMessage}
             onChange={handleInputChange}
             onKeyPress={handleKeyPress}
