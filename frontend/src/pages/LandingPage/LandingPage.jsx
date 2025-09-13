@@ -6,6 +6,7 @@ import DarkMode from "../../components/DarkMode";
 import GoogleAuthButton from "../../components/GoogleAuthButton";
 import GitHubAuthButton from "../../components/GitHubAuthButton";
 import { Link } from "react-router";
+import CookieBanner from "../../components/CookieBanner";
 
 export default function LandingPage() {
   const navigate = useNavigate();
@@ -40,7 +41,9 @@ export default function LandingPage() {
   }
 
   return (
-    <div className={styles.container}>
+    <>
+      <CookieBanner />
+      <div className={styles.container}>
       {/* Dark Mode Button fix oben rechts */}
       <div className={styles.darkModeWrapper}>
         <DarkMode />
@@ -120,6 +123,7 @@ export default function LandingPage() {
                     <Link className={styles.legalLink} to="/legalnotice">Impressum (Legal Notice)</Link>
          
       </div>
-    </div>
+      </div>
+    </>
   );
 }
