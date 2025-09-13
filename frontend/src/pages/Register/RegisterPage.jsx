@@ -33,6 +33,7 @@ export default function RegisterPage() {
       email: "",
       password: "",
       confirmPassword: "",
+      acceptTerms: false,
     },
   });
 
@@ -284,6 +285,7 @@ export default function RegisterPage() {
               <div className="form-hint">{errors.confirmPassword?.message}</div>
             </div>
 
+
             <div className={styles.requirements}>
               <p>
                 <strong>Password Requirements:</strong>
@@ -296,6 +298,23 @@ export default function RegisterPage() {
                   At least one special character (!@#$%^&*(),.?":{}|&lt;&gt;)
                 </li>
               </ul>
+            </div>
+
+            <div className="form-field">
+              <label style={{display: "flex", alignItems: "center", gap: "8px"}}>
+                <input
+                  type="checkbox"
+                  {...register("acceptTerms", {
+                    required: "You must accept the Terms & Conditions (AGB)."
+                  })}
+                  style={{width: "18px", height: "18px"}}
+                />
+                I accept the
+                <a href="/gtc" target="_blank" rel="noopener noreferrer" style={{color: "var(--color-primary)", textDecoration: "underline"}}>Terms & Conditions (AGB)</a>
+              </label>
+              <div className="form-hint" style={{color: "#ef4444"}}>
+                {errors.acceptTerms?.message}
+              </div>
             </div>
 
             <button
