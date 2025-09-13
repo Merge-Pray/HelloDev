@@ -1,10 +1,35 @@
 import { useNavigate } from "react-router";
+import { useEffect } from "react";
 
 const Legalnotice = () => {
   const navigate = useNavigate();
+  useEffect(() => { window.scrollTo(0, 0); }, []);
   return (
     <div style={{ padding: "48px 24px", maxWidth: 700, margin: "0 auto" }}>
       <h1>Legal Notice / Impressum</h1>
+      <button
+        style={{
+          background: "var(--color-primary)",
+          color: "#fff",
+          border: "none",
+          borderRadius: "999px",
+          padding: "0.5rem 1.5rem",
+          fontSize: "1rem",
+          fontWeight: "bold",
+          cursor: "pointer",
+          margin: "16px 0 32px 0",
+          transition: "background 0.2s",
+        }}
+        onClick={() => {
+          if (window.history.length <= 1) {
+            window.location.href = "/";
+          } else {
+            navigate(-1);
+          }
+        }}
+      >
+        ← Back / Zurück
+      </button>
 
       {/* ---------- ENGLISH VERSION ---------- */}
       <h2>1. Project Information</h2>

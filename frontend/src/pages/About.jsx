@@ -1,5 +1,6 @@
 import styles from "./about.module.css";
 import { useNavigate } from "react-router";
+import { useEffect } from "react";
 
 // kleines GitHub-Logo als wiederverwendbare Komponente (SVG)
 const GitHubIcon = ({ size = 16 }) => (
@@ -23,6 +24,7 @@ const GitHubIcon = ({ size = 16 }) => (
 
 const About = () => {
   const navigate = useNavigate();
+  useEffect(() => { window.scrollTo(0, 0); }, []);
   return (
     <div className={styles.aboutPage}>
       <div className={styles.aboutContent}>
@@ -117,7 +119,13 @@ const About = () => {
           </p>
         </div>
 
-        <button className={styles.aboutBackBtn} onClick={() => navigate(-1)}>
+        <button className={styles.aboutBackBtn} onClick={() => {
+          if (window.history.length <= 1) {
+            window.location.href = "/";
+          } else {
+            navigate(-1);
+          }
+        }}>
           ← Back
         </button>
       </div>

@@ -1,7 +1,9 @@
 import { useNavigate } from "react-router";
+import { useEffect } from "react";
 
 const DataPrivacy = () => {
   const navigate = useNavigate();
+  useEffect(() => { window.scrollTo(0, 0); }, []);
   return (
     <div style={{ padding: "48px 24px", maxWidth: 700, margin: "0 auto" }}>
       <h1>Privacy Policy / Datenschutzerklärung</h1>
@@ -18,7 +20,13 @@ const DataPrivacy = () => {
           margin: "16px 0 32px 0",
           transition: "background 0.2s",
         }}
-        onClick={() => navigate(-1)}
+        onClick={() => {
+          if (window.history.length <= 1) {
+            window.location.href = "/";
+          } else {
+            navigate(-1);
+          }
+        }}
       >
         ← Back / Zurück
       </button>
