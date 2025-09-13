@@ -14,6 +14,7 @@ import {
   getUserContacts,
   googleAuth,
   githubAuth,
+  deleteUserAccount,
 } from "../controllers/user.js";
 import { registerValidationRules, validate } from "../middleware/validation.js";
 
@@ -56,4 +57,5 @@ userRouter
   .get("/user", authorizeJwt, getUserData)
   .get("/contacts", authorizeJwt, getUserContacts)
   .get("/profile/:userId", authorizeJwt, getUserProfile)
-  .patch("/update", authorizeJwt, updateUserProfile);
+  .patch("/update", authorizeJwt, updateUserProfile)
+  .delete("/delete", authorizeJwt, deleteUserAccount);
