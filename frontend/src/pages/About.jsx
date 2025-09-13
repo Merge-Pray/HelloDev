@@ -29,10 +29,19 @@ const About = () => {
     <div className={styles.aboutPage}>
       <div className={styles.aboutContent}>
         <h1 className={styles.aboutTitle}>About HelloDev</h1>
+        <button className={styles.aboutBackBtn} onClick={() => {
+          if (window.history.length <= 1) {
+            window.location.href = "/";
+          } else {
+            navigate(-1);
+          }
+        }}>
+          ← Back
+        </button>
         <div className={styles.aboutText}>
           <p>
             <strong>HelloDev</strong> is the capstone project of our one-year
-            Web Development course at the <strong>Digital Career Institute (DCI)</strong>  
+            Web Development course at the <strong>Digital Career Institute (DCI) </strong>  
             (September 2024 – September 2025). It’s a full-stack application we
             designed and built end-to-end.
           </p>
@@ -44,8 +53,8 @@ const About = () => {
           </p>
 
           <p>
-            <strong>Who are we?</strong>  
-            We are three developers working together as <strong>Merge &amp; Pray</strong>:
+            <strong>Who are we? <br></br></strong>  
+            We are three developers working together as <strong>Merge &amp; Pray GitHub Orgnisation</strong>:
           </p>
 
           <ul className={styles.teamList}>
@@ -128,6 +137,7 @@ const About = () => {
         }}>
           ← Back
         </button>
+        {/* Back-Button ist jetzt oben und unten */}
       </div>
     </div>
   );
