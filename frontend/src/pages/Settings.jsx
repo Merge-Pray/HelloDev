@@ -89,55 +89,10 @@ const Settings = () => {
         )}
 
 
+      
+
         <div className={styles.settingsHeader}>
           <h1 className="title">Settings</h1>
-          <div className="card enhanced" style={{marginTop: "2rem"}}>
-            <div className={styles.settingsSectionHeader}>
-              <h2>Account Management</h2>
-            </div>
-            <div className={styles.settingsItem}>
-              <div className={styles.settingsItemInfoDelete}>
-                <h3>Delete Account</h3>
-                <p>Permanently delete your user account and all associated data</p>
-              </div>
-              <div className={styles.settingsItemControl}>
-                <button onClick={handleDeleteClick} className={styles.btnDanger} disabled={isDeleting}>
-                  <X size={18} />
-                  Delete Account
-                </button>
-              </div>
-            </div>
-          </div>
-        </div>
-      {showDeleteConfirm && (
-        <div className={styles.modalOverlay}>
-          <div className={styles.modalContent}>
-            <div className={styles.modalHeader}>
-              <div className={styles.modalIcon}>
-                <AlertTriangle size={24} />
-              </div>
-              <button className={styles.modalClose} onClick={handleDeleteCancel} aria-label="Close">
-                <X size={20} />
-              </button>
-            </div>
-            <div className={styles.modalBody}>
-              <h3>Delete account?</h3>
-              <p>Are you sure you want to permanently delete your user account and all associated data?</p>
-            </div>
-            <div className={styles.modalFooter}>
-              <button className={styles.btnSecondary} onClick={handleDeleteCancel} disabled={isDeleting}>
-                Cancel
-              </button>
-              <button className={styles.btnDanger} onClick={handleDeleteConfirm} disabled={isDeleting}>
-                <X size={16} />
-                {isDeleting ? "Deleting..." : "Yes, delete account"}
-              </button>
-            </div>
-          </div>
-        </div>
-      )}
-
-       
    
 
         <div className={styles.settingsContent}>
@@ -234,6 +189,53 @@ const Settings = () => {
             </div>
           </div>
         )}
+
+         
+          <div className="card enhanced" style={{marginTop: "2rem"}}>
+            <div className={styles.settingsSectionHeader}>
+              <h2>Account Management</h2>
+            </div>
+            <div className={styles.settingsItem}>
+              <div className={styles.settingsItemInfoDelete}>
+                <h3>Delete Account</h3>
+                <p>Permanently delete your user account and all associated data</p>
+              </div>
+              <div className={styles.settingsItemControl}>
+                <button onClick={handleDeleteClick} className={styles.btnDanger} disabled={isDeleting}>
+                  <X size={18} />
+                  Delete Account
+                </button>
+              </div>
+            </div>
+          </div>
+        </div>
+      {showDeleteConfirm && (
+        <div className={styles.modalOverlay}>
+          <div className={styles.modalContent}>
+            <div className={styles.modalHeader}>
+              <div className={styles.modalIcon}>
+                <AlertTriangle size={24} />
+              </div>
+              <button className={styles.modalClose} onClick={handleDeleteCancel} aria-label="Close">
+                <X size={20} />
+              </button>
+            </div>
+            <div className={styles.modalBody}>
+              <h3>Delete account?</h3>
+              <p>Are you sure you want to permanently delete your user account and all associated data?</p>
+            </div>
+            <div className={styles.modalFooter}>
+              <button className={styles.btnSecondary} onClick={handleDeleteCancel} disabled={isDeleting}>
+                Cancel
+              </button>
+              <button className={styles.btnDanger} onClick={handleDeleteConfirm} disabled={isDeleting}>
+                <X size={16} />
+                {isDeleting ? "Deleting..." : "Yes, delete account"}
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
       </div>
     </div>
   );
