@@ -5,6 +5,7 @@ import {
   X,
   AlertTriangle,
   AlertCircle,
+  Skull,
 } from "lucide-react";
 import DarkMode from "../components/DarkMode";
 import styles from "./settings.module.css";
@@ -101,7 +102,7 @@ const Settings = () => {
               <h2>Appearance</h2>
             </div>
             <div className={styles.settingsItem}>
-              <div className={styles.settingsItemInfo}>
+              <div className={styles.settingsItemInfoLeft}>
                 <h3>Dark Mode</h3>
                 <p>Switch between light and dark theme</p>
               </div>
@@ -116,7 +117,7 @@ const Settings = () => {
               <h2>Account</h2>
             </div>
             <div className={styles.settingsItem}>
-              <div className={styles.settingsItemInfo}>
+              <div className={styles.settingsItemInfoLeft}>
                 <h3>Sign Out</h3>
                 <p>Sign out from your account</p>
               </div>
@@ -125,7 +126,7 @@ const Settings = () => {
                   onClick={handleLogoutClick}
                   className={styles.logoutBtn}
                 >
-                  <LogOut size={18} />
+                  <LogOut size={18} color="#fff" />
                   Sign Out
                 </button>
               </div>
@@ -182,7 +183,7 @@ const Settings = () => {
                   onClick={handleLogoutConfirm}
                   disabled={isLoggingOut}
                 >
-                  <LogOut size={16} />
+                  <LogOut size={16} color="#fff" />
                   {isLoggingOut ? "Signing out..." : "Yes, sign out"}
                 </button>
               </div>
@@ -202,7 +203,7 @@ const Settings = () => {
               </div>
               <div className={styles.settingsItemControl}>
                 <button onClick={handleDeleteClick} className={styles.btnDanger} disabled={isDeleting}>
-                  <X size={18} />
+                  <Skull size={18} color="#fff" />
                   Delete Account
                 </button>
               </div>
@@ -229,7 +230,7 @@ const Settings = () => {
                 Cancel
               </button>
               <button className={styles.btnDanger} onClick={handleDeleteConfirm} disabled={isDeleting}>
-                <X size={16} />
+                <Skull size={16} color="#fff" />
                 {isDeleting ? "Deleting..." : "Yes, delete account"}
               </button>
             </div>
