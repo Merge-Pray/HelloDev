@@ -5,6 +5,7 @@ import {
   X,
   AlertTriangle,
   AlertCircle,
+  Skull,
 } from "lucide-react";
 import DarkMode from "../components/DarkMode";
 import styles from "./settings.module.css";
@@ -14,10 +15,34 @@ import { useNavigate } from "react-router";
 import { authenticatedFetch } from "../utils/authenticatedFetch";
 
 const Settings = () => {
+  const [showDeleteConfirm, setShowDeleteConfirm] = useState(false);
+  const [isDeleting, setIsDeleting] = useState(false);
+  const handleDeleteClick = () => setShowDeleteConfirm(true);
+  const handleDeleteCancel = () => setShowDeleteConfirm(false);
+  const handleDeleteConfirm = async () => {
+    setIsDeleting(true);
+    setError(null);
+    try {
+      const response = await authenticatedFetch("/api/user/delete", {
+        method: "DELETE",
+      });
+      if (!response.ok) {
+        throw new Error("Account deletion failed");
+      }
+      clearUser();
+      setShowDeleteConfirm(false);
+      navigate("/login");
+    } catch (err) {
+      setError("Account deletion failed. Please try again.");
+    } finally {
+      setIsDeleting(false);
+    }
+  };
   const clearUser = useUserStore((state) => state.clearUser);
   const [isLoggingOut, setIsLoggingOut] = useState(false);
   const [showLogoutConfirm, setShowLogoutConfirm] = useState(false);
   const [error, setError] = useState(null);
+  const [deleteConfirmText, setDeleteConfirmText] = useState("");
   const navigate = useNavigate();
 
   const handleLogoutClick = () => {
@@ -66,11 +91,10 @@ const Settings = () => {
         )}
 
 
+      
+
         <div className={styles.settingsHeader}>
           <h1 className="title">Settings</h1>
-        </div>
-
-       
    
 
         <div className={styles.settingsContent}>
@@ -79,7 +103,7 @@ const Settings = () => {
               <h2>Appearance</h2>
             </div>
             <div className={styles.settingsItem}>
-              <div className={styles.settingsItemInfo}>
+              <div className={styles.settingsItemInfoLeft}>
                 <h3>Dark Mode</h3>
                 <p>Switch between light and dark theme</p>
               </div>
@@ -94,7 +118,7 @@ const Settings = () => {
               <h2>Account</h2>
             </div>
             <div className={styles.settingsItem}>
-              <div className={styles.settingsItemInfo}>
+              <div className={styles.settingsItemInfoLeft}>
                 <h3>Sign Out</h3>
                 <p>Sign out from your account</p>
               </div>
@@ -103,7 +127,7 @@ const Settings = () => {
                   onClick={handleLogoutClick}
                   className={styles.logoutBtn}
                 >
-                  <LogOut size={18} />
+                  <LogOut size={18} color="#fff" />
                   Sign Out
                 </button>
               </div>
@@ -160,13 +184,76 @@ const Settings = () => {
                   onClick={handleLogoutConfirm}
                   disabled={isLoggingOut}
                 >
-                  <LogOut size={16} />
+                  <LogOut size={16} color="#fff" />
                   {isLoggingOut ? "Signing out..." : "Yes, sign out"}
                 </button>
               </div>
             </div>
           </div>
         )}
+
+         
+          <div className="card enhanced" style={{marginTop: "2rem"}}>
+            <div className={styles.settingsSectionHeader}>
+              <h2>Account Management</h2>
+            </div>
+            <div className={styles.settingsItem}>
+              <div className={styles.settingsItemInfoDelete}>
+                <h3>Delete Account</h3>
+                <p>Permanently delete your user account and all associated data</p>
+              </div>
+              <div className={styles.settingsItemControl}>
+                <button onClick={handleDeleteClick} className={styles.btnDanger} disabled={isDeleting}>
+                  <Skull size={18} color="#fff" />
+                  Delete Account
+                </button>
+              </div>
+            </div>
+          </div>
+        </div>
+      {showDeleteConfirm && (
+        <div className={styles.modalOverlay}>
+          <div className={styles.modalContent}>
+            <div className={styles.modalHeader}>
+              <div className={styles.modalIcon}>
+                <AlertTriangle size={24} />
+              </div>
+              <button className={styles.modalClose} onClick={handleDeleteCancel} aria-label="Close">
+                <X size={20} />
+              </button>
+            </div>
+            <div className={styles.modalBody}>
+              <h3>Delete account?</h3>
+              <p style={{color: "#ef4444", fontWeight: "bold"}}>
+                If you click this button, your profile will be permanently deleted and cannot be restored, even by HelloDev.
+              </p>
+              <p>Are you sure you want to permanently delete your user account and all associated data?</p>
+              <div style={{marginTop: "1.5rem"}}>
+                <label htmlFor="delete-confirm" style={{fontWeight: "bold"}}>Type <span style={{color: "#ef4444"}}>'DELETE'</span> to confirm:</label>
+                <input
+                  id="delete-confirm"
+                  type="text"
+                  value={deleteConfirmText}
+                  onChange={e => setDeleteConfirmText(e.target.value)}
+                  style={{marginLeft: "1rem", padding: "8px", borderRadius: "6px", border: "1px solid #ef4444", outline: "none"}}
+                  autoComplete="off"
+                  placeholder="DELETE"
+                  disabled={isDeleting}
+                />
+              </div>
+            </div>
+            <div className={styles.modalFooter}>
+              <button className={styles.btnSecondary} onClick={handleDeleteCancel} disabled={isDeleting}>
+                Cancel
+              </button>
+              <button className={styles.btnDanger} onClick={handleDeleteConfirm} disabled={isDeleting || deleteConfirmText !== "DELETE"}>
+                <Skull size={16} color="#fff" />
+                {isDeleting ? "Deleting..." : "Yes, delete account"}
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
       </div>
     </div>
   );

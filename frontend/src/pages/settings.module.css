@@ -1,3 +1,22 @@
+.settingsItemInfoLeft {
+  text-align: left;
+  flex: 1;
+}
+.settingsItemInfoDelete {
+  text-align: left;
+  flex: 1;
+}
+/* Abstand für Delete-Account-Button */
+.settingsItemDelete {
+  margin-top: 2rem;
+}
+
+
+
+.settingsItemDelete2 {
+  margin-top: 12rem;
+  padding-top: 0;
+  border-top: none; }
 @media (max-width: 768px) {
   .legalLinksBox {
     max-width: 100%;
@@ -40,6 +59,7 @@
   font-size: 2rem;
   font-weight: 600;
   margin: 0;
+  margin-bottom: 2rem;
 }
 
 .settingsHeader svg {
@@ -125,6 +145,7 @@
 .settingsItem:not(:last-child) {
   border-bottom: 1px solid var(--color-input-border);
 }
+
 
 .settingsItemInfo {
   flex: 1;
