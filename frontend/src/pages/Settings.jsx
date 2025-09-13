@@ -42,6 +42,7 @@ const Settings = () => {
   const [isLoggingOut, setIsLoggingOut] = useState(false);
   const [showLogoutConfirm, setShowLogoutConfirm] = useState(false);
   const [error, setError] = useState(null);
+  const [deleteConfirmText, setDeleteConfirmText] = useState("");
   const navigate = useNavigate();
 
   const handleLogoutClick = () => {
@@ -223,13 +224,29 @@ const Settings = () => {
             </div>
             <div className={styles.modalBody}>
               <h3>Delete account?</h3>
+              <p style={{color: "#ef4444", fontWeight: "bold"}}>
+                If you click this button, your profile will be permanently deleted and cannot be restored, even by HelloDev.
+              </p>
               <p>Are you sure you want to permanently delete your user account and all associated data?</p>
+              <div style={{marginTop: "1.5rem"}}>
+                <label htmlFor="delete-confirm" style={{fontWeight: "bold"}}>Type <span style={{color: "#ef4444"}}>'DELETE'</span> to confirm:</label>
+                <input
+                  id="delete-confirm"
+                  type="text"
+                  value={deleteConfirmText}
+                  onChange={e => setDeleteConfirmText(e.target.value)}
+                  style={{marginLeft: "1rem", padding: "8px", borderRadius: "6px", border: "1px solid #ef4444", outline: "none"}}
+                  autoComplete="off"
+                  placeholder="DELETE"
+                  disabled={isDeleting}
+                />
+              </div>
             </div>
             <div className={styles.modalFooter}>
               <button className={styles.btnSecondary} onClick={handleDeleteCancel} disabled={isDeleting}>
                 Cancel
               </button>
-              <button className={styles.btnDanger} onClick={handleDeleteConfirm} disabled={isDeleting}>
+              <button className={styles.btnDanger} onClick={handleDeleteConfirm} disabled={isDeleting || deleteConfirmText !== "DELETE"}>
                 <Skull size={16} color="#fff" />
                 {isDeleting ? "Deleting..." : "Yes, delete account"}
               </button>
