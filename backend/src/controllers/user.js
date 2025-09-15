@@ -10,9 +10,15 @@ export const deleteUserAccount = async (req, res, next) => {
   session.startTransaction();
   try {
     const userId = req.user._id;
+
+    await UserModel.updateMany(
+      { contacts: userId },
+      { $pull: { contacts: userId } }
+    ).session(session);
+
     await Promise.all([
       PostModel.deleteMany({ author: userId }).session(session),
-      ChatModel.deleteMany({ participants: userId }).session(session),
+      // ChatModel.deleteMany({ participants: userId }).session(session),
       MatchModel.deleteMany({ $or: [{ user1: userId }, { user2: userId }] }).session(session),
       ContactRequestModel.deleteMany({ $or: [{ user1: userId }, { user2: userId }] }).session(session),
       MessageModel.deleteMany({ $or: [{ sender: userId }, { recipient: userId }] }).session(session)
