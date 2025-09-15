@@ -28,12 +28,7 @@ import styles from "./avatar.module.css";
  */
 
 const Avatar = forwardRef(function Avatar(
-  {
-    sizePx = 64,
-    gridSize: initialGridSize = 16,
-    initialData,
-    onDataChange,
-  },
+  { sizePx = 64, gridSize: initialGridSize = 16, initialData, onDataChange },
   ref
 ) {
   // UI-States
@@ -51,16 +46,26 @@ const Avatar = forwardRef(function Avatar(
   );
 
   const [pixels, setPixels] = useState(() => {
-    if (initialData && initialData.length === initialGridSize * initialGridSize) {
+    if (
+      initialData &&
+      initialData.length === initialGridSize * initialGridSize
+    ) {
       return initialData;
     }
-    return Array.from({ length: initialGridSize * initialGridSize }, () => "#ffffff");
+    return Array.from(
+      { length: initialGridSize * initialGridSize },
+      () => "#ffffff"
+    );
   });
 
   // Update pixels when initialData changes
   useEffect(() => {
     if (initialData && initialData.length === gridSize * gridSize) {
-      console.log('🎨 Avatar: Loading initial data with', initialData.length, 'pixels');
+      console.log(
+        "Avatar: Loading initial data with",
+        initialData.length,
+        "pixels"
+      );
       setPixels(initialData.slice()); // Create a copy to avoid mutation
     }
   }, [initialData, gridSize]);
@@ -151,7 +156,11 @@ const Avatar = forwardRef(function Avatar(
   const handleTouchStart = (e) => {
     const t = e.touches[0];
     if (!t) return;
-    handleMouseDown({ preventDefault: () => {}, clientX: t.clientX, clientY: t.clientY });
+    handleMouseDown({
+      preventDefault: () => {},
+      clientX: t.clientX,
+      clientY: t.clientY,
+    });
   };
   const handleTouchMove = (e) => {
     const t = e.touches[0];
@@ -201,7 +210,10 @@ const Avatar = forwardRef(function Avatar(
         const b = data[base + 2];
         const a = data[base + 3];
         const hex =
-          a < 10 ? "#ffffff" : "#" + [r, g, b].map((v) => v.toString(16).padStart(2, "0")).join("");
+          a < 10
+            ? "#ffffff"
+            : "#" +
+              [r, g, b].map((v) => v.toString(16).padStart(2, "0")).join("");
         next.push(hex);
       }
     }
@@ -210,37 +222,48 @@ const Avatar = forwardRef(function Avatar(
   };
 
   // Imperative API
-  useImperativeHandle(ref, () => ({
-    getPixels: () => pixels.slice(),
-    setPixels: (p) => {
-      if (Array.isArray(p) && p.length === gridSize * gridSize) setPixels(p.slice());
-    },
-    toJSON: () => ({ gridSize, pixels }),
-    toPNGDataURL: (bg = "#ffffff") => {
-      const out = document.createElement("canvas");
-      out.width = sizePx;
-      out.height = sizePx;
-      const ctx = out.getContext("2d");
-      ctx.imageSmoothingEnabled = false;
-      const cell = sizePx / gridSize;
-      if (bg === "transparent") {
-        ctx.clearRect(0, 0, out.width, out.height);
-      } else {
-        ctx.fillStyle = bg;
-        ctx.fillRect(0, 0, out.width, out.height);
-      }
-      for (let y = 0; y < gridSize; y++) {
-        for (let x = 0; x < gridSize; x++) {
-          ctx.fillStyle = pixels[idx(x, y)];
-          ctx.fillRect(Math.floor(x * cell), Math.floor(y * cell), Math.ceil(cell), Math.ceil(cell));
+  useImperativeHandle(
+    ref,
+    () => ({
+      getPixels: () => pixels.slice(),
+      setPixels: (p) => {
+        if (Array.isArray(p) && p.length === gridSize * gridSize)
+          setPixels(p.slice());
+      },
+      toJSON: () => ({ gridSize, pixels }),
+      toPNGDataURL: (bg = "#ffffff") => {
+        const out = document.createElement("canvas");
+        out.width = sizePx;
+        out.height = sizePx;
+        const ctx = out.getContext("2d");
+        ctx.imageSmoothingEnabled = false;
+        const cell = sizePx / gridSize;
+        if (bg === "transparent") {
+          ctx.clearRect(0, 0, out.width, out.height);
+        } else {
+          ctx.fillStyle = bg;
+          ctx.fillRect(0, 0, out.width, out.height);
         }
-      }
-      return out.toDataURL("image/png");
-    },
-    randomize: () => setPixels(randomizePixels(gridSize)),
-    refreshSuggestions: () => setSuggestions(makeSuggestions(gridSize, 5)),
-    clear: () => setPixels(Array.from({ length: gridSize * gridSize }, () => "#ffffff")),
-  }), [pixels, gridSize, sizePx, idx]);
+        for (let y = 0; y < gridSize; y++) {
+          for (let x = 0; x < gridSize; x++) {
+            ctx.fillStyle = pixels[idx(x, y)];
+            ctx.fillRect(
+              Math.floor(x * cell),
+              Math.floor(y * cell),
+              Math.ceil(cell),
+              Math.ceil(cell)
+            );
+          }
+        }
+        return out.toDataURL("image/png");
+      },
+      randomize: () => setPixels(randomizePixels(gridSize)),
+      refreshSuggestions: () => setSuggestions(makeSuggestions(gridSize, 5)),
+      clear: () =>
+        setPixels(Array.from({ length: gridSize * gridSize }, () => "#ffffff")),
+    }),
+    [pixels, gridSize, sizePx, idx]
+  );
 
   // JSON-Import (Buttons für Export wurden entfernt; Parent speichert über ref)
   const importJSON = async (file) => {
@@ -265,37 +288,40 @@ const Avatar = forwardRef(function Avatar(
   };
 
   // Cell Size
-  const cellSize = useMemo(() => Math.floor(sizePx / gridSize), [sizePx, gridSize]);
+  const cellSize = useMemo(
+    () => Math.floor(sizePx / gridSize),
+    [sizePx, gridSize]
+  );
 
-// Mini-Renderer für Vorschlag-Previews
-const renderSuggestion = (arr) => {
-  const g = Math.sqrt(arr.length) | 0;
+  // Mini-Renderer für Vorschlag-Previews
+  const renderSuggestion = (arr) => {
+    const g = Math.sqrt(arr.length) | 0;
 
-  // Vorschaugröße = gridSize * 4, aber gedeckelt auf 128px
-  const s = Math.min(g * 4, 128);
+    // Vorschaugröße = gridSize * 4, aber gedeckelt auf 128px
+    const s = Math.min(g * 4, 128);
 
-  const c = document.createElement("canvas");
-  c.width = s;
-  c.height = s;
-  const ctx = c.getContext("2d");
-  ctx.imageSmoothingEnabled = false;
+    const c = document.createElement("canvas");
+    c.width = s;
+    c.height = s;
+    const ctx = c.getContext("2d");
+    ctx.imageSmoothingEnabled = false;
 
-  const cell = s / g;
-  ctx.clearRect(0, 0, s, s);
+    const cell = s / g;
+    ctx.clearRect(0, 0, s, s);
 
-  for (let y = 0; y < g; y++) {
-    for (let x = 0; x < g; x++) {
-      ctx.fillStyle = arr[y * g + x];
-      ctx.fillRect(
-        Math.floor(x * cell),
-        Math.floor(y * cell),
-        Math.ceil(cell),
-        Math.ceil(cell)
-      );
+    for (let y = 0; y < g; y++) {
+      for (let x = 0; x < g; x++) {
+        ctx.fillStyle = arr[y * g + x];
+        ctx.fillRect(
+          Math.floor(x * cell),
+          Math.floor(y * cell),
+          Math.ceil(cell),
+          Math.ceil(cell)
+        );
+      }
     }
-  }
-  return c.toDataURL("image/png");
-};
+    return c.toDataURL("image/png");
+  };
 
   return (
     <div className={styles.wrapper}>
@@ -314,25 +340,42 @@ const renderSuggestion = (arr) => {
 
           <div className={styles.tools}>
             <button
-              className={`${styles.toolBtn} ${tool === "pen" ? styles.active : ""}`}
+              className={`${styles.toolBtn} ${
+                tool === "pen" ? styles.active : ""
+              }`}
               onClick={() => setTool("pen")}
-              title="Stift (malen)"
+              title="Pen tool"
             >
               ✏️ Pen
             </button>
             <button
-              className={`${styles.toolBtn} ${tool === "eraser" ? styles.active : ""}`}
+              className={`${styles.toolBtn} ${
+                tool === "eraser" ? styles.active : ""
+              }`}
               onClick={() => setTool("eraser")}
-              title="Radierer (weiß)"
+              title="Eraser tool"
             >
               🩹 Eraser
             </button>
             <button
-              className={`${styles.toolBtn} ${tool === "picker" ? styles.active : ""}`}
+              className={`${styles.toolBtn} ${
+                tool === "picker" ? styles.active : ""
+              }`}
               onClick={() => setTool("picker")}
-              title="Pipette"
+              title="Color Picker"
             >
-              🎯 Pipette
+              💉 Pipette
+            </button>
+            <button
+              className={styles.clearBtn}
+              onClick={() =>
+                setPixels(
+                  Array.from({ length: gridSize * gridSize }, () => "#ffffff")
+                )
+              }
+              title="Clear all pixels"
+            >
+              Clear
             </button>
           </div>
         </div>
@@ -349,7 +392,6 @@ const renderSuggestion = (arr) => {
           </label>
 
           <label className={styles.inlineControl}>
-            
             <select
               className={styles.select}
               value={gridSize}
@@ -362,7 +404,7 @@ const renderSuggestion = (arr) => {
               ))}
             </select>
           </label>
-<span>Resolution</span>
+          <span>Resolution</span>
           <div className={styles.actions}>
             <label className={styles.fileLabel}>
               <input
@@ -422,25 +464,18 @@ const renderSuggestion = (arr) => {
       {/* Zufall & Vorschläge */}
       <div className={styles.suggestionsBar}>
         <button
-          className={styles.clearBtn}
-          onClick={() => setPixels(Array.from({ length: gridSize * gridSize }, () => "#ffffff"))}
-          title="Alle Pixel leeren (weiß)"
-        >
-          🧹 Clear
-        </button>
-        <button
           className={styles.primaryBtn}
           onClick={() => setPixels(randomizePixels(gridSize))}
-          title="Zufälligen Avatar generieren"
+          title="Generate random avatar"
         >
-          🎲 Random
+          Random
         </button>
         <button
           className={styles.secondaryBtn}
           onClick={() => setSuggestions(makeSuggestions(gridSize, 5))}
-          title="Neue Vorschläge würfeln"
+          title="Generate new suggestions"
         >
-          🔄 New proposals
+          New proposals
         </button>
       </div>
 
@@ -450,7 +485,7 @@ const renderSuggestion = (arr) => {
             key={i}
             className={styles.suggestionItem}
             onClick={() => setPixels(arr)}
-            title="Vorschlag übernehmen"
+            title="Take suggestion"
           >
             {/* kleine Preview als <img> aus DataURL */}
             <img alt={`Vorschlag ${i + 1}`} src={renderSuggestion(arr)} />
@@ -470,9 +505,15 @@ function resamplePixels(prev, fromSize, toSize) {
   if (fromSize === toSize) return prev.slice();
   const next = new Array(toSize * toSize);
   for (let y = 0; y < toSize; y++) {
-    const srcY = Math.min(fromSize - 1, Math.max(0, Math.floor(((y + 0.5) * fromSize) / toSize)));
+    const srcY = Math.min(
+      fromSize - 1,
+      Math.max(0, Math.floor(((y + 0.5) * fromSize) / toSize))
+    );
     for (let x = 0; x < toSize; x++) {
-      const srcX = Math.min(fromSize - 1, Math.max(0, Math.floor(((x + 0.5) * fromSize) / toSize)));
+      const srcX = Math.min(
+        fromSize - 1,
+        Math.max(0, Math.floor(((x + 0.5) * fromSize) / toSize))
+      );
       next[y * toSize + x] = prev[srcY * fromSize + srcX];
     }
   }
@@ -482,9 +523,15 @@ function resamplePixels(prev, fromSize, toSize) {
 /** Einfache Zufallsgenerierung – symmetrisch + kleine Rauschfelder */
 function randomizePixels(g) {
   const palette = [
-    "#000000", "#ffffff",
-    "#5d3f94", "#a78bfa", "#9333ea",
-    "#ef4444", "#f59e0b", "#10b981", "#3b82f6"
+    "#000000",
+    "#ffffff",
+    "#5d3f94",
+    "#a78bfa",
+    "#9333ea",
+    "#ef4444",
+    "#f59e0b",
+    "#10b981",
+    "#3b82f6",
   ];
   const pick = () => palette[(Math.random() * palette.length) | 0];
 
@@ -495,19 +542,22 @@ function randomizePixels(g) {
   for (let y = 0; y < g; y++) {
     for (let x = 0; x < half; x++) {
       const useColor =
-        Math.random() < 0.15 ? pick() :
-        Math.random() < 0.6 ? "#ffffff" : pick();
+        Math.random() < 0.15
+          ? pick()
+          : Math.random() < 0.6
+          ? "#ffffff"
+          : pick();
       arr[y * g + x] = useColor;
       arr[y * g + (g - 1 - x)] = useColor;
     }
   }
 
   // Rauschflecken / Akzente
-  const blobs = 2 + (Math.random() * 4) | 0;
+  const blobs = (2 + Math.random() * 4) | 0;
   for (let b = 0; b < blobs; b++) {
     const cx = (Math.random() * g) | 0;
     const cy = (Math.random() * g) | 0;
-    const r = 1 + (Math.random() * (g / 8)) | 0;
+    const r = (1 + Math.random() * (g / 8)) | 0;
     const color = pick();
     for (let y = Math.max(0, cy - r); y < Math.min(g, cy + r); y++) {
       for (let x = Math.max(0, cx - r); x < Math.min(g, cx + r); x++) {
@@ -523,8 +573,8 @@ function randomizePixels(g) {
     const ey = (g / 3) | 0;
     const ex = (g / 4) | 0;
     const eyeC = "#000000";
-    arr[ey * g + (g / 2 - ex) | 0] = eyeC;
-    arr[ey * g + (g / 2 + ex) | 0] = eyeC;
+    arr[(ey * g + (g / 2 - ex)) | 0] = eyeC;
+    arr[(ey * g + (g / 2 + ex)) | 0] = eyeC;
   }
 
   return arr;

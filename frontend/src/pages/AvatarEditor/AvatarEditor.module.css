@@ -16,26 +16,29 @@
   font-size: 2.5rem;
   margin: 0 0 8px 0;
   color: var(--color-text);
+  font-weight: 700;
 }
 
 .header p {
   font-size: 1.1rem;
   color: var(--color-text-secondary);
   margin: 0;
+  line-height: 1.5;
 }
 
 .loadedNotice {
   background: var(--color-success);
   color: white;
   padding: 8px 16px;
-  border-radius: 6px;
+  border-radius: 8px;
   font-size: 0.9rem;
   margin-top: 12px;
   display: inline-block;
-  font-weight: 500;
+  font-weight: 600;
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
 }
 
- .editorSection {
+.editorSection {
   background: var(--color-bg-secondary);
   border-radius: 16px;
   padding: 24px;
@@ -44,7 +47,7 @@
   border: 1px solid var(--color-card-border);
   max-width: 100vw;
   overflow-x: auto;
- }
+}
 
 .avatarWrapper {
   display: flex;
@@ -56,47 +59,209 @@
 
 .controls {
   display: flex;
-  gap: 16px;
+  flex-direction: column;
+  gap: 24px;
   margin-bottom: 24px;
+  align-items: center;
+  width: 100%;
+  max-width: 400px;
 }
 
-/* Buttons nutzen deine globalen Statusfarben */
-.saveButton,
-.resetButton {
-  padding: 12px 24px;
-  font-size: 1rem;
-  font-weight: 600;
+/* Hauptaktionen - Save Button prominent */
+.primaryActions {
+  display: flex;
+  justify-content: center;
+  width: 100%;
+}
+
+/* Sekundäre Aktionen - weniger prominent, mit Warnung */
+.secondaryActions {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 8px;
+  padding-top: 20px;
+  border-top: 1px solid var(--color-card-border);
+  width: 100%;
+}
+
+/* Save Button - prominent */
+.saveButton {
+  padding: 16px 40px;
   border: none;
-  border-radius: 8px;
+  border-radius: 12px;
+  font-size: 18px;
+  font-weight: 700;
   cursor: pointer;
   transition: all 0.2s ease;
-  min-width: 160px;
-  color: #fff;
-}
-
-.saveButton {
-  background: var(--color-success);
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 10px;
+  text-decoration: none;
+  font-family: "Helvetica Neue", Helvetica, Arial, sans-serif;
+  min-width: 200px;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+  background: var(--color-bg-gradient);
+  color: white;
 }
 
 .saveButton:hover:not(:disabled) {
-  background: color-mix(in srgb, var(--color-success) 85%, black 15%);
-  transform: translateY(-1px);
+  transform: translateY(-3px);
+  background: linear-gradient(
+    135deg,
+    var(--color-primary-hover) 0%,
+    var(--color-accent) 100%
+  );
+  box-shadow: 0 6px 20px rgba(0, 0, 0, 0.2);
 }
 
 .saveButton:disabled {
+  opacity: 0.6;
+  cursor: not-allowed;
+  transform: none !important;
   background: var(--color-card-border);
   color: var(--color-text-secondary);
-  cursor: not-allowed;
-  transform: none;
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
 }
 
+/* Reset Button - weniger prominent */
 .resetButton {
-  background: var(--color-error);
+  padding: 10px 20px;
+  border: none;
+  border-radius: 8px;
+  font-size: 14px;
+  font-weight: 500;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 6px;
+  text-decoration: none;
+  font-family: "Helvetica Neue", Helvetica, Arial, sans-serif;
+  min-width: 160px;
+  background: var(--color-input-bg);
+  color: var(--color-text-secondary);
+  border: 1px solid var(--color-card-border);
 }
 
 .resetButton:hover:not(:disabled) {
-  background: color-mix(in srgb, var(--color-error) 85%, black 15%);
+  background: #ef4444;
+  color: white;
+  border-color: var(--color-error);
   transform: translateY(-1px);
+  box-shadow: 0 2px 8px rgba(239, 68, 68, 0.3);
+}
+
+/* Warnung für destruktive Aktionen */
+.destructiveWarning {
+  font-size: 0.75rem;
+  color: var(--color-text-secondary);
+  text-align: center;
+  font-style: italic;
+  margin-top: 4px;
+}
+
+/* Modal Styles */
+.modalOverlay {
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background: rgba(0, 0, 0, 0.6);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 1000;
+  backdrop-filter: blur(4px);
+}
+
+.modalContent {
+  background: var(--color-card-bg);
+  border-radius: 16px;
+  padding: 0;
+  max-width: 500px;
+  width: 90%;
+  max-height: 90vh;
+  overflow-y: auto;
+  box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.25);
+  border: 1px solid var(--color-card-border);
+}
+
+.modalHeader {
+  padding: 24px 24px 16px;
+  border-bottom: 1px solid var(--color-card-border);
+}
+
+.modalHeader h3 {
+  margin: 0;
+  color: var(--color-error);
+  font-size: 1.25rem;
+  font-weight: 700;
+}
+
+.modalBody {
+  padding: 20px 24px;
+}
+
+.modalBody p {
+  margin: 0 0 16px 0;
+  color: var(--color-text);
+  line-height: 1.5;
+}
+
+.modalBody ul {
+  margin: 16px 0;
+  padding-left: 20px;
+  color: var(--color-text);
+}
+
+.modalBody li {
+  margin-bottom: 8px;
+}
+
+.modalFooter {
+  padding: 16px 24px 24px;
+  display: flex;
+  gap: 12px;
+  justify-content: flex-end;
+  border-top: 1px solid var(--color-card-border);
+}
+
+.btnCancel,
+.btnReset {
+  padding: 10px 20px;
+  border: none;
+  border-radius: 8px;
+  font-size: 14px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  min-width: 100px;
+}
+
+.btnCancel {
+  background: var(--color-input-bg);
+  color: var(--color-text);
+  border: 1px solid var(--color-card-border);
+}
+
+.btnCancel:hover {
+  background: var(--color-bg-secondary);
+  border-color: var(--color-primary);
+}
+
+.btnReset {
+  background: var(--color-error);
+  color: white;
+}
+
+.btnReset:hover {
+  background: #ef4444;
+  transform: translateY(-1px);
+  box-shadow: 0 2px 8px rgba(239, 68, 68, 0.3);
 }
 
 .preview {
@@ -106,59 +271,171 @@
   border: 1px solid var(--color-card-border);
   max-width: 600px;
   width: 100%;
+  box-shadow: 0 2px 8px var(--color-card-shadow);
 }
 
 .preview h3 {
   margin: 0 0 12px 0;
   color: var(--color-text);
+  font-weight: 600;
+  font-size: 1.2rem;
 }
 
 .preview p {
   margin: 0 0 16px 0;
   color: var(--color-text-secondary);
+  line-height: 1.5;
 }
 
 .dataPreview {
   background: var(--color-input-bg);
   border: 1px solid var(--color-card-border);
-  border-radius: 4px;
+  border-radius: 8px;
   padding: 12px;
-  font-family: 'Monaco', 'Menlo', 'Courier New', monospace;
+  font-family: "Monaco", "Menlo", "Courier New", monospace;
   font-size: 0.8rem;
   max-height: 200px;
   overflow-y: auto;
   white-space: pre-wrap;
   word-break: break-all;
   color: var(--color-text);
+  transition: border-color 0.2s ease;
+}
+
+.dataPreview:hover {
+  border-color: var(--color-primary);
 }
 
 /* Responsive Design */
 @media (max-width: 768px) {
   .container {
-    padding: 8px;
+    padding: 16px;
   }
+
   .header h1 {
-    font-size: 1.5rem;
+    font-size: 2rem;
   }
+
+  .header p {
+    font-size: 1rem;
+  }
+
   .editorSection {
-    padding: 8px;
+    padding: 16px;
     max-width: 100vw;
+    border-radius: 12px;
   }
+
   .avatarWrapper {
     max-width: 100vw;
     overflow-x: auto;
   }
+
   .controls {
-    flex-direction: column;
-    width: 100%;
-    max-width: 300px;
+    max-width: 350px;
   }
-  .saveButton,
+
+  .saveButton {
+    width: 100%;
+    padding: 18px 24px;
+    font-size: 16px;
+  }
+
   .resetButton {
-    min-width: auto;
+    width: 100%;
+    padding: 12px 20px;
+  }
+
+  .modalContent {
+    width: 95%;
+    margin: 16px;
+  }
+
+  .modalFooter {
+    flex-direction: column;
+  }
+
+  .btnCancel,
+  .btnReset {
     width: 100%;
   }
+
   .preview {
-    padding: 8px;
+    padding: 16px;
+    border-radius: 10px;
+  }
+
+  .loadedNotice {
+    font-size: 0.85rem;
+    padding: 6px 12px;
+  }
+}
+
+@media (max-width: 480px) {
+  .container {
+    padding: 12px;
+  }
+
+  .header {
+    margin-bottom: 24px;
+  }
+
+  .header h1 {
+    font-size: 1.75rem;
+  }
+
+  .editorSection {
+    padding: 12px;
+    margin-bottom: 16px;
+  }
+
+  .controls {
+    margin-bottom: 16px;
+  }
+
+  .preview {
+    padding: 12px;
+  }
+}
+
+/* Dark Mode Anpassungen */
+[data-theme="dark"] .loadedNotice {
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.3);
+}
+
+[data-theme="dark"] .editorSection {
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.2);
+}
+
+[data-theme="dark"] .preview {
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.2);
+}
+
+[data-theme="dark"] .modalContent {
+  box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.5);
+}
+
+/* Focus States für Accessibility */
+.saveButton:focus,
+.resetButton:focus,
+.btnCancel:focus,
+.btnReset:focus {
+  outline: 2px solid var(--color-primary);
+  outline-offset: 2px;
+}
+
+/* Animation für Section */
+.editorSection {
+  animation: slideInUp 0.3s ease-out;
+}
+
+@keyframes slideInUp {
+  from {
+    opacity: 0;
+    transform: translateY(20px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
   }
 }
