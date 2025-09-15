@@ -1,6 +1,7 @@
 import MessageModel from "../models/Message.js";
 import UserModel from "../models/user.js";
 import ChatModel from "../models/Chat.js";
+import { encrypt, decrypt } from "../utils/encryption.js";
 
 export const socketHandler = (io) => {
   io.on("connection", async (socket) => {
@@ -29,20 +30,33 @@ export const socketHandler = (io) => {
           return;
         }
 
+        const encrypted = encrypt(content);
+        
         const message = await MessageModel.create({
           chat: chatId,
           sender: userId,
           recipient: recipientId,
-          content: content,
+          encryptedContent: encrypted.encryptedContent,
+          iv: encrypted.iv,
+          authTag: encrypted.authTag,
           isRead: false,
         });
         
         await message.populate("sender", "username avatar");
         await ChatModel.findByIdAndUpdate(chatId, { lastMessage: message._id });
 
-        io.to(`chat:${chatId}`).emit("receiveMessage", message);
-        io.to(`user:${userId}`).emit("receiveMessage", message);
-        io.to(`user:${recipientId}`).emit("receiveMessage", message);
+        const decryptedMessage = {
+          ...message.toObject(),
+          content: decrypt({
+            encryptedContent: message.encryptedContent,
+            iv: message.iv,
+            authTag: message.authTag
+          })
+        };
+
+        io.to(`chat:${chatId}`).emit("receiveMessage", decryptedMessage);
+        io.to(`user:${userId}`).emit("receiveMessage", decryptedMessage);
+        io.to(`user:${recipientId}`).emit("receiveMessage", decryptedMessage);
 
         const unreadCount = await MessageModel.countDocuments({
           recipient: recipientId,

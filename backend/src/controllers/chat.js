@@ -2,6 +2,7 @@ import { param } from "express-validator";
 import ChatModel from "../models/Chat.js";
 import MessageModel from "../models/Message.js";
 import UserModel from "../models/user.js";
+import { batchDecrypt } from "../utils/encryption.js";
 
 export const getChats = async (req, res) => {
   try {
@@ -67,9 +68,11 @@ export const getMessages = async (req, res, next) => {
     const otherParticipant = chat.participants.find(p => p._id.toString() !== requestingUserId.toString());
     const areFriends = currentUser.contacts.includes(otherParticipant._id);
 
-    const messages = await MessageModel.find({ chat: chatId })
+    const encryptedMessages = await MessageModel.find({ chat: chatId })
       .populate("sender", "username avatar")
       .sort({ createdAt: 1 });
+
+    const messages = batchDecrypt(encryptedMessages);
 
     res.status(200).json({
       messages,

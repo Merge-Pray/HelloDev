@@ -17,9 +17,21 @@ const MessageSchema = new Schema(
       ref: "User",
       required: true,
     },
-    content: {
+    encryptedContent: {
       type: String,
       required: true,
+    },
+    iv: {
+      type: String,
+      required: true,
+    },
+    authTag: {
+      type: String,
+      required: true,
+    },
+    encryptionVersion: {
+      type: Number,
+      default: 1,
     },
     contentType: {
       type: String,
