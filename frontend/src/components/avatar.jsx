@@ -382,13 +382,19 @@ const Avatar = forwardRef(function Avatar(
 
         {/* Rechte Seite: Grid + Auflösung + Dateiaktionen */}
         <div className={styles.rightGroup}>
-          <label className={styles.inlineControl}>
+          {/* Grid Toggle als Button-Style aber mit Checkbox */}
+          <label
+            className={`${styles.gridToggle} ${
+              showGrid ? styles.gridActive : ""
+            }`}
+            title={showGrid ? "Hide grid" : "Show grid"}
+          >
             <input
               type="checkbox"
               checked={showGrid}
               onChange={(e) => setShowGrid(e.target.checked)}
             />
-            <span>Show grid</span>
+            <span>Grid</span>
           </label>
 
           <label className={styles.inlineControl}>

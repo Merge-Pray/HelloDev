@@ -27,7 +27,7 @@
 }
 
 .loadedNotice {
-  background: var(--color-success);
+  background: var(--color-primary);
   color: white;
   padding: 8px 16px;
   border-radius: 8px;
