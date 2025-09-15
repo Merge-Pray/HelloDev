@@ -12,7 +12,7 @@ import EmojiPicker from "emoji-picker-react";
 import Sidebar from "../components/Sidebar/Sidebar";
 import useUserStore from "../hooks/userstore";
 import { authenticatedFetch } from "../utils/authenticatedFetch";
-import { format } from "date-fns";
+import { format, isToday } from "date-fns";
 import styles from "./chatpage.module.css";
 import { useUnreadCount } from "../hooks/useUnreadCount";
 
@@ -328,7 +328,13 @@ const ChatPage = () => {
   };
 
   const formatMessageTime = (timestamp) => {
-    return format(new Date(timestamp), "HH:mm");
+    const messageDate = new Date(timestamp);
+    if (isToday(messageDate)){
+return format(new Date(timestamp), "HH:mm");
+    } else {
+      return format(new Date(timestamp), "MMM d, HH:mm");
+    }
+    
   };
 
   const renderChatOverview = () => (
