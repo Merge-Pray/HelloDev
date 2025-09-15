@@ -10,6 +10,7 @@ const AvatarEditor = () => {
   const [isSaving, setIsSaving] = useState(false);
   const [initialPixelData, setInitialPixelData] = useState(null);
   const [showSuccessModal, setShowSuccessModal] = useState(false);
+  const [showResetConfirm, setShowResetConfirm] = useState(false);
   const [gridSize, setGridSize] = useState(16); // Default 16x16
   const avatarRef = useRef(null);
   const { setCurrentUser } = useUserStore();
@@ -19,7 +20,7 @@ const AvatarEditor = () => {
   useEffect(() => {
     const loadExistingAvatarData = async () => {
       try {
-        const userData = await authenticatedFetch('/api/user/user');
+        const userData = await authenticatedFetch("/api/user/user");
         if (userData.user?.avatarData) {
           let pixelArray;
           try {
@@ -44,10 +45,10 @@ const AvatarEditor = () => {
 
   // Debug: Watch when initialPixelData changes
   useEffect(() => {
-    console.log('🔄 initialPixelData changed:', {
+    console.log("🔄 initialPixelData changed:", {
       hasData: !!initialPixelData,
       length: initialPixelData?.length,
-      firstPixel: initialPixelData?.[0]
+      firstPixel: initialPixelData?.[0],
     });
   }, [initialPixelData]);
 
@@ -95,7 +96,7 @@ const AvatarEditor = () => {
         queryClient.setQueryData(["user-profile"], result.user);
       }
 
-  setShowSuccessModal(true);
+      setShowSuccessModal(true);
     } catch (error) {
       console.error("Error saving avatar:", error);
       console.error("Error details:", {
@@ -110,10 +111,19 @@ const AvatarEditor = () => {
     }
   };
 
-  const handleReset = () => {
+  const handleResetClick = () => {
+    setShowResetConfirm(true);
+  };
+
+  const handleResetConfirm = () => {
     setAvatarData(null);
+    setShowResetConfirm(false);
     // Die Avatar-Komponente wird durch key-Änderung neu gerendert
     window.location.reload();
+  };
+
+  const handleResetCancel = () => {
+    setShowResetConfirm(false);
   };
 
   return (
@@ -121,14 +131,13 @@ const AvatarEditor = () => {
       <div className={styles.header}>
         <h1>Avatar Editor</h1>
         <p>
-          {initialPixelData 
-            ? "✏️ Edit your existing pixel avatar" 
-            : "🎨 Create your own pixel avatar"
-          }
+          {initialPixelData
+            ? "Edit your existing pixel avatar"
+            : "Create your own pixel avatar"}
         </p>
         {initialPixelData && (
           <div className={styles.loadedNotice}>
-            ✅ Loaded your saved pixel design with {initialPixelData.length} pixels
+            Loaded your saved pixel design with {initialPixelData.length} pixels
           </div>
         )}
       </div>
@@ -137,7 +146,11 @@ const AvatarEditor = () => {
         <div className={styles.avatarWrapper}>
           <Avatar
             ref={avatarRef}
-            sizePx={typeof window !== 'undefined' && window.innerWidth < 600 ? 320 : 512}
+            sizePx={
+              typeof window !== "undefined" && window.innerWidth < 600
+                ? 320
+                : 512
+            }
             gridSize={gridSize}
             initialData={initialPixelData}
             onDataChange={handleAvatarChange}
@@ -146,52 +159,104 @@ const AvatarEditor = () => {
       </div>
 
       <div className={styles.controls}>
-        <button
-          onClick={handleSave}
-          className={styles.saveButton}
-          disabled={!avatarData || isSaving}
-        >
-          {isSaving ? "💾 Saving..." : "💾 Save avatar"}
-        </button>
+        {/* Hauptaktion - Save Button prominent */}
+        <div className={styles.primaryActions}>
+          <button
+            onClick={handleSave}
+            className={styles.saveButton}
+            disabled={!avatarData || isSaving}
+          >
+            {isSaving ? "Saving..." : "Save avatar"}
+          </button>
+        </div>
 
-        <button onClick={handleReset} className={styles.resetButton}>
-          🔄 Reset
-        </button>
+        {/* Sekundäre Aktionen - weniger prominent, mit Trennung */}
+        <div className={styles.secondaryActions}>
+          <button onClick={handleResetClick} className={styles.resetButton}>
+            Reset & Start Over
+          </button>
+          <div className={styles.destructiveWarning}>
+            This will clear all your current work
+          </div>
+        </div>
       </div>
+
+      {/* Reset Confirmation Modal */}
+      {showResetConfirm && (
+        <div className={styles.modalOverlay}>
+          <div className={styles.modalContent}>
+            <div className={styles.modalHeader}>
+              <h3>Reset Avatar Editor?</h3>
+            </div>
+            <div className={styles.modalBody}>
+              <p>
+                Are you sure you want to reset the avatar editor? This will:
+              </p>
+              <ul>
+                <li>Clear all your current pixel work</li>
+                <li>Remove any unsaved changes</li>
+                <li>Reload the page with your last avatar</li>
+              </ul>
+              <p style={{ color: "var(--color-error)", fontWeight: "600" }}>
+                This action cannot be undone!
+              </p>
+            </div>
+            <div className={styles.modalFooter}>
+              <button className={styles.btnCancel} onClick={handleResetCancel}>
+                Cancel
+              </button>
+              <button className={styles.btnReset} onClick={handleResetConfirm}>
+                Yes, Reset Everything
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
 
       {/* Success Modal */}
       {showSuccessModal && (
-        <div style={{
-          position: 'fixed',
-          top: 0,
-          left: 0,
-          width: '100vw',
-          height: '100vh',
-          background: 'rgba(0,0,0,0.5)',
-          display: 'flex',
-          alignItems: 'center',
-          justifyContent: 'center',
-          zIndex: 9999
-        }}>
-          <div className="card enhanced" style={{
-            minWidth: '220px',
-            maxWidth: '95vw',
-            textAlign: 'center',
-            display: 'flex',
-            flexDirection: 'column',
-            alignItems: 'center',
-            padding: '24px 12px'
-          }}>
-            <div className="title" style={{marginBottom: '16px'}}>Avatar has been saved successfully! ✅</div>
-            <div style={{display: 'flex', gap: '16px', marginTop: '16px'}}>
+        <div
+          style={{
+            position: "fixed",
+            top: 0,
+            left: 0,
+            width: "100vw",
+            height: "100vh",
+            background: "rgba(0,0,0,0.5)",
+            display: "flex",
+            alignItems: "center",
+            justifyContent: "center",
+            zIndex: 9999,
+          }}
+        >
+          <div
+            className="card enhanced"
+            style={{
+              minWidth: "220px",
+              maxWidth: "95vw",
+              textAlign: "center",
+              display: "flex",
+              flexDirection: "column",
+              alignItems: "center",
+              padding: "24px 12px",
+            }}
+          >
+            <div className="title" style={{ marginBottom: "16px" }}>
+              Avatar has been saved successfully!
+            </div>
+            <div style={{ display: "flex", gap: "16px", marginTop: "16px" }}>
               <button
                 className="btn btn-primary"
-                onClick={() => window.location.href = '/profile'}
-              >Back to profile</button>
+                onClick={() => (window.location.href = "/profile")}
+              >
+                Back to profile
+              </button>
               <button
                 className="btn btn-secondary"
                 onClick={() => setShowSuccessModal(false)}
-              >Stay on the page</button>
+              >
+                Stay on the page
+              </button>
             </div>
           </div>
         </div>

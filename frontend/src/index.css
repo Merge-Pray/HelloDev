@@ -2,7 +2,7 @@
 :root {
   /* Grundfarben */
   --color-bg: #e6e6e6; /* Hintergrund */
-  --color-bg-secondary: #ffffff; /* Karten/Panel Hintergrund */
+  --color-bg-secondary: #f6f6f6; /* Karten/Panel Hintergrund */
   --color-text: #000000; /* Haupttext */
   --color-text-secondary: #999999; /* Zweittext */
   --color-border: #666666; /* Rahmen */
@@ -59,7 +59,7 @@
 
   --color-primary: #a78bfa;
   --color-primary-hover: #c4b5fd;
-   --color-primary-hover-invert: Black;
+  --color-primary-hover-invert: Black;
   --color-accent: #c084fc;
 
   --color-like: #ff5c8a;
