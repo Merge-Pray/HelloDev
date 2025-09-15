@@ -15,6 +15,7 @@ export const deleteUserAccount = async (req, res, next) => {
       { contacts: userId },
       { $pull: { contacts: userId } }
     ).session(session);
+    
 
     await Promise.all([
       PostModel.deleteMany({ author: userId }).session(session),
