@@ -30,7 +30,7 @@
   border-radius: 12px;
   padding: 1.5rem;
   margin-bottom: 32px;
-  box-shadow: 0 2px 8px rgba(0,0,0,0.04);
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.04);
 }
 
 .legalLinksHeader {
@@ -132,7 +132,7 @@
   color: var(--color-text-secondary);
   font-size: 0.875rem;
   text-decoration: none;
-  
+
   padding: 8px 12px;
   border-radius: 6px;
   transition: background 0.15s;
@@ -327,7 +327,6 @@
   cursor: not-allowed;
   transform: none;
 }
-
 
 .errorHeader {
   display: flex;
