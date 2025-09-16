@@ -100,7 +100,7 @@ function HybridSelector({
     }
   };
 
-  const handleCustomAdd = (valueToAdd = null) => {
+  const handleCustomAdd = async (valueToAdd = null) => {
     const value = valueToAdd || searchInput.trim();
     if (value) {
       if (showSkillLevel) {
@@ -124,6 +124,17 @@ function HybridSelector({
           }
         }
       }
+
+      try {
+        await authenticatedFetch('/api/suggestions', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ category, value })
+        });
+      } catch (error) {
+        console.error('Failed to save suggestion:', error);
+      }
+
       setSearchInput("");
       setSearchResults([]);
       setSelectedSuggestionIndex(-1);
