@@ -3,43 +3,6 @@ import ChatModel from "../models/Chat.js";
 import MatchModel from "../models/match.js";
 import ContactRequestModel from "../models/contactrequest.js";
 import MessageModel from "../models/Message.js";
-
-// Löscht User und alle verknüpften Daten atomar
-export const deleteUserAccount = async (req, res, next) => {
-  const session = await UserModel.startSession();
-  session.startTransaction();
-  try {
-    const userId = req.user._id;
-
-    await UserModel.updateMany(
-      { contacts: userId },
-      { $pull: { contacts: userId } }
-    ).session(session);
-    
-
-    await Promise.all([
-      PostModel.deleteMany({ author: userId }).session(session),
-      // ChatModel.deleteMany({ participants: userId }).session(session),
-      MatchModel.deleteMany({ $or: [{ user1: userId }, { user2: userId }] }).session(session),
-      ContactRequestModel.deleteMany({ $or: [{ user1: userId }, { user2: userId }] }).session(session),
-      MessageModel.deleteMany({ $or: [{ sender: userId }, { recipient: userId }] }).session(session)
-    ]);
-    const deleted = await UserModel.findByIdAndDelete(userId).session(session);
-    if (!deleted) {
-      await session.abortTransaction();
-      session.endSession();
-      return res.status(404).json({ success: false, message: "User not found" });
-    }
-    await session.commitTransaction();
-    session.endSession();
-    res.clearCookie("jwt");
-    return res.status(200).json({ success: true, message: "User und alle verknüpften Daten gelöscht" });
-  } catch (error) {
-    await session.abortTransaction();
-    session.endSession();
-    return next(error);
-  }
-};
 import checkIsMatchable from "../../utils/profileValidator.js";
 import { generateToken } from "../libs/jwt.js";
 import { hashPassword, comparePassword } from "../libs/pw.js";
@@ -60,6 +23,55 @@ cloudinary.config({
 });
 
 const client = new OAuth2Client(process.env.GOOGLE_CLIENT_ID);
+
+// Löscht User und alle verknüpften Daten atomar
+export const deleteUserAccount = async (req, res, next) => {
+  const session = await UserModel.startSession();
+  session.startTransaction();
+  try {
+    const userId = req.user._id;
+
+    await UserModel.updateMany(
+      { contacts: userId },
+      { $pull: { contacts: userId } }
+    ).session(session);
+
+    await Promise.all([
+      PostModel.deleteMany({ author: userId }).session(session),
+      // ChatModel.deleteMany({ participants: userId }).session(session),
+      MatchModel.deleteMany({
+        $or: [{ user1: userId }, { user2: userId }],
+      }).session(session),
+      ContactRequestModel.deleteMany({
+        $or: [{ user1: userId }, { user2: userId }],
+      }).session(session),
+      MessageModel.deleteMany({
+        $or: [{ sender: userId }, { recipient: userId }],
+      }).session(session),
+    ]);
+    const deleted = await UserModel.findByIdAndDelete(userId).session(session);
+    if (!deleted) {
+      await session.abortTransaction();
+      session.endSession();
+      return res
+        .status(404)
+        .json({ success: false, message: "User not found" });
+    }
+    await session.commitTransaction();
+    session.endSession();
+    res.clearCookie("jwt");
+    return res
+      .status(200)
+      .json({
+        success: true,
+        message: "User und alle verknüpften Daten gelöscht",
+      });
+  } catch (error) {
+    await session.abortTransaction();
+    session.endSession();
+    return next(error);
+  }
+};
 
 const getGitHubUserData = async (accessToken) => {
   try {

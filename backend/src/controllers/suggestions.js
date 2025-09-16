@@ -1,5 +1,6 @@
 import Suggestion from '../models/Suggestion.js';
 import { normalizeText } from '../utils/textNormalization.js';
+import jaroWinkler from 'jaro-winkler';
 
 export const getPopularSuggestions = async (req, res) => {
   try {
@@ -37,10 +38,16 @@ export const searchSuggestions = async (req, res) => {
     const matchedSuggestions = allSuggestions
       .filter(item => {
         const value = item.value.toLowerCase();
+        const normalizedValue = item.normalizedValue || '';
+        const normalizedSearch = normalizeText(searchTerm);
         const aliases = item.aliases.map(alias => alias.toLowerCase());
         
         return value.startsWith(searchTerm) || 
-               aliases.some(alias => alias.startsWith(searchTerm));
+               value.includes(searchTerm) ||
+               normalizedValue.startsWith(normalizedSearch) ||
+               normalizedValue.includes(normalizedSearch) ||
+               aliases.some(alias => alias.startsWith(searchTerm)) ||
+               aliases.some(alias => alias.includes(searchTerm));
       })
       .sort((a, b) => b.usageCount - a.usageCount)
       .slice(0, 5);
@@ -61,13 +68,37 @@ export const addSuggestion = async (req, res) => {
     const { category, value } = req.body;
     const normalizedValue = normalizeText(value);
     
-    await Suggestion.findOneAndUpdate(
-      { category, normalizedValue },
-      { $inc: { usageCount: 1 }, $set: { value } },
-      { upsert: true }
-    );
+    let existing = await Suggestion.findOne({ category, normalizedValue });
+    if (existing) {
+      await Suggestion.findByIdAndUpdate(existing._id, { $inc: { usageCount: 1 } });
+      return res.json({ success: true, action: 'incremented' });
+    }
     
-    res.json({ success: true });
+    const allSuggestions = await Suggestion.find({ category });
+    for (const suggestion of allSuggestions) {
+      const similarity = jaroWinkler(normalizedValue, suggestion.normalizedValue);
+      if (similarity > 0.85) {
+        await Suggestion.findByIdAndUpdate(suggestion._id, {
+          $addToSet: { aliases: normalizedValue },
+          $inc: { usageCount: 1 }
+        });
+        return res.json({ 
+          success: true, 
+          action: 'merged', 
+          mergedInto: suggestion.value 
+        });
+      }
+    }
+    
+    await Suggestion.create({ 
+      category, 
+      value, 
+      normalizedValue, 
+      usageCount: 1,
+      aliases: []
+    });
+    
+    res.json({ success: true, action: 'created' });
   } catch (error) {
     res.status(500).json({ error: 'Failed to add suggestion' });
   }
