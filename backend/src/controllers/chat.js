@@ -11,8 +11,8 @@ export const getChats = async (req, res) => {
       .populate("participants", "username nickname avatar isOnline")
       .populate("lastMessage");
 
-    const currentUser = await UserModel.findById(userId).select('contacts');
-    
+    const currentUser = await UserModel.findById(userId).select("contacts");
+
     const chatsWithUnreadCount = await Promise.all(
       chats.map(async (chat) => {
         const unreadCount = await MessageModel.countDocuments({
@@ -21,7 +21,9 @@ export const getChats = async (req, res) => {
           isRead: false,
         });
 
-        const otherParticipant = chat.participants.find(p => p._id.toString() !== userId.toString());
+        const otherParticipant = chat.participants.find(
+          (p) => p._id.toString() !== userId.toString()
+        );
         const areFriends = currentUser.contacts.includes(otherParticipant._id);
 
         let decryptedLastMessage = null;
@@ -32,14 +34,14 @@ export const getChats = async (req, res) => {
               content: decrypt({
                 encryptedContent: chat.lastMessage.encryptedContent,
                 iv: chat.lastMessage.iv,
-                authTag: chat.lastMessage.authTag
-              })
+                authTag: chat.lastMessage.authTag,
+              }),
             };
           } catch (error) {
-            console.error('Failed to decrypt last message:', error);
+            console.error("Failed to decrypt last message:", error);
             decryptedLastMessage = {
               ...chat.lastMessage.toObject(),
-              content: '[Encrypted message]'
+              content: "[Encrypted message]",
             };
           }
         }
@@ -85,8 +87,12 @@ export const getMessages = async (req, res, next) => {
         .json({ message: "Access denied or chat not found" });
     }
 
-    const currentUser = await UserModel.findById(requestingUserId).select('contacts');
-    const otherParticipant = chat.participants.find(p => p._id.toString() !== requestingUserId.toString());
+    const currentUser = await UserModel.findById(requestingUserId).select(
+      "contacts"
+    );
+    const otherParticipant = chat.participants.find(
+      (p) => p._id.toString() !== requestingUserId.toString()
+    );
     const areFriends = currentUser.contacts.includes(otherParticipant._id);
 
     const encryptedMessages = await MessageModel.find({ chat: chatId })
@@ -98,7 +104,7 @@ export const getMessages = async (req, res, next) => {
     res.status(200).json({
       messages,
       areFriends,
-      otherUser: otherParticipant
+      otherUser: otherParticipant,
     });
   } catch (error) {
     console.error(error);
@@ -111,8 +117,6 @@ export const getUserChat = async (req, res, next) => {
     const userId = req.user._id;
     const { recipientId } = req.body;
 
-    console.log("getUserChat called:", { userId: userId.toString(), recipientId });
-
     if (userId.toString() === recipientId) {
       return res.status(400).json({ message: "Cannot chat with yourself" });
     }
@@ -122,29 +126,25 @@ export const getUserChat = async (req, res, next) => {
       return res.status(404).json({ message: "User not found" });
     }
 
-    const sortedParticipants = [userId.toString(), recipientId.toString()].sort();
-    console.log("Sorted participants:", sortedParticipants);
-    
+    const sortedParticipants = [
+      userId.toString(),
+      recipientId.toString(),
+    ].sort();
+
     let chat = await ChatModel.findOne({
-      participants: { $all: sortedParticipants, $size: 2 }
+      participants: { $all: sortedParticipants, $size: 2 },
     });
 
-    console.log("Existing chat found:", chat ? chat._id : "NONE");
-
     if (!chat) {
-      console.log("Creating new chat...");
       try {
         chat = await ChatModel.create({
-          participants: sortedParticipants
+          participants: sortedParticipants,
         });
-        console.log("Chat created:", chat._id);
       } catch (createError) {
         if (createError.code === 11000) {
-          console.log("Duplicate key error - finding existing chat...");
           chat = await ChatModel.findOne({
-            participants: { $all: sortedParticipants, $size: 2 }
+            participants: { $all: sortedParticipants, $size: 2 },
           });
-          console.log("Found existing chat after duplicate error:", chat ? chat._id : "STILL NONE");
         }
         if (!chat) {
           throw createError;

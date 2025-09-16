@@ -19,7 +19,6 @@ export default function LoginPage() {
   const [showPassword, setShowPassword] = useState(false);
   const navigate = useNavigate();
 
-
   const {
     register,
     handleSubmit,
@@ -31,24 +30,6 @@ export default function LoginPage() {
       password: "",
     },
   });
-
-  const handleGoogleSuccess = (data) => {
-    console.log('🔐 GOOGLE LOGIN: Success', data);
-  };
-
-  const handleGoogleError = (error) => {
-    console.error('🔐 GOOGLE LOGIN: Error', error);
-    setError(error);
-  };
-
-  const handleGitHubSuccess = (data) => {
-    console.log('🔐 GITHUB LOGIN: Success', data);
-  };
-
-  const handleGitHubError = (error) => {
-    console.error('🔐 GITHUB LOGIN: Error', error);
-    setError(error);
-  };
 
   async function onSubmit(values) {
     setIsLoading(true);
@@ -110,17 +91,9 @@ export default function LoginPage() {
 
           {/* OAuth Buttons */}
           <div className={styles.oauthContainer}>
-            <GoogleAuthButton 
-              text="Sign in with Google"
-              onSuccess={handleGoogleSuccess}
-              onError={handleGoogleError}
-            />
-            
-            <GitHubAuthButton 
-              text="Sign in with GitHub"
-              onSuccess={handleGitHubSuccess}
-              onError={handleGitHubError}
-            />
+            <GoogleAuthButton text="Sign in with Google" />
+
+            <GitHubAuthButton text="Sign in with GitHub" />
           </div>
 
           <div className={styles.divider}>
