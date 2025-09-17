@@ -38,7 +38,7 @@ export const deleteUserAccount = async (req, res, next) => {
 
     await Promise.all([
       PostModel.deleteMany({ author: userId }).session(session),
-      // ChatModel.deleteMany({ participants: userId }).session(session),
+      ChatModel.deleteMany({ participants: userId }).session(session),
       MatchModel.deleteMany({
         $or: [{ user1: userId }, { user2: userId }],
       }).session(session),
@@ -60,12 +60,10 @@ export const deleteUserAccount = async (req, res, next) => {
     await session.commitTransaction();
     session.endSession();
     res.clearCookie("jwt");
-    return res
-      .status(200)
-      .json({
-        success: true,
-        message: "User und alle verknüpften Daten gelöscht",
-      });
+    return res.status(200).json({
+      success: true,
+      message: "User und alle verknüpften Daten gelöscht",
+    });
   } catch (error) {
     await session.abortTransaction();
     session.endSession();
